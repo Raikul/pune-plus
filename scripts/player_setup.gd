@@ -20,9 +20,7 @@ func _ready():
 	P3Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox
 	P4Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox
 
-	
-#	_on_p_1on_pressed()
-#	_on_p_2on_pressed()
+
 func _process(_delta):
 	pass
 	
@@ -30,18 +28,15 @@ func _on_p_1on_pressed():
 	player1Active = not player1Active
 	activatePlayer(player1Active, P1Box,Color("775193"))
 	
-
 func _on_p_2on_pressed():
 	player2Active = not player2Active
 	activatePlayer(player2Active, P2Box, Color("aecd53"))
 	pass # Replace with function body.
 
-
 func _on_p_3on_pressed():
 	player3Active = not player3Active
 	activatePlayer(player3Active, P3Box, Color("e8a547"))
 	pass # Replace with function body.
-
 
 func _on_p_4on_pressed():
 	player4Active = not player4Active
@@ -58,18 +53,14 @@ func activatePlayer(active, playerBox, color):
 		playerBox.get_node("TextureRect").modulate = Color.WHITE
 		playerBox.get_node("Select").text = "Select"
 	
-
-
 func _on_color_picker_color_changed(color):
 	P4Box.get_node("Label").modulate = color
 	P4Box.get_node("TextureRect").modulate = color
 	pass # Replace with function body.
 
-
 func _on_back_pressed():
 	back.emit()
 	pass # Replace with function body.
-
 
 func _on_go_pressed():
 	Global.player1Active = player1Active
