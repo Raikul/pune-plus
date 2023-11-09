@@ -1,0 +1,247 @@
+[gd_scene load_steps=7 format=3 uid="uid://bd73ybc7rg362"]
+
+[ext_resource type="Script" path="res://scripts/WindowMode.gd" id="1_bi3at"]
+[ext_resource type="Script" path="res://scripts/options.gd" id="1_ff04h"]
+[ext_resource type="Script" path="res://scripts/Resolution.gd" id="2_wj7dj"]
+[ext_resource type="Script" path="res://scripts/VolumeBox.gd" id="3_qxud6"]
+[ext_resource type="Script" path="res://scripts/MusicBox.gd" id="4_33j25"]
+[ext_resource type="Script" path="res://scripts/GapBox.gd" id="6_0hy60"]
+
+[node name="Options" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ff04h")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="TabContainer" type="TabContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 40
+clip_tabs = false
+all_tabs_in_front = true
+drag_to_rearrange_enabled = true
+use_hidden_tabs_for_min_size = true
+
+[node name="Video" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="WindowMode" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video"]
+layout_mode = 2
+theme_override_constants/separation = 80
+script = ExtResource("1_bi3at")
+
+[node name="Window Mode" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+text = "Window Mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="OptionButton" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+
+[node name="Resolution" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video"]
+layout_mode = 2
+theme_override_constants/separation = 80
+script = ExtResource("2_wj7dj")
+
+[node name="Resolution" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Resolution"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 66
+text = "Resolution"
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Resolution"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="OptionButton" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Resolution"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 66
+
+[node name="Back" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Back"
+
+[node name="Audio" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="VolumeBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+theme_override_constants/separation = 80
+alignment = 1
+script = ExtResource("3_qxud6")
+
+[node name="Volume" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+text = "Master Volume
+"
+horizontal_alignment = 3
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox"]
+z_index = 6
+custom_minimum_size = Vector2(400, 100)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_constants/center_grabber = 55
+theme_override_constants/grabber_offset = 55
+max_value = 1.0
+step = 0.001
+scrollable = false
+
+[node name="EffectBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+theme_override_constants/separation = 80
+alignment = 1
+script = ExtResource("3_qxud6")
+
+[node name="Volume" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/EffectBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+text = "Effects
+"
+horizontal_alignment = 3
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/EffectBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/EffectBox"]
+z_index = 6
+custom_minimum_size = Vector2(400, 100)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_constants/center_grabber = 55
+theme_override_constants/grabber_offset = 55
+max_value = 1.0
+step = 0.001
+scrollable = false
+
+[node name="MusicBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+theme_override_constants/separation = 80
+script = ExtResource("4_33j25")
+
+[node name="Music" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+text = "Music
+"
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox"]
+z_index = 6
+custom_minimum_size = Vector2(400, 100)
+layout_mode = 2
+theme_override_constants/center_grabber = 55
+theme_override_constants/grabber_offset = 55
+max_value = 1.0
+step = 0.001
+scrollable = false
+
+[node name="Back" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Back"
+
+[node name="Gameplay" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="GapBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay"]
+layout_mode = 2
+theme_override_constants/separation = 80
+script = ExtResource("6_0hy60")
+
+[node name="Gap Size" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+text = "Gap Size"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="OptionButton" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 66
+item_count = 3
+popup/item_0/text = "Small"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Large"
+popup/item_2/id = 2
+
+[node name="Back" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Back"
+
+[connection signal="item_selected" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode/OptionButton" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode" method="on_window_mode_selected"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Back" to="." method="_on_back_pressed"]
+[connection signal="value_changed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox/HSlider" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox" method="_on_volume_slider_value_changed"]
+[connection signal="value_changed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox/HSlider" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox" method="_on_music_slider_value_changed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/Back" to="." method="_on_back_pressed"]
+[connection signal="item_selected" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox/OptionButton" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox" method="_on_option_button_item_selected"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/Back" to="." method="_on_back_pressed"]

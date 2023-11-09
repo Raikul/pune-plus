@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3 uid="uid://bth6oknld84yg"]
+
+[ext_resource type="Script" path="res://scripts/multiplayer_test.gd" id="1_qdhcm"]
+[ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_trhm1"]
+
+[node name="Multiplayer_Test" type="Node2D"]
+script = ExtResource("1_qdhcm")
+player_scene = ExtResource("2_trhm1")
+
+[node name="Host" type="Button" parent="."]
+offset_left = 72.0
+offset_top = 65.0
+offset_right = 116.0
+offset_bottom = 96.0
+text = "Host
+"
+
+[node name="Join" type="Button" parent="."]
+offset_left = 144.0
+offset_top = 64.0
+offset_right = 182.0
+offset_bottom = 95.0
+text = "Join"
+
+[node name="StartGame" type="Button" parent="."]
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="NameEdit" type="LineEdit" parent="."]
+offset_left = 125.0
+offset_top = 7.0
+offset_right = 192.063
+offset_bottom = 38.0
+
+[node name="Name" type="Label" parent="NameEdit"]
+layout_mode = 0
+offset_left = -60.0
+offset_top = 2.0
+offset_right = -13.0
+offset_bottom = 28.0
+text = "Name
+"
+
+[node name="AddressEdit" type="LineEdit" parent="."]
+offset_left = 354.0
+offset_top = 9.0
+offset_right = 421.063
+offset_bottom = 40.0
+
+[node name="Address" type="Label" parent="AddressEdit"]
+layout_mode = 0
+offset_left = -83.0
+offset_top = -1.0
+offset_right = -20.0
+offset_bottom = 25.0
+text = "Address"
+
+[node name="PortEdit" type="LineEdit" parent="."]
+offset_left = 354.0
+offset_top = 69.0
+offset_right = 421.063
+offset_bottom = 100.0
+
+[node name="Port" type="Label" parent="PortEdit"]
+layout_mode = 0
+offset_left = -84.0
+offset_top = 1.0
+offset_right = -21.0
+offset_bottom = 27.0
+text = "Port
+"
+
+[connection signal="pressed" from="Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Join" to="." method="_on_join_pressed"]
+[connection signal="text_changed" from="AddressEdit" to="." method="_on_address_edit_text_submitted"]
+[connection signal="text_submitted" from="PortEdit" to="." method="_on_port_edit_text_submitted"]

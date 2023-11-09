@@ -1,0 +1,207 @@
+[gd_scene load_steps=6 format=3 uid="uid://bk2lxalhauis"]
+
+[ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_gkmrk"]
+[ext_resource type="Script" path="res://scripts/menu.gd" id="2_5y65b"]
+[ext_resource type="Texture2D" uid="uid://bsmwut0c66rvs" path="res://assets/images/background_red_hexes.jpg" id="2_plvml"]
+[ext_resource type="PackedScene" uid="uid://bd73ybc7rg362" path="res://scenes/options.tscn" id="3_wmb4s"]
+[ext_resource type="PackedScene" uid="uid://ccgij1ekdykeg" path="res://scenes/player_setup.tscn" id="5_dpauy"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_gkmrk")
+script = ExtResource("2_5y65b")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 315.0
+offset_bottom = 177.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_plvml")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Options" parent="CanvasLayer" instance=ExtResource("3_wmb4s")]
+visible = false
+theme = ExtResource("1_gkmrk")
+
+[node name="Version" type="PanelContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = -75.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_gkmrk")
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Version"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="VersionNumber" type="Label" parent="CanvasLayer/Version/MarginContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Version 0.1.7 (Alpha)"
+
+[node name="ChangeLog" type="PanelContainer" parent="CanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -468.0
+offset_top = -75.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_gkmrk")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ChangeLog"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+alignment = 1
+
+[node name="ChangeLogDetailsContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="ChangeLogDetails" type="Button" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 20
+text = "-Configuración de Audio (Master, Musica, Efectos) - Para el Morsa
+-Configuración de Gap Size - Para Felipe
+-Full Fire (el fueguito rompe todo lo que atraviesa) - Para Felipe"
+alignment = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="ChangeLogButton" type="Button" parent="CanvasLayer/ChangeLog/VBoxContainer/MarginContainer"]
+z_index = 3
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 44
+action_mode = 0
+text = "Version 0.1.7 (Alpha)"
+
+[node name="TopMenu" type="CenterContainer" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -144.5
+offset_top = -204.5
+offset_right = 144.5
+offset_bottom = 204.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+theme = ExtResource("1_gkmrk")
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/TopMenu"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TopMenu/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Pune"
+horizontal_alignment = 1
+
+[node name="Play" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Play"
+
+[node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Multiplayer"
+
+[node name="Options" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_font_sizes/font_size = 66
+text = "Options"
+
+[node name="Quit" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Quit"
+
+[node name="PlayerSetup" type="CenterContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -359.0
+offset_top = -289.0
+offset_right = -359.0
+offset_bottom = -289.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/PlayerSetup"]
+layout_mode = 2
+
+[node name="PlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" instance=ExtResource("5_dpauy")]
+layout_mode = 2
+
+[connection signal="back" from="CanvasLayer/Options" to="." method="_on_options_back_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/ChangeLog/VBoxContainer/MarginContainer/ChangeLogButton" to="." method="_on_change_log_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer/Multiplayer" to="." method="_on_multiplayer_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
+[connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]
+
+[editable path="CanvasLayer/Options"]

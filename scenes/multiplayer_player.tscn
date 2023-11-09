@@ -1,0 +1,68 @@
+[gd_scene load_steps=10 format=3 uid="uid://burh8oloo8j3i"]
+
+[ext_resource type="Script" path="res://scripts/MultiplayerPlayer.gd" id="1_abc1p"]
+[ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_e20ck"]
+[ext_resource type="PackedScene" uid="uid://bllc44u30oqtl" path="res://scenes/projectile.tscn" id="3_1p66q"]
+[ext_resource type="AudioStream" uid="uid://c7pisg0ias73o" path="res://assets/sounds/DefensiveStance.ogg" id="4_4bind"]
+[ext_resource type="PackedScene" uid="uid://dqamo77nekmrv" path="res://scenes/twin_head.tscn" id="4_analw"]
+[ext_resource type="AudioStream" uid="uid://de5mf25issd5o" path="res://assets/sounds/Sprint.ogg" id="5_tkcd2"]
+[ext_resource type="Texture2D" uid="uid://drta522m3j2vc" path="res://icon.svg" id="6_uqxgs"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
+size = Vector2(127, 121)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_7vrux"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/sync = true
+properties/0/watch = false
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/sync = true
+properties/1/watch = false
+
+[node name="Player" type="Area2D"]
+script = ExtResource("1_abc1p")
+snakeBodyScene = ExtResource("2_e20ck")
+projectileScene = ExtResource("3_1p66q")
+twinHeadScene = ExtResource("4_analw")
+
+[node name="Hulk" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_4bind")
+
+[node name="Dash" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_tkcd2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3)
+shape = SubResource("RectangleShape2D_3n87r")
+
+[node name="HeadSprite" type="Sprite2D" parent="."]
+texture = ExtResource("6_uqxgs")
+
+[node name="BodyTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 0.05
+autostart = true
+
+[node name="GapTimer" type="Timer" parent="." groups=["timers"]]
+autostart = true
+
+[node name="HulkTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
+[node name="DashTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
+[node name="CooldownTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 6.0
+one_shot = true
+
+[node name="GapFrequencyTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 1.5
+one_shot = true
+autostart = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_7vrux")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

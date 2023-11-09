@@ -1,0 +1,96 @@
+[gd_scene load_steps=13 format=3 uid="uid://cgrfababvjbd2"]
+
+[ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
+[ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_6vd8h"]
+[ext_resource type="PackedScene" uid="uid://bllc44u30oqtl" path="res://scenes/projectile.tscn" id="3_6cibx"]
+[ext_resource type="AudioStream" uid="uid://c7pisg0ias73o" path="res://assets/sounds/DefensiveStance.ogg" id="4_5005l"]
+[ext_resource type="AudioStream" uid="uid://de5mf25issd5o" path="res://assets/sounds/Sprint.ogg" id="5_brfxt"]
+[ext_resource type="Texture2D" uid="uid://drta522m3j2vc" path="res://icon.svg" id="6_tgv0f"]
+[ext_resource type="Shader" path="res://scripts/player.gdshader" id="7_2ol4y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
+size = Vector2(127, 121)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6g8nb"]
+shader = ExtResource("7_2ol4y")
+shader_parameter/brighter_color = Color(1, 0.8, 0, 1)
+shader_parameter/middle_color = Color(1, 0.56, 0, 1)
+shader_parameter/darker_color = Color(0.64, 0.2, 0.05, 1)
+shader_parameter/spread = 0.5
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_a0fcb"]
+load_path = "res://.godot/imported/head base.png-4a77a8a3e690c7a5c840a6ec1e667c6c.ctex"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_3nv3h"]
+load_path = "res://.godot/imported/head color.png-5742966c439714e280dd56f450b27fe4.ctex"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_uvb03"]
+load_path = "res://.godot/imported/head color 2.png-2ff48ab0839b3995e346a32f219a6524.ctex"
+
+[node name="Player" type="Area2D"]
+script = ExtResource("1_bb5nk")
+snakeBodyScene = ExtResource("2_6vd8h")
+projectileScene = ExtResource("3_6cibx")
+
+[node name="Hulk" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_5005l")
+bus = &"Effects"
+
+[node name="Dash" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_brfxt")
+bus = &"Effects"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3)
+shape = SubResource("RectangleShape2D_3n87r")
+
+[node name="HeadSprite" type="Sprite2D" parent="."]
+texture = ExtResource("6_tgv0f")
+
+[node name="BodyTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 0.05
+autostart = true
+
+[node name="GapTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
+[node name="GapFrequencyTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 1.5
+one_shot = true
+autostart = true
+
+[node name="HulkTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
+[node name="DashTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
+[node name="CooldownTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 6.0
+one_shot = true
+
+[node name="ShaderSprite" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_6g8nb")
+texture = ExtResource("6_tgv0f")
+
+[node name="HeadBase" type="Sprite2D" parent="."]
+visible = false
+z_index = 8
+position = Vector2(0, 2)
+rotation = 3.13676
+texture = SubResource("CompressedTexture2D_a0fcb")
+
+[node name="HeadColor" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(0.603922, 0.0705882, 0.372549, 1)
+z_index = 8
+rotation = 3.13676
+texture = SubResource("CompressedTexture2D_3nv3h")
+
+[node name="HeadColor2" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(0.207843, 0.513726, 0.454902, 1)
+texture = SubResource("CompressedTexture2D_uvb03")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

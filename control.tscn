@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dhuwydw35sj3t"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(2.0654, 2.56259)
+clip_tabs = false
+
+[node name="Control" type="Control" parent="TabContainer"]
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Control3" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="TabContainer"]
+visible = false
+layout_mode = 2
+text = "asdasdasdasdasd"
+placeholder_text = "asdasd"
+autowrap_mode = 1

@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://dqamo77nekmrv"]
+
+[ext_resource type="Script" path="res://scripts/twin_head.gd" id="1_hjlq0"]
+[ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_qgryg"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_wntae"]
+radius = 66.7083
+
+[node name="TwinHead" type="Area2D"]
+script = ExtResource("1_hjlq0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.461538, 0.48)
+shape = SubResource("CircleShape2D_wntae")
+
+[node name="BodySprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_qgryg")
+
+[node name="GapTimer" type="Timer" parent="." groups=["timers"]]
+autostart = true
+
+[node name="BodyTimer" type="Timer" parent="." groups=["timers"]]
+wait_time = 0.05
+autostart = true
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

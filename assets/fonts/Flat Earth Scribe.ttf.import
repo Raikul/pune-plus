@@ -1,0 +1,33 @@
+[remap]
+
+importer="font_data_dynamic"
+type="FontFile"
+uid="uid://j8s2a2y7lay"
+path="res://.godot/imported/Flat Earth Scribe.ttf-9c9205459fa8dcd9c6f8e3bac8838513.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/Flat Earth Scribe.ttf"
+dest_files=["res://.godot/imported/Flat Earth Scribe.ttf-9c9205459fa8dcd9c6f8e3bac8838513.fontdata"]
+
+[params]
+
+Rendering=null
+antialiasing=1
+generate_mipmaps=false
+multichannel_signed_distance_field=false
+msdf_pixel_range=8
+msdf_size=48
+allow_system_fallback=true
+force_autohinter=false
+hinting=1
+subpixel_positioning=1
+oversampling=0.0
+Fallbacks=null
+fallbacks=[]
+Compress=null
+compress=true
+preload=[]
+language_support={}
+script_support={}
+opentype_features={}
