@@ -12,18 +12,18 @@ func _ready():
 	$Events.set_space(topLimit,bottomLimit)
 	$MusicPlayer.play(Global.musicProgress)
 
-func _process(delta):
+func _process(_delta):
 	if Input.is_key_pressed(KEY_ESCAPE):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 func groupColliders():
-	var topCollider = $Colliders/LimitTop/Collider
+#	var topCollider = $Colliders/LimitTop/Collider
 	var topRect =  $Colliders/LimitTop/ColorRect
 	
 #	topCollider.shape.get_rect() as Rect2
 	topLimit = topRect.get_position().y + topRect.get_size().y 
 	
-	var bottomCollider = $Colliders/Control/LimitBottom/Collider
+#	var bottomCollider = $Colliders/Control/LimitBottom/Collider
 	var bottomRect = $Colliders/Control/LimitBottom/ColorRect
 #	bottomCollider.shape.get_rect()  as Rect2
 	bottomLimit = bottomRect.global_position.y
@@ -92,6 +92,8 @@ func restart():
 		item.stop()
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		player.set_process(false)
+	for twinHead in get_tree().get_nodes_in_group("twinHeads"):
+		twinHead.set_process(false)
 	
 	if Global.lessons:
 		$Lesson.teach("Water")

@@ -322,12 +322,12 @@ animations = [{
 radius = 7.0
 
 [node name="Shroom" type="Area2D"]
+scale = Vector2(1.7, 1.7)
 script = ExtResource("1_u58fx")
 
 [node name="ShroomSprite" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.02, 0.02)
 sprite_frames = SubResource("SpriteFrames_5yycf")
-animation = &"altShroomPack"
+animation = &"shroomPack"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_nsgxs")

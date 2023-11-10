@@ -6,7 +6,8 @@ var lessonText
 @onready var lessonTextBox = $PanelContainer/MarginContainer/LessonTextBox
 
 func _ready():
-	var my_random_number = rng.randf_range(-10.0, 10.0)
+	pass
+#	var my_random_number = rng.randf_range(-10.0, 10.0)
 	
 func teach(type):
 	randomizeLesson(type)

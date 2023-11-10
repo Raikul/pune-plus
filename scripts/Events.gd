@@ -15,8 +15,8 @@ func _ready():
 func _on_shroom_timer_timeout():
 	var shroom = shroomScene.instantiate() as Node2D
 	shroom.set_as_top_level(true)
-	var verticalPosition = rng.randi_range(topLimit,bottomLimit)
-	var horizontalPosition = rng.randi_range(0,get_viewport_rect().size.x)
+	var verticalPosition = rng.randf_range(topLimit,bottomLimit)
+	var horizontalPosition = rng.randf_range(0,get_viewport_rect().size.x)
 	
 	shroom.show()
 #	shroom.apply_scale(Vector2(2,2))

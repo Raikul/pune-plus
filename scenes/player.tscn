@@ -1,12 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://cgrfababvjbd2"]
+[gd_scene load_steps=15 format=3 uid="uid://cgrfababvjbd2"]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
 [ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_6vd8h"]
 [ext_resource type="PackedScene" uid="uid://bllc44u30oqtl" path="res://scenes/projectile.tscn" id="3_6cibx"]
 [ext_resource type="AudioStream" uid="uid://c7pisg0ias73o" path="res://assets/sounds/DefensiveStance.ogg" id="4_5005l"]
-[ext_resource type="AudioStream" uid="uid://de5mf25issd5o" path="res://assets/sounds/Sprint.ogg" id="5_brfxt"]
+[ext_resource type="AudioStream" uid="uid://d14y4562cnq07" path="res://assets/sounds/firepunchy.mp3" id="5_0ayag"]
 [ext_resource type="Texture2D" uid="uid://drta522m3j2vc" path="res://icon.svg" id="6_tgv0f"]
+[ext_resource type="AudioStream" uid="uid://beqcha2mjaie" path="res://assets/sounds/waterpunchy.mp3" id="6_wcc6r"]
 [ext_resource type="Shader" path="res://scripts/player.gdshader" id="7_2ol4y"]
+[ext_resource type="AudioStream" uid="uid://dwl2whtbjtsfq" path="res://assets/sounds/airepunchy.mp3" id="7_fk3kw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
 size = Vector2(127, 121)
@@ -36,8 +38,16 @@ projectileScene = ExtResource("3_6cibx")
 stream = ExtResource("4_5005l")
 bus = &"Effects"
 
+[node name="Shoot" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_0ayag")
+bus = &"Effects"
+
+[node name="Split" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_wcc6r")
+bus = &"Effects"
+
 [node name="Dash" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_brfxt")
+stream = ExtResource("7_fk3kw")
 bus = &"Effects"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

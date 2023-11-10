@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bk2lxalhauis"]
+[gd_scene load_steps=12 format=3 uid="uid://bk2lxalhauis"]
 
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_gkmrk"]
 [ext_resource type="Script" path="res://scripts/menu.gd" id="2_5y65b"]
@@ -30,6 +30,8 @@ bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
 bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
 
+[sub_resource type="SystemFont" id="SystemFont_xpgnv"]
+
 [node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -45,8 +47,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 315.0
-offset_bottom = 177.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_plvml")
@@ -54,6 +54,7 @@ texture = ExtResource("2_plvml")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Modifiers" type="Control" parent="CanvasLayer"]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_left = 1714.0
@@ -109,8 +110,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -460.0
-offset_top = -75.0
+offset_left = -503.0
+offset_top = -168.0
+offset_right = -21.0
+offset_bottom = -93.0
 grow_horizontal = 0
 grow_vertical = 0
 size_flags_horizontal = 3
@@ -126,7 +129,7 @@ theme_override_constants/margin_bottom = 3
 [node name="VersionNumber" type="Label" parent="CanvasLayer/Version/MarginContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 44
-text = "Version 0.1.7 (Alpha)"
+text = "Version 0.2 (Alpha)"
 
 [node name="ChangeLog" type="PanelContainer" parent="CanvasLayer"]
 anchors_preset = 3
@@ -134,11 +137,12 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -468.0
-offset_top = -75.0
+offset_left = -511.0
+offset_top = -141.0
+offset_right = -21.0
+offset_bottom = -66.0
 grow_horizontal = 0
 grow_vertical = 0
-size_flags_horizontal = 3
 theme = ExtResource("1_gkmrk")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ChangeLog"]
@@ -157,15 +161,15 @@ theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 3
 
-[node name="ChangeLogDetails" type="Button" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer"]
+[node name="ChangeLogDetails" type="Label" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
+theme_override_fonts/font = SubResource("SystemFont_xpgnv")
 theme_override_font_sizes/font_size = 20
-text = "-Configuración de Audio (Master, Musica, Efectos) - Para el Morsa
--Configuración de Gap Size - Para Felipe
--Full Fire (el fueguito rompe todo lo que atraviesa) - Para Felipe"
-alignment = 0
+text = "-Shrooms
+-Redefine Keys
+-Lessons (invisible but coded, quotes missing)
+-Multiplayer LAN! (invisible but coded, full features missing)"
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
 layout_mode = 2
@@ -183,7 +187,7 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 44
 action_mode = 0
-text = "Version 0.1.7 (Alpha)"
+text = "Version 0.2 (Alpha)"
 
 [node name="TopMenu" type="CenterContainer" parent="CanvasLayer"]
 anchors_preset = 8
@@ -219,7 +223,7 @@ alignment = 1
 [node name="Title" type="Label" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
-text = "Pune"
+text = "Pune Con Punchis"
 horizontal_alignment = 1
 
 [node name="Play" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]

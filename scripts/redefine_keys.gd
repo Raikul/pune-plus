@@ -9,20 +9,15 @@ func _ready():
 	set_process_input(false)
 	
 func redefinePlayer(playerId):
+	var stringId = str(playerId)
 	set_process_input(true)
 	currentPlayerId = playerId
-	match playerId:
-		1:
-			actionsToRedefine = ["Player1Left", "Player1Right", "Player1Up"]
+	actionsToRedefine = ["Player"+stringId+"Left", "Player"+stringId+"Right", "Player"+stringId+"Up"]
 	keyToPress.set_text(actionsToRedefine[keyNumber])
 
 func _input(event):
-	
-	if not event is InputEventMouseMotion:
+	if not event is InputEventMouseMotion and not event is InputEventJoypadMotion:
 		if event.is_pressed():
-#		if event is InputEventJoypadMotion:
-#			event.axis_value
-#		print(event.as_text())
 			InputMap.action_erase_events(actionsToRedefine[keyNumber])
 			InputMap.action_add_event(actionsToRedefine[keyNumber],event)
 			keyNumber += 1	

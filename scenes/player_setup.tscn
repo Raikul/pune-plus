@@ -63,6 +63,7 @@ scale = Vector2(0.420479, 0.598997)
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
@@ -70,6 +71,8 @@ theme_override_constants/margin_bottom = 15
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -77,6 +80,7 @@ alignment = 1
 
 [node name="1" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
 
 [node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
@@ -85,18 +89,25 @@ theme_override_font_sizes/font_size = 66
 text = "Solmyr
 "
 horizontal_alignment = 1
+text_overrun_behavior = 2
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 texture = ExtResource("4_4vhgo")
-expand_mode = 1
+expand_mode = 3
 
 [node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+alignment = 1
 
 [node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "A"
@@ -104,17 +115,21 @@ horizontal_alignment = 1
 
 [node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "D"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "W"
 horizontal_alignment = 1
+vertical_alignment = 2
 
 [node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
@@ -140,31 +155,36 @@ horizontal_alignment = 1
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 texture = ExtResource("5_k0jmr")
-expand_mode = 1
+expand_mode = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+[node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+clip_contents = true
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
 
-[node name="P2Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
+[node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "A - D - W"
+text = "Left"
 horizontal_alignment = 1
 
-[node name="P2Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
+[node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "A - D - W"
+text = "Right"
 horizontal_alignment = 1
 
-[node name="P2Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
+[node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "A - D - W"
+text = "Up"
 horizontal_alignment = 1
 
 [node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
@@ -191,14 +211,36 @@ horizontal_alignment = 1
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 texture = ExtResource("6_q1ijh")
-expand_mode = 1
+expand_mode = 3
 
-[node name="P3Controls" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
+[node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+
+[node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "J - L - I"
+text = "J"
+horizontal_alignment = 1
+
+[node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "K"
+horizontal_alignment = 1
+
+[node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "L"
 horizontal_alignment = 1
 
 [node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
@@ -225,14 +267,36 @@ horizontal_alignment = 1
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 texture = ExtResource("7_8clkn")
-expand_mode = 1
+expand_mode = 3
 
-[node name="P4Controls" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
+[node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+
+[node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "4 - 6 - 8"
+text = "KP 4"
+horizontal_alignment = 1
+
+[node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "KP 6"
+horizontal_alignment = 1
+
+[node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "KP 8"
 horizontal_alignment = 1
 
 [node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]

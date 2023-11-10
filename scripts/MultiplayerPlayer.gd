@@ -38,8 +38,8 @@ func _ready():
 	$CooldownTimer.connect("timeout", powerReady)
 
 func _process(delta):
-	var multiSync = $MultiplayerSynchronizer.get_multiplayer_authority()
-	var uniqueId = multiplayer.get_unique_id()
+#	var multiSync = $MultiplayerSynchronizer.get_multiplayer_authority()
+#	var uniqueId = multiplayer.get_unique_id()
 	if ($MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id()):
 		var direction = 0
 		if playerId == 1:
@@ -81,7 +81,7 @@ func _process(delta):
 func set_multi_id():
 #	if multiplayer.is_server():
 #		set_multiplayer_authority(Global.multiplayerIds[playerId])
-		var pname = str(name).to_int()
+#		var pname = str(name).to_int()
 		$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 #		set_multiplayer_authority(1)
 		
@@ -96,7 +96,7 @@ func _on_bodyTimer_timeout():
 #		createBody(snakeBodyScene)
 	pass
 	
-func _on_area_entered(area):
+func _on_area_entered(_area):
 #	if listOfNodes.find(area) == -1 and area != twinHeadInstance:
 #		if (twinHeadInstance == null or twinHeadInstance.alive == false):
 #			$CollisionShape2D.set_deferred("disabled", true)

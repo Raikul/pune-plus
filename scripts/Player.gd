@@ -43,43 +43,16 @@ func _process(delta):
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
 		
 		var direction = 0
-		if playerId == 1:
-			if Input.is_key_pressed(KEY_A):
-				direction = -1
-			if Input.is_key_pressed(KEY_D):
-				direction = 1
-		if playerId == 2:
-			if Input.is_action_pressed("ui_left"):
-				direction = -1
-			if Input.is_action_pressed("ui_right"):
-				direction = 1
-		if playerId == 3:
-			if Input.is_key_pressed(KEY_J):
-				direction = -1
-			if Input.is_key_pressed(KEY_L):
-				direction = 1
-		if playerId == 4:
-			if Input.is_key_pressed(KEY_KP_4):
-				direction = -1
-			if Input.is_key_pressed(KEY_KP_6):
-				direction = 1
-		
+		if Input.is_action_pressed("Player"+str(playerId)+"Left"):
+			direction = -1
+		if Input.is_action_pressed("Player"+str(playerId)+"Right"):
+			direction = 1
+				
 		rotation += angular_speed * direction * delta
 
 		var	velocity = Vector2.UP.rotated(rotation) * speed
 		position += velocity * delta
-#
-#		if (position.x == 0 
-#		or position.x == screen_size.x - 1
-#		or position.y == colorRect.position.y * colorRect.scale.y	
-#		or position.y == screen_size.y - 1):
-#			_on_area_entered(colorRect)
-			
-	#	position.x = clamp(position.x, 0, screen_size.x)
-	#	position.y = clamp(position.y, colorRect.position.y * colorRect.scale.y, screen_size.y)
-#
-
-		
+#		
 func _enter_tree():
 	pass
 
@@ -182,10 +155,12 @@ func undash(prevSpeed, prevColor):
 
 func shoot():
 	createBody(projectileScene)
+	$Shoot.play()
 #	add_child(tirito)
 	pass
 
 func twinHead():
+	$Split.play()
 	twinHeadInstance = createBody(twinHeadScene)
 #	twinHeadInstance.colorRect = colorRect
 	twinHeadInstance.bufferListOfNodes = listOfNodes

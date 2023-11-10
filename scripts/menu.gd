@@ -9,7 +9,7 @@ func _ready():
 func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()
 	$CanvasLayer/TopMenu.hide()
-	
+	$CanvasLayer/Modifiers.show()
 
 func _on_options_pressed():
 	Options.show()
@@ -20,12 +20,10 @@ func _on_options_pressed():
 func _on_quit_pressed():
 	get_tree().quit() # Replace with function body.
 
-
 func _on_options_back_button_pressed():
 	Options.hide()
 	$CanvasLayer/TopMenu.show()
 	pass # Replace with function body.
-
 
 func _on_player_setup_go():
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
@@ -35,6 +33,7 @@ func _on_player_setup_go():
 func _on_player_setup_back():
 	$CanvasLayer/PlayerSetup.hide()
 	$CanvasLayer/TopMenu.show()
+	$CanvasLayer/Modifiers.hide()
 	pass # Replace with function body.
 
 

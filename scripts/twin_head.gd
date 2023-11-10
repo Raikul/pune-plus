@@ -15,6 +15,7 @@ signal dead
 #var syncGapTimer
 
 func _ready():
+	add_to_group("twinHeads")
 	collider = $CollisionShape2D
 	var gapTimer = $GapTimer
 	var bodyTimer = $BodyTimer
@@ -52,27 +53,27 @@ func _on_bodyTimer_timeout():
 #		createBody(snakeBodyScene)
 		pass
 
-func createBody(scene):
-	var snakeBody = scene.instantiate()
-	add_child(snakeBody)
-	snakeBody.set_as_top_level(true)
-	snakeBody.global_position = global_position
-	
-	var bodySprite = snakeBody.get_node("BodySprite")
-	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
-#		if $HeadSprite != null:
-	bodySprite.modulate = get_parent().get_node("HeadSprite").modulate
-
-#		snakeBody.transform.scaled(transform.get_scale())
-	snakeBody.apply_scale(transform.get_scale())
-	snakeBody.rotation = rotation
-	
-#	$Sprite2D.set_offset(Vector2(100,100))
-	listOfNodes.append(snakeBody)
-	
-	if listOfNodes.size() > 4:
-		listOfNodes.pop_front()
-	return snakeBody
+#func createBody(scene):
+#	var snakeBody = scene.instantiate()
+#	add_child(snakeBody)
+#	snakeBody.set_as_top_level(true)
+#	snakeBody.global_position = global_position
+#
+#	var bodySprite = snakeBody.get_node("BodySprite")
+#	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
+##		if $HeadSprite != null:
+#	bodySprite.modulate = get_parent().get_node("HeadSprite").modulate
+#
+##		snakeBody.transform.scaled(transform.get_scale())
+#	snakeBody.apply_scale(transform.get_scale())
+#	snakeBody.rotation = rotation
+#
+##	$Sprite2D.set_offset(Vector2(100,100))
+#	listOfNodes.append(snakeBody)
+#
+#	if listOfNodes.size() > 4:
+#		listOfNodes.pop_front()
+#	return snakeBody
 	
 func _on_area_entered(area):
 #	if area.playerId == null or area.playerId != 4:
