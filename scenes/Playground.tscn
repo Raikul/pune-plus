@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=14 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_1ieds"]
 [ext_resource type="AudioStream" uid="uid://b6e4n6u30fyl8" path="res://assets/sounds/juegonicopune.mp3" id="9_hxvts"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
+[ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
+[ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]
 size = Vector2(2422.65, 20.5537)
@@ -40,6 +42,11 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.59795, 0.892334)
 color = Color(0, 0, 0, 1)
+
+[node name="Shroom" parent="." instance=ExtResource("12_erhbx")]
+visible = false
+position = Vector2(625, 433)
+scale = Vector2(2, 2)
 
 [node name="Lesson" parent="." instance=ExtResource("10_tlq7d")]
 visible = false
@@ -385,6 +392,13 @@ metadata/_edit_use_anchors_ = true
 stream = ExtResource("9_hxvts")
 bus = &"Music"
 
+[node name="Events" type="Node2D" parent="."]
+script = ExtResource("11_yngvc")
+shroomScene = ExtResource("12_erhbx")
+
+[node name="ShroomTimer" type="Timer" parent="Events"]
+wait_time = 3.0
+
 [connection signal="dead" from="Player1" to="." method="_on_player_1_dead"]
 [connection signal="score" from="Player1" to="." method="_on_player_1_score"]
 [connection signal="dead" from="Player2" to="." method="_on_player_2_dead"]
@@ -394,3 +408,4 @@ bus = &"Music"
 [connection signal="dead" from="Player4" to="." method="_on_player_4_dead"]
 [connection signal="score" from="Player4" to="." method="_on_player_4_score"]
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
+[connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]

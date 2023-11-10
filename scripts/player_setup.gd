@@ -15,11 +15,11 @@ signal multigo
 @onready var multiscene = load("res://scenes/multiplayer_playground.tscn")
 
 func _ready():
-	P1Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox
-	P2Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox
-	P3Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox
-	P4Box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox
-
+	P1Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"
+	P2Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"
+	P3Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"
+	P4Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"
+	pass
 
 func _process(_delta):
 	pass
@@ -101,3 +101,42 @@ func _on_multiplayer_test_hosted():
 func _on_multiplayer_test_joined():
 	_on_p_2on_pressed()
 	pass # Replace with function body.
+
+
+func _on_redefine_1_pressed():
+#	var e = new InputEventKey();
+#e.Set("scancode", KeyList.A);
+#InputMap.ActionAddEvent("jump", e);
+	$RedefineKeys.show()
+	$RedefineKeys.redefinePlayer(1)
+	pass # Replace with function body.
+
+
+func _on_redefine_2_pressed():
+	pass # Replace with function body.
+
+
+func _on_redefine_3_pressed():
+	pass # Replace with function body.
+
+
+func _on_redefine_4_pressed():
+	pass # Replace with function body.
+
+
+func _on_redefine_keys_recalculate_labels(playerId):
+	setKeys(playerId, "Left")
+	setKeys(playerId, "Right")
+	setKeys(playerId, "Up")
+	pass # Replace with function body.
+	
+func setKeys(playerId, control):
+	var playerBoxes = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer as HBoxContainer
+	var inputList = playerBoxes.get_node(str(playerId)).get_node("InputList")
+	var text = ""
+	for i in InputMap.action_get_events("Player"+str(playerId)+control):
+		if text != "":
+			text += " / "
+		text +=  i.as_text().rstrip("(Physical)")
+	inputList.get_node(control).set_text(text)
+	

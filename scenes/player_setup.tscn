@@ -1,13 +1,18 @@
-[gd_scene load_steps=10 format=3 uid="uid://ccgij1ekdykeg"]
+[gd_scene load_steps=13 format=3 uid="uid://ccgij1ekdykeg"]
 
 [ext_resource type="Theme" uid="uid://dsnux54sug7ir" path="res://scenes/player_setup.tres" id="1_eccmo"]
 [ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_tbs3p"]
 [ext_resource type="FontFile" uid="uid://j8s2a2y7lay" path="res://assets/fonts/Flat Earth Scribe.ttf" id="3_7uw08"]
+[ext_resource type="PackedScene" uid="uid://dflkv4we1oqbs" path="res://scenes/redefine_keys.tscn" id="3_8ef35"]
 [ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_4vhgo"]
+[ext_resource type="Script" path="res://scripts/redefine_keys.gd" id="4_idam3"]
 [ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_k0jmr"]
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_q1ijh"]
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_8clkn"]
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="8_cyflm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uwhrc"]
+bg_color = Color(0, 0.254902, 0.294118, 1)
 
 [sub_resource type="SystemFont" id="SystemFont_ypk85"]
 subpixel_positioning = 0
@@ -23,6 +28,32 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_eccmo")
 script = ExtResource("2_tbs3p")
+
+[node name="RedefineKeys" parent="." instance=ExtResource("3_8ef35")]
+visible = false
+z_index = 5
+layout_mode = 2
+offset_bottom = 440.0
+size_flags_horizontal = 0
+script = ExtResource("4_idam3")
+
+[node name="PanelContainer" parent="RedefineKeys" index="0"]
+offset_left = 40.0
+offset_top = 2.0
+offset_right = 652.0
+offset_bottom = 445.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uwhrc")
+
+[node name="PlayerName" parent="RedefineKeys/PanelContainer/HBoxContainer" index="0"]
+visible = false
+theme_override_colors/font_color = Color(1, 0.380392, 0, 1)
+
+[node name="Instructions" parent="RedefineKeys/PanelContainer/HBoxContainer" index="1"]
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Key" parent="RedefineKeys/PanelContainer/HBoxContainer" index="2"]
+theme_override_colors/font_color = Color(1, 0, 0, 1)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 0
@@ -44,10 +75,10 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="P1Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="1" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_7uw08")
 theme_override_font_sizes/font_size = 66
@@ -55,108 +86,174 @@ text = "Solmyr
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("4_4vhgo")
 expand_mode = 1
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
+layout_mode = 2
+
+[node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "A"
+horizontal_alignment = 1
+
+[node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "D"
+horizontal_alignment = 1
+
+[node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "W"
+horizontal_alignment = 1
+
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 27
+text = "Select"
+
+[node name="Redefine1" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "Redefine Keys
+"
+
+[node name="2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+layout_mode = 2
+text = "Aislinn
+"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 2
+texture = ExtResource("5_k0jmr")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+layout_mode = 2
+
+[node name="P2Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "A - D - W"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 27
-text = "Select"
-
-[node name="P2Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
-layout_mode = 2
-text = "Aislinn
-"
-horizontal_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
-custom_minimum_size = Vector2(400, 300)
-layout_mode = 2
-texture = ExtResource("5_k0jmr")
-expand_mode = 1
-
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="P2Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
-text = "Left -Right - Up"
+text = "A - D - W"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="P2Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_ypk85")
+theme_override_font_sizes/font_size = 50
+text = "A - D - W"
+horizontal_alignment = 1
+
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="P3Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Redefine2" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "Redefine Keys
+"
+
+[node name="3" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 text = "Reginald
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("6_q1ijh")
 expand_mode = 1
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="P3Controls" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "J - L - I"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="P4Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Redefine3" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "Redefine Keys
+"
+
+[node name="4" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 text = "Elfduardo
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("7_8clkn")
 expand_mode = 1
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="P4Controls" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "4 - 6 - 8"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="ColorPicker" type="ColorPicker" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Redefine4" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "Redefine Keys
+"
+
+[node name="ColorPicker" type="ColorPicker" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 visible = false
 layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
 
 [node name="GO" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -170,10 +267,17 @@ theme = ExtResource("8_cyflm")
 theme_override_font_sizes/font_size = 66
 text = "Back"
 
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox/Select" to="." method="_on_p_1on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox/Select" to="." method="_on_p_2on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox/Select" to="." method="_on_p_3on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox/Select" to="." method="_on_p_4on_pressed"]
-[connection signal="color_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox/ColorPicker" to="." method="_on_color_picker_color_changed"]
+[connection signal="recalculateLabels" from="RedefineKeys" to="." method="_on_redefine_keys_recalculate_labels"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/Select" to="." method="_on_p_1on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/Redefine1" to="." method="_on_redefine_1_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/Select" to="." method="_on_p_2on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/Redefine2" to="." method="_on_redefine_2_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/Select" to="." method="_on_p_3on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/Redefine3" to="." method="_on_redefine_3_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/Select" to="." method="_on_p_4on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/Redefine4" to="." method="_on_redefine_4_pressed"]
+[connection signal="color_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/ColorPicker" to="." method="_on_color_picker_color_changed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/GO" to="." method="_on_go_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/Back" to="." method="_on_back_pressed"]
+
+[editable path="RedefineKeys"]

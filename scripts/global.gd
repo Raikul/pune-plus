@@ -13,26 +13,23 @@ var player2Active
 var player3Active
 var player4Active
 
-var player1Color = Color.BLUE_VIOLET
-var player2Color = Color.GREEN
-var player3Color = Color.ORANGE_RED
-var player4Color = Color.SKY_BLUE
-
 var playerColors = [
 	"",
-	player1Color,
-	player2Color,
-	player3Color,
-	player4Color
+	Color.BLUE_VIOLET,
+	Color.GREEN,
+	Color.ORANGE_RED,
+	Color.SKY_BLUE
 ]
 
 var isMultiplayerActive = false
 
 var Players = {}
 
-var multiplayerIds = [0,1,0,0,0]
+#var multiplayerIds = [0,1,0,0,0]
 
 var musicProgress = 0
+
+#Gameplay
 var gapSize = 1
-
-
+var shrooms = true
+var lessons = false

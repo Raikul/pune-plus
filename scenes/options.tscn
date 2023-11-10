@@ -233,6 +233,9 @@ popup/item_1/id = 1
 popup/item_2/text = "Large"
 popup/item_2/id = 2
 
+[node name="Reset Controls" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay"]
+layout_mode = 2
+
 [node name="Back" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
@@ -244,4 +247,5 @@ text = "Back"
 [connection signal="value_changed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox/HSlider" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/MusicBox" method="_on_music_slider_value_changed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/Back" to="." method="_on_back_pressed"]
 [connection signal="item_selected" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox/OptionButton" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox" method="_on_option_button_item_selected"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/Reset Controls" to="." method="_on_reset_controls_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/Back" to="." method="_on_back_pressed"]

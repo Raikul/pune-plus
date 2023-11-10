@@ -10,3 +10,5 @@ default_font_size = 1
 Label/colors/font_color = Color(1, 0.87451, 0.835294, 1)
 Label/font_sizes/font_size = 66
 Label/fonts/font = ExtResource("1_xk73r")
+PsyloVariant/base_type = &"Label"
+PsyloVariant/colors/font_color = Color(0.615686, 0.341176, 1, 1)

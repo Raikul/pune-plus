@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dflkv4we1oqbs"]
+
+[node name="RedefineKeys" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 429.0
+offset_bottom = 118.0
+
+[node name="HBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="PlayerName" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "Player 1"
+horizontal_alignment = 1
+
+[node name="Instructions" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "Please press a Key or move your Joystick for the action: "
+
+[node name="Key" type="Label" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "LEFT"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -98,43 +98,44 @@ func _on_bodyTimer_timeout():
 		createBody(snakeBodyScene)
 	
 func _on_area_entered(area):
-	if listOfNodes.find(area) == -1 and area != twinHeadInstance:
-		if (twinHeadInstance == null or twinHeadInstance.alive == false):
-			$CollisionShape2D.set_deferred("disabled", true)
-			set_process(false)
-			emit_signal("dead")
-		else: #twinHeadIsAlive
-			twinHeadInstance.collider.set_deferred("disabled", true)
-			var tempPosition = twinHeadInstance.position
-			var tempRotation = twinHeadInstance.rotation
-			twinHeadInstance.queue_free()
-			position = tempPosition
-			rotation = tempRotation
-			pass
+	
+	if area is Shroom:
+		emit_signal("score")
+		area.queue_free()
+	else :
+		if listOfNodes.find(area) == -1 and area != twinHeadInstance:
+			if (twinHeadInstance == null or twinHeadInstance.alive == false):
+				$CollisionShape2D.set_deferred("disabled", true)
+				set_process(false)
+				emit_signal("dead")
+			else: #twinHeadIsAlive
+				twinHeadInstance.collider.set_deferred("disabled", true)
+				var tempPosition = twinHeadInstance.position
+				var tempRotation = twinHeadInstance.rotation
+				twinHeadInstance.queue_free()
+				position = tempPosition
+				rotation = tempRotation
+				pass
 
 func createBody(scene):
-	var snakeBody = scene.instantiate()
-	add_child(snakeBody)
-	snakeBody.set_as_top_level(true)
-	snakeBody.global_position = global_position
+	var sceneInstance = scene.instantiate()
+	add_child(sceneInstance)
+	sceneInstance.set_as_top_level(true)
+	sceneInstance.global_position = global_position
 	
-	var bodySprite = snakeBody.get_node("BodySprite")
+	var bodySprite = sceneInstance.get_node("BodySprite")
 	bodySprite.set_texture($HeadSprite.texture)
-#		if $HeadSprite != null:
 	bodySprite.modulate = $HeadSprite.modulate
-#	snakeBody.get_node("BodyColor").modulate = $HeadColor.modulate
 
-#		snakeBody.transform.scaled(transform.get_scale())
-	snakeBody.apply_scale(transform.get_scale())
-	snakeBody.rotation = rotation
+	sceneInstance.apply_scale(transform.get_scale())
+	sceneInstance.rotation = rotation
 	
-#	$Sprite2D.set_offset(Vector2(100,100))
-	listOfNodes.append(snakeBody)
+	listOfNodes.append(sceneInstance)
 	if listOfNodes.size() == 1:
-		snakeBody.rotation = rotation + PI
+		sceneInstance.rotation = rotation + PI
 	if listOfNodes.size() > 4:
 		listOfNodes.pop_front()
-	return snakeBody
+	return sceneInstance
 	
 func _input(event):
 	if powerAvailable:

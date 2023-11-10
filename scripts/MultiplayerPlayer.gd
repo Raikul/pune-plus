@@ -35,7 +35,6 @@ func _ready():
 	$DashTimer.connect("timeout", undash.bind(200, Global.playerColors[playerId]))
 	
 	$HulkTimer.add_to_group("timers", true)
-	
 	$CooldownTimer.connect("timeout", powerReady)
 
 func _process(delta):

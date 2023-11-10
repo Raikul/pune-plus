@@ -2,10 +2,14 @@ extends Node2D
 
 var scored = false
 var timers = []
+var topLimit
+var bottomLimit
+
 
 func _ready():
 	groupColliders()
 	setupPlayers()
+	$Events.set_space(topLimit,bottomLimit)
 	$MusicPlayer.play(Global.musicProgress)
 
 func _process(delta):
@@ -13,36 +17,47 @@ func _process(delta):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 func groupColliders():
+	var topCollider = $Colliders/LimitTop/Collider
+	var topRect =  $Colliders/LimitTop/ColorRect
+	
+#	topCollider.shape.get_rect() as Rect2
+	topLimit = topRect.get_position().y + topRect.get_size().y 
+	
+	var bottomCollider = $Colliders/Control/LimitBottom/Collider
+	var bottomRect = $Colliders/Control/LimitBottom/ColorRect
+#	bottomCollider.shape.get_rect()  as Rect2
+	bottomLimit = bottomRect.global_position.y
 	$Colliders/Control/LimitBottom.add_to_group("limits")
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
+	
 
 func setupPlayers():
 	if Global.player1Active:
 		$Player1.add_to_group("activePlayers")
 		$Player1.add_to_group("alivePlayers")
-		$Player1/HeadSprite.modulate = Global.player1Color
-		$Player1/HeadColor.modulate = Global.player1Color
+		$Player1/HeadSprite.modulate = Global.playerColors[1]
+#		$Player1/HeadColor.modulate = Global.playerColors[1]
 	else:
 		$Player1.queue_free()
 	if Global.player2Active:
 		$Player2.add_to_group("activePlayers")
 		$Player2.add_to_group("alivePlayers")
-		$Player2/HeadSprite.modulate = Global.player2Color
-		$Player1/HeadColor.modulate = Global.player2Color
+		$Player2/HeadSprite.modulate = Global.playerColors[2]
+#		$Player1/HeadColor.modulate = Global.playerColors[2]
 	else:
 		$Player2.queue_free()
 	if Global.player3Active:
 		$Player3.add_to_group("activePlayers")
 		$Player3.add_to_group("alivePlayers")
-		$Player3/HeadSprite.modulate = Global.player3Color
+		$Player3/HeadSprite.modulate = Global.playerColors[3]
 	else:
 		$Player3.queue_free()
 	if Global.player4Active:
 		$Player4.add_to_group("activePlayers")
 		$Player4.add_to_group("alivePlayers")
-		$Player4/HeadSprite.modulate = Global.player4Color
+		$Player4/HeadSprite.modulate = Global.playerColors[4]
 	else:
 		$Player4.queue_free()
 
@@ -78,8 +93,9 @@ func restart():
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		player.set_process(false)
 	
-	$Lesson.teach("Water")
-	$Lesson.show()
+	if Global.lessons:
+		$Lesson.teach("Water")
+		$Lesson.show()
 	await(get_tree().create_timer(2.0).timeout)
 	Global.musicProgress = $MusicPlayer.get_playback_position()
 	get_tree().reload_current_scene()
