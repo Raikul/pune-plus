@@ -1,5 +1,6 @@
 extends Node
 
+var scoreToReach = 10
 var player1Score = 0
 var player2Score = 0
 var player3Score = 0

@@ -83,6 +83,7 @@ func reboot(scene):
 	get_tree().root.add_child(newScene)
 	self.hide()
 
+#region multi
 func _on_multi_go():
 #	Global.isMultiplayerActive = true
 #	Global.player1Active = player1Active
@@ -97,44 +98,32 @@ func _on_multiplayer_test_hosted():
 	_on_p_1on_pressed()
 	pass # Replace with function body.
 
-
 func _on_multiplayer_test_joined():
 	_on_p_2on_pressed()
 	pass # Replace with function body.
+#endregion
 
 
 func _on_redefine_1_pressed():
-#	var e = new InputEventKey();
-#e.Set("scancode", KeyList.A);
-#InputMap.ActionAddEvent("jump", e);
 	$RedefineKeys.show()
 	$RedefineKeys.redefinePlayer(1)
-	pass # Replace with function body.
-
 
 func _on_redefine_2_pressed():
 	$RedefineKeys.show()
 	$RedefineKeys.redefinePlayer(2)
-	pass # Replace with function body.
-
 
 func _on_redefine_3_pressed():
 	$RedefineKeys.show()
 	$RedefineKeys.redefinePlayer(3)
-	pass # Replace with function body.
-
 
 func _on_redefine_4_pressed():
 	$RedefineKeys.show()
 	$RedefineKeys.redefinePlayer(4)
-	pass # Replace with function body.
-
 
 func _on_redefine_keys_recalculate_labels(playerId):
 	setKeys(playerId, "Left")
 	setKeys(playerId, "Right")
 	setKeys(playerId, "Up")
-	pass # Replace with function body.
 	
 func setKeys(playerId, control):
 	var playerBoxes = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer as HBoxContainer
@@ -145,11 +134,13 @@ func setKeys(playerId, control):
 			text += " / "
 		text +=  i.as_text().rstrip("(Physical)")
 	var label = inputList.get_node(control)
-	var string_size = label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
-	print(string_size)
+	var string_size = label.get_theme_font("font") \
+	.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
+#	print(string_size)
 	inputList.get_node(control).set_text(text)
-	string_size = label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
-	print(string_size)
+	string_size = label.get_theme_font("font") \
+	.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
+#	print(string_size)
 	if string_size.x > 300:
 		var ls = LabelSettings.new()
 		ls.set_font_size(44)

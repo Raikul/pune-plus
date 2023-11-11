@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=15 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
 [ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_60wp1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]
 size = Vector2(2422.65, 20.5537)
@@ -50,16 +52,16 @@ scale = Vector2(2, 2)
 
 [node name="Lesson" parent="." instance=ExtResource("10_tlq7d")]
 visible = false
-z_index = 4
+z_index = 10
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 569.0
-offset_top = 358.0
-offset_right = 569.0
-offset_bottom = 358.0
+offset_left = 511.0
+offset_top = 204.0
+offset_right = 511.0
+offset_bottom = 204.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
 metadata/_edit_use_anchors_ = true
@@ -219,6 +221,7 @@ texture_progress = ExtResource("7_fcb1c")
 tint_progress = Color(0.741176, 0.164706, 0.0156863, 1)
 
 [node name="ControlDetails1" type="Label" parent="HUD"]
+visible = false
 light_mask = 16
 visibility_layer = 16
 z_index = 1
@@ -231,6 +234,7 @@ text = "Left/Right:  A  /   D
 Dash: W"
 
 [node name="ControlDetails2" type="Label" parent="HUD"]
+visible = false
 z_index = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -248,6 +252,7 @@ text = "Left/Right:  L/R Arrows
 Hulk: Up Arrow"
 
 [node name="ControlDetails3" type="Label" parent="HUD"]
+visible = false
 z_index = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -262,6 +267,7 @@ text = "Left/Right: J / L
 Dash: I"
 
 [node name="ControlDetails4" type="Label" parent="HUD"]
+visible = false
 z_index = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -275,17 +281,35 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Left/Right:  KP 4 / KP 6 Arrows
 Hulk: KP 8"
 
-[node name="Title" type="Label" parent="HUD"]
+[node name="Centerfold" type="PanelContainer" parent="HUD"]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -100.5
-offset_right = 100.5
+offset_left = -128.0
+offset_right = 128.0
 offset_bottom = 94.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_60wp1")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/Centerfold"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_font_sizes/font_size = 66
-text = "Pune+"
+text = "Pune+ a"
+
+[node name="ScoreToReach" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.992157, 0.52549, 0, 1)
+theme_override_constants/shadow_offset_x = 5
+theme_override_constants/shadow_offset_y = 4
+theme_override_constants/outline_size = 4
+theme_override_constants/shadow_outline_size = 4
+theme_override_font_sizes/font_size = 66
+text = "10"
 
 [node name="PauseButton" type="Button" parent="."]
 visible = false
@@ -409,3 +433,6 @@ wait_time = 3.0
 [connection signal="score" from="Player4" to="." method="_on_player_4_score"]
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
+
+[editable path="Lesson"]
+[editable path="Player1"]

@@ -1,0 +1,20 @@
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://dwqb8v8x0pe3l"]
+
+[ext_resource type="FontFile" uid="uid://j8s2a2y7lay" path="res://assets/fonts/Flat Earth Scribe.ttf" id="1_sj56d"]
+
+[sub_resource type="SystemFont" id="SystemFont_h1uqm"]
+
+[resource]
+default_font = SubResource("SystemFont_h1uqm")
+default_font_size = 1
+Label/colors/font_color = Color(0, 0.682353, 0.611765, 1)
+Label/colors/font_outline_color = Color(0.505882, 0, 0.654902, 1)
+Label/colors/font_shadow_color = Color(0.701961, 0.352941, 0.0784314, 1)
+Label/constants/outline_size = 8
+Label/constants/shadow_offset_x = 8
+Label/constants/shadow_offset_y = 1
+Label/constants/shadow_outline_size = 12
+Label/font_sizes/font_size = 66
+Label/fonts/font = ExtResource("1_sj56d")
+PsyloVariant/base_type = &"Label"
+PsyloVariant/colors/font_color = Color(0.615686, 0.341176, 1, 1)

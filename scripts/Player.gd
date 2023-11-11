@@ -52,26 +52,20 @@ func _process(delta):
 
 		var	velocity = Vector2.UP.rotated(rotation) * speed
 		position += velocity * delta
-#		
-func _enter_tree():
-	pass
 
 func _on_gapTimer_timeout():
 	gap = false
 	gapFrequencyTimer.start()
 	
-
 func _on_gapFrequencyTimer_timeout():
 	gap = true
 	gapTimer.start()
-	
 	
 func _on_bodyTimer_timeout():
 	if not gap:
 		createBody(snakeBodyScene)
 	
-func _on_area_entered(area):
-	
+func _on_area_entered(area):	
 	if area is Shroom:
 		emit_signal("score")
 		area.queue_free()

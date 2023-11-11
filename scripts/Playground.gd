@@ -4,14 +4,17 @@ var scored = false
 var timers = []
 var topLimit
 var bottomLimit
-
+var gameEnded = true
 
 func _ready():
 	groupColliders()
 	setupPlayers()
 	$Events.set_space(topLimit,bottomLimit)
 	$MusicPlayer.play(Global.musicProgress)
-
+	Global.scoreToReach = (get_tree().get_nodes_in_group("activePlayers").size() - 1) * 10
+	Global.scoreToReach = 3
+	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
+	
 func _process(_delta):
 	if Input.is_key_pressed(KEY_ESCAPE):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
@@ -38,14 +41,12 @@ func setupPlayers():
 		$Player1.add_to_group("activePlayers")
 		$Player1.add_to_group("alivePlayers")
 		$Player1/HeadSprite.modulate = Global.playerColors[1]
-#		$Player1/HeadColor.modulate = Global.playerColors[1]
 	else:
 		$Player1.queue_free()
 	if Global.player2Active:
 		$Player2.add_to_group("activePlayers")
 		$Player2.add_to_group("alivePlayers")
 		$Player2/HeadSprite.modulate = Global.playerColors[2]
-#		$Player1/HeadColor.modulate = Global.playerColors[2]
 	else:
 		$Player2.queue_free()
 	if Global.player3Active:
@@ -79,22 +80,30 @@ func _on_player_3_dead():
 func _on_player_4_dead():
 	playerDead($Player4)
 	
-func playerDead(player):
+func playerDead(player):	
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
 		for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
 			alivePlayer.emit_signal("score")
-	if get_tree().get_nodes_in_group("alivePlayers").size() <= 1:
+	if get_tree().get_nodes_in_group("alivePlayers").size() <= 1 and gameEnded ==false:
 		restart()
 
-func restart():
+func finishGame(playerId):
+	gameEnded = true
+	$Lesson.improvise("Player "+str(playerId)+" Wins")
+	$Lesson.show()
+	
+func stopTime():
 	for item in timers:
 		item.stop()
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		player.set_process(false)
 	for twinHead in get_tree().get_nodes_in_group("twinHeads"):
 		twinHead.set_process(false)
-	
+	pass
+
+func restart():
+	stopTime()
 	if Global.lessons:
 		$Lesson.teach("Water")
 		$Lesson.show()
@@ -104,20 +113,24 @@ func restart():
 	
 func _on_player_1_score():
 	Global.player1Score += 1
-	pass # Replace with function body.
+	if Global.player1Score == Global.scoreToReach:
+		finishGame(1)
 
 func _on_player_2_score():
 	Global.player2Score += 1
-	pass # Replace with function body.
+	if Global.player2Score == Global.scoreToReach:
+		finishGame(2)
 
 func _on_player_3_score():
 	Global.player3Score += 1
-	pass # Replace with function body.
+	if Global.player3Score == Global.scoreToReach:
+		finishGame(3)
 
 func _on_player_4_score():
 	Global.player4Score += 1
-	pass # Replace with function body.
-
+	if Global.player1Score == Global.scoreToReach:
+		finishGame(4)
+	
 func _on_pause_button_pressed():
 	get_tree().paused = false
 	$PauseButton.hide()

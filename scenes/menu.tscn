@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/menu.gd" id="2_5y65b"]
 [ext_resource type="Texture2D" uid="uid://bsmwut0c66rvs" path="res://assets/images/background_red_hexes.jpg" id="2_plvml"]
 [ext_resource type="PackedScene" uid="uid://bd73ybc7rg362" path="res://scenes/options.tscn" id="3_wmb4s"]
-[ext_resource type="Theme" uid="uid://dsnux54sug7ir" path="res://scenes/player_setup.tres" id="4_f6ghi"]
+[ext_resource type="Theme" uid="uid://dwqb8v8x0pe3l" path="res://scenes/shrooms.tres" id="4_qxm8h"]
 [ext_resource type="PackedScene" uid="uid://ccgij1ekdykeg" path="res://scenes/player_setup.tscn" id="5_dpauy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dagr"]
@@ -54,7 +54,6 @@ texture = ExtResource("2_plvml")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Modifiers" type="Control" parent="CanvasLayer"]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_left = 1714.0
@@ -89,7 +88,7 @@ button_pressed = true
 
 [node name="ShroomsLabel" type="Label" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer"]
 layout_mode = 2
-theme = ExtResource("4_f6ghi")
+theme = ExtResource("4_qxm8h")
 theme_override_colors/font_color = Color(0, 0.843137, 0.945098, 1)
 theme_override_colors/font_shadow_color = Color(0.854902, 0.294118, 0.941176, 1)
 theme_override_colors/font_outline_color = Color(0.411765, 0.392157, 0.2, 1)
