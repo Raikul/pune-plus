@@ -13,7 +13,7 @@ func _ready():
 func improvise(improvisedText):
 	winnerTextBox.set_text(improvisedText)
 	$DopamineContainer.show()
-	$DopamineContainer/Dopamine/Winner
+#	$DopamineContainer/Dopamine/Winner
 func teach(type):
 	randomizeLesson(type)
 	showLesson()

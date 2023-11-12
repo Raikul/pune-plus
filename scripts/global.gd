@@ -26,7 +26,7 @@ var isMultiplayerActive = false
 
 var Players = {}
 
-#var multiplayerIds = [0,1,0,0,0]
+var multiplayerIds = [0,1,0,0,0]
 
 var musicProgress = 0
 

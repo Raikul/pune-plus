@@ -78,10 +78,12 @@ func StartGame():
 	self.hide()
 	
 func reboot(scene):
-	var newScene = multiscene.instantiate()
-	scene.queue_free()
-	get_tree().root.add_child(newScene)
-	self.hide()
+	StartGame.rpc()
+#	var newScene = multiscene.instantiate()
+#	scene.queue_free()
+#	get_tree().root.add_child(newScene)
+#	self.hide()
+
 
 #region multi
 func _on_multi_go():

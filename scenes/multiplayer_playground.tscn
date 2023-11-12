@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/MultiPlayground.gd" id="1_m4pyh"]
 [ext_resource type="PackedScene" uid="uid://burh8oloo8j3i" path="res://scenes/multiplayer_player.tscn" id="2_2l6ji"]
-[ext_resource type="Script" path="res://scripts/HUD.gd" id="3_mu006"]
+[ext_resource type="Script" path="res://scripts/MultiplayerHUD.gd" id="3_it2o2"]
 [ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_3b4m3"]
 [ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_ax4uq"]
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_htpc8"]
@@ -28,7 +28,7 @@ scale = Vector2(1.59795, 0.892334)
 color = Color(0, 0, 0, 1)
 
 [node name="HUD" type="CanvasLayer" parent="."]
-script = ExtResource("3_mu006")
+script = ExtResource("3_it2o2")
 
 [node name="Player1Id" type="Label" parent="HUD"]
 offset_left = 412.0

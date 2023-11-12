@@ -46,10 +46,10 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="P1Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="1" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_wyjn6")
 theme_override_font_sizes/font_size = 66
@@ -57,106 +57,110 @@ text = "Solmyr
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("4_gu3or")
-expand_mode = 1
+expand_mode = 3
+stretch_mode = 5
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "A - D - W"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="P2Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 layout_mode = 2
 text = "Aislinn
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("5_e7cqo")
-expand_mode = 1
+expand_mode = 3
+stretch_mode = 5
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "Left -Right - Up"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="P3Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="3" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 text = "Reginald
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("6_dwvb2")
-expand_mode = 1
+expand_mode = 3
+stretch_mode = 5
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "J - L - I"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="P4Vbox" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="4" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 text = "Elfduardo
 "
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 texture = ExtResource("7_h3h7o")
-expand_mode = 1
+expand_mode = 3
+stretch_mode = 5
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "4 - 6 - 8"
 horizontal_alignment = 1
 
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 27
 text = "Select"
 
-[node name="ColorPicker" type="ColorPicker" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox"]
+[node name="ColorPicker" type="ColorPicker" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 visible = false
 layout_mode = 2
 
@@ -164,13 +168,14 @@ layout_mode = 2
 layout_mode = 2
 theme = ExtResource("8_ehujy")
 theme_override_font_sizes/font_size = 66
-text = "GO"
+text = "Start"
 
 [node name="Back" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("8_ehujy")
+theme_override_colors/font_color = Color(0.690196, 0, 0, 1)
 theme_override_font_sizes/font_size = 66
-text = "Back"
+text = "Go Back"
 
 [node name="Multiplayer_Test" parent="PanelContainer" instance=ExtResource("9_n8h51")]
 position = Vector2(1814.6, 248.749)
@@ -196,11 +201,11 @@ layout_mode = 2
 text = "Hosting"
 
 [connection signal="go" from="." to="." method="_on_multi_go"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P1Vbox/Select" to="." method="_on_p_1on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P2Vbox/Select" to="." method="_on_p_2on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P3Vbox/Select" to="." method="_on_p_3on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox/Select" to="." method="_on_p_4on_pressed"]
-[connection signal="color_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/P4Vbox/ColorPicker" to="." method="_on_color_picker_color_changed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/Select" to="." method="_on_p_1on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/Select" to="." method="_on_p_2on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/Select" to="." method="_on_p_3on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/Select" to="." method="_on_p_4on_pressed"]
+[connection signal="color_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/ColorPicker" to="." method="_on_color_picker_color_changed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/GO" to="." method="_on_go_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="hosted" from="PanelContainer/Multiplayer_Test" to="." method="_on_multiplayer_test_hosted"]

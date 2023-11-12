@@ -40,43 +40,18 @@ func _ready():
 func _process(delta):
 #	var multiSync = $MultiplayerSynchronizer.get_multiplayer_authority()
 #	var uniqueId = multiplayer.get_unique_id()
-	if ($MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id()):
-		var direction = 0
-		if playerId == 1:
-			if Input.is_key_pressed(KEY_A):
+#	print(str(multiplayer.get_peers().size()))
+	if multiplayer.get_peers().size() >= 1:
+		if ($MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id()):
+			var direction = 0
+			if Input.is_action_pressed("Player"+str(playerId)+"Left"):
 				direction = -1
-			if Input.is_key_pressed(KEY_D):
+			if Input.is_action_pressed("Player"+str(playerId)+"Right"):
 				direction = 1
-		if playerId == 2:
-			if Input.is_action_pressed("ui_left"):
-				direction = -1
-			if Input.is_action_pressed("ui_right"):
-				direction = 1
-		if playerId == 3:
-			if Input.is_key_pressed(KEY_J):
-				direction = -1
-			if Input.is_key_pressed(KEY_L):
-				direction = 1
-		if playerId == 4:
-			if Input.is_key_pressed(KEY_KP_4):
-				direction = -1
-			if Input.is_key_pressed(KEY_KP_6):
-				direction = 1
-		
-		rotation += angular_speed * direction * delta
-
-		var	velocity = Vector2.UP.rotated(rotation) * speed
-		position += velocity * delta
-#
-#		if (position.x == 0 
-#		or position.x == screen_size.x - 1
-#		or position.y == colorRect.position.y * colorRect.scale.y	
-#		or position.y == screen_size.y - 1):
-#			_on_area_entered(colorRect)
-			
-	#	position.x = clamp(position.x, 0, screen_size.x)
-	#	position.y = clamp(position.y, colorRect.position.y * colorRect.scale.y, screen_size.y)
-#
+									
+			rotation += angular_speed * direction * delta
+			var	velocity = Vector2.UP.rotated(rotation) * speed
+			position += velocity * delta			
 
 func set_multi_id():
 #	if multiplayer.is_server():
@@ -92,23 +67,23 @@ func _on_gapTimer_timeout():
 	gap = not gap
 	
 func _on_bodyTimer_timeout():
-#	if not gap:
-#		createBody(snakeBodyScene)
+	if not gap:
+		createBody(snakeBodyScene)
 	pass
 	
-func _on_area_entered(_area):
-#	if listOfNodes.find(area) == -1 and area != twinHeadInstance:
-#		if (twinHeadInstance == null or twinHeadInstance.alive == false):
-#			$CollisionShape2D.set_deferred("disabled", true)
-#			set_process(false)
-#			emit_signal("dead")
-#		else: #twinHeadIsAlive
-#			twinHeadInstance.collider.set_deferred("disabled", true)
-#			var tempPosition = twinHeadInstance.position
-#			var tempRotation = twinHeadInstance.rotation
-#			twinHeadInstance.queue_free()
-#			position = tempPosition
-#			rotation = tempRotation
+func _on_area_entered(area):
+	if listOfNodes.find(area) == -1 and area != twinHeadInstance:
+		if (twinHeadInstance == null or twinHeadInstance.alive == false):
+			$CollisionShape2D.set_deferred("disabled", true)
+			set_process(false)
+			emit_signal("dead")
+		else: #twinHeadIsAlive
+			twinHeadInstance.collider.set_deferred("disabled", true)
+			var tempPosition = twinHeadInstance.position
+			var tempRotation = twinHeadInstance.rotation
+			twinHeadInstance.queue_free()
+			position = tempPosition
+			rotation = tempRotation
 	pass
 
 func createBody(scene):

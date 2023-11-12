@@ -10,6 +10,8 @@ var p1
 var p2
 signal restartNotice
 
+@onready var nextRound = load("res://scenes/multiplayer_playground.tscn")
+
 func _ready():
 	var index = 0
 	for i in Global.Players:
@@ -20,7 +22,7 @@ func _ready():
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
 			if spawn.name == str(index):
 				currentPlayer.global_position = spawn.global_position
-#				currentPlayer.connect("dead",on_player_dead.bind(currentPlayer))
+				currentPlayer.connect("dead",on_player_dead.bind(currentPlayer))
 		index += 1		
 #				currentPlayer.playerId = index +1
 #	spawn_p1()
@@ -36,62 +38,62 @@ func _ready():
 func on_player_dead(player):
 	playerDead(player)
 	
-@rpc
-func spawn_p1():
-	p1 = playerScene.instantiate()
-	p1.name = "Player1"
-	p1.position = Vector2(400,400)
-	p1.playerId = 1
-	
-	add_child(p1,true)
-	p1.set_multiplayer_authority(1)
-	
-	p1.connect("dead", _on_player_1_dead)
-		
-
-
-@rpc
-func spawn_p2():
-	p2 = playerScene.instantiate()
-	p2.name = "Player2"
-	p2.position = Vector2(500,500)
-	p2.playerId = 2
-#	var test = Global.multiplayerIds[2]
-	add_child(p2, true)
-	p2.set_multiplayer_authority(Global.multiplayerIds[2])
-#	p2.set_multiplayer_authority(multiplayer.get_unique_id())
-	
-	p2.connect("dead", _on_player_2_dead)
-#	if Global.player1Active:
-#		$Player1.add_to_group("activePlayers")
-#		$Player1.add_to_group("alivePlayers")
-#		$Player1/HeadSprite.modulate = Global.player1Color
-#	else:
-#		$Player1.queue_free()
-#	if Global.player2Active:
-#		$Player2.add_to_group("activePlayers")
-#		$Player2.add_to_group("alivePlayers")
-#		$Player2/HeadSprite.modulate = Global.player2Color
-#	else:
-#		$Player2.queue_free()
-#	if Global.player3Active:
-#		$Player3.add_to_group("activePlayers")
-#		$Player3.add_to_group("alivePlayers")
-#		$Player3/HeadSprite.modulate = Global.player3Color
-#	else:
-#		$Player3.queue_free()
-#	if Global.player4Active:
-#		$Player4.add_to_group("activePlayers")
-#		$Player4.add_to_group("alivePlayers")
-#		$Player4/HeadSprite.modulate = Global.player4Color
-#	else:
-#		$Player4.queue_free()
+#@rpc
+#func spawn_p1():
+#	p1 = playerScene.instantiate()
+#	p1.name = "Player1"
+#	p1.position = Vector2(400,400)
+#	p1.playerId = 1
 #
-#	for player in get_tree().get_nodes_in_group("activePlayers"):
-#		for child in player.get_children():
-#			if child is Timer:
-#				timers.append(child)
-#		player.show()
+#	add_child(p1,true)
+#	p1.set_multiplayer_authority(1)
+#
+#	p1.connect("dead", _on_player_1_dead)
+#
+#
+#
+#@rpc
+#func spawn_p2():
+#	p2 = playerScene.instantiate()
+#	p2.name = "Player2"
+#	p2.position = Vector2(500,500)
+#	p2.playerId = 2
+##	var test = Global.multiplayerIds[2]
+#	add_child(p2, true)
+#	p2.set_multiplayer_authority(Global.multiplayerIds[2])
+##	p2.set_multiplayer_authority(multiplayer.get_unique_id())
+#
+#	p2.connect("dead", _on_player_2_dead)
+##	if Global.player1Active:
+##		$Player1.add_to_group("activePlayers")
+##		$Player1.add_to_group("alivePlayers")
+##		$Player1/HeadSprite.modulate = Global.player1Color
+##	else:
+##		$Player1.queue_free()
+##	if Global.player2Active:
+##		$Player2.add_to_group("activePlayers")
+##		$Player2.add_to_group("alivePlayers")
+##		$Player2/HeadSprite.modulate = Global.player2Color
+##	else:
+##		$Player2.queue_free()
+##	if Global.player3Active:
+##		$Player3.add_to_group("activePlayers")
+##		$Player3.add_to_group("alivePlayers")
+##		$Player3/HeadSprite.modulate = Global.player3Color
+##	else:
+##		$Player3.queue_free()
+##	if Global.player4Active:
+##		$Player4.add_to_group("activePlayers")
+##		$Player4.add_to_group("alivePlayers")
+##		$Player4/HeadSprite.modulate = Global.player4Color
+##	else:
+##		$Player4.queue_free()
+##
+##	for player in get_tree().get_nodes_in_group("activePlayers"):
+##		for child in player.get_children():
+##			if child is Timer:
+##				timers.append(child)
+##		player.show()
 
 
 
@@ -122,8 +124,16 @@ func restart():
 #		player.set_process(false)
 	
 	await(get_tree().create_timer(2.0).timeout)
-	emit_signal("restartNotice")
-#	get_tree().reload_current_scene()
+	reboot.rpc()
+#	
+
+@rpc("any_peer","call_local")
+func reboot():
+	var scene = nextRound.instantiate()
+	get_tree().root.add_child(scene)
+#	scene.connect("restartNotice", reboot.bind(scene))
+	self.queue_free()
+	pass
 
 func _process(_delta):
 	if Global.isMultiplayerActive:

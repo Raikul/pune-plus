@@ -29,19 +29,16 @@ func _on_player_setup_go():
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 	pass # Replace with function body.
 
-
 func _on_player_setup_back():
 	$CanvasLayer/PlayerSetup.hide()
 	$CanvasLayer/TopMenu.show()
 	$CanvasLayer/Modifiers.hide()
 	pass # Replace with function body.
 
-
 func _on_multiplayer_pressed():
 #	get_tree().change_scene_to_file("res://scenes/MultiPlayground.tscn")
 	get_tree().change_scene_to_file("res://scenes/multiplayer_setup.tscn")
 	pass # Replace with function body.
-
 
 func _on_change_log_button_pressed():
 	var details = $CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer

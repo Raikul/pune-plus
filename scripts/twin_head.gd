@@ -10,9 +10,9 @@ var alive = true
 var collider
 
 signal dead
+signal twinScore
 
 @export var snakeBodyScene : PackedScene
-#var syncGapTimer
 
 func _ready():
 	add_to_group("twinHeads")
@@ -27,9 +27,9 @@ func _ready():
 
 func _process(delta):
 	var direction = 0
-	if Input.is_key_pressed(KEY_KP_4):
+	if Input.is_action_pressed("Player4Left"):
 		direction = 1
-	if Input.is_key_pressed(KEY_KP_6):
+	if Input.is_action_pressed("Player4Right"):
 		direction = -1
 	
 	rotation += angular_speed * direction * delta
@@ -38,12 +38,6 @@ func _process(delta):
 	position += velocity * delta
 	position.x = clamp(position.x, 0, screen_size.x)
 	position.y = clamp(position.y, 0, screen_size.y)
-	
-#	if (position.x == 0 
-#	or position.x == screen_size.x 
-#	or position.y == colorRect.position.y * colorRect.scale.y	
-#	or position.y == screen_size.y):
-#		_on_area_entered(null)
 
 func _on_gapTimer_timeout():
 	gap = not gap
@@ -76,13 +70,17 @@ func _on_bodyTimer_timeout():
 #	return snakeBody
 	
 func _on_area_entered(area):
+	if area is Shroom:
+		get_parent().emit_signal("score")
+		area.queue_free()
+	else:
 #	if area.playerId == null or area.playerId != 4:
-	if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
-#		if area.is_in_group("activePlayers"):
-		$CollisionShape2D.set_deferred("disabled", true)
-		alive = false
-		set_process(false)
-		if (!get_parent().is_in_group("alivePlayers")):
-			get_parent().emit_signal("dead")
-	pass # Replace with function body.
+		if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
+	#		if area.is_in_group("activePlayers"):
+			$CollisionShape2D.set_deferred("disabled", true)
+			alive = false
+			set_process(false)
+			if (!get_parent().is_in_group("alivePlayers")):
+				get_parent().emit_signal("dead")
+		pass # Replace with function body.
 

@@ -4,7 +4,7 @@ var scored = false
 var timers = []
 var topLimit
 var bottomLimit
-var gameEnded = true
+var gameEnded = false
 
 func _ready():
 	groupColliders()
@@ -12,7 +12,9 @@ func _ready():
 	$Events.set_space(topLimit,bottomLimit)
 	$MusicPlayer.play(Global.musicProgress)
 	Global.scoreToReach = (get_tree().get_nodes_in_group("activePlayers").size() - 1) * 10
-	Global.scoreToReach = 3
+	Global.scoreToReach = max(Global.scoreToReach, 10)
+	#debug
+#	Global.scoreToReach = 1
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
 	
 func _process(_delta):
@@ -89,6 +91,7 @@ func playerDead(player):
 		restart()
 
 func finishGame(playerId):
+	stopTime()
 	gameEnded = true
 	$Lesson.improvise("Player "+str(playerId)+" Wins")
 	$Lesson.show()
@@ -113,22 +116,22 @@ func restart():
 	
 func _on_player_1_score():
 	Global.player1Score += 1
-	if Global.player1Score == Global.scoreToReach:
+	if Global.player1Score >= Global.scoreToReach:
 		finishGame(1)
 
 func _on_player_2_score():
 	Global.player2Score += 1
-	if Global.player2Score == Global.scoreToReach:
+	if Global.player2Score >= Global.scoreToReach:
 		finishGame(2)
 
 func _on_player_3_score():
 	Global.player3Score += 1
-	if Global.player3Score == Global.scoreToReach:
+	if Global.player3Score >= Global.scoreToReach:
 		finishGame(3)
 
 func _on_player_4_score():
 	Global.player4Score += 1
-	if Global.player1Score == Global.scoreToReach:
+	if Global.player1Score >= Global.scoreToReach:
 		finishGame(4)
 	
 func _on_pause_button_pressed():
