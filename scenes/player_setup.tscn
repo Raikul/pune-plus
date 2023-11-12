@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ccgij1ekdykeg"]
+[gd_scene load_steps=24 format=3 uid="uid://ccgij1ekdykeg"]
 
 [ext_resource type="Theme" uid="uid://dsnux54sug7ir" path="res://scenes/player_setup.tres" id="1_eccmo"]
 [ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_tbs3p"]
@@ -10,12 +10,83 @@
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_q1ijh"]
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_8clkn"]
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="8_cyflm"]
+[ext_resource type="Texture2D" uid="uid://d2idsgt8ng8nn" path="res://assets/images/elements/element_sheet_black.jpg" id="9_78rxw"]
+[ext_resource type="Texture2D" uid="uid://cbvhsxj4nn1jr" path="res://assets/images/elements/element_sheet.jpg" id="10_ntixa"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uwhrc"]
 bg_color = Color(0, 0.254902, 0.294118, 1)
 
 [sub_resource type="SystemFont" id="SystemFont_ypk85"]
 subpixel_positioning = 0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gux5s"]
+atlas = ExtResource("9_78rxw")
+region = Rect2(37, 50, 340, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cp4oj"]
+atlas = ExtResource("9_78rxw")
+region = Rect2(377, 50, 340, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vespu"]
+atlas = ExtResource("9_78rxw")
+region = Rect2(37, 370, 340, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l8b8n"]
+atlas = ExtResource("9_78rxw")
+region = Rect2(377, 370, 340, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0mof2"]
+atlas = ExtResource("10_ntixa")
+region = Rect2(0, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xwxob"]
+atlas = ExtResource("10_ntixa")
+region = Rect2(400, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xatyl"]
+atlas = ExtResource("10_ntixa")
+region = Rect2(0, 400, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8at12"]
+atlas = ExtResource("10_ntixa")
+region = Rect2(400, 400, 400, 400)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0d2cv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gux5s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cp4oj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vespu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l8b8n")
+}],
+"loop": true,
+"name": &"black",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0mof2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xwxob")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xatyl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8at12")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="PlayerSetup" type="Control"]
 layout_mode = 3
@@ -92,6 +163,7 @@ horizontal_alignment = 1
 text_overrun_behavior = 2
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
+modulate = Color(1, 0.952941, 1, 1)
 custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -263,6 +335,16 @@ layout_mode = 2
 text = "Elfduardo
 "
 horizontal_alignment = 1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
+visible = false
+modulate = Color(0.74902, 0.74902, 0.74902, 1)
+light_mask = 2
+position = Vector2(-578.202, 178.657)
+scale = Vector2(2.17176, 1.03736)
+sprite_frames = SubResource("SpriteFrames_0d2cv")
+animation = &"black"
+frame = 3
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 custom_minimum_size = Vector2(400, 300)
