@@ -14,11 +14,13 @@ signal restartNotice
 @onready var nextRound = load("res://scenes/multiplayer_playground.tscn")
 
 func _ready():
+#	if (multiplayer.is_server()):
 	var index = 0
 	for i in Global.Players:
 		var currentPlayer = playerScene.instantiate()
 		currentPlayer.playerId = index +1
 		currentPlayer.name = str(Global.Players[i].id)
+#		currentPlayer.name = "Player"+str(index + 1)
 		add_child(currentPlayer)
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
 			if spawn.name == str(index):
@@ -92,14 +94,15 @@ func playerDead(player):
 func restart():
 	for item in timers:
 		item.stop()
-#	for player in get_tree().get_nodes_in_group("activePlayers"):
-#		player.set_process(false)
+	for player in get_tree().get_nodes_in_group("activePlayers"):
+		player.set_process(false)
 	
 	await(get_tree().create_timer(2.0).timeout)
-	reboot.rpc()
+	if multiplayer.is_server():
+		reboot.rpc()
 #	
 
-@rpc("any_peer","call_local")
+@rpc("any_peer","call_local", "reliable")
 func reboot():
 	
 	var scene = nextRound.instantiate()

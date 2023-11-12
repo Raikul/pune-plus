@@ -57,7 +57,10 @@ func set_multi_id():
 #	if multiplayer.is_server():
 #		set_multiplayer_authority(Global.multiplayerIds[playerId])
 #		var pname = str(name).to_int()
+		
 		$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
+#		$MultiplayerSynchronizer.set_multiplayer_authority(Global.Players[playerId-1].id)
+#		str(Global.Players[i].id)
 #		set_multiplayer_authority(1)
 		
 func _enter_tree():

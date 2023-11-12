@@ -194,6 +194,10 @@ theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_font_sizes/font_size = 66
 text = "Pune+"
 
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="HUD"]
+_spawnable_scenes = PackedStringArray("res://scenes/multiplayer_player.tscn")
+spawn_path = NodePath("../..")
+
 [node name="PauseButton" type="Button" parent="."]
 visible = false
 visibility_layer = 3
