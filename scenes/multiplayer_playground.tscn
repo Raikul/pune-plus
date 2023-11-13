@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dtgskxntmd0nq"]
+[gd_scene load_steps=11 format=3 uid="uid://dtgskxntmd0nq"]
 
 [ext_resource type="Script" path="res://scripts/MultiPlayground.gd" id="1_m4pyh"]
 [ext_resource type="PackedScene" uid="uid://burh8oloo8j3i" path="res://scenes/multiplayer_player.tscn" id="2_2l6ji"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_htpc8"]
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_pdrv7"]
 [ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_gmff3"]
+[ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="9_ingoe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]
 size = Vector2(50.6862, 20.5537)
@@ -15,6 +16,9 @@ size = Vector2(50.6862, 20.5537)
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_m4pyh")
 playerScene = ExtResource("2_2l6ji")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("..")
 
 [node name="ColorRect3" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -194,10 +198,6 @@ theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_font_sizes/font_size = 66
 text = "Pune+"
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="HUD"]
-_spawnable_scenes = PackedStringArray("res://scenes/multiplayer_player.tscn")
-spawn_path = NodePath("../..")
-
 [node name="PauseButton" type="Button" parent="."]
 visible = false
 visibility_layer = 3
@@ -282,8 +282,26 @@ color = Color(0.419608, 0.780392, 0.67451, 1)
 
 [node name="0" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
 position = Vector2(200, 228)
+rotation = 2.46964
 
 [node name="1" type="Node2D" parent="SpawnLocation" groups=["PlayerSpawnPoint"]]
 position = Vector2(1292, 652)
+rotation = -1.28805
+
+[node name="Lesson" parent="." instance=ExtResource("9_ingoe")]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 332.0
+offset_top = 116.0
+offset_right = 332.0
+offset_bottom = 116.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
 
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
+
+[editable path="Lesson"]

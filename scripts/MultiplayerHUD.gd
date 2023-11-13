@@ -14,13 +14,13 @@ func _ready():
 
 func _process(_delta):
 	
-#	for player in get_tree().get_nodes_in_group("activePlayers"):
-		pass
-#	if Global.player1Active:
-#		label1.text = str(Global.player1Score)
-#		$Player1Cooldown.value = $"../Player1/CooldownTimer".time_left
-#	if Global.player2Active:	
-#		label2.text = str(Global.player2Score)
+	for player in get_tree().get_nodes_in_group("activePlayers"):
+	
+#		if Global.player1Active:
+			label1.text = str(Global.player1Score)
+	#		$Player1Cooldown.value = $"../Player1/CooldownTimer".time_left
+#		if Global.player2Active:	
+			label2.text = str(Global.player2Score)
 #		$Player2Cooldown.value = $"../Player2/CooldownTimer".time_left
 #	if Global.player3Active:	
 #		label3.text = str(Global.player3Score)

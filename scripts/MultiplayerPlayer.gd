@@ -22,9 +22,7 @@ var listOfNodes = []
 
 func _ready():
 	set_scale(Vector2(0.1,0.1))
-	set_multi_id()
-	
-#	snakeBodyScene = preload("res://snake_body.tscn")
+	#	snakeBodyScene = preload("res://snake_body.tscn")
 	twinHeadScene = preload("res://scenes/twin_head.tscn")
 #	colorRect = $"../Colliders/ColorRect/Collider"
 	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
@@ -37,6 +35,8 @@ func _ready():
 	$HulkTimer.add_to_group("timers", true)
 	$CooldownTimer.connect("timeout", powerReady)
 
+func _enter_tree():
+	set_multi_id()
 func _process(delta):
 #	var multiSync = $MultiplayerSynchronizer.get_multiplayer_authority()
 #	var uniqueId = multiplayer.get_unique_id()
@@ -63,8 +63,6 @@ func set_multi_id():
 #		str(Global.Players[i].id)
 #		set_multiplayer_authority(1)
 		
-func _enter_tree():
-	pass
 
 func _on_gapTimer_timeout():
 	gap = not gap

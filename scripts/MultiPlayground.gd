@@ -14,20 +14,29 @@ signal restartNotice
 @onready var nextRound = load("res://scenes/multiplayer_playground.tscn")
 
 func _ready():
+#	if multiplayer.is_server():
+		spawnplayers()
 #	if (multiplayer.is_server()):
+	
+	
+func spawnplayers():
 	var index = 0
 	for i in Global.Players:
 		var currentPlayer = playerScene.instantiate()
 		currentPlayer.playerId = index +1
 		currentPlayer.name = str(Global.Players[i].id)
 #		currentPlayer.name = "Player"+str(index + 1)
-		add_child(currentPlayer)
+		add_child(currentPlayer, true)
+		currentPlayer.add_to_group("alivePlayers")
+		currentPlayer.add_to_group("activePlayers")
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
+			spawn is Node2D
 			if spawn.name == str(index):
 				currentPlayer.global_position = spawn.global_position
+				currentPlayer.rotate(spawn.rotation)
 				if not currentPlayer.is_connected("dead", on_player_dead.bind(currentPlayer)):
 					currentPlayer.connect("dead",on_player_dead.bind(currentPlayer))
-#				currentPlayer.connect("score",on_player_scored.bind(currentPlayer))
+					currentPlayer.connect("score",on_player_scored.bind(currentPlayer))
 		index += 1		
 #				currentPlayer.playerId = index +1
 	
@@ -36,7 +45,7 @@ func on_player_dead(player):
 	
 func on_player_scored(player):
 	
-	print(Global.Players[player.playerId])
+#	print(Global.Players[player.playerId -1])
 #	get_node("a")
 	match player.playerId:
 		1:
@@ -71,18 +80,18 @@ func stopTime():
 		twinHead.set_process(false)
 	pass
 
-func _on_player_1_dead():
-	playerDead(p1)
-
-func _on_player_2_dead():
-	playerDead(p2)
-	
-func _on_player_3_dead():
-	playerDead($Player3)
-
-func _on_player_4_dead():
-	playerDead($Player4)
-	
+#func _on_player_1_dead():
+#	playerDead(p1)
+#
+#func _on_player_2_dead():
+#	playerDead(p2)
+#
+#func _on_player_3_dead():
+#	playerDead($Player3)
+#
+#func _on_player_4_dead():
+#	playerDead($Player4)
+#
 func playerDead(player):
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
@@ -96,19 +105,23 @@ func restart():
 		item.stop()
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		player.set_process(false)
-	
+		
 	await(get_tree().create_timer(2.0).timeout)
+	for player in get_tree().get_nodes_in_group("activePlayers"):
+		player.queue_free()
+	await(get_tree().create_timer(1.0).timeout)
 	if multiplayer.is_server():
 		reboot.rpc()
 #	
 
 @rpc("any_peer","call_local", "reliable")
 func reboot():
-	
-	var scene = nextRound.instantiate()
-	
-	get_tree().root.add_child(scene)
-	self.queue_free()
+#	if multiplayer.is_server():
+	spawnplayers()	
+#	var scene = nextRound.instantiate()
+#
+#	get_tree().root.add_child(scene)
+#	self.queue_free()
 #	scene.connect("restartNotice", reboot.bind(scene))
 	
 	pass
