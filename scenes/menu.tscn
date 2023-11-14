@@ -231,6 +231,7 @@ theme_override_font_sizes/font_size = 66
 text = "Play"
 
 [node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/PanelContainer/MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Multiplayer"
 
