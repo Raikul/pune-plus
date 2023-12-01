@@ -1,9 +1,10 @@
-[gd_scene load_steps=15 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=18 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
 [ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_s38hy"]
+[ext_resource type="Shader" path="res://scripts/player.gdshader" id="5_piws5"]
 [ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_wc4u4"]
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_sxw5q"]
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_fcb1c"]
@@ -12,6 +13,15 @@
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
 [ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
+[ext_resource type="Script" path="res://scripts/limit.gd" id="12_ihapt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_65hla"]
+resource_local_to_scene = true
+shader = ExtResource("5_piws5")
+shader_parameter/brighter_color = Color(1, 0.8, 0, 1)
+shader_parameter/middle_color = Color(1, 0.56, 0, 1)
+shader_parameter/darker_color = Color(1, 1, 1, 0)
+shader_parameter/spread = 0.708
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_60wp1"]
 
@@ -46,8 +56,7 @@ scale = Vector2(1.59795, 0.892334)
 color = Color(0, 0, 0, 1)
 
 [node name="Shroom" parent="." instance=ExtResource("12_erhbx")]
-visible = false
-position = Vector2(625, 433)
+position = Vector2(937, 553)
 scale = Vector2(2, 2)
 
 [node name="Lesson" parent="." instance=ExtResource("10_tlq7d")]
@@ -71,6 +80,9 @@ position = Vector2(110, 210)
 rotation = 2.1529
 scale = Vector2(0.1, 0.1)
 playerId = 1
+
+[node name="ShaderSprite" parent="Player1" index="14"]
+material = SubResource("ShaderMaterial_65hla")
 
 [node name="Player2" parent="." instance=ExtResource("2_i184r")]
 position = Vector2(1770, 877)
@@ -327,6 +339,7 @@ script = ExtResource("8_1ieds")
 [node name="Colliders" type="Node2D" parent="."]
 
 [node name="LimitTop" type="Area2D" parent="Colliders"]
+script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitTop"]
 position = Vector2(988, 65)
@@ -350,6 +363,7 @@ color = Color(0.211765, 1, 1, 1)
 
 [node name="LimitLeft" type="Area2D" parent="Colliders"]
 position = Vector2(0, 2)
+script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitLeft"]
 position = Vector2(-12, 565)
@@ -366,6 +380,7 @@ color = Color(1, 1, 0.254902, 1)
 
 [node name="LimitRight" type="Area2D" parent="Colliders"]
 position = Vector2(1920, 9)
+script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight"]
 position = Vector2(20, 453)
@@ -391,6 +406,7 @@ grow_vertical = 0
 
 [node name="LimitBottom" type="Area2D" parent="Colliders/Control"]
 position = Vector2(3, 987)
+script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/Control/LimitBottom"]
 position = Vector2(956.975, 13.4135)

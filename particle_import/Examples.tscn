@@ -1,0 +1,330 @@
+[gd_scene load_steps=42 format=3 uid="uid://d1xlb5pb8iwt4"]
+
+[ext_resource type="Texture2D" uid="uid://bflrks323b6t6" path="res://particle_import/icon.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://lkxssegi80uh" path="res://particle_import/resources/floaty_64.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://d04ucrqux78e3" path="res://particle_import/resources/offset_glow.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://kqdpu46o7vn7" path="res://particle_import/resources/random_selection.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://bob5cpccub44y" path="res://particle_import/resources/effect_4.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://cl0k516esnsd0" path="res://particle_import/resources/spotlight_8.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://cx5ne2kxrhlxt" path="res://particle_import/resources/spotlight_7.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://pewe2nee0uii" path="res://particle_import/resources/spotlight_1.png" id="8"]
+[ext_resource type="Script" path="res://particle_import/wiggle_scale.gd" id="9"]
+[ext_resource type="Script" path="res://particle_import/rotate_continuos.gd" id="10"]
+[ext_resource type="Script" path="res://particle_import/Button.gd" id="11"]
+
+[sub_resource type="CanvasItemMaterial" id="1"]
+blend_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id="2"]
+blend_mode = 1
+particles_animation = true
+particles_anim_h_frames = 7
+particles_anim_v_frames = 7
+particles_anim_loop = false
+
+[sub_resource type="Gradient" id="3"]
+offsets = PackedFloat32Array(0, 0.364621, 0.685921, 1)
+colors = PackedColorArray(0.179321, 0, 0.441406, 1, 0.530518, 0, 0.640625, 1, 0.195313, 1, 0.98114, 1, 0.863281, 1, 0.996796, 1)
+
+[sub_resource type="GradientTexture2D" id="4"]
+gradient = SubResource("3")
+
+[sub_resource type="ParticleProcessMaterial" id="5"]
+emission_shape = 1
+emission_sphere_radius = 12.0
+spread = 180.0
+gravity = Vector3(0, -100, 0)
+color_ramp = SubResource("4")
+
+[sub_resource type="CanvasItemMaterial" id="6"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="7"]
+min_value = -360.0
+max_value = 360.0
+_data = [Vector2(0, 9.81818), 0.0, 0.0, 0, 0, Vector2(1, 360), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_3jjrw"]
+curve = SubResource("7")
+
+[sub_resource type="Gradient" id="9"]
+offsets = PackedFloat32Array(0, 0.191336, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lthsk"]
+gradient = SubResource("9")
+
+[sub_resource type="Curve" id="11"]
+_data = [Vector2(0, 0.472727), 0.0, 2.25296, 0, 0, Vector2(1, 0.440909), -0.818182, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_2u1sy"]
+curve = SubResource("11")
+
+[sub_resource type="ParticleProcessMaterial" id="13"]
+emission_shape = 1
+emission_sphere_radius = 5.0
+gravity = Vector3(0, -150, 0)
+angular_velocity_curve = SubResource("CurveTexture_3jjrw")
+scale_curve = SubResource("CurveTexture_2u1sy")
+color_ramp = SubResource("GradientTexture2D_lthsk")
+
+[sub_resource type="CanvasItemMaterial" id="14"]
+blend_mode = 1
+particles_animation = true
+particles_anim_h_frames = 3
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="Gradient" id="15"]
+offsets = PackedFloat32Array(0, 0.523466, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_vv6uw"]
+gradient = SubResource("15")
+
+[sub_resource type="Curve" id="17"]
+_data = [Vector2(0, 0.463636), 0.0, 1.90083, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_frht4"]
+curve = SubResource("17")
+
+[sub_resource type="ParticleProcessMaterial" id="19"]
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_frht4")
+color_ramp = SubResource("GradientTexture2D_vv6uw")
+
+[sub_resource type="CanvasItemMaterial" id="20"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="21"]
+offsets = PackedFloat32Array(0, 0.563177, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ba08n"]
+gradient = SubResource("21")
+
+[sub_resource type="Curve" id="23"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.704545), -1.02273, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_b6u62"]
+curve = SubResource("23")
+
+[sub_resource type="ParticleProcessMaterial" id="25"]
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_b6u62")
+color_ramp = SubResource("GradientTexture2D_ba08n")
+
+[sub_resource type="Gradient" id="26"]
+offsets = PackedFloat32Array(0, 0.104693, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="27"]
+gradient = SubResource("26")
+
+[sub_resource type="Curve" id="28"]
+_data = [Vector2(0, 0), 0.0, 4.0404, 0, 0, Vector2(1, 0), -1.39147, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="29"]
+curve = SubResource("28")
+
+[sub_resource type="ParticleProcessMaterial" id="30"]
+emission_shape = 2
+emission_sphere_radius = 1.0
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("29")
+color_ramp = SubResource("27")
+
+[node name="Examples" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1024.0
+offset_bottom = 600.0
+color = Color(0, 0, 0, 1)
+script = ExtResource("11")
+
+[node name="MarginContainer" type="MarginContainer" parent="Background"]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = -85.0
+offset_right = -30.0
+offset_bottom = -30.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Textures and Effects by Raffaele Picca - Supplied as CC0 Licensed"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Background/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="tutorial" type="Button" parent="Background/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Watch the Tutorial Video"
+
+[node name="discord" type="Button" parent="Background/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Join my Discord :-)"
+
+[node name="twitter" type="Button" parent="Background/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Follow me on Twitter"
+
+[node name="Example1" type="Node2D" parent="."]
+position = Vector2(111, 300)
+
+[node name="HotChocolate" type="Sprite2D" parent="Example1"]
+scale = Vector2(2, 2)
+texture = ExtResource("1")
+
+[node name="Flare" type="Sprite2D" parent="Example1"]
+modulate = Color(0.239216, 1.0921, 2, 1)
+material = SubResource("1")
+position = Vector2(-4, -23)
+scale = Vector2(0.460937, 0.3125)
+texture = ExtResource("7")
+script = ExtResource("9")
+power = 0.01
+speed = 50.0
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Example1"]
+material = SubResource("2")
+position = Vector2(-3, -33)
+amount = 40
+process_material = SubResource("5")
+texture = ExtResource("2")
+lifetime = 1.5
+explosiveness = 0.07
+
+[node name="Example2" type="Node2D" parent="."]
+position = Vector2(287, 300)
+
+[node name="HotChocolate" type="Sprite2D" parent="Example2"]
+scale = Vector2(2, 2)
+texture = ExtResource("1")
+
+[node name="Flare" type="Sprite2D" parent="Example2"]
+modulate = Color(0.239216, 1.6, 2, 0.654902)
+material = SubResource("1")
+position = Vector2(-4, -23)
+scale = Vector2(0.460937, 0.3125)
+texture = ExtResource("7")
+script = ExtResource("9")
+power = 0.01
+speed = 50.0
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Example2"]
+modulate = Color(0.3, 1.55, 3, 1)
+material = SubResource("6")
+position = Vector2(-4, -35)
+amount = 20
+process_material = SubResource("13")
+texture = ExtResource("3")
+
+[node name="Example3" type="Node2D" parent="."]
+position = Vector2(444, 300)
+
+[node name="HotChocolate" type="Sprite2D" parent="Example3"]
+scale = Vector2(2, 2)
+texture = ExtResource("1")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Example3"]
+modulate = Color(0, 0.635294, 1, 1)
+material = SubResource("14")
+position = Vector2(-4, -4)
+amount = 6
+process_material = SubResource("19")
+texture = ExtResource("4")
+
+[node name="Example4" type="Node2D" parent="."]
+position = Vector2(650, 300)
+
+[node name="Flare" type="Sprite2D" parent="Example4"]
+modulate = Color(3, 1.3, 0.24, 1)
+material = SubResource("1")
+scale = Vector2(0.664062, 0.78125)
+texture = ExtResource("7")
+script = ExtResource("9")
+power = 0.05
+speed = 20.0
+
+[node name="HotChocolate" type="Sprite2D" parent="Example4"]
+scale = Vector2(2, 2)
+texture = ExtResource("1")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Example4"]
+modulate = Color(5.78, 1.21922, 0, 1)
+material = SubResource("20")
+position = Vector2(-7, -6)
+amount = 4
+process_material = SubResource("25")
+texture = ExtResource("5")
+
+[node name="Example5" type="Node2D" parent="."]
+position = Vector2(856, 295)
+script = ExtResource("9")
+power = 0.1
+speed = 5.0
+
+[node name="Flare" type="Sprite2D" parent="Example5"]
+modulate = Color(0.384314, 1, 0.235294, 1)
+material = SubResource("1")
+position = Vector2(-4, -3)
+scale = Vector2(0.820313, 0.539062)
+texture = ExtResource("7")
+script = ExtResource("9")
+power = 0.05
+speed = 20.0
+
+[node name="HotChocolate" type="Sprite2D" parent="Example5"]
+scale = Vector2(2, 2)
+texture = ExtResource("1")
+
+[node name="Particles2D2" type="GPUParticles2D" parent="Example5"]
+modulate = Color(0.635294, 0.74902, 0.419608, 1)
+material = SubResource("20")
+position = Vector2(-5, 0)
+amount = 5
+process_material = SubResource("30")
+texture = ExtResource("6")
+explosiveness = 0.08
+
+[node name="Flare2" type="Sprite2D" parent="Example5"]
+modulate = Color(0.384314, 1, 0.235294, 1)
+material = SubResource("1")
+position = Vector2(-4, -3)
+scale = Vector2(0.492188, 0.492188)
+texture = ExtResource("8")
+
+[node name="Flare3" type="Sprite2D" parent="Example5"]
+modulate = Color(0.384314, 1, 0.235294, 0.109804)
+material = SubResource("1")
+position = Vector2(-4, -3)
+scale = Vector2(0.632812, 0.632812)
+texture = ExtResource("5")
+script = ExtResource("10")
+speed = 10.0
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(512, 300)
+
+[connection signal="pressed" from="Background/MarginContainer/VBoxContainer/HBoxContainer/tutorial" to="Background" method="_on_tutorial_pressed"]
+[connection signal="pressed" from="Background/MarginContainer/VBoxContainer/HBoxContainer/discord" to="Background" method="_on_discord_pressed"]
+[connection signal="pressed" from="Background/MarginContainer/VBoxContainer/HBoxContainer/twitter" to="Background" method="_on_twitter_pressed"]

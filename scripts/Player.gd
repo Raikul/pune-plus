@@ -7,6 +7,8 @@ var gap = false
 var powerAvailable = true
 var colorRect
 var twinHeadInstance
+var invincible = false
+
 
 signal dead()
 signal score()
@@ -20,9 +22,10 @@ var listOfNodes = []
 @onready var bodyTimer = get_node("BodyTimer")
 @onready var gapTimer = get_node("GapTimer")
 @onready var gapFrequencyTimer = get_node("GapFrequencyTimer")
+@onready var is_water_my_friend = false
 
 func _ready():
-	
+
 #	snakeBodyScene = preload("res://snake_body.tscn")
 	twinHeadScene = preload("res://scenes/twin_head.tscn")
 #	colorRect = $"../Colliders/ColorRect/Collider"
@@ -37,11 +40,13 @@ func _ready():
 	
 	$HulkTimer.add_to_group("timers", true)
 	
-	$CooldownTimer.connect("timeout", powerReady)
-
+	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
+#	$ShaderSprite.material.set_shader_parameter("darker_color", Global.playerColors[playerId])
+#	$ShaderSprite.show()
+	
+	
 func _process(delta):
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
-		
 		var direction = 0
 		if Input.is_action_pressed("Player"+str(playerId)+"Left"):
 			direction = -1
@@ -69,7 +74,9 @@ func _on_area_entered(area):
 	if area is Shroom:
 		emit_signal("score")
 		area.queue_free()
-	else :
+	elif area.is_in_group("TwinBodies") and is_water_my_friend:
+		pass
+	elif invincible == false:
 		if listOfNodes.find(area) == -1 and area != twinHeadInstance:
 			if (twinHeadInstance == null or twinHeadInstance.alive == false):
 				$CollisionShape2D.set_deferred("disabled", true)
@@ -130,13 +137,14 @@ func hulk():
 	
 	$HeadSprite.modulate = Color.DIM_GRAY
 	$Hulk.play()
-	$CollisionShape2D.set_deferred("disabled", true)
+	invincible = true
+#	$CollisionShape2D.set_deferred("disabled", true)
 	$HulkTimer.start()
 	
 func unhulk(prevColor):
 	$HeadSprite.modulate = prevColor
-	$CollisionShape2D.set_deferred("disabled", false)
-
+#	$CollisionShape2D.set_deferred("disabled", false)
+	invincible = false
 func dash():
 	speed = speed*2
 	$Dash.play()
@@ -155,6 +163,7 @@ func shoot():
 
 func twinHead():
 	$Split.play()
+	is_water_my_friend = true
 	twinHeadInstance = createBody(twinHeadScene)
 #	twinHeadInstance.colorRect = colorRect
 	twinHeadInstance.bufferListOfNodes = listOfNodes
@@ -166,9 +175,13 @@ func twinHead():
 func powerCooldown():
 	powerAvailable = false
 	$CooldownTimer.start()
-	
-func powerReady():
+	$ShaderSprite.hide()
+func powerReady(prevColor):
 	powerAvailable = true
+#	print(Global.playerColors[playerId])
+#	$ShaderSprite.material.set_shader_parameter("darker_color", prevColor)
+#	$ShaderSprite.show()
+	$ElementHeadSprite.modulate = Color.WHITE
 
 func set_gap_size():
 	match Global.gapSize:

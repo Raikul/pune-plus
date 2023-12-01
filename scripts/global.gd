@@ -16,10 +16,10 @@ var player4Active
 
 var playerColors = [
 	"",
-	Color.BLUE_VIOLET,
-	Color.GREEN,
-	Color.ORANGE_RED,
-	Color.SKY_BLUE
+	"1ab2ff",
+	"e6bf00",
+	"ff401a",
+	"00e699"
 ]
 
 var isMultiplayerActive = false
@@ -34,3 +34,10 @@ var musicProgress = 0
 var gapSize = 1
 var shrooms = true
 var lessons = false
+
+func reset_score():
+	player1Score = 0
+	player2Score = 0
+	player3Score = 0
+	player4Score = 0
+	

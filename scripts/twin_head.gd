@@ -44,32 +44,35 @@ func _on_gapTimer_timeout():
 	
 func _on_bodyTimer_timeout():
 	if not gap:
-#		createBody(snakeBodyScene)
+		createBody(snakeBodyScene)
 		pass
 
-#func createBody(scene):
-#	var snakeBody = scene.instantiate()
-#	add_child(snakeBody)
-#	snakeBody.set_as_top_level(true)
-#	snakeBody.global_position = global_position
-#
-#	var bodySprite = snakeBody.get_node("BodySprite")
-#	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
-##		if $HeadSprite != null:
+func createBody(scene):
+	var snakeBody = scene.instantiate()
+	add_child(snakeBody)
+	snakeBody.set_as_top_level(true)
+	snakeBody.global_position = global_position
+
+	var bodySprite = snakeBody.get_node("BodySprite")
+	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
+#		if $HeadSprite != null:
 #	bodySprite.modulate = get_parent().get_node("HeadSprite").modulate
-#
-##		snakeBody.transform.scaled(transform.get_scale())
-#	snakeBody.apply_scale(transform.get_scale())
-#	snakeBody.rotation = rotation
-#
-##	$Sprite2D.set_offset(Vector2(100,100))
-#	listOfNodes.append(snakeBody)
-#
-#	if listOfNodes.size() > 4:
-#		listOfNodes.pop_front()
-#	return snakeBody
+
+#		snakeBody.transform.scaled(transform.get_scale())
+	snakeBody.apply_scale(transform.get_scale())
+	snakeBody.rotation = rotation
+
+#	$Sprite2D.set_offset(Vector2(100,100))}
+	snakeBody.add_to_group("TwinBodies")
+	snakeBody.modulate = Color.AQUA
+	listOfNodes.append(snakeBody)
+
+	if listOfNodes.size() > 4:
+		listOfNodes.pop_front()
+	return snakeBody
 	
 func _on_area_entered(area):
+	
 	if area is Shroom:
 		get_parent().emit_signal("score")
 		area.queue_free()

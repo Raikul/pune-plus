@@ -26,30 +26,35 @@ func _process(_delta):
 	
 func _on_p_1on_pressed():
 	player1Active = not player1Active
-	activatePlayer(player1Active, P1Box,Color("775193"))
+	activatePlayer(player1Active, P1Box,Color("1ab2ff"))
+#	activatePlayer(player1Active, P1Box,Color("775193"))
 	
 func _on_p_2on_pressed():
 	player2Active = not player2Active
-	activatePlayer(player2Active, P2Box, Color("aecd53"))
+	activatePlayer(player2Active, P2Box, Color("e6bf00"))
+#	activatePlayer(player2Active, P2Box, Color("aecd53"))
 	pass # Replace with function body.
 
 func _on_p_3on_pressed():
 	player3Active = not player3Active
-	activatePlayer(player3Active, P3Box, Color("e8a547"))
+	activatePlayer(player3Active, P3Box, Color("ff401a"))
+#	activatePlayer(player3Active, P3Box, Color("e8a547"))
 	pass # Replace with function body.
 
 func _on_p_4on_pressed():
 	player4Active = not player4Active
-	activatePlayer(player4Active, P4Box, Color("13c9ee"))
+	activatePlayer(player4Active, P4Box, Color("00e699"))
+#	activatePlayer(player4Active, P4Box, Color("13c9ee"))
 	pass # Replace with function body.
 
 func activatePlayer(active, playerBox, color):
+	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
 	if active:
-		playerBox.get_node("Label").modulate = color
+		labelNode.modulate = color
 		playerBox.get_node("TextureRect").modulate = color
 		playerBox.get_node("Select").text = "Deselect"
 	else :
-		playerBox.get_node("Label").modulate = Color.WHITE
+		labelNode.modulate = Color.WHITE
 		playerBox.get_node("TextureRect").modulate = Color.WHITE
 		playerBox.get_node("Select").text = "Select"
 	
@@ -67,6 +72,10 @@ func _on_go_pressed():
 	Global.player2Active = player2Active
 	Global.player3Active = player3Active
 	Global.player4Active = player4Active
+	Global.player1Score = 0
+	Global.player2Score = 0
+	Global.player3Score = 0
+	Global.player4Score = 0
 	go.emit()
 	pass # Replace with function body.
 

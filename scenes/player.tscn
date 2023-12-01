@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://cgrfababvjbd2"]
+[gd_scene load_steps=44 format=3 uid="uid://cgrfababvjbd2"]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
 [ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_6vd8h"]
@@ -9,16 +9,28 @@
 [ext_resource type="AudioStream" uid="uid://beqcha2mjaie" path="res://assets/sounds/waterpunchy.mp3" id="6_wcc6r"]
 [ext_resource type="Shader" path="res://scripts/player.gdshader" id="7_2ol4y"]
 [ext_resource type="AudioStream" uid="uid://dwl2whtbjtsfq" path="res://assets/sounds/airepunchy.mp3" id="7_fk3kw"]
+[ext_resource type="Texture2D" uid="uid://cwuko1uppu6iy" path="res://assets/jorge-resources/Gameplay scene/head.png" id="8_fkyt5"]
+[ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="9_maysg"]
+[ext_resource type="Texture2D" uid="uid://d04ucrqux78e3" path="res://particle_import/resources/offset_glow.png" id="10_2uspb"]
+[ext_resource type="Texture2D" uid="uid://bob5cpccub44y" path="res://particle_import/resources/effect_4.png" id="10_m4or2"]
+[ext_resource type="Shader" path="res://player.gdshader" id="12_rji7j"]
+[ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="13_ixvdj"]
+[ext_resource type="Texture2D" uid="uid://kqdpu46o7vn7" path="res://particle_import/resources/random_selection.png" id="14_ywoij"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
 size = Vector2(127, 121)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_cr5m4"]
+custom_solver_bias = 1.0
+radius = 120.0
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6g8nb"]
+resource_local_to_scene = true
 shader = ExtResource("7_2ol4y")
 shader_parameter/brighter_color = Color(1, 0.8, 0, 1)
 shader_parameter/middle_color = Color(1, 0.56, 0, 1)
-shader_parameter/darker_color = Color(0.64, 0.2, 0.05, 1)
-shader_parameter/spread = 0.5
+shader_parameter/darker_color = Color(1, 1, 1, 0)
+shader_parameter/spread = 0.708
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_a0fcb"]
 load_path = "res://.godot/imported/head base.png-4a77a8a3e690c7a5c840a6ec1e667c6c.ctex"
@@ -28,6 +40,94 @@ load_path = "res://.godot/imported/head color.png-5742966c439714e280dd56f450b27f
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_uvb03"]
 load_path = "res://.godot/imported/head color 2.png-2ff48ab0839b3995e346a32f219a6524.ctex"
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_2bysy"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Curve_rl7vu"]
+min_value = -360.0
+max_value = 360.0
+_data = [Vector2(0, 9.81818), 0.0, 0.0, 0, 0, Vector2(1, 360), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="8"]
+curve = SubResource("Curve_rl7vu")
+
+[sub_resource type="Gradient" id="Gradient_lj05r"]
+offsets = PackedFloat32Array(0, 0.191336, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="10"]
+gradient = SubResource("Gradient_lj05r")
+
+[sub_resource type="Curve" id="Curve_wnp52"]
+_data = [Vector2(0, 0.472727), 0.0, 2.25296, 0, 0, Vector2(1, 0.440909), -0.818182, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="12"]
+curve = SubResource("Curve_wnp52")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_3h40t"]
+emission_shape = 1
+emission_sphere_radius = 5.0
+gravity = Vector3(0, -150, 0)
+angular_velocity_curve = SubResource("8")
+scale_curve = SubResource("12")
+color_ramp = SubResource("10")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_1do8s"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_7odw0"]
+offsets = PackedFloat32Array(0, 0.563177, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="22"]
+gradient = SubResource("Gradient_7odw0")
+
+[sub_resource type="Curve" id="Curve_vstgo"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.704545), -1.02273, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="24"]
+curve = SubResource("Curve_vstgo")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cdiov"]
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("24")
+color_ramp = SubResource("22")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7101c"]
+shader = ExtResource("12_rji7j")
+shader_parameter/blue = 1.0
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_mgjku"]
+blend_mode = 1
+particles_animation = true
+particles_anim_h_frames = 3
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="Gradient" id="Gradient_0cmhm"]
+offsets = PackedFloat32Array(0, 0.523466, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="16"]
+gradient = SubResource("Gradient_0cmhm")
+
+[sub_resource type="Curve" id="Curve_0r7qa"]
+_data = [Vector2(0, 0.463636), 0.0, 1.90083, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="18"]
+curve = SubResource("Curve_0r7qa")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_jdd7u"]
+gravity = Vector3(0, 0, 0)
+scale_min = 0.2
+scale_max = 0.2
+scale_curve = SubResource("18")
+color_ramp = SubResource("16")
 
 [node name="Player" type="Area2D"]
 script = ExtResource("1_bb5nk")
@@ -51,14 +151,31 @@ stream = ExtResource("7_fk3kw")
 bus = &"Effects"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 position = Vector2(0, 3)
 shape = SubResource("RectangleShape2D_3n87r")
 
+[node name="Aura" type="CollisionShape2D" parent="."]
+visible = false
+modulate = Color(0.8, 0.8, 0, 1)
+position = Vector2(0, 3)
+shape = SubResource("CircleShape2D_cr5m4")
+disabled = true
+debug_color = Color(0.878431, 0.160784, 0.729412, 0.419608)
+
 [node name="HeadSprite" type="Sprite2D" parent="."]
-texture = ExtResource("6_tgv0f")
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("8_fkyt5")
+
+[node name="ElementHeadSprite" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+z_index = 10
+position = Vector2(-1, -18)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("9_maysg")
 
 [node name="BodyTimer" type="Timer" parent="." groups=["timers"]]
-wait_time = 0.05
+wait_time = 0.01
 autostart = true
 
 [node name="GapTimer" type="Timer" parent="." groups=["timers"]]
@@ -102,5 +219,39 @@ texture = SubResource("CompressedTexture2D_3nv3h")
 visible = false
 modulate = Color(0.207843, 0.513726, 0.454902, 1)
 texture = SubResource("CompressedTexture2D_uvb03")
+
+[node name="Flare" type="GPUParticles2D" parent="."]
+visible = false
+modulate = Color(0.3, 1.55, 3, 1)
+material = SubResource("CanvasItemMaterial_2bysy")
+position = Vector2(-7.38321, -9.5)
+scale = Vector2(0.0958025, 0.1)
+amount = 20
+process_material = SubResource("ParticleProcessMaterial_3h40t")
+texture = ExtResource("10_2uspb")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+visible = false
+modulate = Color(5.78, 1.21922, 0, 1)
+material = SubResource("CanvasItemMaterial_1do8s")
+position = Vector2(-7, -6)
+scale = Vector2(0.0958025, 0.1)
+amount = 4
+process_material = SubResource("ParticleProcessMaterial_cdiov")
+texture = ExtResource("10_m4or2")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_7101c")
+texture = ExtResource("13_ixvdj")
+
+[node name="GPUParticles2D2" type="GPUParticles2D" parent="."]
+visible = false
+modulate = Color(0, 0.635294, 1, 1)
+material = SubResource("CanvasItemMaterial_mgjku")
+position = Vector2(-4, -4)
+amount = 6
+process_material = SubResource("ParticleProcessMaterial_jdd7u")
+texture = ExtResource("14_ywoij")
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

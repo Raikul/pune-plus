@@ -11,7 +11,7 @@ func _ready():
 	screen_size = get_viewport_rect().size
 	scale = Vector2(8,8)
 #	$Meteor.rotate(rotation - PI/2)
-	$AnimationPlayer.play("launch")
+	$AnimationPlayer.play("fireball")
 #	$AnimationPlayer.rotate(rotation)
 	
 #	$Meteor.set_offset(Vector2(0,50))

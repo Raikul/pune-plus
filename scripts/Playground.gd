@@ -5,6 +5,8 @@ var timers = []
 var topLimit
 var bottomLimit
 var gameEnded = false
+var air_earth_texture :Texture= preload("res://assets/jorge-resources/Game Selection/Air-Earth symbol.png")
+var fire_water_texure :Texture= preload("res://assets/jorge-resources/Game Selection/Fire-Water symbol.png")
 
 func _ready():
 	groupColliders()
@@ -20,6 +22,11 @@ func _ready():
 func _process(_delta):
 	if Input.is_key_pressed(KEY_ESCAPE):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		
+
+func reset_match():
+	gameEnded = false
+	Global.reset_score()
 
 func groupColliders():
 #	var topCollider = $Colliders/LimitTop/Collider
@@ -43,6 +50,7 @@ func setupPlayers():
 		$Player1.add_to_group("activePlayers")
 		$Player1.add_to_group("alivePlayers")
 		$Player1/HeadSprite.modulate = Global.playerColors[1]
+		$Player1/ElementHeadSprite.set_texture(air_earth_texture)
 	else:
 		$Player1.queue_free()
 	if Global.player2Active:

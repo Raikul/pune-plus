@@ -1,4 +1,4 @@
-[gd_scene load_steps=70 format=3 uid="uid://bllc44u30oqtl"]
+[gd_scene load_steps=71 format=3 uid="uid://bllc44u30oqtl"]
 
 [ext_resource type="Script" path="res://scripts/projectile.gd" id="1_u848y"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_7bmpq"]
@@ -35,104 +35,6 @@
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wntae"]
 radius = 66.7083
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_qo2yl"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("3_bkf5x")
-}, {
-"duration": 1.0,
-"texture": ExtResource("4_jqbhe")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5_na4hp")
-}, {
-"duration": 1.0,
-"texture": ExtResource("6_ta32f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("7_tv325")
-}, {
-"duration": 1.0,
-"texture": ExtResource("8_x2hif")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9_vig6i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10_x6cw3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("11_wgcx5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("12_l7yqt")
-}, {
-"duration": 1.0,
-"texture": ExtResource("13_rhjq8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("14_wbl4b")
-}, {
-"duration": 1.0,
-"texture": ExtResource("15_33nyu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("16_cvvjd")
-}, {
-"duration": 1.0,
-"texture": ExtResource("17_lyw3n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18_ttmfm")
-}, {
-"duration": 1.0,
-"texture": ExtResource("19_iengl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("20_ctugw")
-}, {
-"duration": 1.0,
-"texture": ExtResource("21_wsj38")
-}, {
-"duration": 1.0,
-"texture": ExtResource("22_j7nkn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("23_g0jyl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("24_u03n6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25_d8bje")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26_l0yr3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27_eg1a5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28_o62ld")
-}, {
-"duration": 1.0,
-"texture": ExtResource("29_eg5ed")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30_l3bfx")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31_8gg11")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32_clbxy")
-}],
-"loop": true,
-"name": &"launch",
-"speed": 10.0
-}]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xtj8k"]
 load_path = "res://.godot/imported/img_0.png-926d3eceeadebe10645bf164a92576a4.ctex"
@@ -325,6 +227,35 @@ animations = [{
 [sub_resource type="Animation" id="Animation_2lo0s"]
 length = 0.001
 
+[sub_resource type="Animation" id="Animation_n47w4"]
+resource_name = "fireball"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:animation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": ["fireball"]
+}
+
 [sub_resource type="Animation" id="Animation_h0gjr"]
 length = 0.63
 loop_mode = 1
@@ -360,9 +291,108 @@ length = 3.0
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_cgiuf"]
 _data = {
 "RESET": SubResource("Animation_2lo0s"),
+"fireball": SubResource("Animation_n47w4"),
 "launch": SubResource("Animation_h0gjr"),
 "meteor": SubResource("Animation_4qqq1")
 }
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3ofob"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_bkf5x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jqbhe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_na4hp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ta32f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_tv325")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_x2hif")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_vig6i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_x6cw3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_wgcx5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_l7yqt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_rhjq8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_wbl4b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_33nyu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_cvvjd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_lyw3n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ttmfm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_iengl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_ctugw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_wsj38")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_j7nkn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_g0jyl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_u03n6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_d8bje")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_l0yr3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_eg1a5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_o62ld")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_eg5ed")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_l3bfx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_8gg11")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_clbxy")
+}],
+"loop": true,
+"name": &"fireball",
+"speed": 10.0
+}]
 
 [node name="Projectile" type="Area2D"]
 scale = Vector2(5, 5)
@@ -376,13 +406,8 @@ shape = SubResource("CircleShape2D_wntae")
 visible = false
 texture = ExtResource("2_7bmpq")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-visible = false
-position = Vector2(-52.4, -18.8)
-sprite_frames = SubResource("SpriteFrames_qo2yl")
-animation = &"launch"
-
 [node name="Meteor" type="AnimatedSprite2D" parent="."]
+visible = false
 position = Vector2(-18.8, 91.4)
 rotation = 4.71239
 scale = Vector2(1.72, 1.457)
@@ -393,5 +418,12 @@ animation = &"launch"
 libraries = {
 "": SubResource("AnimationLibrary_cgiuf")
 }
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-16.2, 54.2)
+rotation = 4.71239
+sprite_frames = SubResource("SpriteFrames_3ofob")
+animation = &"fireball"
+frame = 13
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]
