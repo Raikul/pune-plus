@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://cgrfababvjbd2"]
+[gd_scene load_steps=45 format=3 uid="uid://cgrfababvjbd2"]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
 [ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_6vd8h"]
@@ -16,6 +16,7 @@
 [ext_resource type="Shader" path="res://player.gdshader" id="12_rji7j"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="13_ixvdj"]
 [ext_resource type="Texture2D" uid="uid://kqdpu46o7vn7" path="res://particle_import/resources/random_selection.png" id="14_ywoij"]
+[ext_resource type="PackedScene" uid="uid://sn4iiintepsd" path="res://scenes/raycaster.tscn" id="17_87d3g"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
 size = Vector2(127, 121)
@@ -130,6 +131,7 @@ scale_curve = SubResource("18")
 color_ramp = SubResource("16")
 
 [node name="Player" type="Area2D"]
+collision_mask = 3
 script = ExtResource("1_bb5nk")
 snakeBodyScene = ExtResource("2_6vd8h")
 projectileScene = ExtResource("3_6cibx")
@@ -254,4 +256,8 @@ amount = 6
 process_material = SubResource("ParticleProcessMaterial_jdd7u")
 texture = ExtResource("14_ywoij")
 
+[node name="Raycaster" parent="." instance=ExtResource("17_87d3g")]
+
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]
+
+[editable path="Raycaster"]

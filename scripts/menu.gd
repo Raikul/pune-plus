@@ -5,7 +5,7 @@ func _ready():
 	
 	Options = $CanvasLayer/Options
 	Options.hide()
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 	pass
 

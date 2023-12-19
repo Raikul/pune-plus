@@ -391,7 +391,7 @@ offset_bottom = 27.0
 color = Color(1, 1, 0.254902, 1)
 
 [node name="LimitRight" type="Area2D" parent="Colliders"]
-position = Vector2(1920, 9)
+position = Vector2(1919, 9)
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight"]
@@ -404,7 +404,7 @@ shape = SubResource("RectangleShape2D_c1ycn")
 light_mask = 4
 visibility_layer = 4
 offset_right = 40.0
-offset_bottom = 27.0
+offset_bottom = 1131.0
 color = Color(1, 1, 0.254902, 1)
 
 [node name="Control" type="Control" parent="Colliders"]
@@ -417,25 +417,27 @@ grow_horizontal = 2
 grow_vertical = 0
 
 [node name="LimitBottom" type="Area2D" parent="Colliders/Control"]
-position = Vector2(3, 987)
+modulate = Color(0.478431, 1, 1, 1)
+position = Vector2(4, 1081)
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/Control/LimitBottom"]
-position = Vector2(972, 77)
+position = Vector2(977, 0)
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
 [node name="ColorRect" type="ColorRect" parent="Colliders/Control/LimitBottom"]
+modulate = Color(0.431373, 1, 0.431373, 1)
 light_mask = 4
 visibility_layer = 4
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -4.0
-offset_top = 71.0
-offset_right = 1916.0
-offset_bottom = 151.0
+offset_left = -10.0
+offset_top = -9.0
+offset_right = 1910.0
+offset_bottom = 71.0
 grow_horizontal = 2
 grow_vertical = 0
 color = Color(0.203922, 0.207843, 0.203922, 0.980392)
@@ -465,3 +467,4 @@ wait_time = 3.0
 
 [editable path="Lesson"]
 [editable path="Player1"]
+[editable path="Player1/Raycaster"]

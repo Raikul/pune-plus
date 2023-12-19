@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://ddeb28qs6q5po"]
+[gd_scene load_steps=7 format=3 uid="uid://ddeb28qs6q5po"]
 
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="1_2hwot"]
 [ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_ewdxf"]
@@ -17,9 +17,6 @@ corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
-
-[sub_resource type="Environment" id="Environment_7vceb"]
-glow_enabled = true
 
 [node name="2" type="VBoxContainer"]
 offset_right = 287.0
@@ -146,6 +143,3 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "Select"
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_7vceb")

@@ -48,9 +48,9 @@ func _ready():
 func _process(delta):
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
 		var direction = 0
-		if Input.is_action_pressed("Player"+str(playerId)+"Left"):
+		if Input.is_action_pressed("Player"+str(playerId)+"Left") or $Raycaster.return_steering() == "Left":
 			direction = -1
-		if Input.is_action_pressed("Player"+str(playerId)+"Right"):
+		if Input.is_action_pressed("Player"+str(playerId)+"Right") or $Raycaster.return_steering() == "Right":
 			direction = 1
 				
 		rotation += angular_speed * direction * delta

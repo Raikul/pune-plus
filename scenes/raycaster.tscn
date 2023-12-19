@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://sn4iiintepsd"]
+
+[ext_resource type="Script" path="res://scripts/raycaster.gd" id="1_o7ooo"]
+
+[node name="Raycaster" type="Node2D"]
+script = ExtResource("1_o7ooo")
+
+[node name="Down" type="RayCast2D" parent="."]
+target_position = Vector2(0, 500)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="Right" type="RayCast2D" parent="."]
+target_position = Vector2(500, 0)
+collide_with_areas = true
+
+[node name="Left" type="RayCast2D" parent="."]
+target_position = Vector2(-500, 0)
+collide_with_areas = true
+
+[node name="Up" type="RayCast2D" parent="."]
+target_position = Vector2(0, -1000)
+collide_with_areas = true
+
+[node name="UpLeft" type="RayCast2D" parent="."]
+target_position = Vector2(-700, -700)
+collide_with_areas = true
+
+[node name="UpLeft2" type="RayCast2D" parent="."]
+target_position = Vector2(-300, -1000)
+collide_with_areas = true
+
+[node name="UpLeft3" type="RayCast2D" parent="."]
+target_position = Vector2(-1000, -500)
+collide_with_areas = true
+
+[node name="UpRight" type="RayCast2D" parent="."]
+target_position = Vector2(700, -700)
+collide_with_areas = true
+
+[node name="UpRight2" type="RayCast2D" parent="."]
+target_position = Vector2(300, -1000)
+collide_with_areas = true
+
+[node name="UpRight3" type="RayCast2D" parent="."]
+target_position = Vector2(1000, -500)
+collide_with_areas = true
+
+[node name="DownLeft" type="RayCast2D" parent="."]
+target_position = Vector2(-500, 500)
+collide_with_areas = true
+
+[node name="DownRight" type="RayCast2D" parent="."]
+target_position = Vector2(500, 500)
+collide_with_areas = true
