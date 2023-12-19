@@ -16,9 +16,9 @@ var player4Active
 
 var playerColors = [
 	"",
-	"1ab2ff",
-	"e6bf00",
 	"ff401a",
+	"e6bf00",
+	"1ab2ff",
 	"00e699"
 ]
 

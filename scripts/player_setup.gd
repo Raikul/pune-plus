@@ -19,44 +19,51 @@ func _ready():
 	P2Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"
 	P3Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"
 	P4Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"
+	
 	pass
+
+func recalculate_all_labels():
+	_on_redefine_keys_recalculate_labels(1)
+	_on_redefine_keys_recalculate_labels(2)
+	_on_redefine_keys_recalculate_labels(3)
+	_on_redefine_keys_recalculate_labels(4)
 
 func _process(_delta):
 	pass
 	
 func _on_p_1on_pressed():
 	player1Active = not player1Active
-	activatePlayer(player1Active, P1Box,Color("1ab2ff"))
-#	activatePlayer(player1Active, P1Box,Color("775193"))
+	activatePlayer(player1Active, P1Box, Global.playerColors[1])
+#	activatePlayer(player1Active, P1Box,Color("1ab2ff"))
 	
 func _on_p_2on_pressed():
 	player2Active = not player2Active
-	activatePlayer(player2Active, P2Box, Color("e6bf00"))
+	activatePlayer(player2Active, P2Box, Global.playerColors[2])
 #	activatePlayer(player2Active, P2Box, Color("aecd53"))
 	pass # Replace with function body.
 
 func _on_p_3on_pressed():
 	player3Active = not player3Active
-	activatePlayer(player3Active, P3Box, Color("ff401a"))
+	activatePlayer(player3Active, P3Box, Global.playerColors[3])
 #	activatePlayer(player3Active, P3Box, Color("e8a547"))
 	pass # Replace with function body.
 
 func _on_p_4on_pressed():
 	player4Active = not player4Active
-	activatePlayer(player4Active, P4Box, Color("00e699"))
+	activatePlayer(player4Active, P4Box, Global.playerColors[4])
 #	activatePlayer(player4Active, P4Box, Color("13c9ee"))
 	pass # Replace with function body.
 
 func activatePlayer(active, playerBox, color):
-	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
+#	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
 	if active:
-		labelNode.modulate = color
-		playerBox.get_node("TextureRect").modulate = color
-		playerBox.get_node("Select").text = "Deselect"
+		playerBox.modulate = color
+#		playerBox.get_node("TextureRect").modulate = color
+		playerBox.get_node("VBoxContainer/Select").text = "Deselect"
 	else :
-		labelNode.modulate = Color.WHITE
-		playerBox.get_node("TextureRect").modulate = Color.WHITE
-		playerBox.get_node("Select").text = "Select"
+		playerBox.modulate = Color.WHITE
+#		playerBox.get_node("TextureRect").modulate = Color.WHITE
+		playerBox.get_node("VBoxContainer/Select").text = "Select"
 	
 func _on_color_picker_color_changed(color):
 	P4Box.get_node("Label").modulate = color
@@ -140,15 +147,21 @@ func setKeys(playerId, control):
 	var playerBoxes = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer as HBoxContainer
 	var inputList = playerBoxes.get_node(str(playerId)).get_node("InputList")
 	var text = ""
+	var label
+	
 	for i in InputMap.action_get_events("Player"+str(playerId)+control):
 		if text != "":
 			text += " / "
 		text +=  i.as_text().rstrip("(Physical)")
-	var label = inputList.get_node(control)
+		
+	if control == "Up":
+		label =  inputList.get_node(control).get_node("MarginContainer/PanelContainer").get_node(control)
+	else: label = inputList.get_node(control).get_node(control)
+	
 	var string_size = label.get_theme_font("font") \
 	.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
 #	print(string_size)
-	inputList.get_node(control).set_text(text)
+	label.set_text(text)
 	string_size = label.get_theme_font("font") \
 	.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size"))
 #	print(string_size)

@@ -1,0 +1,151 @@
+[gd_scene load_steps=8 format=3 uid="uid://ddeb28qs6q5po"]
+
+[ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="1_2hwot"]
+[ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_ewdxf"]
+[ext_resource type="Texture2D" uid="uid://dmsqtc8qu7bex" path="res://assets/jorge-resources/Game Selection/direction icon.png" id="3_r30wu"]
+[ext_resource type="Texture2D" uid="uid://dw8r050npvyqp" path="res://assets/jorge-resources/Game Selection/punchi icon.png" id="4_2ld1l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p03ea"]
+bg_color = Color(0.364706, 0.364706, 0.364706, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_20r6i"]
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="Environment" id="Environment_7vceb"]
+glow_enabled = true
+
+[node name="2" type="VBoxContainer"]
+offset_right = 287.0
+offset_bottom = 756.0
+theme = ExtResource("1_ewdxf")
+
+[node name="PanelContainer2" type="PanelContainer" parent="."]
+layout_mode = 2
+
+[node name="PanelContainer" type="VBoxContainer" parent="PanelContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer2/PanelContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer2/PanelContainer/MarginContainer2"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p03ea")
+
+[node name="ColorRect" type="ColorRect" parent="PanelContainer2/PanelContainer/MarginContainer2/PanelContainer"]
+visible = false
+layout_mode = 2
+color = Color(0.4, 0.4, 0.4, 1)
+
+[node name="Label" type="Label" parent="PanelContainer2/PanelContainer/MarginContainer2/PanelContainer"]
+layout_mode = 2
+text = "EARTH
+"
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer2/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 35
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 35
+theme_override_constants/margin_bottom = 70
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer2/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("1_2hwot")
+expand_mode = 3
+stretch_mode = 5
+flip_v = true
+
+[node name="InputList" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Left" type="PanelContainer" parent="InputList"]
+layout_mode = 2
+
+[node name="Left" type="Label" parent="InputList/Left"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Left"
+horizontal_alignment = 1
+
+[node name="LeftSprite" type="Sprite2D" parent="InputList/Left"]
+position = Vector2(44, 28)
+rotation = -3.14159
+scale = Vector2(0.483333, 0.483333)
+texture = ExtResource("3_r30wu")
+
+[node name="Right" type="PanelContainer" parent="InputList"]
+layout_mode = 2
+
+[node name="RightSprite" type="Sprite2D" parent="InputList/Right"]
+position = Vector2(45, 29)
+scale = Vector2(0.483333, 0.483333)
+texture = ExtResource("3_r30wu")
+
+[node name="Right" type="Label" parent="InputList/Right"]
+layout_mode = 2
+text = "Right"
+horizontal_alignment = 1
+
+[node name="Up" type="PanelContainer" parent="InputList"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="InputList/Up"]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="InputList/Up/MarginContainer"]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_20r6i")
+
+[node name="Up" type="Label" parent="InputList/Up/MarginContainer/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "I"
+horizontal_alignment = 1
+
+[node name="PunchySprite" type="Sprite2D" parent="InputList/Up"]
+position = Vector2(47, 29)
+scale = Vector2(0.42848, 0.42848)
+texture = ExtResource("4_2ld1l")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Redefine" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 25
+text = "Redefine Keys
+"
+
+[node name="Select" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "Select"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_7vceb")

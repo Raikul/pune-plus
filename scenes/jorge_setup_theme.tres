@@ -1,17 +1,17 @@
 [gd_resource type="Theme" load_steps=3 format=3 uid="uid://42hs2qutn4w3"]
 
 [ext_resource type="FontFile" uid="uid://clssrksqo8xbc" path="res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf" id="1_ohmmk"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xdix2"]
-bg_color = Color(0.294118, 0.294118, 0.294118, 1)
-corner_radius_top_left = 15
-corner_radius_top_right = 15
-corner_radius_bottom_right = 15
-corner_radius_bottom_left = 15
+[ext_resource type="StyleBox" uid="uid://br277ofo8bvap" path="res://gray_rounded_rect_stylebox.tres" id="2_2vp2r"]
 
 [resource]
 Button/font_sizes/font_size = 44
 Button/fonts/font = ExtResource("1_ohmmk")
-Button/styles/normal = SubResource("StyleBoxFlat_xdix2")
-Label/font_sizes/font_size = 66
+Button/styles/normal = ExtResource("2_2vp2r")
+Label/font_sizes/font_size = 44
 Label/fonts/font = ExtResource("1_ohmmk")
+MarginContainer/constants/margin_bottom = 15
+MarginContainer/constants/margin_left = 15
+MarginContainer/constants/margin_right = 15
+MarginContainer/constants/margin_top = 15
+PanelContainer/styles/panel = ExtResource("2_2vp2r")
+VBoxContainer/constants/separation = 50

@@ -13,6 +13,7 @@ func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()
 	$CanvasLayer/TopMenu.hide()
 	$CanvasLayer/Modifiers.show()
+	$CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup.recalculate_all_labels()
 
 func _on_options_pressed():
 	Options.show()

@@ -1,0 +1,178 @@
+[gd_scene load_steps=14 format=3 uid="uid://rr63k4v7eon5"]
+
+[ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_ea6y1"]
+[ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_p78t2"]
+[ext_resource type="PackedScene" uid="uid://dflkv4we1oqbs" path="res://scenes/redefine_keys.tscn" id="3_bkfac"]
+[ext_resource type="Script" path="res://scripts/redefine_keys.gd" id="4_157ca"]
+[ext_resource type="PackedScene" uid="uid://ddeb28qs6q5po" path="res://scenes/individual_player_setup.tscn" id="5_gg1ju"]
+[ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="6_gh44p"]
+[ext_resource type="Texture2D" uid="uid://bqb0rtmryfpj5" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png" id="7_rx1cs"]
+[ext_resource type="Theme" uid="uid://buk604ocwocj3" path="res://jorge_theme.tres" id="7_tjh4d"]
+[ext_resource type="FontFile" uid="uid://cgb4gpxrb04bo" path="res://assets/jorge-resources/Starting Screen/Aristotelica Display DemiBold Trial.ttf" id="8_dik6d"]
+[ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="8_lif5f"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uwhrc"]
+bg_color = Color(0, 0.254902, 0.294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mg38i"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="Theme" id="Theme_7avap"]
+Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
+Button/font_sizes/font_size = 66
+Button/fonts/font = ExtResource("8_dik6d")
+Label/font_sizes/font_size = 66
+Label/fonts/font = ExtResource("8_dik6d")
+
+[node name="PlayerSetup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1920.0
+offset_bottom = -1080.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("1_ea6y1")
+script = ExtResource("2_p78t2")
+
+[node name="RedefineKeys" parent="." instance=ExtResource("3_bkfac")]
+visible = false
+z_index = 5
+layout_mode = 2
+offset_bottom = 440.0
+size_flags_horizontal = 0
+script = ExtResource("4_157ca")
+
+[node name="PanelContainer" parent="RedefineKeys" index="0"]
+offset_left = 40.0
+offset_top = 2.0
+offset_right = 652.0
+offset_bottom = 445.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uwhrc")
+
+[node name="PlayerName" parent="RedefineKeys/PanelContainer/HBoxContainer" index="0"]
+visible = false
+theme_override_colors/font_color = Color(1, 0.380392, 0, 1)
+
+[node name="Instructions" parent="RedefineKeys/PanelContainer/HBoxContainer" index="1"]
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Key" parent="RedefineKeys/PanelContainer/HBoxContainer" index="2"]
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 301.0
+offset_top = 18.0
+offset_right = 1659.0
+offset_bottom = 1068.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mg38i")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="1" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
+layout_mode = 2
+
+[node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
+text = "FIRE
+"
+
+[node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/PanelContainer2/PanelContainer/MarginContainer" index="0"]
+modulate = Color(1, 0.25098, 0.101961, 1)
+texture = ExtResource("6_gh44p")
+flip_v = false
+
+[node name="2" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
+layout_mode = 2
+
+[node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/PanelContainer2/PanelContainer/MarginContainer" index="0"]
+modulate = Color(0.901961, 0.74902, 0, 1)
+texture = ExtResource("7_rx1cs")
+flip_v = false
+
+[node name="3" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
+layout_mode = 2
+
+[node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
+text = "AIR
+"
+
+[node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/PanelContainer2/PanelContainer/MarginContainer" index="0"]
+modulate = Color(0.101961, 0.698039, 1, 1)
+flip_v = false
+
+[node name="4" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
+layout_mode = 2
+
+[node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
+text = "WATER
+"
+
+[node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/PanelContainer2/PanelContainer/MarginContainer" index="0"]
+modulate = Color(0, 0.901961, 0.6, 1)
+texture = ExtResource("8_lif5f")
+flip_v = false
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="PanelContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GO" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+theme = ExtResource("7_tjh4d")
+text = "Play"
+flat = true
+
+[node name="Back" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+theme = SubResource("Theme_7avap")
+theme_override_font_sizes/font_size = 66
+text = "Back"
+flat = true
+
+[connection signal="recalculateLabels" from="RedefineKeys" to="." method="_on_redefine_keys_recalculate_labels"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/VBoxContainer/Redefine" to="." method="_on_redefine_1_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/VBoxContainer/Select" to="." method="_on_p_1on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer/Redefine" to="." method="_on_redefine_2_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/VBoxContainer/Select" to="." method="_on_p_2on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/VBoxContainer/Redefine" to="." method="_on_redefine_3_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/VBoxContainer/Select" to="." method="_on_p_3on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/VBoxContainer/Redefine" to="." method="_on_redefine_4_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/VBoxContainer/Select" to="." method="_on_p_4on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/PanelContainer/GO" to="." method="_on_go_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/PanelContainer/Back" to="." method="_on_back_pressed"]
+
+[editable path="RedefineKeys"]
+[editable path="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
+[editable path="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
+[editable path="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"]
+[editable path="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]

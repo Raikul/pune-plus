@@ -115,7 +115,8 @@ func _input(event):
 	if powerAvailable:
 		if playerId == 1:
 			if event.is_action_pressed("Player1Up"):
-				dash()	
+				shoot()		
+				
 				powerCooldown()
 				
 		if playerId == 2:
@@ -125,7 +126,7 @@ func _input(event):
 		
 		if playerId == 3:
 			if event.is_action_pressed("Player3Up"):
-				shoot()		
+				dash()
 				powerCooldown()
 				
 		if playerId == 4:

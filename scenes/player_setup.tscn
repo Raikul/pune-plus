@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://ccgij1ekdykeg"]
+[gd_scene load_steps=12 format=3 uid="uid://ccgij1ekdykeg"]
 
 [ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_t3re1"]
 [ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_tbs3p"]
@@ -6,94 +6,25 @@
 [ext_resource type="Script" path="res://scripts/redefine_keys.gd" id="4_idam3"]
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="5_l25by"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="6_b0o1t"]
-[ext_resource type="Texture2D" uid="uid://d2idsgt8ng8nn" path="res://assets/images/elements/element_sheet_black.jpg" id="9_78rxw"]
-[ext_resource type="Theme" uid="uid://buk604ocwocj3" path="res://jorge_theme.tres" id="9_buaqq"]
-[ext_resource type="Texture2D" uid="uid://cbvhsxj4nn1jr" path="res://assets/images/elements/element_sheet.jpg" id="10_ntixa"]
+[ext_resource type="PackedScene" uid="uid://ddeb28qs6q5po" path="res://scenes/individual_player_setup.tscn" id="6_q8i7n"]
+[ext_resource type="FontFile" uid="uid://cgb4gpxrb04bo" path="res://assets/jorge-resources/Starting Screen/Aristotelica Display DemiBold Trial.ttf" id="8_deln0"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uwhrc"]
 bg_color = Color(0, 0.254902, 0.294118, 1)
 
-[sub_resource type="SystemFont" id="SystemFont_ypk85"]
-subpixel_positioning = 0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mg38i"]
+bg_color = Color(0, 0.00392157, 0, 1)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_gux5s"]
-atlas = ExtResource("9_78rxw")
-region = Rect2(37, 50, 340, 320)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cp4oj"]
-atlas = ExtResource("9_78rxw")
-region = Rect2(377, 50, 340, 320)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vespu"]
-atlas = ExtResource("9_78rxw")
-region = Rect2(37, 370, 340, 320)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_l8b8n"]
-atlas = ExtResource("9_78rxw")
-region = Rect2(377, 370, 340, 320)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0mof2"]
-atlas = ExtResource("10_ntixa")
-region = Rect2(0, 0, 400, 400)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xwxob"]
-atlas = ExtResource("10_ntixa")
-region = Rect2(400, 0, 400, 400)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xatyl"]
-atlas = ExtResource("10_ntixa")
-region = Rect2(0, 400, 400, 400)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_8at12"]
-atlas = ExtResource("10_ntixa")
-region = Rect2(400, 400, 400, 400)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_0d2cv"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_gux5s")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_cp4oj")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vespu")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_l8b8n")
-}],
-"loop": true,
-"name": &"black",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_0mof2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xwxob")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xatyl")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_8at12")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}]
+[sub_resource type="Theme" id="Theme_7avap"]
+Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
+Button/font_sizes/font_size = 66
+Button/fonts/font = ExtResource("8_deln0")
+Label/font_sizes/font_size = 66
+Label/fonts/font = ExtResource("8_deln0")
 
 [node name="PlayerSetup" type="Control"]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
+anchors_preset = 0
 theme = ExtResource("1_t3re1")
 script = ExtResource("2_tbs3p")
 
@@ -125,9 +56,9 @@ theme_override_colors/font_color = Color(1, 0, 0, 1)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 0
-offset_right = 1700.0
-offset_bottom = 478.0
-scale = Vector2(0.420479, 0.598997)
+offset_right = 1663.0
+offset_bottom = 1387.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_mg38i")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
@@ -149,6 +80,7 @@ alignment = 1
 [node name="1" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_constants/separation = 15
 
 [node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"]
 layout_mode = 2
@@ -178,7 +110,6 @@ alignment = 1
 [node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "A"
 horizontal_alignment = 1
@@ -186,7 +117,6 @@ horizontal_alignment = 1
 [node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "D"
 horizontal_alignment = 1
@@ -195,7 +125,6 @@ vertical_alignment = 1
 [node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList"]
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "W"
 horizontal_alignment = 1
@@ -212,65 +141,8 @@ text = "Redefine Keys
 layout_mode = 2
 text = "Select"
 
-[node name="2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="2" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_q8i7n")]
 layout_mode = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
-self_modulate = Color(0.619608, 0.133333, 0.596078, 1)
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/PanelContainer"]
-layout_mode = 2
-text = "EARTH
-"
-horizontal_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
-modulate = Color(0.901961, 0.74902, 0, 1)
-custom_minimum_size = Vector2(400, 300)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
-texture = ExtResource("5_l25by")
-expand_mode = 3
-flip_v = true
-
-[node name="InputList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 3
-
-[node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
-layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
-theme_override_font_sizes/font_size = 50
-text = "Left"
-horizontal_alignment = 1
-
-[node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
-layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
-theme_override_font_sizes/font_size = 50
-text = "Right"
-horizontal_alignment = 1
-
-[node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList"]
-layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
-theme_override_font_sizes/font_size = 50
-text = "Up"
-horizontal_alignment = 1
-
-[node name="Redefine2" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Redefine Keys
-"
-
-[node name="Select" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"]
-layout_mode = 2
-text = "Select"
 
 [node name="3" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -301,21 +173,18 @@ size_flags_vertical = 3
 
 [node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "J"
 horizontal_alignment = 1
 
 [node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "K"
 horizontal_alignment = 1
 
 [node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "L"
 horizontal_alignment = 1
@@ -342,16 +211,6 @@ text = "WATER
 "
 horizontal_alignment = 1
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
-visible = false
-modulate = Color(0.74902, 0.74902, 0.74902, 1)
-light_mask = 2
-position = Vector2(-578.202, 178.657)
-scale = Vector2(2.17176, 1.03736)
-sprite_frames = SubResource("SpriteFrames_0d2cv")
-animation = &"black"
-frame = 3
-
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"]
 modulate = Color(0, 0.901961, 0.6, 1)
 custom_minimum_size = Vector2(400, 300)
@@ -370,21 +229,18 @@ size_flags_vertical = 3
 
 [node name="Left" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "KP 4"
 horizontal_alignment = 1
 
 [node name="Right" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "KP 6"
 horizontal_alignment = 1
 
 [node name="Up" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("SystemFont_ypk85")
 theme_override_font_sizes/font_size = 50
 text = "KP 8"
 horizontal_alignment = 1
@@ -409,21 +265,19 @@ alignment = 1
 
 [node name="GO" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme = ExtResource("9_buaqq")
+theme = SubResource("Theme_7avap")
 theme_override_font_sizes/font_size = 66
 text = "Play"
 
 [node name="Back" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme = ExtResource("9_buaqq")
+theme = SubResource("Theme_7avap")
 theme_override_font_sizes/font_size = 66
 text = "Back"
 
 [connection signal="recalculateLabels" from="RedefineKeys" to="." method="_on_redefine_keys_recalculate_labels"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/Redefine1" to="." method="_on_redefine_1_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/Select" to="." method="_on_p_1on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/Redefine2" to="." method="_on_redefine_2_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/Select" to="." method="_on_p_2on_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/Redefine3" to="." method="_on_redefine_3_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/Select" to="." method="_on_p_3on_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/Redefine4" to="." method="_on_redefine_4_pressed"]

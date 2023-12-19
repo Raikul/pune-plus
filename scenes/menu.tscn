@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bk2lxalhauis"]
+[gd_scene load_steps=18 format=3 uid="uid://bk2lxalhauis"]
 
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_gkmrk"]
 [ext_resource type="Script" path="res://scripts/menu.gd" id="2_5y65b"]
@@ -6,9 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://bd73ybc7rg362" path="res://scenes/options.tscn" id="3_wmb4s"]
 [ext_resource type="Theme" uid="uid://dwqb8v8x0pe3l" path="res://scenes/shrooms.tres" id="4_qxm8h"]
 [ext_resource type="PackedScene" uid="uid://ccgij1ekdykeg" path="res://scenes/player_setup.tscn" id="5_dpauy"]
-[ext_resource type="Theme" uid="uid://buk604ocwocj3" path="res://jorge_theme.tres" id="6_q5r13"]
+[ext_resource type="FontFile" uid="uid://cgb4gpxrb04bo" path="res://assets/jorge-resources/Starting Screen/Aristotelica Display DemiBold Trial.ttf" id="6_plbqb"]
 [ext_resource type="Texture2D" uid="uid://dsn85wonlj6bw" path="res://assets/jorge-resources/Starting Screen/Logo-With.png" id="7_v36xn"]
 [ext_resource type="Texture2D" uid="uid://d1fq163d2v530" path="res://assets/jorge-resources/Starting Screen/Logo-Punchis.png" id="8_kslgp"]
+[ext_resource type="PackedScene" uid="uid://rr63k4v7eon5" path="res://scenes/new_player_setup.tscn" id="10_n56o5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dagr"]
 bg_color = Color(0.815686, 0.415686, 0.858824, 1)
@@ -33,7 +34,21 @@ bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
 bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
 
+[sub_resource type="Theme" id="Theme_7avap"]
+Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
+Button/font_sizes/font_size = 66
+Button/fonts/font = ExtResource("6_plbqb")
+Label/font_sizes/font_size = 66
+Label/fonts/font = ExtResource("6_plbqb")
+
 [sub_resource type="SystemFont" id="SystemFont_xpgnv"]
+
+[sub_resource type="Environment" id="Environment_jpjj5"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 1.0
+glow_bloom = 1.0
+glow_blend_mode = 1
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -153,7 +168,7 @@ theme = ExtResource("1_gkmrk")
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
-theme = ExtResource("6_q5r13")
+theme = SubResource("Theme_7avap")
 alignment = 1
 
 [node name="ChangeLogDetailsContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
@@ -208,7 +223,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
-theme = ExtResource("6_q5r13")
+theme = SubResource("Theme_7avap")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu"]
 layout_mode = 2
@@ -271,7 +286,7 @@ horizontal_alignment = 1
 
 [node name="Play" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme = ExtResource("6_q5r13")
+theme = SubResource("Theme_7avap")
 text = "Play"
 
 [node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
@@ -297,20 +312,28 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -359.0
-offset_top = -289.0
-offset_right = -359.0
-offset_bottom = -289.0
+offset_left = -688.0
+offset_top = -396.0
+offset_right = -688.0
+offset_bottom = -396.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.7, 0.7)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/PlayerSetup"]
 layout_mode = 2
 
-[node name="PlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" instance=ExtResource("5_dpauy")]
+[node name="OldPlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" instance=ExtResource("5_dpauy")]
+visible = false
 layout_mode = 2
+
+[node name="PlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" instance=ExtResource("10_n56o5")]
+layout_mode = 2
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_jpjj5")
 
 [connection signal="toggled" from="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer/ShroomsButton" to="." method="_on_shrooms_button_toggled"]
 [connection signal="back" from="CanvasLayer/Options" to="." method="_on_options_back_button_pressed"]
@@ -319,6 +342,8 @@ layout_mode = 2
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Multiplayer" to="." method="_on_multiplayer_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/OldPlayerSetup" to="." method="_on_player_setup_back"]
+[connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/OldPlayerSetup" to="." method="_on_player_setup_go"]
 [connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
 [connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]
 

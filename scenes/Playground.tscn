@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
-[ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_s38hy"]
 [ext_resource type="Shader" path="res://scripts/player.gdshader" id="5_piws5"]
-[ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_wc4u4"]
-[ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_sxw5q"]
-[ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_fcb1c"]
+[ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="7_taa2g"]
 [ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_1ieds"]
+[ext_resource type="Texture2D" uid="uid://bqb0rtmryfpj5" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png" id="8_1tmow"]
+[ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="8_bk8re"]
 [ext_resource type="AudioStream" uid="uid://b6e4n6u30fyl8" path="res://assets/sounds/juegonicopune.mp3" id="9_hxvts"]
+[ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="10_6dk6d"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
 [ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
@@ -26,7 +26,7 @@ shader_parameter/spread = 0.708
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_60wp1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]
-size = Vector2(2422.65, 20.5537)
+size = Vector2(2503.59, 9.46942)
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_ohys2")
@@ -105,132 +105,138 @@ playerId = 4
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_ftqo5")
 
-[node name="Player1ScoreLabel" type="Label" parent="HUD"]
-offset_left = 39.0
-offset_top = 8.0
-offset_right = 119.0
-offset_bottom = 34.0
-scale = Vector2(2.59639, 2.59639)
-theme_override_colors/font_color = Color(0, 0, 0.968627, 1)
-text = "0"
+[node name="PanelContainer" type="PanelContainer" parent="HUD"]
+offset_right = 1920.0
+offset_bottom = 134.0
 
-[node name="Player2ScoreLabel" type="Label" parent="HUD"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -60.9999
-offset_top = -80.9999
-offset_right = 19.0001
-offset_bottom = -55.0
-grow_horizontal = 0
-grow_vertical = 0
-scale = Vector2(2.3898, 2.3898)
-size_flags_horizontal = 10
-theme_override_colors/font_color = Color(0.682353, 0, 0, 1)
-text = "0"
+[node name="MarginContainer" type="MarginContainer" parent="HUD/PanelContainer"]
+layout_mode = 2
 
-[node name="Player3ScoreLabel" type="Label" parent="HUD"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = -81.0
-offset_right = 120.0
-offset_bottom = -55.0
-grow_vertical = 0
-scale = Vector2(2.59639, 2.59639)
-theme_override_colors/font_color = Color(0, 0, 0.968627, 1)
-text = "0"
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(1920, 0)
+layout_mode = 2
 
-[node name="Player4ScoreLabel" type="Label" parent="HUD"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -67.9999
-offset_top = 7.0
-offset_right = 12.0001
-offset_bottom = 33.0
-grow_horizontal = 0
-scale = Vector2(2.59639, 2.59639)
-theme_override_colors/font_color = Color(0, 0, 0.968627, 1)
-text = "0"
+[node name="PanelContainer" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
 
-[node name="Player1Cooldown" type="TextureProgressBar" parent="HUD"]
-offset_left = 129.0
-offset_top = 8.0
-offset_right = 169.0
-offset_bottom = 48.0
-scale = Vector2(1.67148, 1.67148)
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player1Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer"]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
 max_value = 6.0
 step = 0.01
 value = 6.0
-fill_mode = 4
+fill_mode = 2
 nine_patch_stretch = true
-texture_under = ExtResource("4_s38hy")
-texture_progress = ExtResource("4_s38hy")
-tint_progress = Color(0.741176, 0.164706, 0.0156863, 1)
+texture_under = ExtResource("7_taa2g")
+texture_progress = ExtResource("7_taa2g")
+tint_under = Color(1, 0.25098, 0.101961, 1)
+tint_progress = Color(0.301961, 0.0745098, 0.0313726, 1)
 
-[node name="Player2Cooldown" type="TextureProgressBar" parent="HUD"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -190.0
-offset_top = -88.0
-offset_right = -61.9999
-offset_bottom = 40.0
-grow_horizontal = 0
-grow_vertical = 0
-scale = Vector2(0.520361, 0.520361)
-size_flags_horizontal = 3
+[node name="Player1ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
+horizontal_alignment = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player2Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
 max_value = 6.0
 step = 0.1
-fill_mode = 4
+fill_mode = 2
 nine_patch_stretch = true
-texture_under = ExtResource("5_wc4u4")
-texture_progress = ExtResource("5_wc4u4")
-tint_progress = Color(0.968627, 0.176471, 0.0627451, 1)
+texture_under = ExtResource("8_1tmow")
+texture_progress = ExtResource("8_1tmow")
+tint_under = Color(0.901961, 0.74902, 0, 1)
+tint_progress = Color(0.301961, 0.25098, 0, 1)
 
-[node name="Player3Cooldown" type="TextureProgressBar" parent="HUD"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 128.0
-offset_top = -85.0
-offset_right = 168.0
-offset_bottom = -45.0
-grow_vertical = 0
-scale = Vector2(1.67148, 1.67148)
+[node name="Player2ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
+
+[node name="PanelContainer3" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player3Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer"]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
 max_value = 6.0
 step = 0.01
 value = 6.0
-fill_mode = 4
+fill_mode = 2
 nine_patch_stretch = true
-texture_under = ExtResource("6_sxw5q")
-texture_progress = ExtResource("6_sxw5q")
-tint_progress = Color(0.741176, 0.164706, 0.0156863, 1)
+texture_under = ExtResource("8_bk8re")
+texture_progress = ExtResource("8_bk8re")
+tint_under = Color(0.101961, 0.698039, 1, 1)
+tint_progress = Color(0.03, 0.21, 0.3, 1)
 
-[node name="Player4Cooldown" type="TextureProgressBar" parent="HUD"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -159.0
-offset_top = 9.0
-offset_right = -119.0
-offset_bottom = 49.0
-grow_horizontal = 0
-scale = Vector2(1.67148, 1.67148)
+[node name="Player3ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
+
+[node name="PanelContainer4" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player4Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
 max_value = 6.0
 step = 0.01
 value = 6.0
-fill_mode = 4
+fill_mode = 2
 nine_patch_stretch = true
-texture_under = ExtResource("7_fcb1c")
-texture_progress = ExtResource("7_fcb1c")
-tint_progress = Color(0.741176, 0.164706, 0.0156863, 1)
+texture_under = ExtResource("10_6dk6d")
+texture_progress = ExtResource("10_6dk6d")
+tint_under = Color(0, 0.901961, 0.6, 1)
+tint_progress = Color(0, 0.3, 0.2, 1)
+
+[node name="Player4ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
 
 [node name="ControlDetails1" type="Label" parent="HUD"]
 visible = false
@@ -294,6 +300,7 @@ text = "Left/Right:  KP 4 / KP 6 Arrows
 Hulk: KP 8"
 
 [node name="Centerfold" type="PanelContainer" parent="HUD"]
+visible = false
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -304,15 +311,18 @@ grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_60wp1")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/Centerfold"]
+visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_font_sizes/font_size = 66
 text = "Pune+ a"
 
 [node name="ScoreToReach" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_colors/font_shadow_color = Color(0.992157, 0.52549, 0, 1)
@@ -342,11 +352,12 @@ script = ExtResource("8_1ieds")
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitTop"]
-position = Vector2(988, 65)
+position = Vector2(989, 126)
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
 [node name="ColorRect" type="ColorRect" parent="Colliders/LimitTop"]
+visible = false
 light_mask = 4
 visibility_layer = 4
 z_index = 2
@@ -359,19 +370,20 @@ offset_right = 1920.0
 offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.211765, 1, 1, 1)
+color = Color(0.156863, 0.156863, 0.156863, 1)
 
 [node name="LimitLeft" type="Area2D" parent="Colliders"]
 position = Vector2(0, 2)
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitLeft"]
-position = Vector2(-12, 565)
-rotation = 1.56493
+position = Vector2(-6, 565)
+rotation = 1.5708
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
 [node name="ColorRect" type="ColorRect" parent="Colliders/LimitLeft"]
+visible = false
 light_mask = 4
 visibility_layer = 4
 offset_right = 40.0
@@ -383,7 +395,7 @@ position = Vector2(1920, 9)
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight"]
-position = Vector2(20, 453)
+position = Vector2(7, 455)
 rotation = -1.56936
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
@@ -409,7 +421,7 @@ position = Vector2(3, 987)
 script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/Control/LimitBottom"]
-position = Vector2(956.975, 13.4135)
+position = Vector2(972, 77)
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
@@ -420,12 +432,13 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
-offset_right = 1924.0
-offset_bottom = 80.0
+offset_left = -4.0
+offset_top = 71.0
+offset_right = 1916.0
+offset_bottom = 151.0
 grow_horizontal = 2
 grow_vertical = 0
-color = Color(0.419608, 0.780392, 0.67451, 1)
+color = Color(0.203922, 0.207843, 0.203922, 0.980392)
 metadata/_edit_use_anchors_ = true
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="."]

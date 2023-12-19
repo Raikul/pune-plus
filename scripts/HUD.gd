@@ -4,27 +4,34 @@ var label1: Label
 var label2: Label
 var label3: Label
 var label4: Label
+var player1cooldown: TextureProgressBar
+var player2cooldown: TextureProgressBar
+var player3cooldown: TextureProgressBar
+var player4cooldown: TextureProgressBar
 #
 func _ready():
-	label1 = $Player1ScoreLabel
-	label2 = $Player2ScoreLabel
-	label3 = $Player3ScoreLabel
-	label4 = $Player4ScoreLabel
-	
+	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
+	label2 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2ScoreLabel
+	label3 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer/Player3ScoreLabel
+	label4 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4ScoreLabel
+	player1cooldown  = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1Cooldown
+	player2cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2Cooldown
+	player3cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer/Player3Cooldown
+	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
 
 func _process(_delta):
 	
 	if Global.player1Active:
 		label1.text = str(Global.player1Score)
-		$Player1Cooldown.value = $"../Player1/CooldownTimer".time_left
+		player1cooldown.value = $"../Player1/CooldownTimer".time_left
 	if Global.player2Active:	
 		label2.text = str(Global.player2Score)
-		$Player2Cooldown.value = $"../Player2/CooldownTimer".time_left
+		player2cooldown.value = $"../Player2/CooldownTimer".time_left
 	if Global.player3Active:	
 		label3.text = str(Global.player3Score)
-		$Player3Cooldown.value = $"../Player3/CooldownTimer".time_left
+		player3cooldown.value = $"../Player3/CooldownTimer".time_left
 	if Global.player4Active:	
 		label4.text = str(Global.player4Score)
-		$Player4Cooldown.value = $"../Player4/CooldownTimer".time_left
+		player4cooldown.value = $"../Player4/CooldownTimer".time_left
 		
 		
