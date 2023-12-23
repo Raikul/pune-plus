@@ -52,25 +52,25 @@ func setupPlayers():
 		$Player1/HeadSprite.modulate = Global.playerColors[1]
 		$Player1/ElementHeadSprite.set_texture(air_earth_texture)
 	else:
-		$Player1.queue_free()
+		if is_instance_valid($Player1):	$Player1.queue_free()
 	if Global.player2Active:
 		$Player2.add_to_group("activePlayers")
 		$Player2.add_to_group("alivePlayers")
 		$Player2/HeadSprite.modulate = Global.playerColors[2]
 	else:
-		$Player2.queue_free()
+		if is_instance_valid($Player2):$Player2.queue_free()
 	if Global.player3Active:
 		$Player3.add_to_group("activePlayers")
 		$Player3.add_to_group("alivePlayers")
 		$Player3/HeadSprite.modulate = Global.playerColors[3]
 	else:
-		$Player3.queue_free()
+		if is_instance_valid($Player3):	$Player3.queue_free()
 	if Global.player4Active:
 		$Player4.add_to_group("activePlayers")
 		$Player4.add_to_group("alivePlayers")
 		$Player4/HeadSprite.modulate = Global.playerColors[4]
 	else:
-		$Player4.queue_free()
+		if is_instance_valid($Player4):$Player4.queue_free()
 
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		for child in player.get_children():
@@ -91,6 +91,7 @@ func _on_player_4_dead():
 	playerDead($Player4)
 	
 func playerDead(player):	
+	player.powerAvailable = false
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
 		for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
@@ -119,8 +120,9 @@ func restart():
 		$Lesson.teach("Water")
 		$Lesson.show()
 	await(get_tree().create_timer(2.0).timeout)
-	Global.musicProgress = $MusicPlayer.get_playback_position()
+#	Global.musicProgress = $MusicPlayer.get_playback_position()
 	get_tree().reload_current_scene()
+	_ready()
 	
 func _on_player_1_score():
 	Global.player1Score += 1

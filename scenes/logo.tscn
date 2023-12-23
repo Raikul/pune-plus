@@ -15,7 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_ptvxu")
 
 [node name="Transition" parent="." instance=ExtResource("4_joa3r")]
-modulate = Color(0, 0, 0, 1)
+modulate = Color(1, 1, 1, 0)
 z_index = 5
 layout_mode = 1
 

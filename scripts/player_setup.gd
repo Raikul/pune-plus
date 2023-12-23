@@ -93,7 +93,7 @@ func StartGame():
 	scene.connect("restartNotice", reboot.bind(scene))
 	self.hide()
 	
-func reboot(scene):
+func reboot(_scene):
 	StartGame.rpc()
 #	var newScene = multiscene.instantiate()
 #	scene.queue_free()
@@ -169,3 +169,9 @@ func setKeys(playerId, control):
 		var ls = LabelSettings.new()
 		ls.set_font_size(44)
 		label.set_label_settings(ls)
+
+
+func _on_enable_ai_toggled(button_pressed, player_id):
+	Global.AI_Enabled[player_id] = button_pressed
+	
+	pass # Replace with function body.

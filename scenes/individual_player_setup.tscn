@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://ddeb28qs6q5po"]
+[gd_scene load_steps=9 format=3 uid="uid://ddeb28qs6q5po"]
 
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="1_2hwot"]
 [ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_ewdxf"]
+[ext_resource type="Script" path="res://scenes/individual_player_setup.gd" id="2_5m2o2"]
 [ext_resource type="Texture2D" uid="uid://dmsqtc8qu7bex" path="res://assets/jorge-resources/Game Selection/direction icon.png" id="3_r30wu"]
 [ext_resource type="Texture2D" uid="uid://dw8r050npvyqp" path="res://assets/jorge-resources/Game Selection/punchi icon.png" id="4_2ld1l"]
 
@@ -18,10 +19,14 @@ corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_01lo7"]
+bg_color = Color(0.984314, 0.6, 0.513726, 1)
+
 [node name="2" type="VBoxContainer"]
 offset_right = 287.0
 offset_bottom = 756.0
 theme = ExtResource("1_ewdxf")
+script = ExtResource("2_5m2o2")
 
 [node name="PanelContainer2" type="PanelContainer" parent="."]
 layout_mode = 2
@@ -143,3 +148,13 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "Select"
+
+[node name="Enable AI" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+theme_override_styles/pressed = SubResource("StyleBoxFlat_01lo7")
+toggle_mode = true
+text = "Enable AI"
+
+[connection signal="toggled" from="VBoxContainer/Enable AI" to="." method="_on_enable_ai_toggled"]

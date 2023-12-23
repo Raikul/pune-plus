@@ -1,9 +1,8 @@
-[gd_scene load_steps=18 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=16 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
-[ext_resource type="Shader" path="res://scripts/player.gdshader" id="5_piws5"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="7_taa2g"]
 [ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_1ieds"]
 [ext_resource type="Texture2D" uid="uid://bqb0rtmryfpj5" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png" id="8_1tmow"]
@@ -14,14 +13,6 @@
 [ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
 [ext_resource type="Script" path="res://scripts/limit.gd" id="12_ihapt"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_65hla"]
-resource_local_to_scene = true
-shader = ExtResource("5_piws5")
-shader_parameter/brighter_color = Color(1, 0.8, 0, 1)
-shader_parameter/middle_color = Color(1, 0.56, 0, 1)
-shader_parameter/darker_color = Color(1, 1, 1, 0)
-shader_parameter/spread = 0.708
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_60wp1"]
 
@@ -81,9 +72,6 @@ rotation = 2.1529
 scale = Vector2(0.1, 0.1)
 playerId = 1
 
-[node name="ShaderSprite" parent="Player1" index="14"]
-material = SubResource("ShaderMaterial_65hla")
-
 [node name="Player2" parent="." instance=ExtResource("2_i184r")]
 position = Vector2(1770, 877)
 rotation = -7.10548
@@ -92,7 +80,7 @@ playerId = 2
 
 [node name="Player3" parent="." instance=ExtResource("2_i184r")]
 position = Vector2(163, 855)
-rotation = 0.631898
+rotation = 1.3147
 scale = Vector2(0.1, 0.1)
 playerId = 3
 
@@ -108,6 +96,10 @@ script = ExtResource("3_ftqo5")
 [node name="PanelContainer" type="PanelContainer" parent="HUD"]
 offset_right = 1920.0
 offset_bottom = 134.0
+
+[node name="ColorRect" type="ColorRect" parent="HUD/PanelContainer"]
+layout_mode = 2
+color = Color(0.27451, 0.27451, 0.27451, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="HUD/PanelContainer"]
 layout_mode = 2

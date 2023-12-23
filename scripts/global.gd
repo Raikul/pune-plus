@@ -14,6 +14,18 @@ var player2Active
 var player3Active
 var player4Active
 
+var player1AIEnabled = false
+var player2AIEnabled = false
+var player3AIEnabled = false
+var player4AIEnabled = false
+
+var AI_Enabled = {
+	1: false,
+	2: false,
+	3: false,
+	4: false
+}
+
 var playerColors = [
 	"",
 	"ff401a",

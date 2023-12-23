@@ -23,9 +23,12 @@ var listOfNodes = []
 @onready var gapTimer = get_node("GapTimer")
 @onready var gapFrequencyTimer = get_node("GapFrequencyTimer")
 @onready var is_water_my_friend = false
+@onready var ai_enabled = true
+@onready var locked_movement = false
+var locked_direction
 
 func _ready():
-
+	ai_enabled = Global.AI_Enabled[playerId]
 #	snakeBodyScene = preload("res://snake_body.tscn")
 	twinHeadScene = preload("res://scenes/twin_head.tscn")
 #	colorRect = $"../Colliders/ColorRect/Collider"
@@ -44,17 +47,22 @@ func _ready():
 #	$ShaderSprite.material.set_shader_parameter("darker_color", Global.playerColors[playerId])
 #	$ShaderSprite.show()
 	
-	
 func _process(delta):
+		
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
 		var direction = 0
-		if Input.is_action_pressed("Player"+str(playerId)+"Left") or $Raycaster.return_steering() == "Left":
-			direction = -1
-		if Input.is_action_pressed("Player"+str(playerId)+"Right") or $Raycaster.return_steering() == "Right":
-			direction = 1
-				
-		rotation += angular_speed * direction * delta
+		if locked_movement: direction = locked_direction
+		else:
+			if Input.is_action_pressed("Player"+str(playerId)+"Left") :direction = -1
+			elif Input.is_action_pressed("Player"+str(playerId)+"Right"): direction = 1
+			elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
+			elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
+		
+#		elif $Raycaster.collision_distance("Left") < 400: direction = -1
+#		elif $Raycaster.collision_distance("Right") < 400: direction = 1
+		if ai_enabled and powerAvailable: ai_punchy(direction)
 
+		rotation += angular_speed * direction * delta
 		var	velocity = Vector2.UP.rotated(rotation) * speed
 		position += velocity * delta
 
@@ -74,19 +82,21 @@ func _on_area_entered(area):
 	if area is Shroom:
 		emit_signal("score")
 		area.queue_free()
-	elif area.is_in_group("TwinBodies") and is_water_my_friend:
+	elif (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads"))  and is_water_my_friend:
 		pass
 	elif invincible == false:
-		if listOfNodes.find(area) == -1 and area != twinHeadInstance:
-			if (twinHeadInstance == null or twinHeadInstance.alive == false):
+		if listOfNodes.find(area) == -1:
+			var currentTwinHeadInstance = get_tree().get_first_node_in_group("twinHeads")
+#			if (twinHeadInstance == null or twinHeadInstance.alive == false):
+			if !is_instance_valid(currentTwinHeadInstance) or currentTwinHeadInstance.alive == false or !is_water_my_friend:
 				$CollisionShape2D.set_deferred("disabled", true)
 				set_process(false)
 				emit_signal("dead")
-			else: #twinHeadIsAlive
-				twinHeadInstance.collider.set_deferred("disabled", true)
-				var tempPosition = twinHeadInstance.position
-				var tempRotation = twinHeadInstance.rotation
-				twinHeadInstance.queue_free()
+			elif is_water_my_friend: #twinHeadIsAlive
+				currentTwinHeadInstance.collider.set_deferred("disabled", true)
+				var tempPosition = currentTwinHeadInstance.position
+				var tempRotation = currentTwinHeadInstance.rotation
+				currentTwinHeadInstance.queue_free()
 				position = tempPosition
 				rotation = tempRotation
 				pass
@@ -116,7 +126,6 @@ func _input(event):
 		if playerId == 1:
 			if event.is_action_pressed("Player1Up"):
 				shoot()		
-				
 				powerCooldown()
 				
 		if playerId == 2:
@@ -133,6 +142,59 @@ func _input(event):
 			if event.is_action_pressed("Player4Up"):
 				twinHead()		
 				powerCooldown()
+
+
+func activate_power():
+	if powerAvailable:
+		powerCooldown()	
+		if playerId == 1:
+				shoot()		
+		if playerId == 2:
+				hulk()		
+		if playerId == 3:
+				dash()
+		if playerId == 4:
+				twinHead()
+				locked_direction = [-1,1].pick_random()
+				locked_movement = true
+				await get_tree().create_timer(0.2).timeout
+				locked_movement = false		
+		
+
+func ai_punchy(direction):
+	if playerId == 1:
+		if $Raycaster/UpPlayer.is_colliding() or $Raycaster.collision_distance("Up") < 75:
+			activate_power()
+	if playerId == 2:
+		if $Raycaster.collision_distance("Up") < 25:
+			activate_power()
+	if playerId == 3 and direction == 0: 
+		activate_power()
+	if powerAvailable and playerId == 4:
+		activate_power()
+#
+#func determine_punchy_time():
+#	if playerId == 1:
+#		return determine_shoot_time()
+#	if playerId == 2:
+#		return determine_hulk_time()
+#	if playerId == 3:
+#		return determine_dash_time()
+#	if playerId == 4:
+#		return determine_twin_head_time()
+#
+#func determine_shoot_time():
+#	pass
+#
+#func determine_hulk_time():
+#	return $Raycaster.is_fully_surrounded()
+#	pass
+#
+#func determine_dash_time():
+#	if $Raycaster.collistion_distance("Up") > 500 : return true
+#	pass
+#func determine_twin_head_time():
+#	return true
 			
 func hulk():
 	
@@ -176,7 +238,7 @@ func twinHead():
 func powerCooldown():
 	powerAvailable = false
 	$CooldownTimer.start()
-	$ShaderSprite.hide()
+	#$ShaderSprite.hide()
 func powerReady(prevColor):
 	powerAvailable = true
 #	print(Global.playerColors[playerId])

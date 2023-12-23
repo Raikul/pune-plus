@@ -18,6 +18,6 @@ func transition_to(next_scene) -> void:
 	
 
 
-func _on_animation_player_animation_finished(anim_name, next_scene ):
+func _on_animation_player_animation_finished(_anim_name, next_scene ):
 	get_tree().change_scene_to_file(next_scene)
 

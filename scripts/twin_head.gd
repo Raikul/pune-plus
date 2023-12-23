@@ -27,9 +27,9 @@ func _ready():
 
 func _process(delta):
 	var direction = 0
-	if Input.is_action_pressed("Player4Left"):
+	if Input.is_action_pressed("Player4Left") or  $Raycaster.return_steering() == "Right" :
 		direction = 1
-	if Input.is_action_pressed("Player4Right"):
+	if Input.is_action_pressed("Player4Right") or $Raycaster.return_steering() == "Left":
 		direction = -1
 	
 	rotation += angular_speed * direction * delta
@@ -81,6 +81,7 @@ func _on_area_entered(area):
 		if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
 	#		if area.is_in_group("activePlayers"):
 			$CollisionShape2D.set_deferred("disabled", true)
+			remove_from_group("twinHeads")
 			alive = false
 			set_process(false)
 			if (!get_parent().is_in_group("alivePlayers")):

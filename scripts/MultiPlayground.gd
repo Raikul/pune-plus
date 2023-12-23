@@ -30,7 +30,7 @@ func spawnplayers():
 		currentPlayer.add_to_group("alivePlayers")
 		currentPlayer.add_to_group("activePlayers")
 		for spawn in get_tree().get_nodes_in_group("PlayerSpawnPoint"):
-			spawn is Node2D
+#			spawn is Node2D
 			if spawn.name == str(index):
 				currentPlayer.global_position = spawn.global_position
 				currentPlayer.rotate(spawn.rotation)
