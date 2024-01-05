@@ -18,20 +18,25 @@ func _ready():
 	player2cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2Cooldown
 	player3cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer/Player3Cooldown
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
+	add_to_group("HUD")
 
 func _process(_delta):
 	
 	if Global.player1Active:
 		label1.text = str(Global.player1Score)
-		player1cooldown.value = $"../Player1/CooldownTimer".time_left
+		if is_instance_valid($"../Player1"):
+			player1cooldown.value = $"../Player1/CooldownTimer".time_left
 	if Global.player2Active:	
 		label2.text = str(Global.player2Score)
-		player2cooldown.value = $"../Player2/CooldownTimer".time_left
+		if is_instance_valid($"../Player2"):
+			player2cooldown.value = $"../Player2/CooldownTimer".time_left
 	if Global.player3Active:	
 		label3.text = str(Global.player3Score)
-		player3cooldown.value = $"../Player3/CooldownTimer".time_left
+		if is_instance_valid($"../Player3"):
+			player3cooldown.value = $"../Player3/CooldownTimer".time_left
 	if Global.player4Active:	
 		label4.text = str(Global.player4Score)
-		player4cooldown.value = $"../Player4/CooldownTimer".time_left
+		if is_instance_valid($"../Player4"):
+			player4cooldown.value = $"../Player4/CooldownTimer".time_left
 		
 		

@@ -49,7 +49,7 @@ func _on_bodyTimer_timeout():
 
 func createBody(scene):
 	var snakeBody = scene.instantiate()
-	add_child(snakeBody)
+
 	snakeBody.set_as_top_level(true)
 	snakeBody.global_position = global_position
 
@@ -65,6 +65,9 @@ func createBody(scene):
 #	$Sprite2D.set_offset(Vector2(100,100))}
 	snakeBody.add_to_group("TwinBodies")
 	snakeBody.modulate = Color.AQUA
+	snakeBody.collision_layer = 0b100
+	print (snakeBody.collision_layer)
+	add_child(snakeBody)
 	listOfNodes.append(snakeBody)
 
 	if listOfNodes.size() > 4:

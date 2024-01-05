@@ -8,6 +8,8 @@
 radius = 66.7083
 
 [node name="TwinHead" type="Area2D"]
+collision_layer = 4
+collision_mask = 5
 script = ExtResource("1_hjlq0")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

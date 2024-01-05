@@ -22,6 +22,7 @@ func _on_shroom_timer_timeout():
 #	shroom.apply_scale(Vector2(2,2))
 	shroom.set_global_position(Vector2(horizontalPosition, verticalPosition))
 	add_child(shroom)
+	shroom.add_to_group("Shrooms")
 	pass # Replace with function body.
 	
 func set_space(top,bottom):

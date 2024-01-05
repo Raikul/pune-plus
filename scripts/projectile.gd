@@ -9,7 +9,7 @@ func _ready():
 #	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 #	gapTimer.connect("timeout", _on_gapTimer_timeout)
 	screen_size = get_viewport_rect().size
-	scale = Vector2(8,8)
+	scale = Vector2(1,1)
 #	$Meteor.rotate(rotation - PI/2)
 	$AnimationPlayer.play("fireball")
 #	$AnimationPlayer.rotate(rotation)

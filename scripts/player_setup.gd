@@ -12,7 +12,7 @@ var P4Box
 signal back
 signal go
 signal multigo
-@onready var multiscene = load("res://scenes/multiplayer_playground.tscn")
+#@onready var multiscene = load("res://scenes/multiplayer_playground.tscn")
 
 func _ready():
 	P1Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1"
@@ -88,9 +88,9 @@ func _on_go_pressed():
 
 @rpc("any_peer","call_local")
 func StartGame():
-	var scene = multiscene.instantiate()
-	get_tree().root.add_child(scene)
-	scene.connect("restartNotice", reboot.bind(scene))
+#	var scene = multiscene.instantiate()
+#	get_tree().root.add_child(scene)
+#	scene.connect("restartNotice", reboot.bind(scene))
 	self.hide()
 	
 func reboot(_scene):

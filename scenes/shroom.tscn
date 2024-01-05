@@ -324,6 +324,7 @@ radius = 7.0
 [node name="Shroom" type="Area2D"]
 scale = Vector2(1.7, 1.7)
 collision_layer = 2
+collision_mask = 0
 script = ExtResource("1_u58fx")
 
 [node name="ShroomSprite" type="AnimatedSprite2D" parent="."]

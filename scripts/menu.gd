@@ -27,22 +27,14 @@ func _on_quit_pressed():
 func _on_options_back_button_pressed():
 	Options.hide()
 	$CanvasLayer/TopMenu.show()
-	pass # Replace with function body.
 
 func _on_player_setup_go():
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
-	pass # Replace with function body.
 
 func _on_player_setup_back():
 	$CanvasLayer/PlayerSetup.hide()
 	$CanvasLayer/TopMenu.show()
 	$CanvasLayer/Modifiers.hide()
-	pass # Replace with function body.
-
-func _on_multiplayer_pressed():
-#	get_tree().change_scene_to_file("res://scenes/MultiPlayground.tscn")
-	get_tree().change_scene_to_file("res://scenes/multiplayer_setup.tscn")
-	pass # Replace with function body.
 
 func _on_change_log_button_pressed():
 	var details = $CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer
@@ -50,9 +42,10 @@ func _on_change_log_button_pressed():
 		details.hide()
 	else :
 		details.show()
-	pass # Replace with function body.
-
 
 func _on_shrooms_button_toggled(button_pressed):
 	Global.shrooms = button_pressed
-	pass # Replace with function body.
+
+#Region Multiplayer
+func _on_multiplayer_pressed():
+	get_tree().change_scene_to_file("res://scenes/multiplayer_setup.tscn")

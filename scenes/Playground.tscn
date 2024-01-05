@@ -1,7 +1,6 @@
-[gd_scene load_steps=16 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=15 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
-[ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_i184r"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="7_taa2g"]
 [ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_1ieds"]
@@ -65,30 +64,6 @@ offset_bottom = 204.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
 metadata/_edit_use_anchors_ = true
-
-[node name="Player1" parent="." instance=ExtResource("2_i184r")]
-position = Vector2(110, 210)
-rotation = 2.1529
-scale = Vector2(0.1, 0.1)
-playerId = 1
-
-[node name="Player2" parent="." instance=ExtResource("2_i184r")]
-position = Vector2(1770, 877)
-rotation = -7.10548
-scale = Vector2(0.1, 0.1)
-playerId = 2
-
-[node name="Player3" parent="." instance=ExtResource("2_i184r")]
-position = Vector2(163, 855)
-rotation = 1.3147
-scale = Vector2(0.1, 0.1)
-playerId = 3
-
-[node name="Player4" parent="." instance=ExtResource("2_i184r")]
-position = Vector2(1764, 218)
-rotation = -2.2619
-scale = Vector2(0.1, 0.1)
-playerId = 4
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_ftqo5")
@@ -446,17 +421,7 @@ shroomScene = ExtResource("12_erhbx")
 [node name="ShroomTimer" type="Timer" parent="Events"]
 wait_time = 3.0
 
-[connection signal="dead" from="Player1" to="." method="_on_player_1_dead"]
-[connection signal="score" from="Player1" to="." method="_on_player_1_score"]
-[connection signal="dead" from="Player2" to="." method="_on_player_2_dead"]
-[connection signal="score" from="Player2" to="." method="_on_player_2_score"]
-[connection signal="dead" from="Player3" to="." method="_on_player_3_dead"]
-[connection signal="score" from="Player3" to="." method="_on_player_3_score"]
-[connection signal="dead" from="Player4" to="." method="_on_player_4_dead"]
-[connection signal="score" from="Player4" to="." method="_on_player_4_score"]
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
 
 [editable path="Lesson"]
-[editable path="Player1"]
-[editable path="Player1/Raycaster"]

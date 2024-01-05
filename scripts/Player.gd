@@ -13,12 +13,12 @@ var invincible = false
 signal dead()
 signal score()
 
-@export var playerId : int
+var playerId
 
 var listOfNodes = []
-@export var snakeBodyScene: PackedScene
-@export var projectileScene: PackedScene
-@export var twinHeadScene: PackedScene
+var snakeBodyScene: PackedScene
+var projectileScene: PackedScene
+var twinHeadScene: PackedScene
 @onready var bodyTimer = get_node("BodyTimer")
 @onready var gapTimer = get_node("GapTimer")
 @onready var gapFrequencyTimer = get_node("GapFrequencyTimer")
@@ -26,29 +26,41 @@ var listOfNodes = []
 @onready var ai_enabled = true
 @onready var locked_movement = false
 var locked_direction
+var clonable_id
+var clonable_name
+var gap_delta_sum = 0
+#var has_twin_head = false
 
 func _ready():
+	apply_scale(Vector2(0.1,0.1))
 	ai_enabled = Global.AI_Enabled[playerId]
-#	snakeBodyScene = preload("res://snake_body.tscn")
+	
 	twinHeadScene = preload("res://scenes/twin_head.tscn")
-#	colorRect = $"../Colliders/ColorRect/Collider"
-	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
-	set_gap_size()
+	projectileScene = preload("res://scenes/projectile.tscn")
+	snakeBodyScene = preload("res://scenes/snake_body.tscn")
+	
+#	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 	gapTimer.connect("timeout", _on_gapTimer_timeout)
 	gapFrequencyTimer.connect("timeout", _on_gapFrequencyTimer_timeout)
+	
+	set_gap_size()
 	screen_size = get_viewport_rect().size
 	
 	$HulkTimer.connect("timeout", unhulk.bind(Global.playerColors[playerId]))
 	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
+	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
 	
 	$HulkTimer.add_to_group("timers", true)
 	
-	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
-#	$ShaderSprite.material.set_shader_parameter("darker_color", Global.playerColors[playerId])
-#	$ShaderSprite.show()
+	
+	listOfNodes.append(self)
+	if playerId != null:
+		clonable_id = playerId
+		clonable_name = "Player"+str(playerId)
 	
 func _process(delta):
-		
+#	if not gap:
+#		createBody(snakeBodyScene)
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
 		var direction = 0
 		if locked_movement: direction = locked_direction
@@ -75,10 +87,18 @@ func _on_gapFrequencyTimer_timeout():
 	gapTimer.start()
 	
 func _on_bodyTimer_timeout():
-	if not gap:
+#	if not gap:
+#		createBody(snakeBodyScene)
+	pass
+
+func _physics_process(delta):
+	gap_delta_sum += delta
+	if not gap and gap_delta_sum >= 0.05:
 		createBody(snakeBodyScene)
-	
+		gap_delta_sum = 0
+
 func _on_area_entered(area):	
+#	print(area)
 	if area is Shroom:
 		emit_signal("score")
 		area.queue_free()
@@ -103,7 +123,7 @@ func _on_area_entered(area):
 
 func createBody(scene):
 	var sceneInstance = scene.instantiate()
-	add_child(sceneInstance)
+
 	sceneInstance.set_as_top_level(true)
 	sceneInstance.global_position = global_position
 	
@@ -111,7 +131,7 @@ func createBody(scene):
 	bodySprite.set_texture($HeadSprite.texture)
 	bodySprite.modulate = $HeadSprite.modulate
 
-	sceneInstance.apply_scale(transform.get_scale())
+	sceneInstance.apply_scale(get_scale())
 	sceneInstance.rotation = rotation
 	
 	listOfNodes.append(sceneInstance)
@@ -119,6 +139,7 @@ func createBody(scene):
 		sceneInstance.rotation = rotation + PI
 	if listOfNodes.size() > 4:
 		listOfNodes.pop_front()
+	add_child(sceneInstance)
 	return sceneInstance
 	
 func _input(event):
@@ -145,21 +166,27 @@ func _input(event):
 
 
 func activate_power():
-	if powerAvailable:
-		powerCooldown()	
+	if powerAvailable:	
 		if playerId == 1:
-				shoot()		
+			powerCooldown()	
+			shoot()		
 		if playerId == 2:
-				hulk()		
+			powerCooldown()	
+			hulk()		
 		if playerId == 3:
-				dash()
+			powerCooldown()	
+			dash()
 		if playerId == 4:
-				twinHead()
-				locked_direction = [-1,1].pick_random()
-				locked_movement = true
-				await get_tree().create_timer(0.2).timeout
-				locked_movement = false		
+				if !is_there_twin_head():
+					powerCooldown()	
+					twinHead()
+					locked_direction = [-1,1].pick_random()
+					locked_movement = true
+					await get_tree().create_timer(0.2).timeout
+					locked_movement = false		
 		
+func is_there_twin_head():
+	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
 
 func ai_punchy(direction):
 	if playerId == 1:
@@ -172,29 +199,6 @@ func ai_punchy(direction):
 		activate_power()
 	if powerAvailable and playerId == 4:
 		activate_power()
-#
-#func determine_punchy_time():
-#	if playerId == 1:
-#		return determine_shoot_time()
-#	if playerId == 2:
-#		return determine_hulk_time()
-#	if playerId == 3:
-#		return determine_dash_time()
-#	if playerId == 4:
-#		return determine_twin_head_time()
-#
-#func determine_shoot_time():
-#	pass
-#
-#func determine_hulk_time():
-#	return $Raycaster.is_fully_surrounded()
-#	pass
-#
-#func determine_dash_time():
-#	if $Raycaster.collistion_distance("Up") > 500 : return true
-#	pass
-#func determine_twin_head_time():
-#	return true
 			
 func hulk():
 	
@@ -226,6 +230,7 @@ func shoot():
 
 func twinHead():
 	$Split.play()
+#	has_twin_head = true
 	is_water_my_friend = true
 	twinHeadInstance = createBody(twinHeadScene)
 #	twinHeadInstance.colorRect = colorRect
@@ -233,6 +238,7 @@ func twinHead():
 	twinHeadInstance.bufferListOfNodes.append(self)
 	twinHeadInstance.snakeBodyScene = snakeBodyScene
 #	twinHead.syncBodyTimer = bodyTimer
+
 	pass
 	
 func powerCooldown():

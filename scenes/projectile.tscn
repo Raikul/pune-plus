@@ -37,94 +37,64 @@
 radius = 66.7083
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xtj8k"]
-load_path = "res://.godot/imported/img_0.png-926d3eceeadebe10645bf164a92576a4.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_frp4i"]
-load_path = "res://.godot/imported/img_1.png-061cb280a0e5bd278ebec919398c598f.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_75t5n"]
-load_path = "res://.godot/imported/img_2.png-ff318c6e516766f52cb6a6483cb8b822.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_qi0kb"]
-load_path = "res://.godot/imported/img_3.png-59077347287a2e0bc46cefc342abd75d.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2rlwf"]
-load_path = "res://.godot/imported/img_4.png-36482b880465174f0a31e5cd89ede49e.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_3bvk1"]
-load_path = "res://.godot/imported/img_5.png-5100c4061254db1413fc5b5c522aca85.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_b3yfn"]
-load_path = "res://.godot/imported/img_6.png-712af1ab85c02f1163d5db2777368645.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_k1dly"]
-load_path = "res://.godot/imported/img_7.png-df0b763d34686ec9969adff098484137.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_1gddx"]
-load_path = "res://.godot/imported/img_8.png-0ab44c56a9f6bcd13f9054e6f7b2838b.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xd7v3"]
-load_path = "res://.godot/imported/img_9.png-92caac3021a0b77aa78dccd947b5b180.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ohu87"]
-load_path = "res://.godot/imported/img_10.png-207b2a25bc9321175f8c0c16ed068639.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_fg0x5"]
-load_path = "res://.godot/imported/img_11.png-9099572295fd3c462a4ab02d0ab77c5d.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_oh48h"]
-load_path = "res://.godot/imported/img_12.png-871758033cd93b1d17d2c620739af759.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_38nj3"]
-load_path = "res://.godot/imported/img_13.png-5d4dac40aa92cf12d31775559f80858e.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vc2hj"]
-load_path = "res://.godot/imported/img_14.png-e4d504adbd179c187f51813383508900.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_t80ul"]
-load_path = "res://.godot/imported/img_15.png-d44b371d8af89ddef600d1feaf1a35d2.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ll41u"]
-load_path = "res://.godot/imported/img_16.png-6dbcd87d1f657ed62cf84b25a7f2edb3.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2xc3y"]
-load_path = "res://.godot/imported/img_17.png-5a1348105888764968c5ef3d301cac31.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_1uno0"]
-load_path = "res://.godot/imported/img_18.png-dfeb6524f24a74b79c88110f4c3b550e.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_1ojpx"]
-load_path = "res://.godot/imported/img_19.png-c70ecdf0b222de2dc2c3fc00a30ded32.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xihmk"]
-load_path = "res://.godot/imported/img_20.png-74714d9b983569a0f589c8251f02dedc.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_acqt2"]
-load_path = "res://.godot/imported/img_21.png-1d4864966f675556a921342da7946d0e.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_f2876"]
-load_path = "res://.godot/imported/img_22.png-62e679695911fc425da136bcabd544bb.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_odsme"]
-load_path = "res://.godot/imported/img_23.png-8e13b95127ed97d649b942a474eafdb9.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_pus00"]
-load_path = "res://.godot/imported/img_24.png-124243ea245c98eab29757cb8c486d12.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_d03ai"]
-load_path = "res://.godot/imported/img_25.png-537007afa2cbaa32e5326679f83ff014.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_s0akk"]
-load_path = "res://.godot/imported/img_26.png-cf4f36e2c475c399e9df7efb55fec76d.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_kytr5"]
-load_path = "res://.godot/imported/img_27.png-59e441e203d0e8fe773b13d65641e87b.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yjedn"]
-load_path = "res://.godot/imported/img_28.png-2511dae12feb7ec48accff180b43034d.ctex"
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_bptf0"]
-load_path = "res://.godot/imported/img_29.png-a58fdcf65d50276970b6cea2b4a4bb11.ctex"
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jrlsg"]
 animations = [{
