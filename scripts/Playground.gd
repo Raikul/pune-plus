@@ -28,7 +28,9 @@ func _ready():
 	
 func _process(_delta):
 	if Input.is_key_pressed(KEY_ESCAPE):
-		setupPlayers()
+		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	for player in get_tree().get_nodes_in_group("activePlayers"):
+		$HUD.set_cooldown(player.playerId, player.get_node("CooldownTimer").time_left)
 #		get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		
 

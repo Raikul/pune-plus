@@ -20,23 +20,36 @@ func _ready():
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
 	add_to_group("HUD")
 
+func set_cooldown(player_id, time_left):
+	var cooldown
+	match player_id:
+		1:
+			cooldown = player1cooldown
+		2:
+			cooldown = player2cooldown
+		3:
+			cooldown = player3cooldown
+		4:
+			cooldown = player4cooldown
+	cooldown.value = time_left
+	
 func _process(_delta):
 	
 	if Global.player1Active:
 		label1.text = str(Global.player1Score)
-		if is_instance_valid($"../Player1"):
-			player1cooldown.value = $"../Player1/CooldownTimer".time_left
+#		if is_instance_valid($"../Player1"):
+#			player1cooldown.value = $"../Player1/CooldownTimer".time_left
 	if Global.player2Active:	
 		label2.text = str(Global.player2Score)
-		if is_instance_valid($"../Player2"):
-			player2cooldown.value = $"../Player2/CooldownTimer".time_left
+#		if is_instance_valid($"../Player2"):
+#			player2cooldown.value = $"../Player2/CooldownTimer".time_left
 	if Global.player3Active:	
 		label3.text = str(Global.player3Score)
-		if is_instance_valid($"../Player3"):
-			player3cooldown.value = $"../Player3/CooldownTimer".time_left
+#		if is_instance_valid($"../Player3"):
+#			player3cooldown.value = $"../Player3/CooldownTimer".time_left
 	if Global.player4Active:	
 		label4.text = str(Global.player4Score)
-		if is_instance_valid($"../Player4"):
-			player4cooldown.value = $"../Player4/CooldownTimer".time_left
-		
-		
+#		if is_instance_valid($"../Player4"):
+#			player4cooldown.value = $"../Player4/CooldownTimer".time_left
+
+	pass		

@@ -19,8 +19,10 @@ func _ready():
 	P2Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"
 	P3Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"
 	P4Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"
-	
-	pass
+	P1Box.set_ai_status(Global.AI_Enabled[1])
+	P2Box.set_ai_status(Global.AI_Enabled[2])
+	P3Box.set_ai_status(Global.AI_Enabled[3])
+	P4Box.set_ai_status(Global.AI_Enabled[4])	
 
 func recalculate_all_labels():
 	_on_redefine_keys_recalculate_labels(1)
@@ -172,6 +174,7 @@ func setKeys(playerId, control):
 
 
 func _on_enable_ai_toggled(button_pressed, player_id):
+	#Connected through Scene - TODO: Connect through code
 	Global.AI_Enabled[player_id] = button_pressed
 	
 	pass # Replace with function body.

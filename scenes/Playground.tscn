@@ -350,11 +350,11 @@ scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
 [node name="ColorRect" type="ColorRect" parent="Colliders/LimitLeft"]
-visible = false
 light_mask = 4
 visibility_layer = 4
-offset_right = 40.0
-offset_bottom = 27.0
+custom_minimum_size = Vector2(1, 0)
+offset_right = 1.0
+offset_bottom = 1121.0
 color = Color(1, 1, 0.254902, 1)
 
 [node name="LimitRight" type="Area2D" parent="Colliders"]

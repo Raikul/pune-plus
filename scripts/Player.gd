@@ -184,7 +184,7 @@ func activate_power():
 					locked_movement = true
 					await get_tree().create_timer(0.2).timeout
 					locked_movement = false		
-		
+	
 func is_there_twin_head():
 	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
 
@@ -245,7 +245,7 @@ func powerCooldown():
 	powerAvailable = false
 	$CooldownTimer.start()
 	#$ShaderSprite.hide()
-func powerReady(prevColor):
+func powerReady(_prevColor):
 	powerAvailable = true
 #	print(Global.playerColors[playerId])
 #	$ShaderSprite.material.set_shader_parameter("darker_color", prevColor)
