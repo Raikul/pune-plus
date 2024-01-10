@@ -4,15 +4,6 @@ var node_paths = ["UpLeft", "Up", "UpLeft2", "UpLeft3", "UpRight", "UpRight2", "
 
 @onready var u_turn = false
 
-func _process(delta):
-	if $UpPlayer.is_colliding():
-		print ("player detected")
-#	print ($UpLeft.get_collision_point().distance_to(global_position))
-	pass
-#	if $Up.is_colliding():
-#		print("Down")
-#		$"..".direction = -1
-
 func return_steering():
 #	if is_fully_surrounded() : return "Left"
 	var danger_distance_left = INF
