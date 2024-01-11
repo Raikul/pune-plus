@@ -25,6 +25,8 @@ var twinHeadScene: PackedScene
 @onready var is_water_my_friend = false
 @onready var ai_enabled = true
 @onready var locked_movement = false
+@onready var head_texture: CompressedTexture2D = $HeadSprite.texture
+@onready var head_modulate: Color = $HeadSprite.modulate
 var locked_direction
 var clonable_id
 var clonable_name
@@ -128,8 +130,8 @@ func createBody(scene):
 	sceneInstance.global_position = global_position
 	
 	var bodySprite = sceneInstance.get_node("BodySprite")
-	bodySprite.set_texture($HeadSprite.texture)
-	bodySprite.modulate = $HeadSprite.modulate
+	bodySprite.set_texture(head_texture)
+	bodySprite.modulate = head_modulate
 
 	sceneInstance.apply_scale(get_scale())
 	sceneInstance.rotation = rotation
@@ -145,22 +147,22 @@ func createBody(scene):
 func _input(event):
 	if powerAvailable:
 		if playerId == 1:
-			if event.is_action_pressed("Player1Up"):
+			if event.is_action_pressed(&"Player1Up"):
 				shoot()		
 				powerCooldown()
 				
 		if playerId == 2:
-			if event.is_action_pressed("Player2Up"):
+			if event.is_action_pressed(&"Player2Up"):
 				hulk()		
 				powerCooldown()
 		
 		if playerId == 3:
-			if event.is_action_pressed("Player3Up"):
+			if event.is_action_pressed(&"Player3Up"):
 				dash()
 				powerCooldown()
 				
 		if playerId == 4:
-			if event.is_action_pressed("Player4Up"):
+			if event.is_action_pressed(&"Player4Up"):
 				twinHead()		
 				powerCooldown()
 
