@@ -143,6 +143,28 @@ func createBody(scene):
 		listOfNodes.pop_front()
 	add_child(sceneInstance)
 	return sceneInstance
+
+func shoot_fireball(scene):	
+	var sceneInstance = scene.instantiate()
+
+	sceneInstance.set_as_top_level(true)
+	sceneInstance.global_position = global_position
+#
+#	var bodySprite = sceneInstance.get_node("BodySprite")
+#	bodySprite.set_texture(head_texture)
+#	bodySprite.modulate = head_modulate
+
+#	sceneInstance.apply_scale(get_scale())
+	sceneInstance.rotation = rotation
+	
+	listOfNodes.append(sceneInstance)
+	if listOfNodes.size() == 1:
+		sceneInstance.rotation = rotation + PI
+	if listOfNodes.size() > 4:
+		listOfNodes.pop_front()
+	add_child(sceneInstance)
+	return sceneInstance
+	
 	
 func _input(event):
 	if powerAvailable:
@@ -225,7 +247,7 @@ func undash(prevSpeed, prevColor):
 	$HeadSprite.modulate = prevColor
 
 func shoot():
-	createBody(projectileScene)
+	shoot_fireball(projectileScene)
 	$Shoot.play()
 #	add_child(tirito)
 	pass

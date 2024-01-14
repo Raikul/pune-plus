@@ -1,4 +1,4 @@
-[gd_scene load_steps=71 format=3 uid="uid://bllc44u30oqtl"]
+[gd_scene load_steps=73 format=3 uid="uid://bllc44u30oqtl"]
 
 [ext_resource type="Script" path="res://scripts/projectile.gd" id="1_u848y"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_7bmpq"]
@@ -364,8 +364,17 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="Curve" id="Curve_yyxjl"]
+max_value = 3.0
+_data = [Vector2(0.0078125, 2.81053), 0.0, 0.0, 0, 0, Vector2(0.921875, 1.42105), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_r2mk2"]
+offsets = PackedFloat32Array(0, 0.309278, 0.71134)
+colors = PackedColorArray(1, 0.4, 0, 1, 1, 0.152941, 0, 1, 1, 0.566667, 0, 1)
+
 [node name="Projectile" type="Area2D"]
-scale = Vector2(5, 5)
+collision_mask = 5
 script = ExtResource("1_u848y")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -390,10 +399,29 @@ libraries = {
 }
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
 position = Vector2(-16.2, 54.2)
 rotation = 4.71239
 sprite_frames = SubResource("SpriteFrames_3ofob")
 animation = &"fireball"
 frame = 13
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+amount = 2000
+lifetime = 2.0
+explosiveness = 0.11
+emission_shape = 1
+emission_sphere_radius = 40.0
+direction = Vector2(0, 1)
+spread = 0.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 27.78
+initial_velocity_max = 100.0
+radial_accel_min = -50.0
+radial_accel_max = -40.0
+scale_amount_min = 0.0
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("Curve_yyxjl")
+color_ramp = SubResource("Gradient_r2mk2")
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

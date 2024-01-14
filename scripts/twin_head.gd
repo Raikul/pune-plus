@@ -66,7 +66,7 @@ func createBody(scene):
 	snakeBody.add_to_group("TwinBodies")
 	snakeBody.modulate = Color.AQUA
 	snakeBody.collision_layer = 0b100
-	print (snakeBody.collision_layer)
+#	print (snakeBody.collision_layer)
 	add_child(snakeBody)
 	listOfNodes.append(snakeBody)
 
