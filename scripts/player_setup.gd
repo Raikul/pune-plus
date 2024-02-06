@@ -176,5 +176,17 @@ func setKeys(playerId, control):
 func _on_enable_ai_toggled(button_pressed, player_id):
 	#Connected through Scene - TODO: Connect through code
 	Global.AI_Enabled[player_id] = button_pressed
-	
+	if button_pressed: enable_player(player_id)
 	pass # Replace with function body.
+
+func enable_player(player_id:int) -> void:
+	match player_id:
+		1:
+			if !player1Active : _on_p_1on_pressed()
+		2:
+			if !player2Active : _on_p_2on_pressed()
+		3:
+			if !player3Active : _on_p_3on_pressed()
+		4:
+			if !player4Active : _on_p_4on_pressed()
+

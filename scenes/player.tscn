@@ -81,6 +81,9 @@ one_shot = true
 [node name="DashTimer" type="Timer" parent="." groups=["timers"]]
 one_shot = true
 
+[node name="StopAndBreatheTimer" type="Timer" parent="." groups=["timers"]]
+one_shot = true
+
 [node name="CooldownTimer" type="Timer" parent="." groups=["timers"]]
 wait_time = 6.0
 one_shot = true

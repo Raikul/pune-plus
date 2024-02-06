@@ -49,9 +49,9 @@ func _ready():
 	screen_size = get_viewport_rect().size
 	
 	$HulkTimer.connect("timeout", unhulk.bind(Global.playerColors[playerId]))
-	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
+	$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
 	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
-	
+	$StopAndBreatheTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
 	$HulkTimer.add_to_group("timers", true)
 	
 	
@@ -245,6 +245,11 @@ func dash():
 func undash(prevSpeed, prevColor):
 	speed = prevSpeed
 	$HeadSprite.modulate = prevColor
+	
+func stop_and_breathe(prevSpeed,prevColor):
+	speed = 0
+	$HeadSprite.modulate = Color.ORANGE
+	$StopAndBreatheTimer.start()
 
 func shoot():
 	shoot_fireball(projectileScene)
