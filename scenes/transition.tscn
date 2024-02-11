@@ -34,7 +34,7 @@ color = Color(0, 0, 0, 1)
 script = ExtResource("1_pt3c8")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-autoplay = "transition_to"
 libraries = {
 "": SubResource("AnimationLibrary_kt1ek")
 }
+autoplay = "transition_to"
