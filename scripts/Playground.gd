@@ -19,7 +19,7 @@ func _ready():
 	groupColliders()
 	setupPlayers()
 	$Events.set_space(topLimit,bottomLimit)
-	$MusicPlayer.play(Global.musicProgress)
+	setup_music()
 	Global.scoreToReach = (get_tree().get_nodes_in_group("activePlayers").size() - 1) * 10
 	Global.scoreToReach = max(Global.scoreToReach, 10)
 	#debug
@@ -27,14 +27,44 @@ func _ready():
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
 	
 func _process(_delta):
-	if Input.is_key_pressed(KEY_ESCAPE):
-		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	#pause_menu_input()
+	#exit_menu_input()
+	#if Input.is_key_pressed(KEY_ESCAPE):
+		#get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	set_cooldowns_ui()
+	#		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+
+func pause_menu_input() -> void:
+	if Input.is_action_just_pressed("Pause"):
+		if get_tree().paused:
+			$PauseButton.hide()
+			get_tree().paused = false
+		elif not get_tree().paused:
+			$PauseButton.show()
+			get_tree().paused = true
+			
+			
+func exit_menu_input() -> void:
+	if Input.is_action_just_pressed("ui_cancel"):
+		if get_tree().paused:
+			$ExitButton.hide()
+			get_tree().paused = false
+		elif not get_tree().paused:
+			$ExitButton.show()
+			get_tree().paused = true
+
+
+func set_cooldowns_ui():
 	if is_instance_valid(get_tree()):
 		for player in get_tree().get_nodes_in_group("activePlayers"):
 			$HUD.set_cooldown(player.playerId, player.get_node("CooldownTimer").time_left)
-	#		get_tree().change_scene_to_file("res://scenes/menu.tscn")
-		
 
+
+func setup_music():
+	$MusicPlayer.play(Global.musicProgress)
+	$MusicPlayer.connect("finished",$MusicPlayer.play)
+	
+	
 func reset_match():
 	gameEnded = false
 	Global.reset_score()

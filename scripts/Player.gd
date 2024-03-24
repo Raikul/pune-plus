@@ -19,6 +19,7 @@ var listOfNodes = []
 var snakeBodyScene: PackedScene
 var projectileScene: PackedScene
 var twinHeadScene: PackedScene
+var fissure_scene: PackedScene
 @onready var bodyTimer = get_node("BodyTimer")
 @onready var gapTimer = get_node("GapTimer")
 @onready var gapFrequencyTimer = get_node("GapFrequencyTimer")
@@ -40,6 +41,7 @@ func _ready():
 	twinHeadScene = preload("res://scenes/twin_head.tscn")
 	projectileScene = preload("res://scenes/projectile.tscn")
 	snakeBodyScene = preload("res://scenes/snake_body.tscn")
+	fissure_scene = preload("res://scenes/fissure.tscn")
 	
 #	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 	gapTimer.connect("timeout", _on_gapTimer_timeout)
@@ -165,6 +167,27 @@ func shoot_fireball(scene):
 	add_child(sceneInstance)
 	return sceneInstance
 	
+func start_fissure(scene):	
+	var sceneInstance = scene.instantiate()
+
+	sceneInstance.set_as_top_level(true)
+	sceneInstance.global_position = global_position
+#
+#	var bodySprite = sceneInstance.get_node("BodySprite")
+#	bodySprite.set_texture(head_texture)
+#	bodySprite.modulate = head_modulate
+
+#	sceneInstance.apply_scale(get_scale())
+	sceneInstance.rotation = rotation
+	
+	listOfNodes.append(sceneInstance)
+	if listOfNodes.size() == 1:
+		sceneInstance.rotation = rotation + PI
+	if listOfNodes.size() > 4:
+		listOfNodes.pop_front()
+	add_child(sceneInstance)
+	return sceneInstance
+	
 	
 func _input(event):
 	if powerAvailable:
@@ -226,9 +249,11 @@ func ai_punchy(direction):
 			
 func hulk():
 	
-	$HeadSprite.modulate = Color.DIM_GRAY
+
 	$Hulk.play()
 	invincible = true
+	start_fissure(fissure_scene)
+	$HeadSprite.modulate = Color.DIM_GRAY
 #	$CollisionShape2D.set_deferred("disabled", true)
 	$HulkTimer.start()
 	
@@ -236,6 +261,7 @@ func unhulk(prevColor):
 	$HeadSprite.modulate = prevColor
 #	$CollisionShape2D.set_deferred("disabled", false)
 	invincible = false
+	
 func dash():
 	speed = speed*2
 	$Dash.play()

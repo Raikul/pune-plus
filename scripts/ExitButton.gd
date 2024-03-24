@@ -8,10 +8,9 @@ func _ready():
 
 func _process(_delta):
 	if Input.is_action_just_pressed("Pause"):
-		if visible and get_tree().paused:
+		if get_tree().paused:
 			hide()
 			get_tree().paused = false
 		elif not get_tree().paused:
 			show()
 			get_tree().paused = true
-	

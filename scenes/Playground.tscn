@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene load_steps=16 format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="8_bk8re"]
 [ext_resource type="AudioStream" uid="uid://b6e4n6u30fyl8" path="res://assets/sounds/juegonicopune.mp3" id="9_hxvts"]
 [ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="10_6dk6d"]
+[ext_resource type="Script" path="res://scenes/ExitButton.gd" id="10_q7u0a"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
 [ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
@@ -313,6 +314,19 @@ text = "Unpause
  (Click)"
 script = ExtResource("8_1ieds")
 
+[node name="ExitButton" type="Button" parent="."]
+visible = false
+visibility_layer = 3
+z_index = 5
+offset_left = 670.0
+offset_top = 379.0
+offset_right = 678.0
+offset_bottom = 387.0
+theme_override_font_sizes/font_size = 66
+text = "Click to Exit
+ESC to Cancel"
+script = ExtResource("10_q7u0a")
+
 [node name="Colliders" type="Node2D" parent="."]
 
 [node name="LimitTop" type="Area2D" parent="Colliders"]
@@ -422,6 +436,7 @@ shroomScene = ExtResource("12_erhbx")
 wait_time = 3.0
 
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
+[connection signal="pressed" from="ExitButton" to="ExitButton" method="_on_pressed"]
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
 
 [editable path="Lesson"]
