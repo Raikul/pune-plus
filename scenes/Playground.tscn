@@ -44,7 +44,7 @@ offset_bottom = 1201.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.59795, 0.892334)
-color = Color(0, 0, 0, 1)
+color = Color(0.08, 0.08, 0.08, 1)
 
 [node name="Shroom" parent="." instance=ExtResource("12_erhbx")]
 position = Vector2(937, 553)

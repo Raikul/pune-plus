@@ -169,15 +169,15 @@ func shoot_fireball(scene):
 	add_child(sceneInstance)
 	return sceneInstance
 	
-func start_fissure(fissure_step, fissure_scene):	
+func start_fissure(fissure_step, fissure_scene, previous_body_list = []):	
 	var fissure_instance : Fissure = fissure_scene.instantiate()
 
 	fissure_instance.set_as_top_level(true)
 	fissure_instance.global_position = global_position
-	
+	var body_list = fissure_instance.set_body(fissure_step, previous_body_list)
 	if fissure_step < fissure_instance.maximum_step_number:
-		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene) )
-	fissure_instance.set_body(fissure_step)
+		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene, body_list) )
+
 #	var bodySprite = sceneInstance.get_node("BodySprite")
 #	bodySprite.set_texture(head_texture)
 #	bodySprite.modulate = head_modulate

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5hnkhow1tevi"
-path="res://.godot/imported/cuerpo 3.png-362ec81c6c474519e77175622f9aa8e9.ctex"
+uid="uid://ctftbps61dbmx"
+path="res://.godot/imported/inicio 3.png-60f478c792c359433ce7bc998fa929d9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/jorge-resources/Powers/Earth/cuerpo 3.png"
-dest_files=["res://.godot/imported/cuerpo 3.png-362ec81c6c474519e77175622f9aa8e9.ctex"]
+source_file="res://assets/jorge-resources/Powers/xEarth/inicio 3.png"
+dest_files=["res://.godot/imported/inicio 3.png-60f478c792c359433ce7bc998fa929d9.ctex"]
 
 [params]
 
