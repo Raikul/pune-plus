@@ -175,7 +175,7 @@ func start_fissure(fissure_step, fissure_scene):
 	fissure_instance.set_as_top_level(true)
 	fissure_instance.global_position = global_position
 	
-	if fissure_step <4:
+	if fissure_step < fissure_instance.maximum_step_number:
 		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene) )
 	fissure_instance.set_body(fissure_step)
 #	var bodySprite = sceneInstance.get_node("BodySprite")
@@ -262,13 +262,15 @@ func hulk():
 
 	$Hulk.play()
 	invincible = true
+	head_modulate.a = 0
 	start_fissure( 1, fissure_scene)
-	$HeadSprite.modulate = Color.DIM_GRAY
+	#$HeadSprite.modulate = Color.BLACK
 #	$CollisionShape2D.set_deferred("disabled", true)
 	$HulkTimer.start()
 	
 func unhulk(prevColor):
 	$HeadSprite.modulate = prevColor
+	head_modulate = prevColor
 #	$CollisionShape2D.set_deferred("disabled", false)
 	invincible = false
 	

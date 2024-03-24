@@ -6,7 +6,8 @@ var texture_path = "res://assets/jorge-resources/Powers/Earth/"
 var _fissure_step: = 1
 var delta_sum : float = 0
 var next_created := false
-var fissure_gap := 0.4
+var fissure_gap := 0.1
+var maximum_step_number := 8
 signal fissure_ready(step)
 
 # Called when the node enters the scene tree for the first time.
@@ -24,7 +25,7 @@ func _physics_process(delta: float) -> void:
 func set_body(fissure_step: int) -> void:
 	_fissure_step = fissure_step
 	var random_number = randi_range(1,4)
-	if fissure_step == 1 or fissure_step == 4:
+	if fissure_step == 1 or fissure_step == maximum_step_number:
 		$FissureBody.texture = load(texture_path + "inicio " + str(random_number) + ".png")
 		if fissure_step == 1:
 			$FissureBody.set_flip_h(true)
