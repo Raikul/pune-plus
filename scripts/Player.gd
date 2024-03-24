@@ -108,6 +108,8 @@ func _on_area_entered(area):
 		area.queue_free()
 	elif (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads"))  and is_water_my_friend:
 		pass
+	elif area.is_in_group("Fissures"):
+		pass
 	elif invincible == false:
 		if listOfNodes.find(area) == -1:
 			var currentTwinHeadInstance = get_tree().get_first_node_in_group("twinHeads")
@@ -167,26 +169,34 @@ func shoot_fireball(scene):
 	add_child(sceneInstance)
 	return sceneInstance
 	
-func start_fissure(scene):	
-	var sceneInstance = scene.instantiate()
+func start_fissure(fissure_step, fissure_scene):	
+	var fissure_instance : Fissure = fissure_scene.instantiate()
 
-	sceneInstance.set_as_top_level(true)
-	sceneInstance.global_position = global_position
-#
+	fissure_instance.set_as_top_level(true)
+	fissure_instance.global_position = global_position
+	
+	if fissure_step <4:
+		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene) )
+	fissure_instance.set_body(fissure_step)
 #	var bodySprite = sceneInstance.get_node("BodySprite")
 #	bodySprite.set_texture(head_texture)
 #	bodySprite.modulate = head_modulate
 
-#	sceneInstance.apply_scale(get_scale())
-	sceneInstance.rotation = rotation
 	
-	listOfNodes.append(sceneInstance)
+
+		
+#	sceneInstance.apply_scale(get_scale())
+	fissure_instance.rotation = rotation
+	
+	listOfNodes.append(fissure_instance)
 	if listOfNodes.size() == 1:
-		sceneInstance.rotation = rotation + PI
+		fissure_instance.rotation = rotation + PI
 	if listOfNodes.size() > 4:
 		listOfNodes.pop_front()
-	add_child(sceneInstance)
-	return sceneInstance
+	
+	fissure_instance.add_to_group("Fissures", true)
+	add_child(fissure_instance)
+	return fissure_instance
 	
 	
 func _input(event):
@@ -252,7 +262,7 @@ func hulk():
 
 	$Hulk.play()
 	invincible = true
-	start_fissure(fissure_scene)
+	start_fissure( 1, fissure_scene)
 	$HeadSprite.modulate = Color.DIM_GRAY
 #	$CollisionShape2D.set_deferred("disabled", true)
 	$HulkTimer.start()

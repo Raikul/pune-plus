@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://k1wa6jvfpeoq"]
+[gd_scene load_steps=3 format=3 uid="uid://k1wa6jvfpeoq"]
 
+[ext_resource type="Script" path="res://scenes/fissure.gd" id="1_bvc44"]
 [ext_resource type="Texture2D" uid="uid://c5hnkhow1tevi" path="res://assets/jorge-resources/Powers/Earth/cuerpo 3.png" id="1_uj237"]
 
 [node name="Fissure" type="Node2D"]
+script = ExtResource("1_bvc44")
 
 [node name="FissureBody" type="TextureRect" parent="."]
 anchors_preset = 8
