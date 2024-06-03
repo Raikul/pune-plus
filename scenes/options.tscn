@@ -1,10 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://bd73ybc7rg362"]
+[gd_scene load_steps=10 format=3 uid="uid://bd73ybc7rg362"]
 
+[ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_1wyxj"]
 [ext_resource type="Script" path="res://scripts/WindowMode.gd" id="1_bi3at"]
 [ext_resource type="Script" path="res://scripts/options.gd" id="1_ff04h"]
 [ext_resource type="Script" path="res://scripts/Resolution.gd" id="2_wj7dj"]
 [ext_resource type="Script" path="res://scripts/VolumeBox.gd" id="3_qxud6"]
 [ext_resource type="Script" path="res://scripts/MusicBox.gd" id="4_33j25"]
+[ext_resource type="FontFile" uid="uid://diuj1g8p0nk4h" path="res://assets/fonts/Epistolar.ttf" id="5_vybkf"]
 [ext_resource type="Script" path="res://scripts/EffectBox.gd" id="5_y60kl"]
 [ext_resource type="Script" path="res://scripts/GapBox.gd" id="6_0hy60"]
 
@@ -15,6 +17,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_1wyxj")
 script = ExtResource("1_ff04h")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
@@ -57,6 +60,7 @@ script = ExtResource("1_bi3at")
 [node name="Window Mode" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode"]
 layout_mode = 2
 size_flags_horizontal = 8
+theme = ExtResource("1_1wyxj")
 theme_override_font_sizes/font_size = 66
 text = "Window Mode"
 horizontal_alignment = 1
@@ -90,6 +94,7 @@ size_flags_horizontal = 4
 [node name="OptionButton" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Resolution"]
 layout_mode = 2
 size_flags_horizontal = 10
+theme_override_fonts/font = ExtResource("5_vybkf")
 theme_override_font_sizes/font_size = 66
 
 [node name="Back" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video"]

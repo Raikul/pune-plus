@@ -112,7 +112,6 @@ text = "Shrooms?"
 
 [node name="Options" parent="CanvasLayer" instance=ExtResource("3_wmb4s")]
 visible = false
-theme = ExtResource("1_gkmrk")
 
 [node name="Version" type="PanelContainer" parent="CanvasLayer"]
 visible = false

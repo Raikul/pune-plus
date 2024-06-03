@@ -13,7 +13,7 @@ func _ready():
 #	option_button.item_selected.connect(on_window_mode_selected)
 	add_window_mode_items()
 	on_window_mode_selected(1)
-	option_button.select(1)
+	option_button.select(0)
 	
 func add_window_mode_items():
 	for window_mode in WINDOW_MODE_ARRAY:
