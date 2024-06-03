@@ -53,7 +53,13 @@ func _ready():
 	$HulkTimer.connect("timeout", unhulk.bind(Global.playerColors[playerId]))
 	$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
 	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
-	$StopAndBreatheTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
+	
+	#With Stop:
+	#$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
+	#$StopAndBreatheTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
+	##No Stop
+	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
+	
 	$HulkTimer.add_to_group("timers", true)
 	
 	

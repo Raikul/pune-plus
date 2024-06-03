@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://bd73ybc7rg362"]
+[gd_scene load_steps=8 format=3 uid="uid://bd73ybc7rg362"]
 
 [ext_resource type="Script" path="res://scripts/WindowMode.gd" id="1_bi3at"]
 [ext_resource type="Script" path="res://scripts/options.gd" id="1_ff04h"]
 [ext_resource type="Script" path="res://scripts/Resolution.gd" id="2_wj7dj"]
 [ext_resource type="Script" path="res://scripts/VolumeBox.gd" id="3_qxud6"]
 [ext_resource type="Script" path="res://scripts/MusicBox.gd" id="4_33j25"]
+[ext_resource type="Script" path="res://scripts/EffectBox.gd" id="5_y60kl"]
 [ext_resource type="Script" path="res://scripts/GapBox.gd" id="6_0hy60"]
 
 [node name="Options" type="Control"]
@@ -139,7 +140,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 6
 theme_override_constants/separation = 80
 alignment = 1
-script = ExtResource("3_qxud6")
+script = ExtResource("5_y60kl")
 
 [node name="Volume" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/EffectBox"]
 layout_mode = 2
