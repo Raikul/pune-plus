@@ -150,6 +150,7 @@ func setKeys(playerId, control):
 			text += " / "
 		text +=  i.as_text().rstrip("(Physical)")
 		
+		
 	if control == "Up":
 		label =  inputList.get_node(control).get_node("MarginContainer/PanelContainer").get_node(control)
 	else: label = inputList.get_node(control).get_node(control)
@@ -165,7 +166,9 @@ func setKeys(playerId, control):
 		var ls = LabelSettings.new()
 		ls.set_font_size(44)
 		label.set_label_settings(ls)
-
+		label.set_text(label.text.substr(0,20))
+	#if label.text .size() > 300:
+		#label.text.substr(300)
 
 func _on_enable_ai_toggled(button_pressed, player_id):
 	#Connected through Scene - TODO: Connect through code

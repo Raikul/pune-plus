@@ -107,6 +107,9 @@ modulate = Color(1, 0.25098, 0.101961, 1)
 texture = ExtResource("6_gh44p")
 flip_v = false
 
+[node name="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/InputList/Up" index="0"]
+clip_contents = true
+
 [node name="2" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
 layout_mode = 2
 
@@ -114,6 +117,9 @@ layout_mode = 2
 modulate = Color(0.901961, 0.74902, 0, 1)
 texture = ExtResource("7_rx1cs")
 flip_v = false
+
+[node name="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2/InputList/Up" index="0"]
+clip_contents = true
 
 [node name="3" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
 layout_mode = 2
@@ -126,6 +132,9 @@ text = "AIR
 modulate = Color(0.101961, 0.698039, 1, 1)
 flip_v = false
 
+[node name="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/InputList/Up" index="0"]
+clip_contents = true
+
 [node name="4" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_gg1ju")]
 layout_mode = 2
 
@@ -137,6 +146,9 @@ text = "WATER
 modulate = Color(0, 0.901961, 0.6, 1)
 texture = ExtResource("8_lif5f")
 flip_v = false
+
+[node name="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/InputList/Up" index="0"]
+clip_contents = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
