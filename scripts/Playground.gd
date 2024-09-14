@@ -11,6 +11,8 @@ var players_to_reset = []
 var player_scene
 var RNG :RandomNumberGenerator
 var time_flowing = false
+
+@onready var animation_player = $AnimationPlayer
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
 
 func _ready():
@@ -154,6 +156,7 @@ func finishGame(playerId):
 	gameEnded = true
 	$Lesson.improvise("Player "+str(playerId)+" Wins")
 	$Lesson.show()
+	$Victory.play()
 	
 func stopTime():
 	time_flowing = false
@@ -166,8 +169,16 @@ func stopTime():
 	get_tree().get_first_node_in_group("HUD").set_process(false)
 	pass
 
-func restart():
+func restart(delay = 2):
 	stopTime()
+	var alive_players = get_tree().get_nodes_in_group("alivePlayers")
+	if alive_players.size() == 1:
+		var id = alive_players[0].playerId
+		animation_player.play("player_"+str(id)+"_win")
+	
+	await(get_tree().create_timer(delay).timeout)
+	animation_player.stop()
+	$HUD.reset_labels()
 	if Global.lessons:
 		$Lesson.teach("Water")
 		$Lesson.show()

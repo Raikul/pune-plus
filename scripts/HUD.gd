@@ -8,6 +8,7 @@ var player1cooldown: TextureProgressBar
 var player2cooldown: TextureProgressBar
 var player3cooldown: TextureProgressBar
 var player4cooldown: TextureProgressBar
+
 #
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
@@ -32,6 +33,12 @@ func set_cooldown(player_id, time_left):
 		4:
 			cooldown = player4cooldown
 	cooldown.value = time_left
+	
+func reset_labels():
+	label1.self_modulate = Color.WHITE
+	label2.self_modulate = Color.WHITE
+	label3.self_modulate = Color.WHITE
+	label4.self_modulate = Color.WHITE
 	
 func _process(_delta):
 	

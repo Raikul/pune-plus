@@ -1,10 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://cgrfababvjbd2"]
+[gd_scene load_steps=13 format=3 uid="uid://cgrfababvjbd2"]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
-[ext_resource type="AudioStream" uid="uid://c7pisg0ias73o" path="res://assets/sounds/DefensiveStance.ogg" id="4_5005l"]
-[ext_resource type="AudioStream" uid="uid://d14y4562cnq07" path="res://assets/sounds/firepunchy.mp3" id="5_0ayag"]
+[ext_resource type="AudioStream" uid="uid://dexbo2gvthvoy" path="res://assets/sounds/Earth.ogg" id="2_js8rq"]
+[ext_resource type="AudioStream" uid="uid://bqi7qlp3r5wbx" path="res://assets/sounds/NewFireball.mp3" id="3_2aej1"]
+[ext_resource type="AudioStream" uid="uid://bhbafwkh2dvke" path="res://assets/sounds/NewSplit.ogg" id="5_2webw"]
 [ext_resource type="AudioStream" uid="uid://beqcha2mjaie" path="res://assets/sounds/waterpunchy.mp3" id="6_wcc6r"]
 [ext_resource type="AudioStream" uid="uid://dwl2whtbjtsfq" path="res://assets/sounds/airepunchy.mp3" id="7_fk3kw"]
+[ext_resource type="AudioStream" uid="uid://bikvdq2rm4nam" path="res://assets/sounds/ShroomEaten.ogg" id="7_good5"]
 [ext_resource type="Texture2D" uid="uid://cwuko1uppu6iy" path="res://assets/jorge-resources/Gameplay scene/head.png" id="8_fkyt5"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="9_maysg"]
 [ext_resource type="PackedScene" uid="uid://sn4iiintepsd" path="res://scenes/raycaster.tscn" id="17_87d3g"]
@@ -22,19 +24,27 @@ collision_mask = 7
 script = ExtResource("1_bb5nk")
 
 [node name="Hulk" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_5005l")
+stream = ExtResource("2_js8rq")
 bus = &"Effects"
 
 [node name="Shoot" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_0ayag")
+stream = ExtResource("3_2aej1")
 bus = &"Effects"
 
 [node name="Split" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("6_wcc6r")
 bus = &"Effects"
 
+[node name="NewSplit" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_2webw")
+bus = &"Effects"
+
 [node name="Dash" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("7_fk3kw")
+bus = &"Effects"
+
+[node name="ShroomEaten" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_good5")
 bus = &"Effects"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

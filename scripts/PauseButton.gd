@@ -15,3 +15,7 @@ func _process(_delta):
 			show()
 			get_tree().paused = true
 	
+	if Input.is_action_just_pressed("ui_cancel"):
+		if visible and get_tree().paused:
+			get_parent().restart(0)
+	

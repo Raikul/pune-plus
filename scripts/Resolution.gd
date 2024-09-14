@@ -6,14 +6,15 @@ extends HBoxContainer
 const RESOLUTION_DICTIONARY : Dictionary = {
 	"1152 x 648" : Vector2(1152,648),
 	"1288 x 720" : Vector2(1288,720),
+	"1680 x 1050" : Vector2(1680,1050),
 	"1920 x 1080" : Vector2(1920,1080)
 }
 
 
 func _ready():
 	add_resolution_items()
-	on_resolution_selected(2)
-	option_button.select(2)
+	on_resolution_selected(3)
+	#option_button.select(2)
 #	print(RESOLUTION_DICTIONARY.values())
 #	print(DisplayServer.window_get_size())
 #	print(RESOLUTION_DICTIONARY.values().find(DisplayServer.window_get_size()))

@@ -110,6 +110,7 @@ func _physics_process(delta):
 func _on_area_entered(area):	
 #	print(area)
 	if area is Shroom:
+		$ShroomEaten.play()
 		emit_signal("score")
 		area.queue_free()
 	elif (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads"))  and is_water_my_friend:
@@ -122,6 +123,7 @@ func _on_area_entered(area):
 #			if (twinHeadInstance == null or twinHeadInstance.alive == false):
 			if !is_instance_valid(currentTwinHeadInstance) or currentTwinHeadInstance.alive == false or !is_water_my_friend:
 				$CollisionShape2D.set_deferred("disabled", true)
+				$Split.play()
 				set_process(false)
 				emit_signal("dead")
 			elif is_water_my_friend: #twinHeadIsAlive
@@ -302,7 +304,7 @@ func shoot():
 	pass
 
 func twinHead():
-	$Split.play()
+	$NewSplit.play()
 #	has_twin_head = true
 	is_water_my_friend = true
 	twinHeadInstance = createBody(twinHeadScene)
