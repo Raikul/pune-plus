@@ -45,5 +45,3 @@ func is_fully_surrounded():
 		return true
 	else: return false
 	
-
-

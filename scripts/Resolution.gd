@@ -30,4 +30,3 @@ func add_resolution_items():
 
 func on_resolution_selected(index : int):
 	DisplayServer.window_set_size(RESOLUTION_DICTIONARY.values()[index])
-

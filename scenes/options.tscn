@@ -42,6 +42,7 @@ theme_override_constants/margin_bottom = 3
 layout_mode = 2
 size_flags_horizontal = 8
 theme_override_font_sizes/font_size = 40
+current_tab = 0
 clip_tabs = false
 all_tabs_in_front = true
 drag_to_rearrange_enabled = true
@@ -51,6 +52,7 @@ use_hidden_tabs_for_min_size = true
 layout_mode = 2
 theme_override_constants/separation = 50
 alignment = 1
+metadata/_tab_index = 0
 
 [node name="WindowMode" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video"]
 layout_mode = 2
@@ -105,6 +107,7 @@ text = "Back"
 [node name="Audio" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer"]
 visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="VolumeBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio"]
 layout_mode = 2
@@ -209,6 +212,7 @@ text = "Back"
 [node name="Gameplay" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer"]
 visible = false
 layout_mode = 2
+metadata/_tab_index = 2
 
 [node name="GapBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay"]
 layout_mode = 2
@@ -233,7 +237,6 @@ size_flags_horizontal = 8
 theme_override_font_sizes/font_size = 66
 item_count = 3
 popup/item_0/text = "Small"
-popup/item_0/id = 0
 popup/item_1/text = "Medium"
 popup/item_1/id = 1
 popup/item_2/text = "Large"

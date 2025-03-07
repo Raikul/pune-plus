@@ -186,4 +186,3 @@ func enable_player(player_id:int) -> void:
 			if !player3Active : _on_p_3on_pressed()
 		4:
 			if !player4Active : _on_p_4on_pressed()
-

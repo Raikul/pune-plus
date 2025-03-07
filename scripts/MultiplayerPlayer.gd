@@ -172,4 +172,3 @@ func powerCooldown():
 	
 func powerReady():
 	powerAvailable = true
-

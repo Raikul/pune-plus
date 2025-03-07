@@ -10,6 +10,15 @@
 [ext_resource type="Texture2D" uid="uid://d1fq163d2v530" path="res://assets/jorge-resources/Starting Screen/Logo-Punchis.png" id="8_kslgp"]
 [ext_resource type="PackedScene" uid="uid://rr63k4v7eon5" path="res://scenes/new_player_setup.tscn" id="10_n56o5"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
+bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwfie"]
+bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ci1j0"]
+bg_color = Color(0.203922, 0.701961, 0.47451, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dagr"]
 bg_color = Color(0.815686, 0.415686, 0.858824, 1)
 border_width_left = 4
@@ -23,15 +32,6 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 shadow_color = Color(0.933333, 0, 0, 0.6)
 shadow_size = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ci1j0"]
-bg_color = Color(0.203922, 0.701961, 0.47451, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwfie"]
-bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
-bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
 
 [sub_resource type="Theme" id="Theme_7avap"]
 Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
@@ -92,10 +92,10 @@ theme = ExtResource("1_gkmrk")
 [node name="ShroomsButton" type="CheckButton" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer"]
 layout_mode = 2
 theme = ExtResource("1_gkmrk")
-theme_override_styles/normal = SubResource("StyleBoxFlat_1dagr")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_6e00a")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
+theme_override_styles/normal = SubResource("StyleBoxFlat_1dagr")
 button_pressed = true
 
 [node name="ShroomsLabel" type="Label" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer"]
@@ -112,6 +112,18 @@ text = "Shrooms?"
 
 [node name="Options" parent="CanvasLayer" instance=ExtResource("3_wmb4s")]
 visible = false
+
+[node name="TabContainer" parent="CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer" index="0"]
+current_tab = 0
+
+[node name="Video" parent="CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer" index="1"]
+metadata/_tab_index = 0
+
+[node name="Audio" parent="CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer" index="2"]
+metadata/_tab_index = 1
+
+[node name="Gameplay" parent="CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer" index="3"]
+metadata/_tab_index = 2
 
 [node name="Version" type="PanelContainer" parent="CanvasLayer"]
 visible = false

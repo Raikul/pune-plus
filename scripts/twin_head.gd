@@ -90,4 +90,3 @@ func _on_area_entered(area):
 			if (!get_parent().is_in_group("alivePlayers")):
 				get_parent().emit_signal("dead")
 		pass # Replace with function body.
-
