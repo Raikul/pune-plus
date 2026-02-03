@@ -8,9 +8,9 @@
 [ext_resource type="Texture2D" uid="uid://cl0k516esnsd0" path="res://particle_import/resources/spotlight_8.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://cx5ne2kxrhlxt" path="res://particle_import/resources/spotlight_7.png" id="7"]
 [ext_resource type="Texture2D" uid="uid://pewe2nee0uii" path="res://particle_import/resources/spotlight_1.png" id="8"]
-[ext_resource type="Script" path="res://particle_import/wiggle_scale.gd" id="9"]
-[ext_resource type="Script" path="res://particle_import/rotate_continuos.gd" id="10"]
-[ext_resource type="Script" path="res://particle_import/Button.gd" id="11"]
+[ext_resource type="Script" uid="uid://dld40coxo8kcs" path="res://particle_import/wiggle_scale.gd" id="9"]
+[ext_resource type="Script" uid="uid://bmnu3f0g328di" path="res://particle_import/rotate_continuos.gd" id="10"]
+[ext_resource type="Script" uid="uid://bb1hyli6nky1" path="res://particle_import/Button.gd" id="11"]
 
 [sub_resource type="CanvasItemMaterial" id="1"]
 blend_mode = 1
@@ -40,8 +40,7 @@ color_ramp = SubResource("4")
 blend_mode = 1
 
 [sub_resource type="Curve" id="7"]
-min_value = -360.0
-max_value = 360.0
+_limits = [-360.0, 360.0, 0.0, 1.0]
 _data = [Vector2(0, 9.81818), 0.0, 0.0, 0, 0, Vector2(1, 360), 0.0, 0.0, 0, 0]
 point_count = 2
 
@@ -65,8 +64,8 @@ curve = SubResource("11")
 [sub_resource type="ParticleProcessMaterial" id="13"]
 emission_shape = 1
 emission_sphere_radius = 5.0
-gravity = Vector3(0, -150, 0)
 angular_velocity_curve = SubResource("CurveTexture_3jjrw")
+gravity = Vector3(0, -150, 0)
 scale_curve = SubResource("CurveTexture_2u1sy")
 color_ramp = SubResource("GradientTexture2D_lthsk")
 

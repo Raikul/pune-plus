@@ -1,7 +1,7 @@
 [gd_scene load_steps=49 format=3 uid="uid://bmmk676dlolf3"]
 
 [ext_resource type="Texture2D" uid="uid://erkqje4p6awr" path="res://assets/images/mushroom_pack/sprites.png" id="1_dxfee"]
-[ext_resource type="Script" path="res://scripts/shroom.gd" id="1_u58fx"]
+[ext_resource type="Script" uid="uid://bre8ex3twj6qa" path="res://scripts/shroom.gd" id="1_u58fx"]
 [ext_resource type="Texture2D" uid="uid://cnok64pos6lo6" path="res://assets/images/cartoon-set-various-glowing-magic-mushrooms-black-background-isolated-vector-illustration/2305.i203.018.P.m004.c33.fantasy magic mushrooms cartoon set.jpg" id="2_n07um"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dy2le"]

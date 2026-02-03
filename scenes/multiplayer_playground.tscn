@@ -1,13 +1,13 @@
 [gd_scene load_steps=11 format=3 uid="uid://dtgskxntmd0nq"]
 
-[ext_resource type="Script" path="res://scripts/MultiPlayground.gd" id="1_m4pyh"]
+[ext_resource type="Script" uid="uid://ix58vdkeft8q" path="res://scripts/MultiPlayground.gd" id="1_m4pyh"]
 [ext_resource type="PackedScene" uid="uid://burh8oloo8j3i" path="res://scenes/multiplayer_player.tscn" id="2_2l6ji"]
-[ext_resource type="Script" path="res://scripts/MultiplayerHUD.gd" id="3_it2o2"]
+[ext_resource type="Script" uid="uid://c3ib7yjocje7y" path="res://scripts/MultiplayerHUD.gd" id="3_it2o2"]
 [ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_3b4m3"]
 [ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_ax4uq"]
 [ext_resource type="Texture2D" uid="uid://cfcbkjgd1dtmf" path="res://assets/images/elements/fire.png" id="6_htpc8"]
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_pdrv7"]
-[ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_gmff3"]
+[ext_resource type="Script" uid="uid://cmsdlhm7gnvjf" path="res://scripts/PauseButton.gd" id="8_gmff3"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="9_ingoe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]

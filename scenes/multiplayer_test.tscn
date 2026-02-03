@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bth6oknld84yg"]
 
-[ext_resource type="Script" path="res://scripts/multiplayer_test.gd" id="1_qdhcm"]
+[ext_resource type="Script" uid="uid://dkjcabe5aokjd" path="res://scripts/multiplayer_test.gd" id="1_qdhcm"]
 [ext_resource type="PackedScene" uid="uid://cgrfababvjbd2" path="res://scenes/player.tscn" id="2_trhm1"]
 
 [node name="Multiplayer_Test" type="Node2D"]

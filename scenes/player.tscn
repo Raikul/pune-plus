@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://cgrfababvjbd2"]
 
-[ext_resource type="Script" path="res://scripts/Player.gd" id="1_bb5nk"]
+[ext_resource type="Script" uid="uid://hbe4s3t8o2lv" path="res://scripts/Player.gd" id="1_bb5nk"]
 [ext_resource type="AudioStream" uid="uid://dexbo2gvthvoy" path="res://assets/sounds/Earth.ogg" id="2_js8rq"]
 [ext_resource type="AudioStream" uid="uid://bqi7qlp3r5wbx" path="res://assets/sounds/NewFireball.mp3" id="3_2aej1"]
 [ext_resource type="AudioStream" uid="uid://bhbafwkh2dvke" path="res://assets/sounds/NewSplit.ogg" id="5_2webw"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://burh8oloo8j3i"]
 
-[ext_resource type="Script" path="res://scripts/MultiplayerPlayer.gd" id="1_abc1p"]
+[ext_resource type="Script" uid="uid://crsb3svvi1px4" path="res://scripts/MultiplayerPlayer.gd" id="1_abc1p"]
 [ext_resource type="PackedScene" uid="uid://wgnhwklhhik8" path="res://scenes/snake_body.tscn" id="2_e20ck"]
 [ext_resource type="PackedScene" uid="uid://bllc44u30oqtl" path="res://scenes/projectile.tscn" id="3_1p66q"]
 [ext_resource type="AudioStream" uid="uid://c7pisg0ias73o" path="res://assets/sounds/DefensiveStance.ogg" id="4_4bind"]
@@ -14,16 +14,13 @@ size = Vector2(127, 121)
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_7vrux"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
-properties/0/sync = true
-properties/0/watch = false
+properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
-properties/1/sync = true
-properties/1/watch = false
+properties/1/replication_mode = 1
 properties/2/path = NodePath("HeadSprite:modulate")
 properties/2/spawn = true
-properties/2/sync = true
-properties/2/watch = false
+properties/2/replication_mode = 1
 
 [node name="Player" type="Area2D"]
 script = ExtResource("1_abc1p")

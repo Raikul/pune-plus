@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dvukui07lve6g"]
 
-[ext_resource type="Script" path="res://scenes/lesson.gd" id="1_78d6u"]
+[ext_resource type="Script" uid="uid://c3xya1yujn0px" path="res://scenes/lesson.gd" id="1_78d6u"]
 [ext_resource type="Theme" uid="uid://dwqb8v8x0pe3l" path="res://scenes/shrooms.tres" id="2_6gxin"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_pwnbw"]

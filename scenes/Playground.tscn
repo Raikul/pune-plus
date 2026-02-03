@@ -1,18 +1,18 @@
 [gd_scene load_steps=22 format=3 uid="uid://bthplnovyhrpa"]
 
-[ext_resource type="Script" path="res://scripts/Playground.gd" id="1_ohys2"]
-[ext_resource type="Script" path="res://scripts/HUD.gd" id="3_ftqo5"]
+[ext_resource type="Script" uid="uid://bk2i8tnu2p034" path="res://scripts/Playground.gd" id="1_ohys2"]
+[ext_resource type="Script" uid="uid://waam8jkfa0ir" path="res://scripts/HUD.gd" id="3_ftqo5"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="7_taa2g"]
-[ext_resource type="Script" path="res://scripts/PauseButton.gd" id="8_1ieds"]
+[ext_resource type="Script" uid="uid://cmsdlhm7gnvjf" path="res://scripts/PauseButton.gd" id="8_1ieds"]
 [ext_resource type="Texture2D" uid="uid://bqb0rtmryfpj5" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png" id="8_1tmow"]
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="8_bk8re"]
 [ext_resource type="AudioStream" uid="uid://b6e4n6u30fyl8" path="res://assets/sounds/juegonicopune.mp3" id="9_hxvts"]
 [ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="10_6dk6d"]
-[ext_resource type="Script" path="res://scenes/ExitButton.gd" id="10_q7u0a"]
+[ext_resource type="Script" uid="uid://cfror2o588sr7" path="res://scenes/ExitButton.gd" id="10_q7u0a"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
-[ext_resource type="Script" path="res://scripts/Events.gd" id="11_yngvc"]
+[ext_resource type="Script" uid="uid://c4k0uwxvip4v6" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
-[ext_resource type="Script" path="res://scripts/limit.gd" id="12_ihapt"]
+[ext_resource type="Script" uid="uid://dud50g8jpvnm4" path="res://scripts/limit.gd" id="12_ihapt"]
 [ext_resource type="AudioStream" uid="uid://l25h3u0s44ky" path="res://assets/sounds/Victory.ogg" id="13_calfl"]
 
 [sub_resource type="Animation" id="Animation_o8qv7"]
@@ -80,10 +80,10 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ynogr"]
 _data = {
-"player_1_win": SubResource("Animation_o8qv7"),
-"player_2_win": SubResource("Animation_axq6q"),
-"player_3_win": SubResource("Animation_b5slg"),
-"player_4_win": SubResource("Animation_s5l6v")
+&"player_1_win": SubResource("Animation_o8qv7"),
+&"player_2_win": SubResource("Animation_axq6q"),
+&"player_3_win": SubResource("Animation_b5slg"),
+&"player_4_win": SubResource("Animation_s5l6v")
 }
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_60wp1"]
@@ -144,7 +144,7 @@ text = "DISFRUTA TU DOPAMINA"
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1Cooldown")
 libraries = {
-"": SubResource("AnimationLibrary_ynogr")
+&"": SubResource("AnimationLibrary_ynogr")
 }
 
 [node name="HUD" type="CanvasLayer" parent="."]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://k1wa6jvfpeoq"]
 
-[ext_resource type="Script" path="res://scenes/fissure.gd" id="1_bvc44"]
+[ext_resource type="Script" uid="uid://csrratvy2rpm2" path="res://scenes/fissure.gd" id="1_bvc44"]
 [ext_resource type="Texture2D" uid="uid://cnjbiavimwnm0" path="res://assets/jorge-resources/Powers/Earth/cuerpo_1.png" id="2_arqb2"]
 
 [node name="Fissure" type="Node2D"]

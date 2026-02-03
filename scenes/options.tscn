@@ -1,14 +1,14 @@
 [gd_scene load_steps=10 format=3 uid="uid://bd73ybc7rg362"]
 
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_1wyxj"]
-[ext_resource type="Script" path="res://scripts/WindowMode.gd" id="1_bi3at"]
-[ext_resource type="Script" path="res://scripts/options.gd" id="1_ff04h"]
-[ext_resource type="Script" path="res://scripts/Resolution.gd" id="2_wj7dj"]
-[ext_resource type="Script" path="res://scripts/VolumeBox.gd" id="3_qxud6"]
-[ext_resource type="Script" path="res://scripts/MusicBox.gd" id="4_33j25"]
+[ext_resource type="Script" uid="uid://bufy2dci7oouh" path="res://scripts/WindowMode.gd" id="1_bi3at"]
+[ext_resource type="Script" uid="uid://bawwjpcgvniad" path="res://scripts/options.gd" id="1_ff04h"]
+[ext_resource type="Script" uid="uid://vjodrnfriruo" path="res://scripts/Resolution.gd" id="2_wj7dj"]
+[ext_resource type="Script" uid="uid://bwyt6152slmj7" path="res://scripts/VolumeBox.gd" id="3_qxud6"]
+[ext_resource type="Script" uid="uid://lywlmxuu4lbv" path="res://scripts/MusicBox.gd" id="4_33j25"]
 [ext_resource type="FontFile" uid="uid://diuj1g8p0nk4h" path="res://assets/fonts/Epistolar.ttf" id="5_vybkf"]
-[ext_resource type="Script" path="res://scripts/EffectBox.gd" id="5_y60kl"]
-[ext_resource type="Script" path="res://scripts/GapBox.gd" id="6_0hy60"]
+[ext_resource type="Script" uid="uid://cjcacfa4bjwxc" path="res://scripts/EffectBox.gd" id="5_y60kl"]
+[ext_resource type="Script" uid="uid://b6y41018euqbd" path="res://scripts/GapBox.gd" id="6_0hy60"]
 
 [node name="Options" type="Control"]
 layout_mode = 3
@@ -237,6 +237,7 @@ size_flags_horizontal = 8
 theme_override_font_sizes/font_size = 66
 item_count = 3
 popup/item_0/text = "Small"
+popup/item_0/id = 0
 popup/item_1/text = "Medium"
 popup/item_1/id = 1
 popup/item_2/text = "Large"

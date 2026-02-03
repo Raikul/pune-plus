@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://civ242y3r6l2a"]
 
 [ext_resource type="Theme" uid="uid://dsnux54sug7ir" path="res://scenes/player_setup.tres" id="1_dho6o"]
-[ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_4fjiw"]
+[ext_resource type="Script" uid="uid://cwraxyv67tjfg" path="res://scripts/player_setup.gd" id="2_4fjiw"]
 [ext_resource type="FontFile" uid="uid://j8s2a2y7lay" path="res://assets/fonts/Flat Earth Scribe.ttf" id="3_wyjn6"]
 [ext_resource type="Texture2D" uid="uid://cmaqge41y7fdx" path="res://assets/images/elements/air.png" id="4_gu3or"]
 [ext_resource type="Texture2D" uid="uid://c5ej0d8p7s7bg" path="res://assets/images/elements/earth.png" id="5_e7cqo"]
@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bwlyoq7o83n43" path="res://assets/images/elements/water.png" id="7_h3h7o"]
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="8_ehujy"]
 [ext_resource type="PackedScene" uid="uid://bth6oknld84yg" path="res://scenes/multiplayer_test.tscn" id="9_n8h51"]
-[ext_resource type="Script" path="res://scenes/multiplayer_status.gd" id="10_1v47x"]
+[ext_resource type="Script" uid="uid://pq4qc14qn6n4" path="res://scenes/multiplayer_status.gd" id="10_1v47x"]
 
 [sub_resource type="SystemFont" id="SystemFont_ypk85"]
 subpixel_positioning = 0

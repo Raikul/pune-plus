@@ -1,9 +1,9 @@
 [gd_scene load_steps=12 format=3 uid="uid://ccgij1ekdykeg"]
 
 [ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_t3re1"]
-[ext_resource type="Script" path="res://scripts/player_setup.gd" id="2_tbs3p"]
+[ext_resource type="Script" uid="uid://cwraxyv67tjfg" path="res://scripts/player_setup.gd" id="2_tbs3p"]
 [ext_resource type="PackedScene" uid="uid://dflkv4we1oqbs" path="res://scenes/redefine_keys.tscn" id="3_8ef35"]
-[ext_resource type="Script" path="res://scripts/redefine_keys.gd" id="4_idam3"]
+[ext_resource type="Script" uid="uid://d3p7m6pcaqr1y" path="res://scripts/redefine_keys.gd" id="4_idam3"]
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="5_l25by"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="6_b0o1t"]
 [ext_resource type="PackedScene" uid="uid://ddeb28qs6q5po" path="res://scenes/individual_player_setup.tscn" id="6_q8i7n"]

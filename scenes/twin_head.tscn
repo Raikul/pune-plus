@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://dqamo77nekmrv"]
 
-[ext_resource type="Script" path="res://scripts/twin_head.gd" id="1_hjlq0"]
+[ext_resource type="Script" uid="uid://ba4hmxgiwfx6o" path="res://scripts/twin_head.gd" id="1_hjlq0"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_qgryg"]
 [ext_resource type="PackedScene" uid="uid://sn4iiintepsd" path="res://scenes/raycaster.tscn" id="3_aj473"]
 

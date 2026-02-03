@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="1_2hwot"]
 [ext_resource type="Theme" uid="uid://42hs2qutn4w3" path="res://scenes/jorge_setup_theme.tres" id="1_ewdxf"]
-[ext_resource type="Script" path="res://scenes/individual_player_setup.gd" id="2_5m2o2"]
+[ext_resource type="Script" uid="uid://d1lnwtnbmpr5e" path="res://scenes/individual_player_setup.gd" id="2_5m2o2"]
 [ext_resource type="Texture2D" uid="uid://dmsqtc8qu7bex" path="res://assets/jorge-resources/Game Selection/direction icon.png" id="3_r30wu"]
 [ext_resource type="Texture2D" uid="uid://dw8r050npvyqp" path="res://assets/jorge-resources/Game Selection/punchi icon.png" id="4_2ld1l"]
 

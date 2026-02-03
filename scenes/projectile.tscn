@@ -1,6 +1,6 @@
 [gd_scene load_steps=73 format=3 uid="uid://bllc44u30oqtl"]
 
-[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_u848y"]
+[ext_resource type="Script" uid="uid://cx1fm0iu72hup" path="res://scripts/projectile.gd" id="1_u848y"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_7bmpq"]
 [ext_resource type="Texture2D" uid="uid://bat6lrpprxkly" path="res://assets/images/fireballs/fire_ball_side_medium/imgs/img_0.png" id="3_bkf5x"]
 [ext_resource type="Texture2D" uid="uid://bg4nstemy8xi2" path="res://assets/images/fireballs/fire_ball_side_medium/imgs/img_1.png" id="4_jqbhe"]
@@ -260,10 +260,10 @@ length = 3.0
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_cgiuf"]
 _data = {
-"RESET": SubResource("Animation_2lo0s"),
-"fireball": SubResource("Animation_n47w4"),
-"launch": SubResource("Animation_h0gjr"),
-"meteor": SubResource("Animation_4qqq1")
+&"RESET": SubResource("Animation_2lo0s"),
+&"fireball": SubResource("Animation_n47w4"),
+&"launch": SubResource("Animation_h0gjr"),
+&"meteor": SubResource("Animation_4qqq1")
 }
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3ofob"]
@@ -365,7 +365,7 @@ animations = [{
 }]
 
 [sub_resource type="Curve" id="Curve_yyxjl"]
-max_value = 3.0
+_limits = [0.0, 3.0, 0.0, 1.0]
 _data = [Vector2(0.0078125, 2.81053), 0.0, 0.0, 0, 0, Vector2(0.921875, 1.42105), 0.0, 0.0, 0, 0]
 point_count = 2
 
@@ -395,7 +395,7 @@ animation = &"launch"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_cgiuf")
+&"": SubResource("AnimationLibrary_cgiuf")
 }
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
