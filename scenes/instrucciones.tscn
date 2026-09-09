@@ -1,0 +1,169 @@
+[gd_scene format=3 uid="uid://cua7mokcq7oa"]
+
+[ext_resource type="Script" uid="uid://bo5rmpgxmta05" path="res://scenes/instrucciones.gd" id="1_anmr4"]
+[ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="1_b42ok"]
+[ext_resource type="Texture2D" uid="uid://bqb0rtmryfpj5" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png" id="2_anmr4"]
+[ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="3_b1dxx"]
+[ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="4_bqms7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b42ok"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="Instrucciones" type="Control" unique_id=1618712375]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_anmr4")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1133726453]
+layout_mode = 0
+offset_right = 1364.0
+offset_bottom = 699.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_b42ok")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1011093358]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer" unique_id=247259651]
+custom_minimum_size = Vector2(1920, 0)
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=321542618]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer" unique_id=1969455978]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player1Cooldown" type="TextureProgressBar" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=1529820060]
+self_modulate = Color(0.898039, 0, 0.898039, 1)
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
+max_value = 6.0
+step = 0.01
+value = 6.0
+fill_mode = 2
+nine_patch_stretch = true
+texture_under = ExtResource("1_b42ok")
+texture_progress = ExtResource("1_b42ok")
+tint_under = Color(1, 0.25098, 0.101961, 1)
+tint_progress = Color(0.301961, 0.0745098, 0.0313726, 1)
+
+[node name="Player1Description" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=846471158]
+self_modulate = Color(1, 0, 1, 1)
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 22
+text = "Tira una bola de fuego"
+horizontal_alignment = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=1544115801]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer2" unique_id=2130919424]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player2Cooldown" type="TextureProgressBar" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer" unique_id=935394065]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
+max_value = 6.0
+step = 0.1
+fill_mode = 2
+nine_patch_stretch = true
+texture_under = ExtResource("2_anmr4")
+texture_progress = ExtResource("2_anmr4")
+tint_under = Color(0.901961, 0.74902, 0, 1)
+tint_progress = Color(0.301961, 0.25098, 0, 1)
+
+[node name="Player2Description" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer" unique_id=2115078004]
+self_modulate = Color(0.833333, 1, 0.166667, 1)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 22
+text = "Acelera"
+
+[node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=725750737]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer3" unique_id=1195058539]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player3Cooldown" type="TextureProgressBar" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer" unique_id=213483557]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
+max_value = 6.0
+step = 0.01
+value = 6.0
+fill_mode = 2
+nine_patch_stretch = true
+texture_under = ExtResource("3_b1dxx")
+texture_progress = ExtResource("3_b1dxx")
+tint_under = Color(0.101961, 0.698039, 1, 1)
+tint_progress = Color(0.03, 0.21, 0.3, 1)
+
+[node name="Player3ScoreLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer" unique_id=939100934]
+self_modulate = Color(0.833333, 1, 0.166667, 1)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
+
+[node name="PanelContainer4" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=895410247]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer4" unique_id=1835777973]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Player4Cooldown" type="TextureProgressBar" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer" unique_id=569316078]
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 4
+max_value = 6.0
+step = 0.01
+value = 6.0
+fill_mode = 2
+nine_patch_stretch = true
+texture_under = ExtResource("4_bqms7")
+texture_progress = ExtResource("4_bqms7")
+tint_under = Color(0, 0.901961, 0.6, 1)
+tint_progress = Color(0, 0.3, 0.2, 1)
+
+[node name="Player4ScoreLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer" unique_id=2045973302]
+self_modulate = Color(1, 0.0985601, 0.90144, 1)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
+theme_override_font_sizes/font_size = 66
+text = "0"
+
+[node name="Button" type="Button" parent="." unique_id=849591867]
+layout_mode = 0
+offset_left = 888.0
+offset_top = 561.0
+offset_right = 1042.0
+offset_bottom = 604.0
+text = "CERRAR"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

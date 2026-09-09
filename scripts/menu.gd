@@ -55,3 +55,8 @@ func _on_shrooms_button_toggled(button_pressed):
 #Region Multiplayer
 func _on_multiplayer_pressed():
 	get_tree().change_scene_to_file("res://scenes/multiplayer_setup.tscn")
+
+
+func _on_instructions_pressed() -> void:
+	%Instrucciones.show()
+	pass # Replace with function body.
