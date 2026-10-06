@@ -221,7 +221,7 @@ func _input(event):
 		
 		if playerId == 3:
 			if event.is_action_pressed(&"Player3Up"):
-				dash()
+				teleport()
 				powerCooldown()
 				
 		if playerId == 4:
@@ -240,7 +240,7 @@ func activate_power():
 			hulk()		
 		if playerId == 3:
 			powerCooldown()	
-			dash()
+			teleport()
 		if playerId == 4:
 				if !is_there_twin_head():
 					powerCooldown()	
@@ -282,11 +282,18 @@ func unhulk(prevColor):
 #	$CollisionShape2D.set_deferred("disabled", false)
 	invincible = false
 	
-func dash():
-	speed = speed*2
+func teleport():
+	var jump_distance = 200.0 #Distancia fija del salto
+	var forward_dir = Vector2.UP.rotated(rotation)
+
+	gap = true
+	gap_delta_sum = 0.0
+
+	global_position += forward_dir * jump_distance
+
 	$Dash.play()
-	$HeadSprite.modulate = Color.YELLOW
-	$DashTimer.start()
+
+	get_tree().create_timer(0.12).timeout.connect(func(): gap = false)
 	
 func undash(prevSpeed, prevColor):
 	speed = prevSpeed

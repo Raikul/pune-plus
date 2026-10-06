@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cgrfababvjbd2"]
+[gd_scene format=3 uid="uid://cgrfababvjbd2"]
 
 [ext_resource type="Script" uid="uid://hbe4s3t8o2lv" path="res://scripts/Player.gd" id="1_bb5nk"]
 [ext_resource type="AudioStream" uid="uid://dexbo2gvthvoy" path="res://assets/sounds/Earth.ogg" id="2_js8rq"]
@@ -18,41 +18,41 @@ size = Vector2(127, 121)
 custom_solver_bias = 1.0
 radius = 120.0
 
-[node name="Player" type="Area2D"]
+[node name="Player" type="Area2D" unique_id=1385216677]
 collision_layer = 9
 collision_mask = 7
 script = ExtResource("1_bb5nk")
 
-[node name="Hulk" type="AudioStreamPlayer" parent="."]
+[node name="Hulk" type="AudioStreamPlayer" parent="." unique_id=1579471527]
 stream = ExtResource("2_js8rq")
 bus = &"Effects"
 
-[node name="Shoot" type="AudioStreamPlayer" parent="."]
+[node name="Shoot" type="AudioStreamPlayer" parent="." unique_id=1756981378]
 stream = ExtResource("3_2aej1")
 bus = &"Effects"
 
-[node name="Split" type="AudioStreamPlayer" parent="."]
+[node name="Split" type="AudioStreamPlayer" parent="." unique_id=2100829070]
 stream = ExtResource("6_wcc6r")
 bus = &"Effects"
 
-[node name="NewSplit" type="AudioStreamPlayer" parent="."]
+[node name="NewSplit" type="AudioStreamPlayer" parent="." unique_id=1308027981]
 stream = ExtResource("5_2webw")
 bus = &"Effects"
 
-[node name="Dash" type="AudioStreamPlayer" parent="."]
+[node name="Dash" type="AudioStreamPlayer" parent="." unique_id=1180181782]
 stream = ExtResource("7_fk3kw")
 bus = &"Effects"
 
-[node name="ShroomEaten" type="AudioStreamPlayer" parent="."]
+[node name="ShroomEaten" type="AudioStreamPlayer" parent="." unique_id=1497161227]
 stream = ExtResource("7_good5")
 bus = &"Effects"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2126358664]
 visible = false
 position = Vector2(0, 3)
 shape = SubResource("RectangleShape2D_3n87r")
 
-[node name="Aura" type="CollisionShape2D" parent="."]
+[node name="Aura" type="CollisionShape2D" parent="." unique_id=2118902469]
 visible = false
 modulate = Color(0.8, 0.8, 0, 1)
 position = Vector2(0, 3)
@@ -60,45 +60,45 @@ shape = SubResource("CircleShape2D_cr5m4")
 disabled = true
 debug_color = Color(0.878431, 0.160784, 0.729412, 0.419608)
 
-[node name="HeadSprite" type="Sprite2D" parent="."]
+[node name="HeadSprite" type="Sprite2D" parent="." unique_id=894016506]
 scale = Vector2(1.5, 1.5)
 texture = ExtResource("8_fkyt5")
 
-[node name="ElementHeadSprite" type="Sprite2D" parent="."]
+[node name="ElementHeadSprite" type="Sprite2D" parent="." unique_id=894974903]
 modulate = Color(0, 0, 0, 1)
 z_index = 10
 position = Vector2(-1, -18)
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("9_maysg")
 
-[node name="BodyTimer" type="Timer" parent="." groups=["timers"]]
+[node name="BodyTimer" type="Timer" parent="." unique_id=297951519 groups=["timers"]]
 process_callback = 0
 wait_time = 0.01
 
-[node name="GapTimer" type="Timer" parent="." groups=["timers"]]
+[node name="GapTimer" type="Timer" parent="." unique_id=2137552451 groups=["timers"]]
 process_callback = 0
 one_shot = true
 
-[node name="GapFrequencyTimer" type="Timer" parent="." groups=["timers"]]
+[node name="GapFrequencyTimer" type="Timer" parent="." unique_id=2038573584 groups=["timers"]]
 process_callback = 0
 wait_time = 1.5
 one_shot = true
 autostart = true
 
-[node name="HulkTimer" type="Timer" parent="." groups=["timers"]]
+[node name="HulkTimer" type="Timer" parent="." unique_id=871908255 groups=["timers"]]
 one_shot = true
 
-[node name="DashTimer" type="Timer" parent="." groups=["timers"]]
+[node name="DashTimer" type="Timer" parent="." unique_id=1854735568 groups=["timers"]]
 one_shot = true
 
-[node name="StopAndBreatheTimer" type="Timer" parent="." groups=["timers"]]
+[node name="StopAndBreatheTimer" type="Timer" parent="." unique_id=1840549237 groups=["timers"]]
 one_shot = true
 
-[node name="CooldownTimer" type="Timer" parent="." groups=["timers"]]
+[node name="CooldownTimer" type="Timer" parent="." unique_id=647435363 groups=["timers"]]
 wait_time = 6.0
 one_shot = true
 
-[node name="Raycaster" parent="." instance=ExtResource("17_87d3g")]
+[node name="Raycaster" parent="." unique_id=21907627 instance=ExtResource("17_87d3g")]
 
 [node name="Right" parent="Raycaster" index="1"]
 enabled = false

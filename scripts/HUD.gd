@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+var menu_font = preload("res://assets/fonts/Flat Earth Scribe.TTF")
+
 var label1: Label
 var label2: Label
 var label3: Label
@@ -9,7 +11,9 @@ var player2cooldown: TextureProgressBar
 var player3cooldown: TextureProgressBar
 var player4cooldown: TextureProgressBar
 
-#
+# Diccionario para saber quién murio
+var dead_players = {1: false, 2: false, 3: false, 4: false}
+
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
 	label2 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2ScoreLabel
@@ -19,6 +23,13 @@ func _ready():
 	player2cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2Cooldown
 	player3cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer/Player3Cooldown
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
+	
+
+	label1.add_theme_font_override("font", menu_font)
+	label2.add_theme_font_override("font", menu_font)
+	label3.add_theme_font_override("font", menu_font)
+	label4.add_theme_font_override("font", menu_font)
+	
 	add_to_group("HUD")
 
 func set_cooldown(player_id, time_left):
@@ -33,30 +44,42 @@ func set_cooldown(player_id, time_left):
 		4:
 			cooldown = player4cooldown
 	cooldown.value = time_left
-	
+
+func set_player_dead(player_id: int):
+	dead_players[player_id] = true
+
 func reset_labels():
 	label1.self_modulate = Color.WHITE
 	label2.self_modulate = Color.WHITE
 	label3.self_modulate = Color.WHITE
 	label4.self_modulate = Color.WHITE
-	
-func _process(_delta):
-	
-	if Global.player1Active:
-		label1.text = str(Global.player1Score)
-#		if is_instance_valid($"../Player1"):
-#			player1cooldown.value = $"../Player1/CooldownTimer".time_left
-	if Global.player2Active:	
-		label2.text = str(Global.player2Score)
-#		if is_instance_valid($"../Player2"):
-#			player2cooldown.value = $"../Player2/CooldownTimer".time_left
-	if Global.player3Active:	
-		label3.text = str(Global.player3Score)
-#		if is_instance_valid($"../Player3"):
-#			player3cooldown.value = $"../Player3/CooldownTimer".time_left
-	if Global.player4Active:	
-		label4.text = str(Global.player4Score)
-#		if is_instance_valid($"../Player4"):
-#			player4cooldown.value = $"../Player4/CooldownTimer".time_left
+	# Reiniciar el estado de muerte para la siguiente ronda
+	for id in dead_players:
+		dead_players[id] = false
 
-	pass		
+func _process(_delta):
+	var mensaje_muerte = "(DISABLED)"
+
+	if Global.player1Active:
+		var texto = str(Global.player1Score)
+		if dead_players[1]:
+			texto += mensaje_muerte
+		label1.text = texto
+
+	if Global.player2Active:	
+		var texto = str(Global.player2Score)
+		if dead_players[2]:
+			texto += mensaje_muerte
+		label2.text = texto
+
+	if Global.player3Active:	
+		var texto = str(Global.player3Score)
+		if dead_players[3]:
+			texto += mensaje_muerte
+		label3.text = texto
+
+	if Global.player4Active:	
+		var texto = str(Global.player4Score)
+		if dead_players[4]:
+			texto += mensaje_muerte
+		label4.text = texto

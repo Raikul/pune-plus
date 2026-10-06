@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://bthplnovyhrpa"]
+[gd_scene format=3 uid="uid://bthplnovyhrpa"]
 
 [ext_resource type="Script" uid="uid://bk2i8tnu2p034" path="res://scripts/Playground.gd" id="1_ohys2"]
 [ext_resource type="Script" uid="uid://waam8jkfa0ir" path="res://scripts/HUD.gd" id="3_ftqo5"]
@@ -8,12 +8,14 @@
 [ext_resource type="Texture2D" uid="uid://dd2qb0nlltbrq" path="res://assets/jorge-resources/Game Selection/Air-Earth symbol.png" id="8_bk8re"]
 [ext_resource type="AudioStream" uid="uid://b6e4n6u30fyl8" path="res://assets/sounds/juegonicopune.mp3" id="9_hxvts"]
 [ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="10_6dk6d"]
-[ext_resource type="Script" uid="uid://cfror2o588sr7" path="res://scenes/ExitButton.gd" id="10_q7u0a"]
 [ext_resource type="PackedScene" uid="uid://dvukui07lve6g" path="res://scenes/lesson.tscn" id="10_tlq7d"]
 [ext_resource type="Script" uid="uid://c4k0uwxvip4v6" path="res://scripts/Events.gd" id="11_yngvc"]
 [ext_resource type="PackedScene" uid="uid://bmmk676dlolf3" path="res://scenes/shroom.tscn" id="12_erhbx"]
 [ext_resource type="Script" uid="uid://dud50g8jpvnm4" path="res://scripts/limit.gd" id="12_ihapt"]
 [ext_resource type="AudioStream" uid="uid://l25h3u0s44ky" path="res://assets/sounds/Victory.ogg" id="13_calfl"]
+[ext_resource type="PackedScene" uid="uid://bd73ybc7rg362" path="res://scenes/options.tscn" id="15_s4mno"]
+[ext_resource type="PackedScene" uid="uid://cua7mokcq7oa" path="res://scenes/instrucciones.tscn" id="16_ibmoi"]
+[ext_resource type="Script" uid="uid://dyg7oeacxcptu" path="res://scenes/menu_pause.gd" id="17_g8yjl"]
 
 [sub_resource type="Animation" id="Animation_o8qv7"]
 resource_name = "player_1_win"
@@ -91,10 +93,10 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c1ycn"]
 size = Vector2(2503.59, 9.46942)
 
-[node name="Arena" type="Node2D"]
+[node name="Arena" type="Node2D" unique_id=1730736225]
 script = ExtResource("1_ohys2")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1062818127]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -107,7 +109,7 @@ grow_horizontal = 2
 grow_vertical = 2
 rotation = 1.56835
 
-[node name="ColorRect3" type="ColorRect" parent="."]
+[node name="ColorRect3" type="ColorRect" parent="." unique_id=1682632037]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -118,11 +120,11 @@ grow_vertical = 2
 scale = Vector2(1.59795, 0.892334)
 color = Color(0.08, 0.08, 0.08, 1)
 
-[node name="Shroom" parent="." instance=ExtResource("12_erhbx")]
+[node name="Shroom" parent="." unique_id=612766281 instance=ExtResource("12_erhbx")]
 position = Vector2(937, 553)
 scale = Vector2(2, 2)
 
-[node name="Lesson" parent="." instance=ExtResource("10_tlq7d")]
+[node name="Lesson" parent="." unique_id=1305694609 instance=ExtResource("10_tlq7d")]
 visible = false
 z_index = 10
 anchors_preset = 8
@@ -138,43 +140,47 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 metadata/_edit_use_anchors_ = true
 
+[node name="ColorRect" parent="Lesson" index="1"]
+layout_mode = 0
+
+[node name="PanelContainer" parent="Lesson" index="2"]
+layout_mode = 0
+
 [node name="DopamineLabel" parent="Lesson/DopamineContainer/Dopamine" index="0"]
 text = "DISFRUTA TU DOPAMINA"
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=141854364]
 root_node = NodePath("../HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1Cooldown")
-libraries = {
-&"": SubResource("AnimationLibrary_ynogr")
-}
+libraries/ = SubResource("AnimationLibrary_ynogr")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=189726627]
 script = ExtResource("3_ftqo5")
 
-[node name="PanelContainer" type="PanelContainer" parent="HUD"]
+[node name="PanelContainer" type="PanelContainer" parent="HUD" unique_id=1134741150]
 offset_right = 1920.0
 offset_bottom = 134.0
 
-[node name="ColorRect" type="ColorRect" parent="HUD/PanelContainer"]
+[node name="ColorRect" type="ColorRect" parent="HUD/PanelContainer" unique_id=540933014]
 layout_mode = 2
 color = Color(0.27451, 0.27451, 0.27451, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="HUD/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HUD/PanelContainer" unique_id=1174398349]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer" unique_id=639461257]
 custom_minimum_size = Vector2(1920, 0)
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer" unique_id=1028012828]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer" unique_id=1343705924]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Player1Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer"]
+[node name="Player1Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=1701343491]
 self_modulate = Color(0.898039, 0, 0.898039, 1)
 custom_minimum_size = Vector2(75, 75)
 layout_mode = 2
@@ -190,7 +196,7 @@ texture_progress = ExtResource("7_taa2g")
 tint_under = Color(1, 0.25098, 0.101961, 1)
 tint_progress = Color(0.301961, 0.0745098, 0.0313726, 1)
 
-[node name="Player1ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer"]
+[node name="Player1ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=519433123]
 self_modulate = Color(1, 0, 1, 1)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -199,16 +205,16 @@ theme_override_font_sizes/font_size = 66
 text = "0"
 horizontal_alignment = 2
 
-[node name="PanelContainer2" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer" unique_id=1567373940]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2" unique_id=734263938]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Player2Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+[node name="Player2Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer" unique_id=147098162]
 custom_minimum_size = Vector2(75, 75)
 layout_mode = 2
 size_flags_horizontal = 2
@@ -222,7 +228,7 @@ texture_progress = ExtResource("8_1tmow")
 tint_under = Color(0.901961, 0.74902, 0, 1)
 tint_progress = Color(0.301961, 0.25098, 0, 1)
 
-[node name="Player2ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer"]
+[node name="Player2ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer" unique_id=2017297726]
 self_modulate = Color(0.833333, 1, 0.166667, 1)
 layout_mode = 2
 size_flags_horizontal = 10
@@ -230,16 +236,16 @@ theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
 theme_override_font_sizes/font_size = 66
 text = "0"
 
-[node name="PanelContainer3" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+[node name="PanelContainer3" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer" unique_id=1820813817]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3" unique_id=840918027]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Player3Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer"]
+[node name="Player3Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer" unique_id=311537172]
 custom_minimum_size = Vector2(75, 75)
 layout_mode = 2
 size_flags_horizontal = 2
@@ -254,23 +260,23 @@ texture_progress = ExtResource("8_bk8re")
 tint_under = Color(0.101961, 0.698039, 1, 1)
 tint_progress = Color(0.03, 0.21, 0.3, 1)
 
-[node name="Player3ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer"]
+[node name="Player3ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer3/HBoxContainer" unique_id=1271207823]
 self_modulate = Color(0.833333, 1, 0.166667, 1)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
 theme_override_font_sizes/font_size = 66
 text = "0"
 
-[node name="PanelContainer4" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer"]
+[node name="PanelContainer4" type="PanelContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer" unique_id=2081585643]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4" unique_id=988912193]
 layout_mode = 2
 theme_override_constants/separation = 25
 
-[node name="Player4Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
+[node name="Player4Cooldown" type="TextureProgressBar" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer" unique_id=830320479]
 custom_minimum_size = Vector2(75, 75)
 layout_mode = 2
 size_flags_horizontal = 2
@@ -285,14 +291,14 @@ texture_progress = ExtResource("10_6dk6d")
 tint_under = Color(0, 0.901961, 0.6, 1)
 tint_progress = Color(0, 0.3, 0.2, 1)
 
-[node name="Player4ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer"]
+[node name="Player4ScoreLabel" type="Label" parent="HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer" unique_id=501746154]
 self_modulate = Color(1, 0.0985601, 0.90144, 1)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.466667, 0.490196, 0.760784, 1)
 theme_override_font_sizes/font_size = 66
 text = "0"
 
-[node name="ControlDetails1" type="Label" parent="HUD"]
+[node name="ControlDetails1" type="Label" parent="HUD" unique_id=641879952]
 visible = false
 light_mask = 16
 visibility_layer = 16
@@ -305,7 +311,7 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Left/Right:  A  /   D
 Dash: W"
 
-[node name="ControlDetails2" type="Label" parent="HUD"]
+[node name="ControlDetails2" type="Label" parent="HUD" unique_id=1011554557]
 visible = false
 z_index = 1
 anchors_preset = 3
@@ -323,7 +329,7 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Left/Right:  L/R Arrows
 Hulk: Up Arrow"
 
-[node name="ControlDetails3" type="Label" parent="HUD"]
+[node name="ControlDetails3" type="Label" parent="HUD" unique_id=1863805573]
 visible = false
 z_index = 1
 anchors_preset = 2
@@ -338,7 +344,7 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Left/Right: J / L
 Dash: I"
 
-[node name="ControlDetails4" type="Label" parent="HUD"]
+[node name="ControlDetails4" type="Label" parent="HUD" unique_id=2138731667]
 visible = false
 z_index = 1
 anchors_preset = 1
@@ -353,7 +359,7 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Left/Right:  KP 4 / KP 6 Arrows
 Hulk: KP 8"
 
-[node name="Centerfold" type="PanelContainer" parent="HUD"]
+[node name="Centerfold" type="PanelContainer" parent="HUD" unique_id=131074321]
 visible = false
 anchors_preset = 5
 anchor_left = 0.5
@@ -364,18 +370,18 @@ offset_bottom = 94.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_60wp1")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HUD/Centerfold"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/Centerfold" unique_id=1912132475]
 visible = false
 layout_mode = 2
 
-[node name="Title" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+[node name="Title" type="Label" parent="HUD/Centerfold/HBoxContainer" unique_id=1070493985]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
 theme_override_font_sizes/font_size = 66
 text = "Pune+ a"
 
-[node name="ScoreToReach" type="Label" parent="HUD/Centerfold/HBoxContainer"]
+[node name="ScoreToReach" type="Label" parent="HUD/Centerfold/HBoxContainer" unique_id=283506077]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.341176, 0.270588, 1, 1)
@@ -387,7 +393,7 @@ theme_override_constants/shadow_outline_size = 4
 theme_override_font_sizes/font_size = 66
 text = "10"
 
-[node name="PauseButton" type="Button" parent="."]
+[node name="PauseButton" type="Button" parent="." unique_id=179202245]
 visible = false
 visibility_layer = 3
 z_index = 5
@@ -401,30 +407,17 @@ ESC to Restart
 "
 script = ExtResource("8_1ieds")
 
-[node name="ExitButton" type="Button" parent="."]
-visible = false
-visibility_layer = 3
-z_index = 5
-offset_left = 791.0
-offset_top = 492.0
-offset_right = 1225.0
-offset_bottom = 682.0
-theme_override_font_sizes/font_size = 66
-text = "Click to Exit
-ESC to Cancel"
-script = ExtResource("10_q7u0a")
+[node name="Colliders" type="Node2D" parent="." unique_id=1808286707]
 
-[node name="Colliders" type="Node2D" parent="."]
-
-[node name="LimitTop" type="Area2D" parent="Colliders"]
+[node name="LimitTop" type="Area2D" parent="Colliders" unique_id=1598195287]
 script = ExtResource("12_ihapt")
 
-[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitTop"]
+[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitTop" unique_id=97081623]
 position = Vector2(989, 126)
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
-[node name="ColorRect" type="ColorRect" parent="Colliders/LimitTop"]
+[node name="ColorRect" type="ColorRect" parent="Colliders/LimitTop" unique_id=1777622254]
 visible = false
 light_mask = 4
 visibility_layer = 4
@@ -440,17 +433,17 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.156863, 0.156863, 0.156863, 1)
 
-[node name="LimitLeft" type="Area2D" parent="Colliders"]
+[node name="LimitLeft" type="Area2D" parent="Colliders" unique_id=1028024146]
 position = Vector2(0, 2)
 script = ExtResource("12_ihapt")
 
-[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitLeft"]
+[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitLeft" unique_id=1806121036]
 position = Vector2(-6, 565)
 rotation = 1.5708
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
-[node name="ColorRect" type="ColorRect" parent="Colliders/LimitLeft"]
+[node name="ColorRect" type="ColorRect" parent="Colliders/LimitLeft" unique_id=288262894]
 light_mask = 4
 visibility_layer = 4
 custom_minimum_size = Vector2(1, 0)
@@ -458,24 +451,24 @@ offset_right = 1.0
 offset_bottom = 1121.0
 color = Color(1, 1, 0.254902, 1)
 
-[node name="LimitRight" type="Area2D" parent="Colliders"]
+[node name="LimitRight" type="Area2D" parent="Colliders" unique_id=1180936447]
 position = Vector2(1919, 9)
 script = ExtResource("12_ihapt")
 
-[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight"]
+[node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight" unique_id=1288661645]
 position = Vector2(7, 455)
 rotation = -1.56936
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
-[node name="ColorRect" type="ColorRect" parent="Colliders/LimitRight"]
+[node name="ColorRect" type="ColorRect" parent="Colliders/LimitRight" unique_id=524640557]
 light_mask = 4
 visibility_layer = 4
 offset_right = 40.0
 offset_bottom = 1131.0
 color = Color(1, 1, 0.254902, 1)
 
-[node name="Control" type="Control" parent="Colliders"]
+[node name="Control" type="Control" parent="Colliders" unique_id=2042186163]
 layout_mode = 3
 anchors_preset = 12
 anchor_top = 1.0
@@ -484,17 +477,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="LimitBottom" type="Area2D" parent="Colliders/Control"]
+[node name="LimitBottom" type="Area2D" parent="Colliders/Control" unique_id=836548036]
 modulate = Color(0.478431, 1, 1, 1)
 position = Vector2(4, 1081)
 script = ExtResource("12_ihapt")
 
-[node name="Collider" type="CollisionShape2D" parent="Colliders/Control/LimitBottom"]
+[node name="Collider" type="CollisionShape2D" parent="Colliders/Control/LimitBottom" unique_id=1774801761]
 position = Vector2(977, 0)
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
-[node name="ColorRect" type="ColorRect" parent="Colliders/Control/LimitBottom"]
+[node name="ColorRect" type="ColorRect" parent="Colliders/Control/LimitBottom" unique_id=21788754]
 modulate = Color(0.431373, 1, 0.431373, 1)
 light_mask = 4
 visibility_layer = 4
@@ -511,23 +504,119 @@ grow_vertical = 0
 color = Color(0.203922, 0.207843, 0.203922, 0.980392)
 metadata/_edit_use_anchors_ = true
 
-[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=1870892511]
 stream = ExtResource("9_hxvts")
 bus = &"Music"
 
-[node name="Victory" type="AudioStreamPlayer" parent="."]
+[node name="Victory" type="AudioStreamPlayer" parent="." unique_id=204562384]
 stream = ExtResource("13_calfl")
 bus = &"Effects"
 
-[node name="Events" type="Node2D" parent="."]
+[node name="Events" type="Node2D" parent="." unique_id=1952678777]
 script = ExtResource("11_yngvc")
 shroomScene = ExtResource("12_erhbx")
 
-[node name="ShroomTimer" type="Timer" parent="Events"]
+[node name="ShroomTimer" type="Timer" parent="Events" unique_id=381288488]
 wait_time = 3.0
 
+[node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1882715416]
+process_mode = 3
+layer = 10
+
+[node name="Instrucciones" parent="PauseLayer" unique_id=1618712375 instance=ExtResource("16_ibmoi")]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_top = 0.115
+anchor_right = 0.678
+anchor_bottom = 0.264
+grow_horizontal = 0
+grow_vertical = 1
+size_flags_stretch_ratio = 1.22
+
+[node name="Label" parent="PauseLayer/Instrucciones" index="2" unique_id=124205885]
+text = "                                                                 The player earns points when their other players touch a border or are killed by an opponent
+                                                               If Shroom Mode is activated, picking up shrooms also earns points
+
+"
+
+[node name="MenuPause" type="Control" parent="PauseLayer" unique_id=1131243987]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("17_g8yjl")
+
+[node name="PanelContainer" type="PanelContainer" parent="PauseLayer/MenuPause" unique_id=60977493]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseLayer/MenuPause/PanelContainer" unique_id=1444304493]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer" unique_id=1799286440]
+layout_mode = 2
+size_flags_stretch_ratio = 0.66
+alignment = 1
+
+[node name="Resume" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=408504120]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Resume
+"
+
+[node name="Title" type="Label" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1789424007]
+visible = false
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 66
+text = "Pune Con Punchis"
+horizontal_alignment = 1
+
+[node name="Simulate" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1005429580]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Simulate Round
+"
+
+[node name="Multiplayer" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=910356513]
+visible = false
+layout_mode = 2
+text = "Multiplayer"
+
+[node name="Options" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1140593985]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_font_sizes/font_size = 66
+text = "Options"
+
+[node name="Instructions" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1129607360]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_font_sizes/font_size = 66
+text = "Instructions"
+
+[node name="Quit" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1714335034]
+layout_mode = 2
+theme_override_font_sizes/font_size = 66
+text = "Quit"
+
+[node name="Options" parent="PauseLayer" unique_id=1501364392 instance=ExtResource("15_s4mno")]
+visible = false
+
 [connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
-[connection signal="pressed" from="ExitButton" to="ExitButton" method="_on_pressed"]
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
 
 [editable path="Lesson"]
+[editable path="PauseLayer/Instrucciones"]
+[editable path="PauseLayer/Options"]

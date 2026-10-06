@@ -59,4 +59,4 @@ func _on_multiplayer_pressed():
 
 func _on_instructions_pressed() -> void:
 	%Instrucciones.show()
-	pass # Replace with function body.
+	pass

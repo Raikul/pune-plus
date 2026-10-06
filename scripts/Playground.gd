@@ -143,6 +143,7 @@ func _on_player_dead(player):
 	
 func playerDead(player):	
 	player.powerAvailable = false
+	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
 		for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
@@ -222,3 +223,15 @@ func _on_pause_button_pressed():
 	get_tree().paused = false
 	$PauseButton.hide()
 	
+# Simulate until one snake remains 
+func simulate_round():
+	var alive = get_tree().get_nodes_in_group("alivePlayers")
+	
+	
+	if alive.size() <= 1 or gameEnded:
+		return
+		
+	while alive.size() > 1 and not gameEnded:
+		var victim = alive.pick_random() # Kills random serpents 
+		playerDead(victim)               
+		alive = get_tree().get_nodes_in_group("alivePlayers") # Actualiza la lista
