@@ -522,6 +522,7 @@ wait_time = 3.0
 [node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1882715416]
 process_mode = 3
 layer = 10
+visible = false
 
 [node name="Instrucciones" parent="PauseLayer" unique_id=1618712375 instance=ExtResource("16_ibmoi")]
 unique_name_in_owner = true

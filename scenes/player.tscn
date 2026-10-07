@@ -106,6 +106,12 @@ enabled = false
 [node name="Left" parent="Raycaster" index="2"]
 enabled = false
 
+[node name="FixedTeleportNode" type="Node2D" parent="." unique_id=17769041]
+position = Vector2(0, -2000)
+
+[node name="DynamicTeleportNode" type="Node2D" parent="." unique_id=1894464049]
+position = Vector2(0, -2000)
+
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]
 
 [editable path="Raycaster"]

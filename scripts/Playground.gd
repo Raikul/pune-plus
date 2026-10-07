@@ -126,6 +126,10 @@ func spawn_player(player_id):
 	add_child(newPlayer)
 	newPlayer.add_to_group("activePlayers")
 	newPlayer.add_to_group("alivePlayers")
+	
+	#Test
+	newPlayer.left_limit_x = $Colliders/LimitLeft/Collider.global_position.x
+	newPlayer.right_limit_x = $Colliders/LimitRight/Collider.global_position.x
 #	print("Player Added")
 
 
