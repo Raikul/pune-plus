@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bk2lxalhauis"]
+[gd_scene format=3 uid="uid://bk2lxalhauis"]
 
 [ext_resource type="Theme" uid="uid://d03l0um7shk6w" path="res://menu.tres" id="1_gkmrk"]
 [ext_resource type="Script" uid="uid://bni0pxrh10vil" path="res://scripts/menu.gd" id="2_5y65b"]
@@ -8,16 +8,8 @@
 [ext_resource type="FontFile" uid="uid://cgb4gpxrb04bo" path="res://assets/jorge-resources/Starting Screen/Aristotelica Display DemiBold Trial.ttf" id="6_plbqb"]
 [ext_resource type="Texture2D" uid="uid://dsn85wonlj6bw" path="res://assets/jorge-resources/Starting Screen/Logo-With.png" id="7_v36xn"]
 [ext_resource type="Texture2D" uid="uid://d1fq163d2v530" path="res://assets/jorge-resources/Starting Screen/Logo-Punchis.png" id="8_kslgp"]
+[ext_resource type="PackedScene" uid="uid://cua7mokcq7oa" path="res://scenes/instrucciones.tscn" id="10_70i5f"]
 [ext_resource type="PackedScene" uid="uid://rr63k4v7eon5" path="res://scenes/new_player_setup.tscn" id="10_n56o5"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
-bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwfie"]
-bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ci1j0"]
-bg_color = Color(0.203922, 0.701961, 0.47451, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dagr"]
 bg_color = Color(0.815686, 0.415686, 0.858824, 1)
@@ -33,6 +25,15 @@ corner_radius_bottom_left = 4
 shadow_color = Color(0.933333, 0, 0, 0.6)
 shadow_size = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ci1j0"]
+bg_color = Color(0.203922, 0.701961, 0.47451, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwfie"]
+bg_color = Color(0.85098, 0.827451, 0.0117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6e00a"]
+bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
+
 [sub_resource type="Theme" id="Theme_7avap"]
 Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
 Button/font_sizes/font_size = 66
@@ -42,7 +43,7 @@ Label/fonts/font = ExtResource("6_plbqb")
 
 [sub_resource type="SystemFont" id="SystemFont_xpgnv"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=855265616]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,7 +54,7 @@ focus_mode = 2
 theme = ExtResource("1_gkmrk")
 script = ExtResource("2_5y65b")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=281758474]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,18 +64,18 @@ grow_vertical = 2
 texture = ExtResource("3_75sqf")
 expand_mode = 5
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1003252788]
 
-[node name="Modifiers" type="Control" parent="CanvasLayer"]
+[node name="Modifiers" type="Control" parent="CanvasLayer" unique_id=962654165]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1714.0
-offset_top = 36.0
-offset_right = 1754.0
-offset_bottom = 76.0
+offset_left = 1708.0
+offset_top = 44.0
+offset_right = 1748.0
+offset_bottom = 84.0
 theme = ExtResource("1_gkmrk")
 
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/Modifiers"]
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/Modifiers" unique_id=925590038]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -85,20 +86,20 @@ offset_right = 124.0
 offset_bottom = 67.0
 grow_horizontal = 0
 
-[node name="ShroomsContainer" type="HBoxContainer" parent="CanvasLayer/Modifiers/PanelContainer"]
+[node name="ShroomsContainer" type="HBoxContainer" parent="CanvasLayer/Modifiers/PanelContainer" unique_id=1659948263]
 layout_mode = 2
 theme = ExtResource("1_gkmrk")
 
-[node name="ShroomsButton" type="CheckButton" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer"]
+[node name="ShroomsButton" type="CheckButton" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer" unique_id=544648200]
 layout_mode = 2
 theme = ExtResource("1_gkmrk")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_6e00a")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
 theme_override_styles/normal = SubResource("StyleBoxFlat_1dagr")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_6e00a")
 button_pressed = true
 
-[node name="ShroomsLabel" type="Label" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer"]
+[node name="ShroomsLabel" type="Label" parent="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer" unique_id=2128260512]
 layout_mode = 2
 theme = ExtResource("4_qxm8h")
 theme_override_colors/font_color = Color(0, 0.843137, 0.945098, 1)
@@ -110,13 +111,10 @@ theme_override_constants/outline_size = 8
 theme_override_constants/shadow_outline_size = 12
 text = "Shrooms?"
 
-[node name="Options" parent="CanvasLayer" instance=ExtResource("3_wmb4s")]
+[node name="Options" parent="CanvasLayer" unique_id=464464145 instance=ExtResource("3_wmb4s")]
 visible = false
 
-[node name="OptionButton" parent="CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer/Gameplay/GapBox" index="2"]
-popup/item_0/id = 0
-
-[node name="Version" type="PanelContainer" parent="CanvasLayer"]
+[node name="Version" type="PanelContainer" parent="CanvasLayer" unique_id=1072450106]
 visible = false
 anchors_preset = 3
 anchor_left = 1.0
@@ -132,19 +130,19 @@ grow_vertical = 0
 size_flags_horizontal = 3
 theme = ExtResource("1_gkmrk")
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Version"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Version" unique_id=1784071251]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 3
 
-[node name="VersionNumber" type="Label" parent="CanvasLayer/Version/MarginContainer"]
+[node name="VersionNumber" type="Label" parent="CanvasLayer/Version/MarginContainer" unique_id=2108425634]
 layout_mode = 2
 theme_override_font_sizes/font_size = 44
 text = "Version 0.2 (Alpha)"
 
-[node name="ChangeLog" type="PanelContainer" parent="CanvasLayer"]
+[node name="ChangeLog" type="PanelContainer" parent="CanvasLayer" unique_id=1931637407]
 visible = false
 anchors_preset = 3
 anchor_left = 1.0
@@ -159,14 +157,14 @@ grow_horizontal = 0
 grow_vertical = 0
 theme = ExtResource("1_gkmrk")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ChangeLog"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ChangeLog" unique_id=552557687]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 theme = SubResource("Theme_7avap")
 alignment = 1
 
-[node name="ChangeLogDetailsContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
+[node name="ChangeLogDetailsContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer" unique_id=1036057659]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 4
@@ -176,7 +174,7 @@ theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 3
 
-[node name="ChangeLogDetails" type="Label" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer"]
+[node name="ChangeLogDetails" type="Label" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer" unique_id=928803375]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = SubResource("SystemFont_xpgnv")
@@ -185,7 +183,7 @@ text = "-Upgraded Water Punchy
 -Added visual for PunchyReady
 "
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer" unique_id=613202549]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
@@ -194,7 +192,7 @@ theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 3
 
-[node name="ChangeLogButton" type="Button" parent="CanvasLayer/ChangeLog/VBoxContainer/MarginContainer"]
+[node name="ChangeLogButton" type="Button" parent="CanvasLayer/ChangeLog/VBoxContainer/MarginContainer" unique_id=213104462]
 z_index = 3
 layout_mode = 2
 size_flags_horizontal = 8
@@ -203,7 +201,7 @@ theme_override_font_sizes/font_size = 44
 action_mode = 0
 text = "Version 0.22 (Alpha)"
 
-[node name="TopMenu" type="CenterContainer" parent="CanvasLayer"]
+[node name="TopMenu" type="CenterContainer" parent="CanvasLayer" unique_id=704499331]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -220,25 +218,25 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 theme = SubResource("Theme_7avap")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu" unique_id=1134060256]
 layout_mode = 2
 theme_override_constants/separation = 150
 
-[node name="PanelContainer2" type="PanelContainer" parent="CanvasLayer/TopMenu/VBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="CanvasLayer/TopMenu/VBoxContainer" unique_id=1012830404]
 layout_mode = 2
 
-[node name="Title2" type="Label" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2"]
+[node name="Title2" type="Label" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2" unique_id=1591810183]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 120
 text = "Pune"
 horizontal_alignment = 1
 
-[node name="Control" type="Control" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2"]
+[node name="Control" type="Control" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2" unique_id=1061801257]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2/Control"]
-layout_mode = 2
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2/Control" unique_id=909634349]
+layout_mode = 0
 offset_left = 264.5
 offset_top = 27.0
 offset_right = 2698.5
@@ -247,8 +245,8 @@ rotation = -0.218004
 scale = Vector2(0.059847, 0.059847)
 texture = ExtResource("7_v36xn")
 
-[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2/Control"]
-layout_mode = 2
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer2/Control" unique_id=1686675965]
+layout_mode = 0
 offset_left = 189.5
 offset_top = 84.0
 offset_right = 3812.5
@@ -257,21 +255,21 @@ rotation = -0.218004
 scale = Vector2(0.0798492, 0.0798492)
 texture = ExtResource("8_kslgp")
 
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/TopMenu/VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/TopMenu/VBoxContainer" unique_id=87840065]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer" unique_id=252646421]
 layout_mode = 2
 theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer" unique_id=885280246]
 layout_mode = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2113162999]
 visible = false
 layout_mode = 2
 size_flags_vertical = 0
@@ -279,28 +277,34 @@ theme_override_font_sizes/font_size = 66
 text = "Pune Con Punchis"
 horizontal_alignment = 1
 
-[node name="Play" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Play" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=880425664]
 layout_mode = 2
 theme = SubResource("Theme_7avap")
 text = "Play"
 
-[node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1559298825]
 visible = false
 layout_mode = 2
 text = "Multiplayer"
 
-[node name="Options" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Options" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1228341811]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
 text = "Options"
 
-[node name="Quit" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Instructions" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=399230022]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_font_sizes/font_size = 66
+text = "Instructions"
+
+[node name="Quit" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1123454094]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
 text = "Quit"
 
-[node name="PlayerSetup" type="CenterContainer" parent="CanvasLayer"]
+[node name="PlayerSetup" type="CenterContainer" parent="CanvasLayer" unique_id=552390979]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
@@ -317,11 +321,19 @@ scale = Vector2(0.7, 0.7)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/PlayerSetup"]
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/PlayerSetup" unique_id=390714292]
 layout_mode = 2
 
-[node name="PlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" instance=ExtResource("10_n56o5")]
+[node name="PlayerSetup" parent="CanvasLayer/PlayerSetup/PanelContainer" unique_id=322420553 instance=ExtResource("10_n56o5")]
 layout_mode = 2
+
+[node name="Instrucciones" parent="CanvasLayer" unique_id=1618712375 instance=ExtResource("10_70i5f")]
+unique_name_in_owner = true
+visible = false
+offset_left = 6.0
+offset_top = 169.0
+offset_right = -6.0
+offset_bottom = -221.0
 
 [connection signal="toggled" from="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer/ShroomsButton" to="." method="_on_shrooms_button_toggled"]
 [connection signal="back" from="CanvasLayer/Options" to="." method="_on_options_back_button_pressed"]
@@ -329,6 +341,7 @@ layout_mode = 2
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Multiplayer" to="." method="_on_multiplayer_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Instructions" to="." method="_on_instructions_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
 [connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]

@@ -33,6 +33,9 @@ var clonable_id
 var clonable_name
 var gap_delta_sum = 0
 #var has_twin_head = false
+var left_limit_x
+var right_limit_x
+
 
 func _ready():
 	apply_scale(Vector2(0.1,0.1))
@@ -87,6 +90,16 @@ func _process(delta):
 		rotation += angular_speed * direction * delta
 		var	velocity = Vector2.UP.rotated(rotation) * speed
 		position += velocity * delta
+		
+	#Llamar función que actualiza la posición del Punto de Transporte
+
+		actualizarPuntoDeTransporte()
+	
+func actualizarPuntoDeTransporte():
+	#Si el TeleportNode está dentro de la pantalla, la posición del Punto de Transporte ES la del TeleportNode.
+	#Si el TeleportNode está FUERA de la pantalla, el Punto de Transporte se ajusta de acuerdo a la X_difference y Y_difference
+	#con los limites del mapa
+	pass
 
 func _on_gapTimer_timeout():
 	gap = false
@@ -221,7 +234,7 @@ func _input(event):
 		
 		if playerId == 3:
 			if event.is_action_pressed(&"Player3Up"):
-				dash()
+				teleport()
 				powerCooldown()
 				
 		if playerId == 4:
@@ -240,7 +253,7 @@ func activate_power():
 			hulk()		
 		if playerId == 3:
 			powerCooldown()	
-			dash()
+			teleport()
 		if playerId == 4:
 				if !is_there_twin_head():
 					powerCooldown()	
@@ -282,11 +295,36 @@ func unhulk(prevColor):
 #	$CollisionShape2D.set_deferred("disabled", false)
 	invincible = false
 	
-func dash():
-	speed = speed*2
+func teleport():
+	##Esta funcion simplemente hará que la nueva GlobalPosition del PLayer sea la del DynamicTeleportNOde
+	
+	
+	##
+	var jump_distance = 200.0 #Distancia fija del salto
+	var forward_dir = Vector2.UP.rotated(rotation)
+
+	gap = true
+	gap_delta_sum = 0.0
+
+	#global_position += forward_dir * jump_distance
+	#Test:
+	var current_teleport_node_pos : Vector2 = $FixedTeleportNode.global_position
+	var teleport_position = current_teleport_node_pos
+	if left_limit_x != null and current_teleport_node_pos.x <= left_limit_x:
+		var x_difference = current_teleport_node_pos.x - left_limit_x
+		
+		print("Current Teleport X: " + str(current_teleport_node_pos.x))
+		print("Left Limit X: " +str(left_limit_x))
+		print("Dif: " + str(x_difference) )
+		teleport_position.x = right_limit_x + x_difference
+		print("New x " + str(teleport_position.x))
+		
+		print("borde borde")
+	
+	global_position = teleport_position
 	$Dash.play()
-	$HeadSprite.modulate = Color.YELLOW
-	$DashTimer.start()
+
+	get_tree().create_timer(0.12).timeout.connect(func(): gap = false)
 	
 func undash(prevSpeed, prevColor):
 	speed = prevSpeed
