@@ -130,6 +130,8 @@ func spawn_player(player_id):
 	#Test
 	newPlayer.left_limit_x = $Colliders/LimitLeft/Collider.global_position.x
 	newPlayer.right_limit_x = $Colliders/LimitRight/Collider.global_position.x
+	newPlayer.top_limit_y = $Colliders/LimitTop/Collider.global_position.y
+	newPlayer.bottom_limit_y = $Colliders/Control/LimitBottom/Collider.global_position.y
 #	print("Player Added")
 
 

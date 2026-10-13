@@ -9,6 +9,7 @@
 [ext_resource type="AudioStream" uid="uid://bikvdq2rm4nam" path="res://assets/sounds/ShroomEaten.ogg" id="7_good5"]
 [ext_resource type="Texture2D" uid="uid://cwuko1uppu6iy" path="res://assets/jorge-resources/Gameplay scene/head.png" id="8_fkyt5"]
 [ext_resource type="Texture2D" uid="uid://bvytc0f0scp8j" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol.png" id="9_maysg"]
+[ext_resource type="Script" uid="uid://boamrmr0fjmtw" path="res://scenes/dynamic_teleport_node.gd" id="11_d2wvv"]
 [ext_resource type="PackedScene" uid="uid://sn4iiintepsd" path="res://scenes/raycaster.tscn" id="17_87d3g"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3n87r"]
@@ -111,6 +112,7 @@ position = Vector2(0, -2000)
 
 [node name="DynamicTeleportNode" type="Node2D" parent="." unique_id=1894464049]
 position = Vector2(0, -2000)
+script = ExtResource("11_d2wvv")
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]
 
