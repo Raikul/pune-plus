@@ -14,6 +14,7 @@ signal dead()
 signal score()
 
 var playerId
+var main_power: Power
 
 var listOfNodes = []
 var snakeBodyScene: PackedScene
@@ -71,7 +72,11 @@ func _ready():
 	if playerId != null:
 		clonable_id = playerId
 		clonable_name = "Player"+str(playerId)
-	
+	if playerId != null:
+		main_power = Powers.create(playerId)
+		if main_power != null:
+			add_child(main_power)
+			main_power.setup(self)
 func _process(delta):
 #	if not gap:
 #		createBody(snakeBodyScene)
@@ -197,8 +202,19 @@ func createBody(scene):
 	add_child(sceneInstance)
 	return sceneInstance
 
-func shoot_fireball(scene):	
+func spawn_projectile(scene: PackedScene) -> Node2D:
 	var sceneInstance = scene.instantiate()
+	sceneInstance.set_as_top_level(true)
+	sceneInstance.global_position = global_position
+	sceneInstance.rotation = rotation
+
+	# Vital: registrar en listOfNodes para no suicidarse con su propio proyectil
+	listOfNodes.append(sceneInstance)
+	if listOfNodes.size() == 1:
+		sceneInstance.rotation = rotation + PI
+	if listOfNodes.size() > 4:
+		listOfNodes.pop_front()
+
 
 	sceneInstance.set_as_top_level(true)
 	sceneInstance.global_position = global_position
@@ -274,8 +290,11 @@ func _input(event):
 func activate_power():
 	if powerAvailable:	
 		if playerId == 1:
-			powerCooldown()	
-			shoot()		
+			powerCooldown()
+			if main_power:
+				main_power.activate()
+			else:
+				shoot() # Fallback por seguridad
 		if playerId == 2:
 			powerCooldown()	
 			hulk()		
@@ -283,20 +302,19 @@ func activate_power():
 			powerCooldown()	
 			teleport()
 		if playerId == 4:
-				if !is_there_twin_head():
-					powerCooldown()	
-					twinHead()
-					locked_direction = [-1,1].pick_random()
-					locked_movement = true
-					await get_tree().create_timer(0.2).timeout
-					locked_movement = false		
-	
+			if !is_there_twin_head():
+				powerCooldown()	
+				twinHead()
+				locked_direction = [-1, 1].pick_random()
+				locked_movement = true
+				await get_tree().create_timer(0.2).timeout
+				locked_movement = false
 func is_there_twin_head():
 	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
 
 func ai_punchy(direction):
 	if playerId == 1:
-		if $Raycaster/UpPlayer.is_colliding() or $Raycaster.collision_distance("Up") < 75:
+		if main_power and main_power.ai_should_activate(direction):
 			activate_power()
 	if playerId == 2:
 		if $Raycaster.collision_distance("Up") < 25:
@@ -305,7 +323,6 @@ func ai_punchy(direction):
 		activate_power()
 	if powerAvailable and playerId == 4:
 		activate_power()
-			
 func hulk():
 	
 
@@ -341,12 +358,12 @@ func stop_and_breathe(prevSpeed,prevColor):
 	speed = 0
 	$HeadSprite.modulate = Color.ORANGE
 	$StopAndBreatheTimer.start()
-
+	
 func shoot():
-	shoot_fireball(projectileScene)
-	$Shoot.play()
-#	add_child(tirito)
-	pass
+	if projectileScene != null:
+		spawn_projectile(projectileScene)
+	if has_node("Shoot"):
+		$Shoot.play()
 
 func twinHead():
 	$NewSplit.play()
