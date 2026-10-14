@@ -35,7 +35,8 @@ var gap_delta_sum = 0
 #var has_twin_head = false
 var left_limit_x
 var right_limit_x
-
+var top_limit_y
+var bottom_limit_y
 
 func _ready():
 	apply_scale(Vector2(0.1,0.1))
@@ -96,11 +97,38 @@ func _process(delta):
 		actualizarPuntoDeTransporte()
 	
 func actualizarPuntoDeTransporte():
-	#Si el TeleportNode está dentro de la pantalla, la posición del Punto de Transporte ES la del TeleportNode.
-	#Si el TeleportNode está FUERA de la pantalla, el Punto de Transporte se ajusta de acuerdo a la X_difference y Y_difference
-	#con los limites del mapa
-	pass
+	if not has_node("DynamicTeleportNode") or not has_node("FixedTeleportNode"):
+		return
 
+	# NOTA: Si solo quieres que se vea con el jugador 3 (aire), deja esta condición.
+	# Si estás probando con el jugador 1 o 2, comenta estas líneas temporalmente:
+	if playerId != 3:
+		$DynamicTeleportNode.hide()
+		return
+	else:
+		$DynamicTeleportNode.show()
+
+	# Tomamos la posición base adelante de la serpiente
+	var target_pos : Vector2 = $FixedTeleportNode.global_position
+
+	# --- EJE X ---
+	if left_limit_x != null and target_pos.x <= left_limit_x:
+		var x_difference = target_pos.x - left_limit_x
+		target_pos.x = right_limit_x + x_difference
+	elif right_limit_x != null and target_pos.x >= right_limit_x:
+		var x_difference = target_pos.x - right_limit_x
+		target_pos.x = left_limit_x + x_difference
+
+	# --- EJE Y ---
+	if top_limit_y != null and target_pos.y <= top_limit_y:
+		var y_difference = target_pos.y - top_limit_y
+		target_pos.y = bottom_limit_y + y_difference
+	elif bottom_limit_y != null and target_pos.y >= bottom_limit_y:
+		var y_difference = target_pos.y - bottom_limit_y
+		target_pos.y = top_limit_y + y_difference
+
+	# Actualizamos la posición
+	$DynamicTeleportNode.global_position = target_pos
 func _on_gapTimer_timeout():
 	gap = false
 	gapFrequencyTimer.start()
@@ -296,36 +324,15 @@ func unhulk(prevColor):
 	invincible = false
 	
 func teleport():
-	##Esta funcion simplemente hará que la nueva GlobalPosition del PLayer sea la del DynamicTeleportNOde
-	
-	
-	##
-	var jump_distance = 200.0 #Distancia fija del salto
-	var forward_dir = Vector2.UP.rotated(rotation)
-
 	gap = true
 	gap_delta_sum = 0.0
 
-	#global_position += forward_dir * jump_distance
-	#Test:
-	var current_teleport_node_pos : Vector2 = $FixedTeleportNode.global_position
-	var teleport_position = current_teleport_node_pos
-	if left_limit_x != null and current_teleport_node_pos.x <= left_limit_x:
-		var x_difference = current_teleport_node_pos.x - left_limit_x
-		
-		print("Current Teleport X: " + str(current_teleport_node_pos.x))
-		print("Left Limit X: " +str(left_limit_x))
-		print("Dif: " + str(x_difference) )
-		teleport_position.x = right_limit_x + x_difference
-		print("New x " + str(teleport_position.x))
-		
-		print("borde borde")
-	
-	global_position = teleport_position
-	$Dash.play()
+	# Teletransporta la serpiente directo a la posición del indicador visual
+	if has_node("DynamicTeleportNode"):
+		global_position = $DynamicTeleportNode.global_position
 
+	$Dash.play()
 	get_tree().create_timer(0.12).timeout.connect(func(): gap = false)
-	
 func undash(prevSpeed, prevColor):
 	speed = prevSpeed
 	$HeadSprite.modulate = prevColor
