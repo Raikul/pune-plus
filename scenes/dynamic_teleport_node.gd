@@ -6,8 +6,8 @@ func _ready():
 
 func _draw():
 	# Círculo celeste semitransparente (estilo aire)
-	draw_circle(Vector2.ZERO, 12, Color(0.3, 0.8, 1.0, 0.45))
+	draw_circle(Vector2.ZERO, 6, Color(0.3, 0.8, 1.0, 0.45))
 	# Borde blanco circular
-	draw_arc(Vector2.ZERO, 12, 0, TAU, 32, Color.WHITE, 2.0)
+	#draw_arc(Vector2.ZERO, 6, 0, TAU, 32, Color.WHITE, 2.0)
 	# Punto blanco en el centro
-	draw_circle(Vector2.ZERO, 3, Color.WHITE)
+	draw_circle(Vector2.ZERO, 1, Color.WHITE)
