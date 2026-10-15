@@ -77,30 +77,26 @@ func _ready():
 		if main_power != null:
 			add_child(main_power)
 			main_power.setup(self)
+	actualizarPuntoDeTransporte()
+
 func _process(delta):
-#	if not gap:
-#		createBody(snakeBodyScene)
-#	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
-		var direction = 0
-		if locked_movement: direction = locked_direction
-		else:
-			if Input.is_action_pressed("Player"+str(playerId)+"Left") :direction = -1
-			elif Input.is_action_pressed("Player"+str(playerId)+"Right"): direction = 1
-			elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
-			elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
-		
-#		elif $Raycaster.collision_distance("Left") < 400: direction = -1
-#		elif $Raycaster.collision_distance("Right") < 400: direction = 1
-		if ai_enabled and powerAvailable: ai_punchy(direction)
+	# 1. Primero siempre actualizamos la mirilla:
+	actualizarPuntoDeTransporte()
 
-		rotation += angular_speed * direction * delta
-		var	velocity = Vector2.UP.rotated(rotation) * speed
-		position += velocity * delta
-		
-	#Llamar función que actualiza la posición del Punto de Transporte
+	# 2. Luego el movimiento y la IA:
+	var direction = 0
+	if locked_movement: direction = locked_direction
+	else:
+		if Input.is_action_pressed("Player"+str(playerId)+"Left") :direction = -1
+		elif Input.is_action_pressed("Player"+str(playerId)+"Right"): direction = 1
+		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
+		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 
-		actualizarPuntoDeTransporte()
-	
+	if ai_enabled and powerAvailable: ai_punchy(direction)
+
+	rotation += angular_speed * direction * delta
+	var velocity = Vector2.UP.rotated(rotation) * speed
+	position += velocity * delta
 func actualizarPuntoDeTransporte():
 	if not has_node("DynamicTeleportNode") or not has_node("FixedTeleportNode"):
 		return
@@ -153,7 +149,31 @@ func _physics_process(delta):
 		createBody(snakeBodyScene)
 		gap_delta_sum = 0
 
-func _on_area_entered(area):	
+func _on_area_entered(area):
+	if area is Shroom:
+		$ShroomEaten.play()
+		emit_signal("score")
+		area.queue_free()
+		return
+
+	# Si el poder activo decide ignorar la colisión (ej. Agua tocando su propio clon):
+	if main_power and main_power.should_ignore_collision(area):
+		return
+
+	if area.is_in_group("Fissures"):
+		return
+
+	if not invincible:
+		if listOfNodes.find(area) == -1:
+			# Le preguntamos al poder si puede salvar al jugador de morir (Agua reviviendo)
+			if main_power and main_power.try_prevent_death():
+				return
+
+			# Muerte normal
+			$CollisionShape2D.set_deferred("disabled", true)
+			$Split.play()
+			set_process(false)
+			emit_signal("dead")	
 #	print(area)
 	if area is Shroom:
 		$ShroomEaten.play()
@@ -266,6 +286,8 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 func set_invincible(state: bool) -> void:
 	invincible = state	
 func _input(event):
+	if playerId != null and event.is_action_pressed("Player" + str(playerId) + "Up"):
+		try_use_power()
 	if powerAvailable:
 		if playerId == 1:
 			if event.is_action_pressed(&"Player1Up"):
@@ -287,33 +309,37 @@ func _input(event):
 				twinHead()		
 				powerCooldown()
 
+func try_use_power() -> void:
+	if not powerAvailable:
+		return
+	
+	powerCooldown()
+	
+	if main_power != null:
+		main_power.activate()
+	else:
+		# Fallback para Agua si todavía estás terminando water_power:
+		if playerId == 4:
+			if not is_there_twin_head():
+				twinHead()
+				locked_direction = [-1, 1].pick_random()
+				locked_movement = true
+				await get_tree().create_timer(0.2).timeout
+				locked_movement = false
 
 func activate_power():
-	if powerAvailable:	
-		powerCooldown()
-		
-		# Si tenemos main_power instanciado (Fuego, Tierra o Aire), lo usamos directo:
-		if main_power:
-			main_power.activate()
-		else:
-			# Solo Agua (4) sigue en el sistema viejo por ahora
-			if playerId == 4:
-				if !is_there_twin_head():
-					twinHead()
-					locked_direction = [-1,1].pick_random()
-					locked_movement = true
-					await get_tree().create_timer(0.2).timeout
-					locked_movement = false
-func is_there_twin_head():
-	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
+	try_use_power()
 
 func ai_punchy(direction):
-	if powerAvailable and main_power:
-		if main_power.ai_should_activate(direction):
-			activate_power()
-	elif powerAvailable and playerId == 4:
-		# Agua sigue aquí hasta el siguiente paso
-		activate_power()
+	if powerAvailable and main_power and main_power.ai_should_activate(direction):
+		try_use_power()
+
+				
+	try_use_power()
+	if powerAvailable and main_power and main_power.ai_should_activate(direction):
+		try_use_power()
+func is_there_twin_head():
+	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
 func hulk():
 	
 
@@ -356,7 +382,12 @@ func shoot():
 	if has_node("Shoot"):
 		$Shoot.play()
 
-func twinHead():
+func spawn_twin(scene: PackedScene) -> Node2D:
+	var twin = createBody(scene)
+	twin.bufferListOfNodes = listOfNodes
+	twin.bufferListOfNodes.append(self)
+	twin.snakeBodyScene = snakeBodyScene
+	return twin
 	$NewSplit.play()
 #	has_twin_head = true
 	is_water_my_friend = true
@@ -368,7 +399,14 @@ func twinHead():
 #	twinHead.syncBodyTimer = bodyTimer
 
 	pass
-	
+
+func twinHead():
+	if has_node("NewSplit"):
+		$NewSplit.play()
+	is_water_my_friend = true
+	if twinHeadScene != null:
+		twinHeadInstance = spawn_twin(twinHeadScene)
+		return twinHeadInstance
 func powerCooldown():
 	powerAvailable = false
 	$CooldownTimer.start()

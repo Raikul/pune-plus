@@ -23,6 +23,7 @@ func ai_should_activate(_direction: int) -> bool:
 # Solo para Agua: intercepta la muerte. Devuelve true si salvó al jugador
 func try_prevent_death() -> bool:
 	return false
-
+func should_ignore_collision(_area: Area2D) -> bool:
+	return false
 func cleanup() -> void:
 	pass
