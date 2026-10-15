@@ -263,7 +263,8 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 	add_child(fissure_instance)
 	return fissure_instance
 	
-	
+func set_invincible(state: bool) -> void:
+	invincible = state	
 func _input(event):
 	if powerAvailable:
 		if playerId == 1:
@@ -289,39 +290,29 @@ func _input(event):
 
 func activate_power():
 	if powerAvailable:	
-		if playerId == 1:
-			powerCooldown()
-			if main_power:
-				main_power.activate()
-			else:
-				shoot() # Fallback por seguridad
-		if playerId == 2:
-			powerCooldown()	
-			hulk()		
-		if playerId == 3:
-			powerCooldown()	
-			teleport()
-		if playerId == 4:
-			if !is_there_twin_head():
-				powerCooldown()	
-				twinHead()
-				locked_direction = [-1, 1].pick_random()
-				locked_movement = true
-				await get_tree().create_timer(0.2).timeout
-				locked_movement = false
+		powerCooldown()
+		
+		# Si tenemos main_power instanciado (Fuego, Tierra o Aire), lo usamos directo:
+		if main_power:
+			main_power.activate()
+		else:
+			# Solo Agua (4) sigue en el sistema viejo por ahora
+			if playerId == 4:
+				if !is_there_twin_head():
+					twinHead()
+					locked_direction = [-1,1].pick_random()
+					locked_movement = true
+					await get_tree().create_timer(0.2).timeout
+					locked_movement = false
 func is_there_twin_head():
 	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
 
 func ai_punchy(direction):
-	if playerId == 1:
-		if main_power and main_power.ai_should_activate(direction):
+	if powerAvailable and main_power:
+		if main_power.ai_should_activate(direction):
 			activate_power()
-	if playerId == 2:
-		if $Raycaster.collision_distance("Up") < 25:
-			activate_power()
-	if playerId == 3 and direction == 0: 
-		activate_power()
-	if powerAvailable and playerId == 4:
+	elif powerAvailable and playerId == 4:
+		# Agua sigue aquí hasta el siguiente paso
 		activate_power()
 func hulk():
 	
