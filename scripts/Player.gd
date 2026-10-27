@@ -8,7 +8,8 @@ var powerAvailable = true
 var colorRect
 var twinHeadInstance
 var invincible = false
-
+var stats: PlayerStats = null
+var is_chaining_power: bool = false
 
 signal dead()
 signal score()
@@ -48,7 +49,6 @@ func _ready():
 	snakeBodyScene = preload("res://scenes/snake_body.tscn")
 	fissure_scene = preload("res://scenes/fissure.tscn")
 	
-#	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 	gapTimer.connect("timeout", _on_gapTimer_timeout)
 	gapFrequencyTimer.connect("timeout", _on_gapFrequencyTimer_timeout)
 	
@@ -58,27 +58,28 @@ func _ready():
 	$HulkTimer.connect("timeout", unhulk.bind(Global.playerColors[playerId]))
 	$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
 	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
-	
-	#With Stop:
-	#$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
-	#$StopAndBreatheTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
-	##No Stop
 	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
 	
 	$HulkTimer.add_to_group("timers", true)
-	
 	
 	listOfNodes.append(self)
 	if playerId != null:
 		clonable_id = playerId
 		clonable_name = "Player"+str(playerId)
-	if playerId != null:
 		main_power = Powers.create(playerId)
 		if main_power != null:
 			add_child(main_power)
 			main_power.setup(self)
+
 	actualizarPuntoDeTransporte()
 
+	if stats != null:
+		stats.stats_changed.connect(refresh_stats)
+		refresh_stats()
+func refresh_stats() -> void:
+	if stats != null:
+		speed = stats.get_stat("speed")
+		
 func _process(delta):
 	# 1. Primero siempre actualizamos la mirilla:
 	actualizarPuntoDeTransporte()
@@ -317,6 +318,18 @@ func try_use_power() -> void:
 	
 	if main_power != null:
 		main_power.activate()
+	
+	if stats != null:
+		for entry in stats.active_buffs.values():
+			if entry.behavior != null:
+				entry.behavior.on_power_activated(self, entry.stacks)
+	if not powerAvailable:
+		return
+	
+	powerCooldown()
+	
+	if main_power != null:
+		main_power.activate()
 	else:
 		# Fallback para Agua si todavía estás terminando water_power:
 		if playerId == 4:
@@ -409,8 +422,14 @@ func twinHead():
 		return twinHeadInstance
 func powerCooldown():
 	powerAvailable = false
-	$CooldownTimer.start()
-	#$ShaderSprite.hide()
+	var cd = 5.0
+	if stats != null:
+		cd = stats.get_stat("cooldown")
+	elif has_node("CooldownTimer"):
+		cd = $CooldownTimer.wait_time
+	
+	# Usamos max(cd, 0.05) para que nunca dé error si pones 0 en la consola
+	$CooldownTimer.start(max(cd, 0.05))
 func powerReady(_prevColor):
 	powerAvailable = true
 #	print(Global.playerColors[playerId])

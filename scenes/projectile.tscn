@@ -1,4 +1,4 @@
-[gd_scene load_steps=73 format=3 uid="uid://bllc44u30oqtl"]
+[gd_scene format=3 uid="uid://bllc44u30oqtl"]
 
 [ext_resource type="Script" uid="uid://cx1fm0iu72hup" path="res://scripts/projectile.gd" id="1_u848y"]
 [ext_resource type="Texture2D" uid="uid://chti2861q2jlf" path="res://wound poison.png" id="2_7bmpq"]
@@ -373,19 +373,19 @@ point_count = 2
 offsets = PackedFloat32Array(0, 0.309278, 0.71134)
 colors = PackedColorArray(1, 0.4, 0, 1, 1, 0.152941, 0, 1, 1, 0.566667, 0, 1)
 
-[node name="Projectile" type="Area2D"]
+[node name="Projectile" type="Area2D" unique_id=488573262]
 collision_mask = 5
 script = ExtResource("1_u848y")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1554825523]
 scale = Vector2(0.461538, 0.48)
 shape = SubResource("CircleShape2D_wntae")
 
-[node name="BodySprite" type="Sprite2D" parent="."]
+[node name="BodySprite" type="Sprite2D" parent="." unique_id=444564168]
 visible = false
 texture = ExtResource("2_7bmpq")
 
-[node name="Meteor" type="AnimatedSprite2D" parent="."]
+[node name="Meteor" type="AnimatedSprite2D" parent="." unique_id=1652563558]
 visible = false
 position = Vector2(-18.8, 91.4)
 rotation = 4.71239
@@ -393,21 +393,20 @@ scale = Vector2(1.72, 1.457)
 sprite_frames = SubResource("SpriteFrames_jrlsg")
 animation = &"launch"
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_cgiuf")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=95750746]
+libraries/ = SubResource("AnimationLibrary_cgiuf")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1408329335]
 visible = false
 position = Vector2(-16.2, 54.2)
 rotation = 4.71239
 sprite_frames = SubResource("SpriteFrames_3ofob")
 animation = &"fireball"
-frame = 13
+frame = 18
+frame_progress = 0.469472
 
-[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
-amount = 2000
+[node name="CPUParticles2D" type="CPUParticles2D" parent="." unique_id=164806021]
+amount = 5000
 lifetime = 2.0
 explosiveness = 0.11
 emission_shape = 1

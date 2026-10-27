@@ -112,36 +112,33 @@ func spawn_player(player_id):
 	var spawn_range = 150
 	
 	newPlayer.playerId = player_id
+	newPlayer.stats = Global.player_stats[player_id]
 	
-	newPlayer.global_position = Vector2(spawn_x + randf_range(-spawn_range,spawn_range),spawn_y + randf_range(-spawn_range,spawn_range))
-	print ("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
-	newPlayer.rotate( (3/2 * PI) - (player_id * PI/2) - (randf_range(0,PI/2)) + PI/2)
+	newPlayer.global_position = Vector2(spawn_x + randf_range(-spawn_range, spawn_range), spawn_y + randf_range(-spawn_range, spawn_range))
+	print("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
+	newPlayer.rotate((3/2 * PI) - (player_id * PI/2) - (randf_range(0, PI/2)) + PI/2)
 	print("Player ID:" + str(player_id))
-	print ("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
+	print("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
 	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
 	newPlayer.connect("score", _on_player_score.bind(player_id))
-	newPlayer.name = "Player"+str(player_id)
+	newPlayer.name = "Player" + str(player_id)
 	add_child(newPlayer)
 	newPlayer.add_to_group("activePlayers")
 	newPlayer.add_to_group("alivePlayers")
 	
-	#Test
+	# Límites del mapa
 	newPlayer.left_limit_x = $Colliders/LimitLeft/Collider.global_position.x
 	newPlayer.right_limit_x = $Colliders/LimitRight/Collider.global_position.x
 	newPlayer.top_limit_y = $Colliders/LimitTop/Collider.global_position.y
 	newPlayer.bottom_limit_y = $Colliders/Control/LimitBottom/Collider.global_position.y
-#	print("Player Added")
-
 
 	if newPlayer.playerId == 4:
 		var raycaster = newPlayer.get_node("Raycaster")
 		for raycast in raycaster.get_children():
 			if raycast.name != "UpPlayer":
 				raycast.collision_mask = 0b1
-		
-#	
 #	if player_id == 4, set raycast masks to not 3. Por default marquemoslo como 3 true
 
 func _on_player_dead(player):

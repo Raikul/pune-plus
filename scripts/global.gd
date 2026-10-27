@@ -47,6 +47,16 @@ var gapSize = 1
 var shrooms = true
 var lessons = false
 
+var player_stats: Dictionary = {
+	1: null,
+	2: null,
+	3: null,
+	4: null
+}
+
+func reset_all_player_stats() -> void:
+	for id in [1, 2, 3, 4]:
+		player_stats[id] = PlayerStats.new()
 func reset_score():
 	player1Score = 0
 	player2Score = 0
