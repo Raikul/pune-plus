@@ -24,6 +24,7 @@ run/transparent_background=false
 
 Global="*res://scripts/global.gd"
 LessonList="*res://scripts/lessonList.gd"
+SteamNet="*res://scripts/net/steam_net.gd"
 
 [display]
 

@@ -8,6 +8,9 @@ var Options
 func _ready():
 	Options = $CanvasLayer/Options
 	Options.hide()
+	# Back from an online match
+	if SteamNet.is_online():
+		SteamNet.leave()
 	shrooms_button.button_pressed = Global.shrooms
 	upgrades_button.button_pressed = Global.upgrades
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
@@ -59,7 +62,7 @@ func _on_upgrades_button_toggled(button_pressed):
 
 #Region Multiplayer
 func _on_multiplayer_pressed():
-	get_tree().change_scene_to_file("res://scenes/multiplayer_setup.tscn")
+	get_tree().change_scene_to_file("res://scenes/net/online_lobby.tscn")
 
 
 func _on_instructions_pressed() -> void:
