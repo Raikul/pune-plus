@@ -66,7 +66,7 @@ func _unhandled_input(event):
 	elif event.is_action_pressed(prefix + "Right"):
 		_focus(focus_index + 1)
 	elif event.is_action_pressed(prefix + "Up"):
-		_confirm()
+		confirm()
 	else:
 		return
 	get_viewport().set_input_as_handled()
@@ -78,7 +78,10 @@ func _focus(index, play_sound = true):
 	if play_sound:
 		move_sound_player.play()
 
-func _confirm():
+# Picks the highlighted card. Also called by the screen when time runs out.
+func confirm():
+	if has_chosen:
+		return
 	has_chosen = true
 	var card = cards[focus_index]
 	for other in cards:
@@ -97,10 +100,12 @@ func _ai_pick():
 	await _wait(randf_range(0.6, 1.2))
 	var steps = randi_range(cards.size(), cards.size() * 2)
 	for i in steps:
+		if has_chosen:
+			return
 		_focus(focus_index + 1)
 		await _wait(AI_STEP_TIME)
 	await _wait(0.4)
-	_confirm()
+	confirm()
 
 # Timer owned by the row, so a pending AI pick dies with the row
 func _wait(seconds):

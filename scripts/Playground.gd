@@ -11,6 +11,8 @@ var players_to_reset = []
 var player_scene
 var RNG :RandomNumberGenerator
 var time_flowing = false
+var upgrade_selection_scene = preload("res://scenes/upgrade_selection.tscn")
+const UPGRADE_TIME_LIMIT = 10.0
 
 @onready var animation_player = $AnimationPlayer
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
@@ -195,7 +197,21 @@ func restart(delay = 2):
 	for shroom in get_tree().get_nodes_in_group("Shrooms"):
 		shroom.queue_free()
 #	await(get_tree().create_timer(2.0).timeout)
+	if Global.upgrades:
+		await run_upgrade_selection()
 	call_deferred("setupPlayers")
+
+# Shows the upgrade screen between rounds and waits until every snake picked or time ran out.
+# The picks aren't applied to the snakes yet.
+func run_upgrade_selection():
+	var layer = CanvasLayer.new()
+	layer.layer = 5 # Above the HUD, below the pause menu
+	add_child(layer)
+	var upgrade_selection = upgrade_selection_scene.instantiate()
+	layer.add_child(upgrade_selection)
+	upgrade_selection.start([], UPGRADE_TIME_LIMIT)
+	await upgrade_selection.finished
+	layer.queue_free()
 #
 
 func _on_player_score(player_id):

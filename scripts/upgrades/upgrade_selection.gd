@@ -6,6 +6,8 @@ extends Control
 
 signal upgrade_selected(player_id, upgrade_id)
 signal all_upgrades_selected(selections)
+## Emitted right after all_upgrades_selected, when the screen can be closed.
+signal finished
 
 const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 
@@ -17,9 +19,12 @@ var selections = {}
 var rows = []
 var player_ids = []
 var waiting_for_reroll = false
+var finishing = false
+var time_left = 0.0
 var rows_box
 var footer_label
 var signal_label
+var timer_label
 
 func _ready():
 	_build_layout()
@@ -27,8 +32,9 @@ func _ready():
 	if get_tree().current_scene == self:
 		start()
 
-# player_ids defaults to the snakes marked active in Global (all four when none are)
-func start(ids = []):
+# player_ids defaults to the snakes marked active in Global (all four when none are).
+# With a time_limit, snakes that haven't picked when it runs out get their highlighted card.
+func start(ids = [], time_limit = 0.0):
 	if not is_node_ready():
 		await ready
 	for row in rows:
@@ -36,6 +42,10 @@ func start(ids = []):
 	rows.clear()
 	selections.clear()
 	waiting_for_reroll = false
+	finishing = false
+	time_left = time_limit
+	timer_label.visible = time_limit > 0
+	_update_timer_label()
 	player_ids = ids if not ids.is_empty() else _active_player_ids()
 
 	for i in player_ids.size():
@@ -67,13 +77,36 @@ func _on_row_chosen(player_id, upgrade_id):
 	if selections.size() == rows.size():
 		_finish()
 
+func _process(delta):
+	if time_left <= 0 or finishing:
+		return
+	var previous_second = ceili(time_left)
+	time_left -= delta
+	if ceili(time_left) != previous_second:
+		_update_timer_label()
+		timer_label.scale = Vector2(1.3, 1.3)
+		create_tween().tween_property(timer_label, "scale", Vector2.ONE, 0.25)
+	if time_left <= 0:
+		for row in rows:
+			row.confirm()
+
+func _update_timer_label():
+	var seconds = max(ceili(time_left), 0)
+	timer_label.text = str(seconds)
+	timer_label.add_theme_color_override("font_color", Color(1, 0.3, 0.25) if seconds <= 3 else Color.WHITE)
+
 func _finish():
+	if finishing:
+		return
+	finishing = true
 	footer_label.text = "All snakes are ready!"
-	await get_tree().create_timer(finish_delay).timeout
+	# Not process_always, so pausing the game also holds the screen
+	await get_tree().create_timer(finish_delay, false).timeout
 	if not is_inside_tree():
 		return
 	all_upgrades_selected.emit(selections.duplicate())
 	_report("all_upgrades_selected(%s)" % selections)
+	finished.emit()
 	if get_tree().current_scene == self:
 		waiting_for_reroll = true
 		footer_label.text = "Press any Punchy key to roll new upgrades"
@@ -137,6 +170,19 @@ func _build_layout():
 	layout.add_child(footer_label)
 	signal_label = _centered_label("", 18, Color(0.5, 0.5, 0.5))
 	layout.add_child(signal_label)
+
+	# Countdown in the top-right corner, only shown when there's a time limit
+	timer_label = _centered_label("", 72, Color.WHITE)
+	timer_label.add_theme_constant_override("outline_size", 10)
+	timer_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	timer_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	timer_label.offset_left = -180
+	timer_label.offset_right = -40
+	timer_label.offset_top = 20
+	timer_label.offset_bottom = 110
+	timer_label.pivot_offset = Vector2(70, 45)
+	timer_label.visible = false
+	add_child(timer_label)
 
 func _centered_label(text, font_size, font_color):
 	var label = Label.new()

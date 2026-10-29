@@ -2,12 +2,14 @@ extends Control
 
 var Options 
 @onready var shrooms_button =  $CanvasLayer/Modifiers/PanelContainer/ShroomsContainer/ShroomsButton
+@onready var upgrades_button = $CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer/UpgradesButton
 @onready var play_button = $CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Play
 
 func _ready():
 	Options = $CanvasLayer/Options
 	Options.hide()
 	shrooms_button.button_pressed = Global.shrooms
+	upgrades_button.button_pressed = Global.upgrades
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 	get_tree().paused = false
@@ -51,6 +53,9 @@ func _on_change_log_button_pressed():
 
 func _on_shrooms_button_toggled(button_pressed):
 	Global.shrooms = button_pressed
+
+func _on_upgrades_button_toggled(button_pressed):
+	Global.upgrades = button_pressed
 
 #Region Multiplayer
 func _on_multiplayer_pressed():

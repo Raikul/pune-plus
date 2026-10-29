@@ -111,6 +111,41 @@ theme_override_constants/outline_size = 8
 theme_override_constants/shadow_outline_size = 12
 text = "Shrooms?"
 
+[node name="UpgradesPanel" type="PanelContainer" parent="CanvasLayer/Modifiers"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -239.0
+offset_top = 87.0
+offset_right = 124.0
+offset_bottom = 157.0
+grow_horizontal = 0
+
+[node name="UpgradesContainer" type="HBoxContainer" parent="CanvasLayer/Modifiers/UpgradesPanel"]
+layout_mode = 2
+theme = ExtResource("1_gkmrk")
+
+[node name="UpgradesButton" type="CheckButton" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer"]
+layout_mode = 2
+theme = ExtResource("1_gkmrk")
+theme_override_styles/normal = SubResource("StyleBoxFlat_1dagr")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_6e00a")
+
+[node name="UpgradesLabel" type="Label" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer"]
+layout_mode = 2
+theme = ExtResource("4_qxm8h")
+theme_override_colors/font_color = Color(0, 0.843137, 0.945098, 1)
+theme_override_colors/font_shadow_color = Color(0.854902, 0.294118, 0.941176, 1)
+theme_override_colors/font_outline_color = Color(0.411765, 0.392157, 0.2, 1)
+theme_override_constants/shadow_offset_x = 8
+theme_override_constants/shadow_offset_y = -5
+theme_override_constants/outline_size = 8
+theme_override_constants/shadow_outline_size = 12
+text = "Upgrades?"
+
 [node name="Options" parent="CanvasLayer" unique_id=464464145 instance=ExtResource("3_wmb4s")]
 visible = false
 
@@ -336,6 +371,7 @@ offset_right = -6.0
 offset_bottom = -221.0
 
 [connection signal="toggled" from="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer/ShroomsButton" to="." method="_on_shrooms_button_toggled"]
+[connection signal="toggled" from="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer/UpgradesButton" to="." method="_on_upgrades_button_toggled"]
 [connection signal="back" from="CanvasLayer/Options" to="." method="_on_options_back_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/ChangeLog/VBoxContainer/MarginContainer/ChangeLogButton" to="." method="_on_change_log_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Play" to="." method="_on_play_pressed"]
