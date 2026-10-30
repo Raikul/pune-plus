@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-var menu_font = preload("res://assets/fonts/Flat Earth Scribe.TTF")
+var menu_font = preload("res://assets/fonts/Flat Earth Scribe.ttf")
 
 var label1: Label
 var label2: Label
