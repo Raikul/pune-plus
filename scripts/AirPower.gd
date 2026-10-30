@@ -2,14 +2,36 @@ class_name AirPower extends Power
 
 @onready var dash_sound: AudioStreamPlayer = $Dash
 
+static var double_jump_enabled: bool = false
+var recast_active: bool = false
+
 func setup(p: Node2D) -> void:
 	super.setup(p)
 	var reticle = player.get_node_or_null("DynamicTeleportNode")
 	if reticle:
 		reticle.show()
 
+func is_recast_ready() -> bool:
+	return double_jump_enabled and recast_active
+
+func execute_recast() -> void:
+	print(">>> [AIRE] ¡SEGUNDO SALTO EJECUTADO CON ÉXITO!")
+	recast_active = false
+	realizar_salto()
+
 func activate() -> void:
-	# Forzamos a calcular la posición del frente justo antes de saltar
+	print(">>> [AIRE] SALTO 1. ¿Doble salto encendido?: ", double_jump_enabled)
+	realizar_salto()
+
+	if double_jump_enabled:
+		recast_active = true
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if recast_active:
+				print(">>> [AIRE] Se terminó el tiempo de 1s para el segundo salto.")
+				recast_active = false
+		)
+
+func realizar_salto() -> void:
 	if player.has_method("actualizarPuntoDeTransporte"):
 		player.actualizarPuntoDeTransporte()
 

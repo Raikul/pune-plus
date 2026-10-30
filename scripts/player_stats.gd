@@ -6,9 +6,12 @@ var base: Dictionary = {
 	"speed": 150.0,
 	"cooldown": 5.0,
 	"earth.duration": 2.0,
+	"earth.scale": 2.0,         # <--- 2.0x = el doble de tamaño de colisión
 	"fire.radius": 1.0,
+	"fire.duration": 2.0,
+	"gap.time": 0.6,
+	"air.recast_window": 0.0,
 }
-
 var active_buffs: Dictionary = {}
 
 func set_stat(key: String, value: float) -> void:

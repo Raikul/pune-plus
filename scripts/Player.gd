@@ -10,6 +10,8 @@ var twinHeadInstance
 var invincible = false
 var stats: PlayerStats = null
 var is_chaining_power: bool = false
+var orig_col_scale: Vector2 = Vector2.ONE
+var orig_head_scale: Vector2 = Vector2.ONE
 
 signal dead()
 signal score()
@@ -61,7 +63,11 @@ func _ready():
 	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
 	
 	$HulkTimer.add_to_group("timers", true)
-	
+	if has_node("CollisionShape2D"):
+		orig_col_scale = $CollisionShape2D.scale
+	if has_node("HeadSprite"):
+		orig_head_scale = $HeadSprite.scale
+		
 	listOfNodes.append(self)
 	if playerId != null:
 		clonable_id = playerId
@@ -137,8 +143,10 @@ func _on_gapTimer_timeout():
 	
 func _on_gapFrequencyTimer_timeout():
 	gap = true
-	gapTimer.start()
-	
+	var dur = 0.6
+	if stats != null:
+		dur = stats.get_stat("gap.time")
+	gapTimer.start(max(dur, 0.05))
 func _on_bodyTimer_timeout():
 #	if not gap:
 #		createBody(snakeBodyScene)
@@ -287,30 +295,17 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 func set_invincible(state: bool) -> void:
 	invincible = state	
 func _input(event):
+	# Una sola línea universal para todos los jugadores:
 	if playerId != null and event.is_action_pressed("Player" + str(playerId) + "Up"):
 		try_use_power()
-	if powerAvailable:
-		if playerId == 1:
-			if event.is_action_pressed(&"Player1Up"):
-				shoot()		
-				powerCooldown()
-				
-		if playerId == 2:
-			if event.is_action_pressed(&"Player2Up"):
-				hulk()		
-				powerCooldown()
-		
-		if playerId == 3:
-			if event.is_action_pressed(&"Player3Up"):
-				teleport()
-				powerCooldown()
-				
-		if playerId == 4:
-			if event.is_action_pressed(&"Player4Up"):
-				twinHead()		
-				powerCooldown()
 
 func try_use_power() -> void:
+	# 1. Si el poder tiene el segundo salto listo, salta DE INMEDIATO sin cooldown:
+	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
+		main_power.execute_recast()
+		return
+
+	# 2. Si está en cooldown normal y no hay segundo salto, no hace nada:
 	if not powerAvailable:
 		return
 	
@@ -323,26 +318,9 @@ func try_use_power() -> void:
 		for entry in stats.active_buffs.values():
 			if entry.behavior != null:
 				entry.behavior.on_power_activated(self, entry.stacks)
-	if not powerAvailable:
-		return
-	
-	powerCooldown()
-	
-	if main_power != null:
-		main_power.activate()
-	else:
-		# Fallback para Agua si todavía estás terminando water_power:
-		if playerId == 4:
-			if not is_there_twin_head():
-				twinHead()
-				locked_direction = [-1, 1].pick_random()
-				locked_movement = true
-				await get_tree().create_timer(0.2).timeout
-				locked_movement = false
 
 func activate_power():
 	try_use_power()
-
 func ai_punchy(direction):
 	if powerAvailable and main_power and main_power.ai_should_activate(direction):
 		try_use_power()
@@ -445,3 +423,18 @@ func set_gap_size():
 			gapTimer.set_wait_time(0.7)
 		2:
 			gapTimer.set_wait_time(1)
+func set_earth_collision_scale(mult: float) -> void:
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.scale = orig_col_scale * mult
+	if has_node("HeadSprite"):
+		$HeadSprite.scale = orig_head_scale * mult
+	if has_node("ElementHeadSprite"):
+		$ElementHeadSprite.scale = orig_head_scale * mult
+
+func reset_earth_collision_scale() -> void:
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.scale = orig_col_scale
+	if has_node("HeadSprite"):
+		$HeadSprite.scale = orig_head_scale
+	if has_node("ElementHeadSprite"):
+		$ElementHeadSprite.scale = orig_head_scale
