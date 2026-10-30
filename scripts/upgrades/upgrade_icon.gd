@@ -62,6 +62,8 @@ func _draw():
 			_draw_symbol(FIRE_WATER_SYMBOL, center + offset, size.x * 0.42, true, 0.5)
 			_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, true)
 			_draw_text("+1", size.y * 0.95, 26)
+		"lasting_twin":
+			_draw_lasting_twin()
 
 # Draws one frame of the fireball sprite sheet flying to the right and returns where the ball is
 func _draw_fireball(pos, scale_mult) -> Vector2:
@@ -89,6 +91,16 @@ func _draw_trail(gap_length):
 			draw_circle(Vector2(x, _trail_y(x)), 7, color)
 		x += 8.0
 	draw_circle(Vector2(head_x, _trail_y(head_x)), 11, color.lightened(0.35))
+
+# An aqua twin trail with a shimmer running along it: it never fades to the water color
+func _draw_lasting_twin():
+	var head_x = size.x - 16
+	var x = 4.0
+	while x < head_x - 10:
+		var shimmer = 0.5 + 0.5 * sin(x * 0.08 - time * 6.0)
+		draw_circle(Vector2(x, _trail_y(x)), 7, Color.AQUA.lerp(Color.WHITE, shimmer * 0.45))
+		x += 8.0
+	draw_circle(Vector2(head_x, _trail_y(head_x)), 11, Color.AQUA.lightened(0.35))
 
 func _trail_y(x):
 	return size.y / 2 + sin(x * 0.045 - time * 2.0) * 14

@@ -78,6 +78,13 @@ const UPGRADES = [
 		"element": "water",
 		"icon": "extra_copy",
 	},
+	{
+		"id": &"water_lasting_twin",
+		"name": "Lasting Twin",
+		"description": "Your twin's trail never sheds: it stays aqua and never blocks you.",
+		"element": "water",
+		"icon": "lasting_twin",
+	},
 ]
 
 static func get_upgrade(upgrade_id) -> Dictionary:

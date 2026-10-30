@@ -282,7 +282,7 @@ func _on_player_3_score():
 
 func _on_player_4_score():
 	Global.player4Score += 1
-	if Global.player1Score >= Global.scoreToReach:
+	if Global.player4Score >= Global.scoreToReach:
 		finishGame(4)
 	
 func _on_pause_button_pressed():

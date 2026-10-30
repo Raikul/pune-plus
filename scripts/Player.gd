@@ -20,6 +20,7 @@ signal power_used()
 signal twin_spawned(twin)
 
 var playerId
+const FISSURE_Z_INDEX = 5
 # Which Player{N} input actions steer this snake (0 = no keys, e.g. an online AI).
 # Online each machine numbers its own players from 1, so the first one there uses the Player 1 keys.
 var input_id
@@ -284,6 +285,8 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 		listOfNodes.pop_front()
 	
 	fissure_instance.add_to_group("Fissures", true)
+	# Above every trail and head, whichever snake was spawned later
+	fissure_instance.z_index = FISSURE_Z_INDEX
 	add_child(fissure_instance)
 	return fissure_instance
 	
@@ -360,6 +363,8 @@ func unhulk(prevColor):
 	invincible = false
 	
 func teleport():
+	# The target is only refreshed in _process; the AI can teleport before that first runs
+	actualizarPuntoDeTransporte()
 	gap = true
 	gap_delta_sum = 0.0
 

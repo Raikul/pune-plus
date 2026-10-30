@@ -39,7 +39,7 @@ The snake game is unusual: a snake's whole future is determined by its position,
 | Own death | **its owner** | The owner tests its head against the trails it sees (exact copies of everyone's trails, only the newest few cm may be a few ms behind), then reports to the host (reliable) |
 | Round start/spawns, deaths → scores, round end, match end | **host** | Reliable RPCs. The host rolls spawn positions and broadcasts them so everyone spawns identically |
 | Power use | owner | Reliable event, replayed on the remote copy of that snake |
-| Water twin | **the water snake's machine** | Streamed like a snake (`twin_state`: state + trail segments + alive/dead/absorbed; an absorbed twin loses its head but keeps its trail) and dead-reckoned elsewhere. The twin is AI-steered after a short forced split, so it never reads anyone's keys |
+| Water twin | **the water snake's machine** | Streamed like a snake (`twin_state`: state + trail segments + alive/dead/absorbed; an absorbed twin loses its head but keeps its trail) and dead-reckoned elsewhere. The twin is AI-steered after a short forced split, so it never reads anyone's keys. A water snake can have several twins at once; each one is streamed separately |
 
 Why not the alternatives:
 
@@ -60,6 +60,8 @@ Measured on the LAN debug transport (two windows, scripted steering, snake speed
 Trails are exact at any latency. Only the heads are predicted. A visual-only line bridges a remote snake's newest received segment to its predicted head (hidden while the owner is in a gap), so in-flight segments don't look like holes.
 
 Known tradeoff: head-to-head and "who crossed first" races near the front of a trail are decided on the owner's screen. That's the standard compromise for this genre.
+
+Leaving mid-match: every received message and every delayed step checks `NetSession._online()` (still in the tree, session still open) before touching `multiplayer` or sending anything, so a player or the host leaving doesn't cascade into errors.
 
 ## Code map
 

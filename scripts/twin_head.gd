@@ -18,6 +18,15 @@ var steer_direction = 0
 var net_remote = false
 # The water snake took this twin's place: the head is gone but its trail stays
 var absorbed = false
+## Seconds before a twin trail segment sheds its aqua skin and blocks the water snake again
+const SHED_TIME = 5.0
+## How long one segment takes to fade into the water color
+const SHED_FADE = 0.4
+# False keeps the trail aqua and harmless to the water snake forever (upgrade placeholder, not connected yet)
+var sheds_trail = true
+# [segment, trail_clock when laid], oldest first: the tail sheds first, then towards the head
+var unshed_segments = []
+var trail_clock = 0.0
 
 signal dead
 signal twinScore
@@ -61,6 +70,23 @@ func _process(delta):
 	position.x = clamp(position.x, 0, screen_size.x)
 	position.y = clamp(position.y, 0, screen_size.y)
 
+# Runs even after the twin died or was absorbed: its trail keeps shedding
+func _physics_process(delta):
+	trail_clock += delta
+	if not sheds_trail:
+		return
+	while not unshed_segments.is_empty() and trail_clock - unshed_segments[0][1] >= SHED_TIME:
+		_shed(unshed_segments.pop_front()[0])
+
+func _shed(segment):
+	if not is_instance_valid(segment):
+		return
+	var water_color = Color(Global.playerColors[get_parent().playerId])
+	var tween = segment.create_tween()
+	tween.tween_property(segment, "modulate", water_color, SHED_FADE)
+	# Once it looks like the water snake's own trail, it blocks it like one
+	tween.tween_callback(segment.remove_from_group.bind("TwinBodies"))
+
 func _on_gapTimer_timeout():
 	gap = not gap
 	
@@ -100,6 +126,7 @@ func createBody(scene):
 #	print (snakeBody.collision_layer)
 	add_child(snakeBody)
 	listOfNodes.append(snakeBody)
+	unshed_segments.append([snakeBody, trail_clock])
 
 	if listOfNodes.size() > 4:
 		listOfNodes.pop_front()

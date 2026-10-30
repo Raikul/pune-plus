@@ -51,8 +51,9 @@ var round_id = 0
 var sequences = {} # player_id -> last sequence sent, for each snake this machine runs
 var send_timer = 0.0
 var local_segments = {} # player_id -> [PackedFloat32Array [index, x, y, rotation]] per segment of our own trails
-# Water twins. Ours: player_id -> {"twin", "serial", "sequence", "segments", "last", "final_sends"};
-# other machines': player_id -> RemoteSnake
+# Water twins (a water snake can have several at once).
+# Ours: serial -> {"player_id", "twin", "serial", "sequence", "segments", "last", "final_sends"};
+# other machines': "player_id:serial" -> RemoteSnake
 var local_twins = {}
 var remote_twins = {}
 var twin_serial = 0
@@ -103,6 +104,8 @@ func _new_remote_snake(node, color):
 #region Owner side: stream our snake
 
 func _physics_process(delta):
+	if not _online():
+		return
 	send_timer += delta
 	if send_timer < SEND_INTERVAL:
 		return
@@ -111,8 +114,8 @@ func _physics_process(delta):
 		var local = players.get(player_id)
 		if local != null and is_instance_valid(local) and local.is_processing():
 			_send_state(local)
-	for player_id in local_twins.keys():
-		_send_twin_state(player_id)
+	for serial in local_twins.keys():
+		_send_twin_state(serial)
 
 # final: the snake died here, so it must not be extrapolated any further
 func _send_state(local, final = false):
@@ -130,18 +133,19 @@ func _on_local_body_laid(body_position, body_rotation, player_id):
 
 func _on_local_twin_spawned(twin, player_id):
 	twin_serial += 1
-	var entry = {"twin": twin, "serial": twin_serial, "sequence": 0, "segments": [], "last": null, "final_sends": 0}
-	local_twins[player_id] = entry
+	var entry = {"player_id": player_id, "twin": twin, "serial": twin_serial, "sequence": 0, "segments": [], "last": null, "final_sends": 0}
+	local_twins[twin_serial] = entry
 	twin.body_laid.connect(_on_local_twin_body_laid.bind(entry))
 
 func _on_local_twin_body_laid(body_position, body_rotation, entry):
 	entry.segments.append(PackedFloat32Array([entry.segments.size(), body_position.x, body_position.y, body_rotation]))
 
-func _send_twin_state(player_id):
-	var entry = local_twins[player_id]
+func _send_twin_state(serial):
+	var entry = local_twins[serial]
+	var player_id = entry.player_id
 	var twin = entry.twin
 	if not is_instance_valid(twin):
-		local_twins.erase(player_id) # Round cleared
+		local_twins.erase(serial) # Round cleared
 		return
 	var status = TWIN_ALIVE
 	if twin.absorbed:
@@ -163,13 +167,17 @@ func _send_twin_state(player_id):
 	if status != TWIN_ALIVE:
 		entry.final_sends += 1
 		if entry.final_sends >= SEGMENT_REDUNDANCY:
-			local_twins.erase(player_id)
+			local_twins.erase(serial)
 
 func _on_local_power_used(player_id):
+	if not _online():
+		return
 	power_event.rpc(round_id, player_id)
 
 # Our snake died on our screen: send its last trail and let the host decide what that means
 func report_death(player_id):
+	if not _online():
+		return
 	var player = players.get(player_id)
 	if player and is_instance_valid(player):
 		_send_state(player, true)
@@ -184,8 +192,11 @@ func report_death(player_id):
 
 @rpc("any_peer", "call_remote", "unreliable_ordered", 1)
 func snake_state(state_round, player_id, state_sequence, sent_at, state_position, state_rotation, direction, speed, gap, segments):
+	if not _online():
+		return
 	var sender = multiplayer.get_remote_sender_id()
-	await _fake_latency()
+	if not await _arrived():
+		return
 	if state_round != round_id or SteamNet.peer_for_slot(player_id) != sender:
 		return
 	var snake = remote_snakes.get(player_id)
@@ -254,37 +265,37 @@ func _predict(snake):
 
 @rpc("any_peer", "call_remote", "unreliable_ordered", 1)
 func twin_state(state_round, player_id, serial, state_sequence, sent_at, state_position, state_rotation, direction, speed, gap, segments, status):
+	if not _online():
+		return
 	var sender = multiplayer.get_remote_sender_id()
-	await _fake_latency()
+	if not await _arrived():
+		return
 	if state_round != round_id or SteamNet.peer_for_slot(player_id) != sender:
 		return
 	var player = players.get(player_id)
 	if player == null or not is_instance_valid(player):
 		return
-	var snake = remote_twins.get(player_id)
-	if snake != null and snake.serial > serial:
-		return # A late packet from an older twin
-	if snake == null or snake.serial < serial:
-		# A new twin: the previous one (if any) keeps its trail where it stopped
-		if snake != null:
-			_stop_twin(player_id)
+	var key = str(player_id) + ":" + str(serial)
+	var snake = remote_twins.get(key)
+	if snake == null:
+		# A new twin. Older twins of the same snake keep going: each has its own packets.
 		var twin = player.spawn_remote_twin()
 		twin.global_position = state_position
 		twin.rotation = state_rotation
 		snake = _new_remote_snake(twin, Color.AQUA)
 		snake.serial = serial
-		remote_twins[player_id] = snake
+		remote_twins[key] = snake
 	if not is_instance_valid(snake.player):
 		return
 	_apply_state(snake, state_sequence, sent_at, state_position, state_rotation, direction, speed, gap, segments)
 	if status != TWIN_ALIVE:
-		_stop_twin(player_id)
+		_stop_twin(key)
 	if status == TWIN_ABSORBED and not snake.player.absorbed:
 		snake.player.absorb()
 
 # Freeze a remote twin where its owner last reported it
-func _stop_twin(player_id):
-	var snake = remote_twins.get(player_id)
+func _stop_twin(key):
+	var snake = remote_twins.get(key)
 	if snake == null or snake.dead:
 		return
 	snake.dead = true
@@ -297,8 +308,11 @@ func _stop_twin(player_id):
 
 @rpc("any_peer", "call_remote", "reliable")
 func power_event(event_round, player_id):
+	if not _online():
+		return
 	var sender = multiplayer.get_remote_sender_id()
-	await _fake_latency()
+	if not await _arrived():
+		return
 	if event_round != round_id or SteamNet.peer_for_slot(player_id) != sender:
 		return
 	var player = players.get(player_id)
@@ -324,14 +338,16 @@ func _stop_snake(player_id):
 func _stop_all_snakes():
 	for player_id in remote_snakes:
 		_stop_snake(player_id)
-	for player_id in remote_twins:
-		_stop_twin(player_id)
+	for key in remote_twins:
+		_stop_twin(key)
 
 #endregion
 
 #region Host authority: rounds, deaths and scores
 
 func host_start_round():
+	if not _online():
+		return
 	var spawns = {}
 	for slot in SteamNet.roster:
 		spawns[slot] = playground.roll_spawn(slot)
@@ -339,7 +355,8 @@ func host_start_round():
 
 @rpc("authority", "call_local", "reliable")
 func start_round(new_round_id, spawns):
-	await _fake_latency()
+	if not await _arrived():
+		return
 	round_id = new_round_id
 	players.clear()
 	remote_snakes.clear()
@@ -352,12 +369,17 @@ func start_round(new_round_id, spawns):
 
 @rpc("any_peer", "call_remote", "reliable")
 func death_report(report_round, player_id):
+	if not _online():
+		return
 	var sender = multiplayer.get_remote_sender_id()
-	await _fake_latency()
+	if not await _arrived():
+		return
 	if multiplayer.is_server() and report_round == round_id and SteamNet.peer_for_slot(player_id) == sender:
 		_host_player_died(player_id)
 
 func _host_player_died(player_id):
+	if not _online():
+		return
 	var player = players.get(player_id)
 	if player == null or not is_instance_valid(player) or not player.is_in_group("alivePlayers"):
 		return
@@ -368,7 +390,8 @@ func _host_player_died(player_id):
 
 @rpc("authority", "call_remote", "reliable")
 func player_died(event_round, player_id):
-	await _fake_latency()
+	if not await _arrived():
+		return
 	var player = players.get(player_id)
 	if event_round != round_id or player == null or not is_instance_valid(player):
 		return
@@ -376,34 +399,45 @@ func player_died(event_round, player_id):
 	playground.mark_player_dead(player)
 
 func host_round_over():
+	if not _online():
+		return
 	_stop_all_snakes()
 	round_over.rpc(round_id, _scores())
 
 @rpc("authority", "call_remote", "reliable")
 func round_over(event_round, scores):
-	await _fake_latency()
+	if not await _arrived():
+		return
 	if event_round != round_id:
 		return
 	_stop_all_snakes()
 	_apply_scores(scores)
 	await get_tree().process_frame # Let the HUD show the final scores before it stops
+	if not _online():
+		return
 	playground.restart()
 
 func host_game_over(winner_id):
+	if not _online():
+		return
 	_stop_all_snakes()
 	game_over.rpc(winner_id, _scores())
 
 @rpc("authority", "call_remote", "reliable")
 func game_over(winner_id, scores):
-	await _fake_latency()
+	if not await _arrived():
+		return
 	_stop_all_snakes()
 	_apply_scores(scores)
 	await get_tree().process_frame
+	if not _online():
+		return
 	playground.finishGame(winner_id)
 
 @rpc("authority", "call_remote", "reliable")
 func sync_scores(scores):
-	await _fake_latency()
+	if not await _arrived():
+		return
 	_apply_scores(scores)
 
 func _scores():
@@ -423,6 +457,13 @@ func _on_peer_left(_peer_id, slots):
 #endregion
 
 
-# Debug: simulate network delay on everything we receive (SteamNet.fake_latency)
-func _fake_latency():
+# Still in a running session? False once this node left the tree (scene change)
+# or the connection closed, e.g. right after a player or the host left.
+func _online():
+	return is_inside_tree() and SteamNet.is_online()
+
+# Call (with await) at the start of every received message: applies the debug
+# network delay (SteamNet.fake_latency) and says whether it's still safe to handle it.
+func _arrived():
 	await SteamNet.fake_delay()
+	return _online()

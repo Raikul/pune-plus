@@ -79,11 +79,14 @@ func _local_time():
 func clock_ping(client_time):
 	var sender = multiplayer.get_remote_sender_id()
 	await fake_delay()
-	clock_pong.rpc_id(sender, client_time, _local_time())
+	if is_online():
+		clock_pong.rpc_id(sender, client_time, _local_time())
 
 @rpc("authority", "call_remote", "unreliable")
 func clock_pong(client_time, host_time):
 	await fake_delay()
+	if not is_online():
+		return
 	var round_trip = _local_time() - client_time
 	clock_samples.append([round_trip, host_time + round_trip / 2.0 - _local_time()])
 	if clock_samples.size() > CLOCK_SAMPLES:
