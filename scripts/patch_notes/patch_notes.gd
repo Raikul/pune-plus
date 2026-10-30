@@ -1,0 +1,160 @@
+extends RefCounted
+class_name PatchNotes
+
+# Patch notes shown from the version button in the main menu, newest first.
+#
+# Version numbers are MAJOR.MINOR.PATCH (0.x while in development):
+# - MINOR for a content update (new modes, powers, screens),
+# - PATCH for fixes and small tweaks on top of it.
+# The current one lives in Project Settings > Application > Config > Version
+# (application/config/version); add a release here whenever it changes.
+
+const STAGE = "Alpha"
+
+const RELEASES = [
+	{
+		"version": "0.4.0",
+		"name": "Online & Upgrades",
+		"date": "2026-10-30",
+		"sections": [
+			["Online multiplayer (Steam, early version)", [
+				"Host a friends-only or public lobby, browse open lobbies, invite friends with the Steam overlay or join from your friends list. No port forwarding needed.",
+				"Pick your element: click any open slot to move there, add another player on your keyboard or add your own AI. Two PCs can fill a four-snake match.",
+				"See every local player's keys in the lobby and rebind them with the Keys button.",
+				"Built for latency: your snake reacts instantly, everyone else's movement is predicted and trails are exact copies on every screen.",
+				"Players leaving a match no longer cause errors; if the host leaves, everyone returns to the lobby.",
+			]],
+			["Upgrades", [
+				"New upgrade screen between rounds, turned on with \"Upgrades?\" in the main menu. Each snake picks one of three upgrades with its own keys within 10 seconds.",
+				"Placeholder upgrades for now (picks don't change the game yet): wider or tighter gaps, speed, quicker recharge, piercing and bigger fireballs, wall warp, second wind, tectonic bulk, extra twin and lasting twin.",
+			]],
+			["Water", [
+				"The twin is now steered by its own AI after splitting away from your snake, instead of mirroring your keys.",
+				"The twin's trail sheds its skin: after 5 seconds each segment fades from aqua to Water's color, tail first, and from then on it blocks the Water snake like its own trail.",
+				"When Water takes its twin's place, the twin's trail now stays on the field.",
+			]],
+			["Fixes", [
+				"Water now wins when it reaches the score limit.",
+				"AI Air could teleport off the map at the start of a round and keep flying where nobody could see it.",
+				"Earth's fissure is drawn above every trail instead of under some of them.",
+				"The game failed to start on Linux.",
+				"The fireball no longer floods the log with errors.",
+			]],
+			["Also new", [
+				"Version number in the main menu and these patch notes.",
+			]],
+			["Known issues (online)", [
+				"Fireballs can break slightly different trail pieces on each screen.",
+				"Mushrooms and upgrades are turned off online, and pausing doesn't stop an online match.",
+			]],
+		],
+	},
+	{
+		"version": "0.3.2",
+		"name": "Air & Instructions",
+		"date": "2026-10-28",
+		"note": "Reconstructed from the project history.",
+		"sections": [
+			["New", [
+				"Air's power teleports the snake ahead of itself, shown by an indicator in front of its head.",
+				"Instructions screen.",
+				"New fireball sprite.",
+				"Debug: \"Simulate round\" in the pause menu.",
+			]],
+			["Engine", [
+				"Updated to Godot 4.3, then 4.5.",
+			]],
+		],
+	},
+	{
+		"version": "0.3.1",
+		"name": "Expo Patch",
+		"date": "2024-09-14",
+		"note": "Reconstructed from the project history.",
+		"sections": [
+			["New", [
+				"Full keyboard navigation in the menus.",
+				"Music and effects volume settings.",
+				"Lessons: a quote shows up between rounds.",
+			]],
+			["Changes", [
+				"Player setup and HUD tweaks for the expo.",
+			]],
+		],
+	},
+	{
+		"version": "0.3.0",
+		"name": "Bots & Fissures",
+		"date": "2024-03-24",
+		"note": "Reconstructed from the project history.",
+		"sections": [
+			["New", [
+				"AI bots: any snake can be played by the computer, chosen in player setup.",
+				"Earth's power opens a fissure that crawls ahead of the snake.",
+				"Pause and exit buttons during a match.",
+				"New fireball.",
+			]],
+			["Changes", [
+				"Major rework and optimization of the game code.",
+				"Updated to Godot 4.2.",
+			]],
+		],
+	},
+	{
+		"version": "0.2.2",
+		"name": "New Look",
+		"date": "2023-11-30",
+		"note": "From the in-game changelog of the time.",
+		"sections": [
+			["Changes", [
+				"Upgraded Water Punchy.",
+				"Added a visual for Punchy ready.",
+				"New logo, fonts and menu art.",
+			]],
+		],
+	},
+	{
+		"version": "0.2.0",
+		"name": "Shrooms",
+		"date": "2023-11-13",
+		"note": "From the in-game changelog of the time.",
+		"sections": [
+			["New", [
+				"Shrooms.",
+				"Redefine keys.",
+				"Win condition and main menu.",
+				"Lessons (coded but not shown yet).",
+				"LAN multiplayer (coded but not shown yet).",
+			]],
+		],
+	},
+	{
+		"version": "0.1.7",
+		"name": "First Slither",
+		"date": "2023-11-09",
+		"note": "From the in-game changelog of the time.",
+		"sections": [
+			["New", [
+				"Audio settings: master, music and effects.",
+				"Gap size setting.",
+				"Full Fire: the fireball breaks everything it passes through.",
+			]],
+		],
+	},
+]
+
+static func current_version() -> String:
+	return ProjectSettings.get_setting("application/config/version", "0.0.0")
+
+# "Version 0.4.0 (Alpha)"
+static func version_label() -> String:
+	return "Version %s (%s)" % [current_version(), STAGE]
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+# "2026-10-30" -> "Oct 30, 2026"
+static func format_date(date: String) -> String:
+	var parts = date.split("-")
+	if parts.size() != 3:
+		return date
+	return "%s %d, %s" % [MONTHS[int(parts[1]) - 1], int(parts[2]), parts[0]]

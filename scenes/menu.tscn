@@ -178,7 +178,6 @@ theme_override_font_sizes/font_size = 44
 text = "Version 0.2 (Alpha)"
 
 [node name="ChangeLog" type="PanelContainer" parent="CanvasLayer" unique_id=1931637407]
-visible = false
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -199,25 +198,6 @@ size_flags_vertical = 0
 theme = SubResource("Theme_7avap")
 alignment = 1
 
-[node name="ChangeLogDetailsContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer" unique_id=1036057659]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 3
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 3
-
-[node name="ChangeLogDetails" type="Label" parent="CanvasLayer/ChangeLog/VBoxContainer/ChangeLogDetailsContainer" unique_id=928803375]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_fonts/font = SubResource("SystemFont_xpgnv")
-theme_override_font_sizes/font_size = 20
-text = "-Upgraded Water Punchy
--Added visual for PunchyReady
-"
-
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ChangeLog/VBoxContainer" unique_id=613202549]
 layout_mode = 2
 size_flags_horizontal = 8
@@ -234,7 +214,7 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 44
 action_mode = 0
-text = "Version 0.22 (Alpha)"
+text = "Version 0.4.0 (Alpha)"
 
 [node name="TopMenu" type="CenterContainer" parent="CanvasLayer" unique_id=704499331]
 anchors_preset = 8
