@@ -111,7 +111,7 @@ theme_override_constants/outline_size = 8
 theme_override_constants/shadow_outline_size = 12
 text = "Shrooms?"
 
-[node name="UpgradesPanel" type="PanelContainer" parent="CanvasLayer/Modifiers"]
+[node name="UpgradesPanel" type="PanelContainer" parent="CanvasLayer/Modifiers" unique_id=1517582730]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -122,11 +122,11 @@ offset_right = 124.0
 offset_bottom = 157.0
 grow_horizontal = 0
 
-[node name="UpgradesContainer" type="HBoxContainer" parent="CanvasLayer/Modifiers/UpgradesPanel"]
+[node name="UpgradesContainer" type="HBoxContainer" parent="CanvasLayer/Modifiers/UpgradesPanel" unique_id=787978704]
 layout_mode = 2
 theme = ExtResource("1_gkmrk")
 
-[node name="UpgradesButton" type="CheckButton" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer"]
+[node name="UpgradesButton" type="CheckButton" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer" unique_id=1554815021]
 layout_mode = 2
 theme = ExtResource("1_gkmrk")
 theme_override_styles/normal = SubResource("StyleBoxFlat_1dagr")
@@ -134,7 +134,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_ci1j0")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hwfie")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_6e00a")
 
-[node name="UpgradesLabel" type="Label" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer"]
+[node name="UpgradesLabel" type="Label" parent="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer" unique_id=2103272826]
 layout_mode = 2
 theme = ExtResource("4_qxm8h")
 theme_override_colors/font_color = Color(0, 0.843137, 0.945098, 1)
@@ -318,7 +318,6 @@ theme = SubResource("Theme_7avap")
 text = "Play"
 
 [node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1559298825]
-visible = false
 layout_mode = 2
 text = "Multiplayer"
 
