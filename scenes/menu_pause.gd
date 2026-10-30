@@ -29,6 +29,8 @@ func _ready():
 	# Conectar botones del menú
 	if resume_button: resume_button.pressed.connect(_on_resume_pressed)
 	if simulate_button: simulate_button.pressed.connect(_on_simulate_pressed)  # <--- Conectado aquí
+	# Simulating a round only works locally
+	if simulate_button and Global.isMultiplayerActive: simulate_button.hide()
 	if options_button: options_button.pressed.connect(_on_options_pressed)
 	if instructions_button: instructions_button.pressed.connect(_on_instructions_pressed)
 	if quit_button: quit_button.pressed.connect(_on_quit_pressed)
@@ -53,14 +55,15 @@ func _unhandled_input(event):
 				toggle_pause()
 
 func toggle_pause():
-	if get_tree().paused:
+	if visible:
 		hide()
 		if options_panel: options_panel.hide()
 		if instructions_panel: instructions_panel.hide()
 		get_tree().paused = false
 	else:
 		show()
-		get_tree().paused = true
+		# Online the match keeps running for everyone else
+		get_tree().paused = not Global.isMultiplayerActive
 
 func _on_resume_pressed():
 	toggle_pause()

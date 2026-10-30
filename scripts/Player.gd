@@ -12,8 +12,21 @@ var invincible = false
 
 signal dead()
 signal score()
+## Online: a trail segment was laid by this (local) snake
+signal body_laid(body_position, body_rotation)
+## Online: this (local) snake used its power
+signal power_used()
+## Online: this (local) water snake split off a twin
+signal twin_spawned(twin)
 
 var playerId
+const FISSURE_Z_INDEX = 5
+# Which Player{N} input actions steer this snake (0 = no keys, e.g. an online AI).
+# Online each machine numbers its own players from 1, so the first one there uses the Player 1 keys.
+var input_id
+# Online: another machine owns this snake. NetSession moves it and lays its trail.
+var net_remote = false
+var steer_direction = 0
 
 var listOfNodes = []
 var snakeBodyScene: PackedScene
@@ -68,25 +81,30 @@ func _ready():
 	
 	
 	listOfNodes.append(self)
+	if input_id == null:
+		input_id = playerId
 	if playerId != null:
 		clonable_id = playerId
 		clonable_name = "Player"+str(playerId)
 	
 func _process(delta):
+		if net_remote:
+			return
 #	if not gap:
 #		createBody(snakeBodyScene)
 #	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
 		var direction = 0
 		if locked_movement: direction = locked_direction
 		else:
-			if Input.is_action_pressed("Player"+str(playerId)+"Left") :direction = -1
-			elif Input.is_action_pressed("Player"+str(playerId)+"Right"): direction = 1
+			if input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Left") :direction = -1
+			elif input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Right"): direction = 1
 			elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
 			elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 		
 #		elif $Raycaster.collision_distance("Left") < 400: direction = -1
 #		elif $Raycaster.collision_distance("Right") < 400: direction = 1
 		if ai_enabled and powerAvailable: ai_punchy(direction)
+		steer_direction = direction
 
 		rotation += angular_speed * direction * delta
 		var	velocity = Vector2.UP.rotated(rotation) * speed
@@ -143,13 +161,19 @@ func _on_bodyTimer_timeout():
 	pass
 
 func _physics_process(delta):
+	if net_remote:
+		return
 	gap_delta_sum += delta
 	if not gap and gap_delta_sum >= 0.05:
-		createBody(snakeBodyScene)
+		var body = createBody(snakeBodyScene)
 		gap_delta_sum = 0
+		body_laid.emit(body.global_position, body.rotation)
 
 func _on_area_entered(area):	
 #	print(area)
+	# A remote snake's owner decides its deaths and pickups
+	if net_remote:
+		return
 	if area is Shroom:
 		$ShroomEaten.play()
 		emit_signal("score")
@@ -168,13 +192,30 @@ func _on_area_entered(area):
 				set_process(false)
 				emit_signal("dead")
 			elif is_water_my_friend: #twinHeadIsAlive
-				currentTwinHeadInstance.collider.set_deferred("disabled", true)
+				# Take the twin's place. Its trail stays, and since twin trails never hurt
+				# their water snake (is_water_my_friend), landing on its tail is safe.
 				var tempPosition = currentTwinHeadInstance.position
 				var tempRotation = currentTwinHeadInstance.rotation
-				currentTwinHeadInstance.queue_free()
+				currentTwinHeadInstance.absorb()
 				position = tempPosition
 				rotation = tempRotation
 				pass
+
+# Online: the twin of a remote water snake, moved by NetSession
+func spawn_remote_twin():
+	is_water_my_friend = true
+	var twin = createBody(twinHeadScene)
+	twin.net_remote = true
+	twin.bufferListOfNodes = listOfNodes
+	twin.bufferListOfNodes.append(self)
+	return twin
+
+# Online: lay a segment of a remote snake where its owner laid it
+func create_body_at(body_position, body_rotation):
+	var body = createBody(snakeBodyScene)
+	body.global_position = body_position
+	body.rotation = body_rotation
+	return body
 
 func createBody(scene):
 	var sceneInstance = scene.instantiate()
@@ -244,35 +285,33 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 		listOfNodes.pop_front()
 	
 	fissure_instance.add_to_group("Fissures", true)
+	# Above every trail and head, whichever snake was spawned later
+	fissure_instance.z_index = FISSURE_Z_INDEX
 	add_child(fissure_instance)
 	return fissure_instance
 	
 	
 func _input(event):
-	if powerAvailable:
-		if playerId == 1:
-			if event.is_action_pressed(&"Player1Up"):
-				shoot()		
-				powerCooldown()
-				
-		if playerId == 2:
-			if event.is_action_pressed(&"Player2Up"):
-				hulk()		
-				powerCooldown()
-		
-		if playerId == 3:
-			if event.is_action_pressed(&"Player3Up"):
-				teleport()
-				powerCooldown()
-				
-		if playerId == 4:
-			if event.is_action_pressed(&"Player4Up"):
-				twinHead()		
-				powerCooldown()
+	if net_remote:
+		return
+	if powerAvailable and input_id != 0 and event.is_action_pressed("Player" + str(input_id) + "Up"):
+		use_power()
+		powerCooldown()
+		power_used.emit()
+
+# The element power of this snake, without cooldown checks
+func use_power():
+	match playerId:
+		1: shoot()
+		2: hulk()
+		3: teleport()
+		4: twinHead()
 
 
 func activate_power():
 	if powerAvailable:	
+		if playerId != 4 or !is_there_twin_head():
+			power_used.emit()
 		if playerId == 1:
 			powerCooldown()	
 			shoot()		
@@ -286,7 +325,7 @@ func activate_power():
 				if !is_there_twin_head():
 					powerCooldown()	
 					twinHead()
-					locked_direction = [-1,1].pick_random()
+					locked_direction = -twinHeadInstance.split_direction
 					locked_movement = true
 					await get_tree().create_timer(0.2).timeout
 					locked_movement = false		
@@ -324,6 +363,8 @@ func unhulk(prevColor):
 	invincible = false
 	
 func teleport():
+	# The target is only refreshed in _process; the AI can teleport before that first runs
+	actualizarPuntoDeTransporte()
 	gap = true
 	gap_delta_sum = 0.0
 
@@ -358,6 +399,7 @@ func twinHead():
 	twinHeadInstance.bufferListOfNodes.append(self)
 	twinHeadInstance.snakeBodyScene = snakeBodyScene
 #	twinHead.syncBodyTimer = bodyTimer
+	twin_spawned.emit(twinHeadInstance)
 
 	pass
 	
