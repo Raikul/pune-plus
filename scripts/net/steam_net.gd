@@ -312,10 +312,12 @@ func introduce(player_name):
 		return
 	_roster_updated()
 
-# Host: give peer_id the lowest free element. Returns the slot, or 0 when full.
-func _add_slot(peer_id, player_name, ai):
-	var slot = _lowest_free(roster.keys())
+# Host: give peer_id the requested element, or the lowest free one (slot 0).
+# Returns the slot, or 0 when it's taken or the lobby is full.
+func _add_slot(peer_id, player_name, ai, slot = 0):
 	if slot == 0:
+		slot = _lowest_free(roster.keys())
+	if slot < 1 or slot > MAX_PLAYERS or roster.has(slot):
 		return 0
 	var keys = 0
 	if not ai:
@@ -331,28 +333,50 @@ func _lowest_free(used):
 			return number
 	return 0
 
-# Another snake run by this machine: a second person on this keyboard, or an AI
-func add_local_player(ai = false):
+# Another snake run by this machine: a second person on this keyboard, or an AI.
+# slot picks its element; 0 takes the lowest free one.
+func add_local_player(ai = false, slot = 0):
 	if not is_online():
 		return
 	if multiplayer.is_server():
-		_host_add_extra(1, ai)
+		_host_add_extra(1, ai, slot)
 	else:
-		request_extra_slot.rpc_id(1, ai)
+		request_extra_slot.rpc_id(1, ai, slot)
 
 @rpc("any_peer", "call_remote", "reliable")
-func request_extra_slot(ai):
+func request_extra_slot(ai, slot):
 	if multiplayer.is_server() and not Global.isMultiplayerActive:
-		_host_add_extra(multiplayer.get_remote_sender_id(), ai)
+		_host_add_extra(multiplayer.get_remote_sender_id(), ai, slot)
 
-func _host_add_extra(peer_id, ai):
+func _host_add_extra(peer_id, ai, slot = 0):
 	var owner_slots = slots_of_peer(peer_id)
 	if owner_slots.is_empty():
 		return
 	var owner_name = roster[owner_slots[0]].name
 	var player_name = "AI (" + owner_name + ")" if ai else owner_name + " #" + str(owner_slots.size() + 1)
-	if _add_slot(peer_id, player_name, ai) != 0:
+	if _add_slot(peer_id, player_name, ai, slot) != 0:
 		_roster_updated()
+
+# Move one of this machine's snakes to a free element
+func move_slot(from_slot, to_slot):
+	if not is_online():
+		return
+	if multiplayer.is_server():
+		_host_move_slot(1, from_slot, to_slot)
+	else:
+		request_move_slot.rpc_id(1, from_slot, to_slot)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_move_slot(from_slot, to_slot):
+	if multiplayer.is_server() and not Global.isMultiplayerActive:
+		_host_move_slot(multiplayer.get_remote_sender_id(), from_slot, to_slot)
+
+func _host_move_slot(peer_id, from_slot, to_slot):
+	if peer_for_slot(from_slot) != peer_id or roster.has(to_slot) or to_slot < 1 or to_slot > MAX_PLAYERS:
+		return
+	roster[to_slot] = roster[from_slot]
+	roster.erase(from_slot)
+	_roster_updated()
 
 # Owners can drop their extra snakes (never their own first one); the host can drop any AI
 func remove_slot(slot):

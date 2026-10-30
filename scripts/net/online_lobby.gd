@@ -14,7 +14,7 @@ const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchy"}
 const HIGHLIGHT = Color(0.91, 0.61, 0.17)
 
 var status_label
-var slot_rows = {} # slot -> {"name", "keys", "keys_button", "remove_button"}
+var slot_rows = {} # slot -> {"name", "open_button", "keys", "keys_button", "remove_button"}
 var add_player_button
 var add_ai_button
 # Key set being rebound (Player{N}), 0 when not rebinding
@@ -48,6 +48,9 @@ func _refresh_roster():
 		var entry = SteamNet.roster.get(slot)
 		row.keys_button.visible = false
 		row.remove_button.visible = false
+		# An open slot is a menu to move one of your snakes there or add one
+		row.open_button.visible = entry == null and SteamNet.is_online()
+		row.name.visible = not row.open_button.visible
 		if entry == null:
 			row.name.text = "Open"
 			row.name.modulate = Color(1, 1, 1, 0.4)
@@ -88,6 +91,32 @@ func _key_name(action):
 		var code = event.physical_keycode if event.physical_keycode != 0 else event.keycode
 		return OS.get_keycode_string(code)
 	return event.as_text()
+
+#region Open slot menu
+
+const MENU_ADD_PLAYER = 100
+const MENU_ADD_AI = 101
+
+# Rebuilt every time it opens, so it lists this machine's current snakes
+func _fill_open_menu(slot):
+	var popup = slot_rows[slot].open_button.get_popup()
+	popup.clear()
+	for own_slot in SteamNet.local_slots():
+		var entry = SteamNet.roster[own_slot]
+		popup.add_item("Take slot: move " + entry.name + " (" + ELEMENT_NAMES[own_slot] + ")", own_slot)
+	var full = SteamNet.roster.size() >= SteamNet.MAX_PLAYERS
+	popup.add_item("Add player here (this keyboard)", MENU_ADD_PLAYER)
+	popup.set_item_disabled(popup.get_item_index(MENU_ADD_PLAYER), full)
+	popup.add_item("Add my AI here", MENU_ADD_AI)
+	popup.set_item_disabled(popup.get_item_index(MENU_ADD_AI), full)
+
+func _on_open_menu_chosen(id, slot):
+	match id:
+		MENU_ADD_PLAYER: SteamNet.add_local_player(false, slot)
+		MENU_ADD_AI: SteamNet.add_local_player(true, slot)
+		_: SteamNet.move_slot(id, slot)
+
+#endregion
 
 #region Key rebinding (local only, like the offline player setup)
 
@@ -225,6 +254,17 @@ func _build_layout():
 		row.add_child(texts)
 		var name_label = _label("Open", 30, Color.WHITE)
 		texts.add_child(name_label)
+		var open_button = MenuButton.new()
+		open_button.text = "Open  -  choose..."
+		open_button.flat = false
+		open_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		open_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		open_button.focus_mode = Control.FOCUS_ALL
+		open_button.about_to_popup.connect(_fill_open_menu.bind(slot))
+		open_button.get_popup().id_pressed.connect(_on_open_menu_chosen.bind(slot))
+		open_button.get_popup().add_theme_font_size_override("font_size", 26)
+		open_button.hide()
+		texts.add_child(open_button)
 		var keys_label = _label("", 22, Color(0.7, 0.7, 0.7))
 		texts.add_child(keys_label)
 		var keys_button = _button("Keys", _start_rebind.bind(slot))
@@ -233,7 +273,7 @@ func _build_layout():
 		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
 		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(remove_button)
-		slot_rows[slot] = {"name": name_label, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button}
+		slot_rows[slot] = {"name": name_label, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button}
 		players_box.add_child(panel)
 
 	var lobbies_box = VBoxContainer.new()

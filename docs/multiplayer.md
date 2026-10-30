@@ -21,7 +21,8 @@ Branch: `ten_multiplayer`. Status: **draft**. Lobbies, round flow and snake move
 
 `SteamNet.roster` maps each element slot (1-4) to `{peer, name, ai, keys}`, so one machine can run several snakes:
 
-- Every machine joins with one snake. **Add player (this keyboard)** gives it another one for a second person on the same keyboard, and **Add AI player** adds an AI snake simulated on that machine (handy for testing with only two clients).
+- Every machine joins with one snake in the lowest free element. Clicking an **Open** slot opens a menu: *Take slot* moves one of your snakes to that element, and *Add player here* / *Add my AI here* add one there.
+- Besides that menu, the **Add player (this keyboard)** button gives a machine another one for a second person on the same keyboard, and **Add AI player** adds an AI snake simulated on that machine (handy for testing with only two clients).
 - `keys` is the `Player{N}` input set that steers the snake *on its machine*. Each machine numbers its own people from 1, so the first person anywhere uses the Player 1 keys. AI snakes have `keys = 0`.
 - The lobby shows every local snake's keys and has a **Keys** button to rebind them (Left, Right, Punchy). Rebinding only changes this machine's `InputMap`, like the offline player setup, and isn't saved yet.
 - Owners can remove their extra snakes (never their last human one); the host can remove any AI. A peer that disconnects loses all its snakes, and mid-match the host counts them as dead.
@@ -79,4 +80,4 @@ Known tradeoff: head-to-head and "who crossed first" races near the front of a t
 - Fireball trail destruction: each machine destroys what its own copy of the fireball hits. It should be decided by the shooter and broadcast as a list of segment indices.
 - Shrooms (spawned by the host; eating confirmed by the host) and the upgrade screen (each machine controls only its own row) are disabled online for now.
 - Pause doesn't pause online (the menu still opens). Host migration, reconnects and spectators are not handled.
-- Lobby polish: kicking, element choice (slots are handed out lowest-free), a ready check, rematch without leaving, saving rebound keys.
+- Lobby polish: kicking, a ready check, rematch without leaving, saving rebound keys.
