@@ -8,9 +8,21 @@ var listOfNodes = []
 var gap = false
 var alive = true
 var collider
+## How long the twin is forced to turn away from the original snake after it appears
+const SPLIT_TIME = 0.3
+# Side the twin turns to while splitting off (-1 left, 1 right)
+var split_direction = 1
+var split_time_left = SPLIT_TIME
+var steer_direction = 0
+# Online: another machine owns this twin. NetSession moves it and lays its trail.
+var net_remote = false
+# The water snake took this twin's place: the head is gone but its trail stays
+var absorbed = false
 
 signal dead
 signal twinScore
+## Online: a trail segment was laid by this (local) twin
+signal body_laid(body_position, body_rotation)
 
 @export var snakeBodyScene : PackedScene
 
@@ -24,13 +36,23 @@ func _ready():
 	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 	gapTimer.connect("timeout", _on_gapTimer_timeout)
 	screen_size = get_viewport_rect().size
+	# Split away from wherever the original snake is turning (random if it goes straight)
+	var parent_direction = get_parent().steer_direction
+	split_direction = -parent_direction if parent_direction != 0 else [-1, 1].pick_random()
 
 func _process(delta):
+	if net_remote:
+		return
+	# Forced split first, then the AI steers on its own
 	var direction = 0
-	if Input.is_action_pressed("Player4Left") or  $Raycaster.return_steering() == "Right" :
-		direction = 1
-	if Input.is_action_pressed("Player4Right") or $Raycaster.return_steering() == "Left":
+	if split_time_left > 0:
+		split_time_left -= delta
+		direction = split_direction
+	elif $Raycaster.return_steering() == "Left":
 		direction = -1
+	elif $Raycaster.return_steering() == "Right":
+		direction = 1
+	steer_direction = direction
 	
 	rotation += angular_speed * direction * delta
 
@@ -43,9 +65,18 @@ func _on_gapTimer_timeout():
 	gap = not gap
 	
 func _on_bodyTimer_timeout():
+	if net_remote:
+		return
 	if not gap:
-		createBody(snakeBodyScene)
-		pass
+		var body = createBody(snakeBodyScene)
+		body_laid.emit(body.global_position, body.rotation)
+
+# Online: lay a segment of a remote twin where its owner laid it
+func create_body_at(body_position, body_rotation):
+	var body = createBody(snakeBodyScene)
+	body.global_position = body_position
+	body.rotation = body_rotation
+	return body
 
 func createBody(scene):
 	var snakeBody = scene.instantiate()
@@ -74,8 +105,20 @@ func createBody(scene):
 		listOfNodes.pop_front()
 	return snakeBody
 	
+# The water snake jumps into this twin's place: stop it and hide its head, keep its trail
+func absorb():
+	absorbed = true
+	alive = false
+	set_process(false)
+	$BodyTimer.stop()
+	$GapTimer.stop()
+	collider.set_deferred("disabled", true)
+	remove_from_group("twinHeads")
+	$BodySprite.hide()
+
 func _on_area_entered(area):
-	
+	if net_remote:
+		return
 	if area is Shroom:
 		get_parent().emit_signal("score")
 		area.queue_free()

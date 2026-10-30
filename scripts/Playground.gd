@@ -136,7 +136,7 @@ func spawn_player(player_id, spawn):
 	newPlayer.rotation = spawn[2]
 	if net_session:
 		newPlayer.net_remote = not net_session.is_local(player_id)
-		newPlayer.input_id = 1
+		newPlayer.input_id = net_session.input_id_for(player_id)
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
 	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))

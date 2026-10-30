@@ -9,7 +9,7 @@ signal status_changed(text)
 signal roster_changed
 signal lobby_list_received(lobbies)
 signal all_peers_ready
-signal peer_left(peer_id, slot)
+signal peer_left(peer_id, slots)
 signal session_ended(reason)
 
 const APP_ID = 480 # Spacewar test app until Pune has its own Steam app id
@@ -32,7 +32,10 @@ var steam_status = "Steam not available"
 var persona_name = "Player"
 var lobby_id = 0
 var is_lan = false
-# peer_id -> {"name": String, "slot": int}, kept the same on every peer by the host
+# slot (element 1-4) -> {"peer": peer id that runs the snake, "name": String,
+# "ai": bool, "keys": which Player{N} input actions steer it on its machine (0 = AI)}.
+# The host owns it and keeps it the same on every peer. A machine can run several
+# snakes: extra local players on the same keyboard, or AI snakes.
 var roster = {}
 var ready_peers = {}
 ## Debug: extra delay applied to every received game packet (seconds).
@@ -41,6 +44,8 @@ var fake_latency = 0.0
 var clock_offset = 0.0
 var clock_samples = [] # [round_trip, offset], the lowest round trip is the most accurate
 var clock_timer = 0.0
+# Offline AI toggles, put back after an online match changed them
+var offline_ai = null
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -54,6 +59,8 @@ func _ready():
 
 func _process(delta):
 	if not is_online() or multiplayer.is_server():
+		return
+	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
 		return
 	clock_timer -= delta
 	if clock_timer <= 0:
@@ -122,14 +129,25 @@ func is_online():
 func is_host():
 	return is_online() and multiplayer.is_server()
 
-func local_slot():
-	return roster.get(multiplayer.get_unique_id(), {}).get("slot", 0)
-
 func peer_for_slot(slot):
-	for peer_id in roster:
-		if roster[peer_id].slot == slot:
-			return peer_id
-	return 0
+	return roster.get(slot, {}).get("peer", 0)
+
+func is_local_slot(slot):
+	return peer_for_slot(slot) == multiplayer.get_unique_id()
+
+func local_slots():
+	return roster.keys().filter(is_local_slot)
+
+func slots_of_peer(peer_id):
+	return roster.keys().filter(func(slot): return roster[slot].peer == peer_id)
+
+# Every machine taking part in the match
+func roster_peers():
+	var peers = []
+	for entry in roster.values():
+		if not peers.has(entry.peer):
+			peers.append(entry.peer)
+	return peers
 
 #region Hosting and joining
 
@@ -250,6 +268,9 @@ func leave():
 	roster.clear()
 	ready_peers.clear()
 	Global.isMultiplayerActive = false
+	if offline_ai != null:
+		Global.AI_Enabled = offline_ai
+		offline_ai = null
 	roster_changed.emit()
 
 func _end_session(reason):
@@ -266,7 +287,8 @@ func _end_session(reason):
 #region Roster: who plays which element
 
 func _start_roster():
-	roster = {1: {"name": _local_name(), "slot": 1}}
+	roster = {}
+	_add_slot(1, _local_name(), false)
 	roster_changed.emit()
 
 func _local_name():
@@ -285,14 +307,81 @@ func introduce(player_name):
 	if not multiplayer.is_server():
 		return
 	var peer_id = multiplayer.get_remote_sender_id()
-	var used = roster.values().map(func(entry): return entry.slot)
-	for slot in range(1, MAX_PLAYERS + 1):
-		if not used.has(slot):
-			roster[peer_id] = {"name": player_name, "slot": slot}
-			break
-	if not roster.has(peer_id):
+	if _add_slot(peer_id, player_name, false) == 0:
 		multiplayer.multiplayer_peer.disconnect_peer(peer_id) # Lobby full
 		return
+	_roster_updated()
+
+# Host: give peer_id the lowest free element. Returns the slot, or 0 when full.
+func _add_slot(peer_id, player_name, ai):
+	var slot = _lowest_free(roster.keys())
+	if slot == 0:
+		return 0
+	var keys = 0
+	if not ai:
+		# Each person on the same machine steers with their own Player{N} key set
+		var used_keys = slots_of_peer(peer_id).map(func(s): return roster[s].keys)
+		keys = _lowest_free(used_keys)
+	roster[slot] = {"peer": peer_id, "name": player_name, "ai": ai, "keys": keys}
+	return slot
+
+func _lowest_free(used):
+	for number in range(1, MAX_PLAYERS + 1):
+		if not used.has(number):
+			return number
+	return 0
+
+# Another snake run by this machine: a second person on this keyboard, or an AI
+func add_local_player(ai = false):
+	if not is_online():
+		return
+	if multiplayer.is_server():
+		_host_add_extra(1, ai)
+	else:
+		request_extra_slot.rpc_id(1, ai)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_extra_slot(ai):
+	if multiplayer.is_server() and not Global.isMultiplayerActive:
+		_host_add_extra(multiplayer.get_remote_sender_id(), ai)
+
+func _host_add_extra(peer_id, ai):
+	var owner_slots = slots_of_peer(peer_id)
+	if owner_slots.is_empty():
+		return
+	var owner_name = roster[owner_slots[0]].name
+	var player_name = "AI (" + owner_name + ")" if ai else owner_name + " #" + str(owner_slots.size() + 1)
+	if _add_slot(peer_id, player_name, ai) != 0:
+		_roster_updated()
+
+# Owners can drop their extra snakes (never their own first one); the host can drop any AI
+func remove_slot(slot):
+	if not is_online():
+		return
+	if multiplayer.is_server():
+		_host_remove_slot(1, slot)
+	else:
+		request_remove_slot.rpc_id(1, slot)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_remove_slot(slot):
+	if multiplayer.is_server() and not Global.isMultiplayerActive:
+		_host_remove_slot(multiplayer.get_remote_sender_id(), slot)
+
+func can_remove_slot(slot, by_peer):
+	if not roster.has(slot):
+		return false
+	var entry = roster[slot]
+	if entry.ai:
+		return by_peer == entry.peer or by_peer == 1
+	return by_peer == entry.peer and slots_of_peer(by_peer).filter(func(s): return not roster[s].ai).size() > 1
+
+func _host_remove_slot(peer_id, slot):
+	if can_remove_slot(slot, peer_id):
+		roster.erase(slot)
+		_roster_updated()
+
+func _roster_updated():
 	sync_roster.rpc(roster)
 	roster_changed.emit()
 
@@ -302,15 +391,16 @@ func sync_roster(new_roster):
 	roster_changed.emit()
 
 func _on_peer_disconnected(peer_id):
-	if not roster.has(peer_id):
+	var slots = slots_of_peer(peer_id)
+	if slots.is_empty():
 		return
-	var slot = roster[peer_id].slot
-	roster.erase(peer_id)
+	for slot in slots:
+		roster.erase(slot)
 	ready_peers.erase(peer_id)
 	if multiplayer.is_server():
 		sync_roster.rpc(roster)
 	roster_changed.emit()
-	peer_left.emit(peer_id, slot)
+	peer_left.emit(peer_id, slots)
 
 #endregion
 
@@ -327,10 +417,12 @@ func start_match():
 func begin_match(final_roster):
 	roster = final_roster
 	ready_peers.clear()
-	var used_slots = roster.values().map(func(entry): return entry.slot)
+	if offline_ai == null:
+		offline_ai = Global.AI_Enabled.duplicate()
 	for slot in range(1, MAX_PLAYERS + 1):
-		Global.set("player" + str(slot) + "Active", used_slots.has(slot))
-		Global.AI_Enabled[slot] = false
+		Global.set("player" + str(slot) + "Active", roster.has(slot))
+		# Only matters on the machine that runs the snake; the others just mirror it
+		Global.AI_Enabled[slot] = roster.has(slot) and roster[slot].ai
 	Global.reset_score()
 	Global.isMultiplayerActive = true
 	# Not synced online yet, see docs/multiplayer.md
@@ -352,7 +444,7 @@ func scene_ready():
 
 func _mark_ready(peer_id):
 	ready_peers[peer_id] = true
-	if roster.keys().all(func(id): return ready_peers.has(id)):
+	if roster_peers().all(func(id): return ready_peers.has(id)):
 		all_peers_ready.emit()
 
 #endregion

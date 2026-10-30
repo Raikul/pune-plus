@@ -1,15 +1,25 @@
 extends Control
 
 # Online lobby screen: host or find a Steam lobby, invite friends, see who plays
-# which element and start the match. Debug builds also get a LAN mode and a fake
-# latency setting to test the netcode with two game windows on one machine.
+# which element and start the match. Each machine can add more snakes: another
+# person on the same keyboard or an AI, and everyone can see and rebind the keys of
+# the snakes they steer. Debug builds also get a LAN mode and a fake latency
+# setting to test the netcode with two game windows on one machine.
 
 const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 const ELEMENT_NAMES = ["", "FIRE", "EARTH", "AIR", "WATER"]
 const FAKE_LATENCIES = [0.0, 0.1, 0.2]
+const KEY_ACTIONS = ["Left", "Right", "Up"]
+const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchy"}
+const HIGHLIGHT = Color(0.91, 0.61, 0.17)
 
 var status_label
-var slot_labels = {}
+var slot_rows = {} # slot -> {"name", "keys", "keys_button", "remove_button"}
+var add_player_button
+var add_ai_button
+# Key set being rebound (Player{N}), 0 when not rebinding
+var rebind_keys = 0
+var rebind_step = 0
 var lobby_list
 var start_button
 var invite_button
@@ -32,18 +42,87 @@ func _on_status_changed(text):
 	status_label.text = text
 
 func _refresh_roster():
-	for slot in slot_labels:
-		var peer_id = SteamNet.peer_for_slot(slot)
-		var label = slot_labels[slot]
-		if peer_id != 0:
-			var you = "  (you)" if peer_id == multiplayer.get_unique_id() else ""
-			label.text = SteamNet.roster[peer_id].name + you
-			label.modulate = Color.WHITE
+	var me = multiplayer.get_unique_id()
+	for slot in slot_rows:
+		var row = slot_rows[slot]
+		var entry = SteamNet.roster.get(slot)
+		row.keys_button.visible = false
+		row.remove_button.visible = false
+		if entry == null:
+			row.name.text = "Open"
+			row.name.modulate = Color(1, 1, 1, 0.4)
+			row.keys.text = ""
+			continue
+		row.name.modulate = Color.WHITE
+		var local = entry.peer == me
+		row.name.text = entry.name + ("  (you)" if local and not entry.ai else "")
+		if entry.ai:
+			row.keys.text = "AI, runs on " + ("this machine" if local else "its owner's machine")
+		elif local:
+			row.keys.text = _keys_text(entry.keys)
+			row.keys_button.visible = true
 		else:
-			label.text = "Open"
-			label.modulate = Color(1, 1, 1, 0.4)
+			row.keys.text = "Plays on their machine"
+		row.keys.modulate = Color(0.7, 0.7, 0.7)
+		row.remove_button.visible = SteamNet.can_remove_slot(slot, me)
+	if rebind_keys != 0:
+		_show_rebind_prompt()
+	var full = SteamNet.roster.size() >= SteamNet.MAX_PLAYERS
+	add_player_button.disabled = not SteamNet.is_online() or full
+	add_ai_button.disabled = not SteamNet.is_online() or full
 	start_button.disabled = not SteamNet.is_host() or SteamNet.roster.size() < 2
 	invite_button.disabled = SteamNet.lobby_id == 0
+
+func _keys_text(keys):
+	var parts = []
+	for action in KEY_ACTIONS:
+		parts.append(KEY_NAMES[action] + ": " + _key_name("Player" + str(keys) + action))
+	return "   ".join(parts)
+
+func _key_name(action):
+	var events = InputMap.action_get_events(action)
+	if events.is_empty():
+		return "?"
+	var event = events[0]
+	if event is InputEventKey:
+		var code = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+		return OS.get_keycode_string(code)
+	return event.as_text()
+
+#region Key rebinding (local only, like the offline player setup)
+
+func _start_rebind(slot):
+	var entry = SteamNet.roster.get(slot)
+	if entry == null or entry.keys == 0:
+		return
+	rebind_keys = entry.keys
+	rebind_step = 0
+	_show_rebind_prompt()
+
+func _show_rebind_prompt():
+	for slot in slot_rows:
+		var entry = SteamNet.roster.get(slot)
+		if entry and SteamNet.is_local_slot(slot) and entry.keys == rebind_keys:
+			slot_rows[slot].keys.text = "Press the key for " + KEY_NAMES[KEY_ACTIONS[rebind_step]].to_upper() + "..."
+			slot_rows[slot].keys.modulate = HIGHLIGHT
+			return
+	rebind_keys = 0 # That snake is gone
+
+func _input(event):
+	if rebind_keys == 0 or not event.is_pressed() or event.is_echo():
+		return
+	if not (event is InputEventKey or event is InputEventJoypadButton):
+		return
+	get_viewport().set_input_as_handled()
+	var action = "Player" + str(rebind_keys) + KEY_ACTIONS[rebind_step]
+	InputMap.action_erase_events(action)
+	InputMap.action_add_event(action, event)
+	rebind_step += 1
+	if rebind_step >= KEY_ACTIONS.size():
+		rebind_keys = 0
+	_refresh_roster()
+
+#endregion
 
 func _show_lobbies(lobbies):
 	for child in lobby_list.get_children():
@@ -116,15 +195,13 @@ func _build_layout():
 	actions.add_child(_button("Find lobbies", SteamNet.find_lobbies))
 	invite_button = _button("Invite friends", SteamNet.invite_friends)
 	actions.add_child(invite_button)
+	add_player_button = _button("Add player (this keyboard)", func(): SteamNet.add_local_player(false))
+	actions.add_child(add_player_button)
+	add_ai_button = _button("Add AI player", func(): SteamNet.add_local_player(true))
+	actions.add_child(add_ai_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))
-	if OS.is_debug_build():
-		actions.add_child(_label("Debug", 22, Color(0.5, 0.5, 0.5)))
-		actions.add_child(_button("LAN host", SteamNet.host_lan))
-		actions.add_child(_button("LAN join (this PC)", func(): SteamNet.join_lan()))
-		latency_button = _button("Fake latency: 0 ms", _cycle_fake_latency)
-		actions.add_child(latency_button)
 
 	var players_box = VBoxContainer.new()
 	players_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -143,18 +220,37 @@ func _build_layout():
 		var element = _label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot]))
 		element.custom_minimum_size.x = 170
 		row.add_child(element)
-		slot_labels[slot] = _label("Open", 30, Color.WHITE)
-		row.add_child(slot_labels[slot])
+		var texts = VBoxContainer.new()
+		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(texts)
+		var name_label = _label("Open", 30, Color.WHITE)
+		texts.add_child(name_label)
+		var keys_label = _label("", 22, Color(0.7, 0.7, 0.7))
+		texts.add_child(keys_label)
+		var keys_button = _button("Keys", _start_rebind.bind(slot))
+		keys_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(keys_button)
+		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
+		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(remove_button)
+		slot_rows[slot] = {"name": name_label, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button}
 		players_box.add_child(panel)
 
 	var lobbies_box = VBoxContainer.new()
-	lobbies_box.custom_minimum_size.x = 520
+	lobbies_box.custom_minimum_size.x = 440
 	lobbies_box.add_theme_constant_override("separation", 14)
 	columns.add_child(lobbies_box)
 	lobbies_box.add_child(_label("Lobbies", 34, Color.WHITE))
 	lobby_list = VBoxContainer.new()
 	lobby_list.add_theme_constant_override("separation", 10)
+	lobby_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lobbies_box.add_child(lobby_list)
+	if OS.is_debug_build():
+		lobbies_box.add_child(_label("Debug", 22, Color(0.5, 0.5, 0.5)))
+		lobbies_box.add_child(_button("LAN host", SteamNet.host_lan))
+		lobbies_box.add_child(_button("LAN join (this PC)", func(): SteamNet.join_lan()))
+		latency_button = _button("Fake latency: 0 ms", _cycle_fake_latency)
+		lobbies_box.add_child(latency_button)
 
 	host_button.grab_focus.call_deferred()
 
