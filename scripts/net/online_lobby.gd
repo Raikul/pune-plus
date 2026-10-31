@@ -22,6 +22,7 @@ var rebind_keys = 0
 var rebind_step = 0
 var lobby_list
 var start_button
+var upgrades_button
 var invite_button
 var latency_button
 
@@ -74,6 +75,9 @@ func _refresh_roster():
 	add_player_button.disabled = not SteamNet.is_online() or full
 	add_ai_button.disabled = not SteamNet.is_online() or full
 	start_button.disabled = not SteamNet.is_host() or SteamNet.roster.size() < 2
+	# The host's toggle decides the match (Global.online_upgrades)
+	upgrades_button.disabled = not SteamNet.is_host()
+	upgrades_button.text = "Upgrades: " + ("ON" if Global.upgrades else "OFF")
 	invite_button.disabled = SteamNet.lobby_id == 0
 
 func _keys_text(keys):
@@ -162,6 +166,11 @@ func _show_lobbies(lobbies):
 		var button = _button("%s  (%d/4)" % [lobby.name, lobby.members], func(): SteamNet.join_lobby(lobby.id))
 		lobby_list.add_child(button)
 
+func _toggle_upgrades():
+	Global.upgrades = not Global.upgrades
+	Global.save_settings()
+	_refresh_roster()
+
 func _on_back_pressed():
 	SteamNet.leave()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
@@ -228,6 +237,8 @@ func _build_layout():
 	actions.add_child(add_player_button)
 	add_ai_button = _button("Add AI player", func(): SteamNet.add_local_player(true))
 	actions.add_child(add_ai_button)
+	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
+	actions.add_child(upgrades_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))

@@ -20,6 +20,8 @@ var net_session
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
 
 func _ready():
+	# Every match starts without upgrades; they build up round after round
+	Global.reset_all_player_stats()
 	RNG = RandomNumberGenerator.new()
 	player_scene = preload("res://scenes/player.tscn")
 	groupColliders()
@@ -74,7 +76,8 @@ func exit_menu_input() -> void:
 func set_cooldowns_ui():
 	if is_instance_valid(get_tree()):
 		for player in get_tree().get_nodes_in_group("activePlayers"):
-			$HUD.set_cooldown(player.playerId, player.get_node("CooldownTimer").time_left)
+			var cooldown_timer = player.get_node("CooldownTimer")
+			$HUD.set_cooldown(player.playerId, cooldown_timer.time_left, cooldown_timer.wait_time)
 
 
 func setup_music():
@@ -173,6 +176,7 @@ func _on_player_dead(player):
 # Online this only runs on the host (NetSession tells the clients)
 func playerDead(player):	
 	player.powerAvailable = false
+	player.update_power_indicator()
 	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
@@ -187,6 +191,7 @@ func playerDead(player):
 # Online clients: the host says this snake died
 func mark_player_dead(player):
 	player.powerAvailable = false
+	player.update_power_indicator()
 	player.set_process(false)
 	$HUD.set_player_dead(player.playerId)
 	player.remove_from_group("alivePlayers")
@@ -224,8 +229,11 @@ func restart(delay = 2):
 	await(get_tree().create_timer(delay).timeout)
 	clear_round()
 #	await(get_tree().create_timer(2.0).timeout)
-	if Global.upgrades:
-		await run_upgrade_selection()
+	if Global.upgrades_enabled():
+		if net_session:
+			await net_session.host_run_upgrades(UPGRADE_TIME_LIMIT)
+		else:
+			await run_upgrade_selection()
 	if net_session:
 		net_session.host_start_round()
 	else:
@@ -245,16 +253,40 @@ func clear_round():
 		shroom.queue_free()
 
 # Shows the upgrade screen between rounds and waits until every snake picked or time ran out.
-# The picks aren't applied to the snakes yet.
 func run_upgrade_selection():
+	var screen = open_upgrade_screen(UPGRADE_TIME_LIMIT)
+	await screen.finished
+
+# The open upgrade screen, if any (online picks from other machines are passed to it)
+var upgrade_screen = null
+
+# preset: online options and row owners (see UpgradeSelection.start); closes itself when done
+func open_upgrade_screen(time_limit, preset = {}):
 	var layer = CanvasLayer.new()
 	layer.layer = 5 # Above the HUD, below the pause menu
 	add_child(layer)
-	var upgrade_selection = upgrade_selection_scene.instantiate()
-	layer.add_child(upgrade_selection)
-	upgrade_selection.start([], UPGRADE_TIME_LIMIT)
-	await upgrade_selection.finished
-	layer.queue_free()
+	var screen = upgrade_selection_scene.instantiate()
+	layer.add_child(screen)
+	screen.upgrade_selected.connect(_on_upgrade_selected)
+	screen.finished.connect(func():
+		upgrade_screen = null
+		layer.queue_free())
+	upgrade_screen = screen
+	screen.start([], time_limit, preset)
+	return screen
+
+func _on_upgrade_selected(player_id, upgrade_id):
+	_apply_upgrade(player_id, upgrade_id)
+	# Online: tell the others about the picks made on this machine
+	if net_session and net_session.is_local(player_id):
+		net_session.send_upgrade_pick(player_id, upgrade_id)
+
+# A snake picked an upgrade: it keeps it (stacking) for the rest of the match
+func _apply_upgrade(player_id, upgrade_id):
+	var stats = Global.player_stats.get(player_id)
+	var buff = UpgradeCatalog.make_buff(upgrade_id)
+	if stats != null and buff != null:
+		stats.add_buff(buff)
 #
 
 func _on_player_score(player_id):

@@ -8,9 +8,12 @@ var base: Dictionary = {
 	"earth.duration": 2.0,
 	"earth.scale": 2.0,         # <--- 2.0x = el doble de tamaño de colisión
 	"fire.radius": 1.0,
-	"fire.duration": 0.0,       # 0 = sin límite: la bola vuela hasta chocar, como antes
+	"fire.duration": 4.0,       # Segundos de vuelo; después se desvanece (0 = sin límite)
 	"gap.time": 0.6,
-	"air.recast_window": 0.0,
+	"air.recast_window": 0.0,   # Segundos para el segundo salto (0 = sin doble salto)
+	"air.wall_warp": 0.0,       # 1 = el teletransporte atraviesa las paredes
+	"water.copies": 1.0,        # Gemelos por poder
+	"water.lasting_twin": 0.0,  # 1 = la estela del gemelo nunca cambia de color
 }
 var active_buffs: Dictionary = {}
 

@@ -251,7 +251,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 66
 text = "Back"
 
-[connection signal="item_selected" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode/OptionButton" to="." method="_on_window_mode_item_selected"]
 [connection signal="item_selected" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode/OptionButton" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode" method="on_window_mode_selected"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/Back" to="." method="_on_back_pressed"]
 [connection signal="value_changed" from="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox/HSlider" to="CenterContainer/PanelContainer/MarginContainer/TabContainer/Audio/VolumeBox" method="_on_volume_slider_value_changed"]

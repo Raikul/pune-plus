@@ -1,6 +1,7 @@
 class_name FirePower extends Power
 
 var projectile_scene: PackedScene = preload("res://scenes/projectile.tscn")
+const DEFAULT_DURATION = 4.0
 
 func activate() -> void:
 	if projectile_scene == null:
@@ -15,28 +16,11 @@ func activate() -> void:
 	proj.scale = Vector2(radius_mult, radius_mult)
 
 	# 2. Aplicar Duración en el aire
-	var duration: float = 0.0 # 0 = sin límite
+	# The projectile flies this long, then fades out (projectile.gd); 0 = until it hits something
+	var duration: float = DEFAULT_DURATION
 	if player.stats != null:
 		duration = player.stats.get_stat("fire.duration")
-
-	# Corregido: con 0 (el valor por defecto) la bola vuela hasta chocar, como antes.
-	# Antes desaparecía a los 2 s (~800 px) y no llegaba al otro lado del mapa.
-	if duration > 0:
-		# Le pasamos la duración al proyectil si tiene variables internas o timers
-		if "duration" in proj:
-			proj.duration = duration
-		if "lifetime" in proj:
-			proj.lifetime = duration
-		for child in proj.get_children():
-			if child is Timer:
-				child.wait_time = duration
-				child.start()
-
-		# Respaldo: destruye el proyectil cuando termine el tiempo de vuelo
-		get_tree().create_timer(duration).timeout.connect(func():
-			if is_instance_valid(proj):
-				proj.queue_free()
-		)
+	proj.lifetime = duration
 
 	if has_node("Shoot"):
 		$Shoot.play()

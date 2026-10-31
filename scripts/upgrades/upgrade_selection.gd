@@ -34,7 +34,9 @@ func _ready():
 
 # player_ids defaults to the snakes marked active in Global (all four when none are).
 # With a time_limit, snakes that haven't picked when it runs out get their highlighted card.
-func start(ids = [], time_limit = 0.0):
+# preset (online): {player_id: {"options": [upgrade ids], "ai": bool, "input_id": int,
+# "remote": bool}} so every machine shows the host's options and only drives its own rows.
+func start(ids = [], time_limit = 0.0, preset = {}):
 	if not is_node_ready():
 		await ready
 	for row in rows:
@@ -46,13 +48,21 @@ func start(ids = [], time_limit = 0.0):
 	time_left = time_limit
 	timer_label.visible = time_limit > 0
 	_update_timer_label()
+	if ids.is_empty() and not preset.is_empty():
+		ids = preset.keys()
+		ids.sort()
 	player_ids = ids if not ids.is_empty() else _active_player_ids()
 
 	for i in player_ids.size():
 		var id = player_ids[i]
 		var row = UpgradeRow.new()
 		rows_box.add_child(row)
-		row.setup(id, UpgradeCatalog.roll_options(id, options_per_player), Global.AI_Enabled.get(id, false))
+		if preset.has(id):
+			var row_preset = preset[id]
+			row.setup(id, UpgradeCatalog.options_from_ids(id, row_preset.options), row_preset.ai,
+				row_preset.input_id, row_preset.remote)
+		else:
+			row.setup(id, UpgradeCatalog.roll_options(id, options_per_player), Global.AI_Enabled.get(id, false))
 		row.chosen.connect(_on_row_chosen)
 		rows.append(row)
 		row.modulate.a = 0
@@ -60,6 +70,20 @@ func start(ids = [], time_limit = 0.0):
 
 	footer_label.text = "Left / Right to browse   |   Punchy to confirm"
 	signal_label.text = ""
+
+# Online: another machine picked for this snake
+func remote_pick(player_id, upgrade_id):
+	for row in rows:
+		if row.player_id == player_id:
+			row.pick(upgrade_id)
+
+# [[player_id, highlighted upgrade id], ...] for the snakes that haven't picked yet
+func unpicked():
+	var missing = []
+	for row in rows:
+		if not row.has_chosen:
+			missing.append([row.player_id, row.highlighted_id()])
+	return missing
 
 func _active_player_ids():
 	var ids = []

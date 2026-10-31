@@ -13,6 +13,10 @@ var player4cooldown: TextureProgressBar
 
 # Diccionario para saber quién murio
 var dead_players = {1: false, 2: false, 3: false, 4: false}
+# Red cross drawn over a dead snake's symbol, per player
+var dead_marks = {}
+const DEAD_SYMBOL_ALPHA = 0.3
+const DEAD_CROSS_COLOR = Color(0.9, 0.1, 0.1)
 
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
@@ -30,9 +34,13 @@ func _ready():
 	label3.add_theme_font_override("font", menu_font)
 	label4.add_theme_font_override("font", menu_font)
 	
+	for id in [1, 2, 3, 4]:
+		dead_marks[id] = _make_dead_mark(_cooldown_bar(id))
+
 	add_to_group("HUD")
 
-func set_cooldown(player_id, time_left):
+# total: the cooldown's full length (upgrades can shorten it), so the bar starts full
+func set_cooldown(player_id, time_left, total = 0.0):
 	var cooldown
 	match player_id:
 		1:
@@ -43,6 +51,8 @@ func set_cooldown(player_id, time_left):
 			cooldown = player3cooldown
 		4:
 			cooldown = player4cooldown
+	if total > 0:
+		cooldown.max_value = total
 	cooldown.value = time_left
 
 func set_player_dead(player_id: int):
@@ -57,29 +67,33 @@ func reset_labels():
 	for id in dead_players:
 		dead_players[id] = false
 
+func _cooldown_bar(player_id):
+	return [null, player1cooldown, player2cooldown, player3cooldown, player4cooldown][player_id]
+
+func _make_dead_mark(bar):
+	var mark = Control.new()
+	mark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mark.top_level = false
+	mark.hide()
+	mark.draw.connect(func():
+		var inset = mark.size * 0.12
+		var a = inset
+		var b = mark.size - inset
+		for line in [[a, b], [Vector2(b.x, a.y), Vector2(a.x, b.y)]]:
+			mark.draw_line(line[0], line[1], Color.BLACK, 14.0, true)
+			mark.draw_line(line[0], line[1], DEAD_CROSS_COLOR, 8.0, true))
+	bar.add_child(mark)
+	return mark
+
+# A dead snake's symbol is dimmed and crossed out until the next round
+func _show_dead(player_id, dead):
+	var bar = _cooldown_bar(player_id)
+	bar.self_modulate.a = DEAD_SYMBOL_ALPHA if dead else 1.0 # self_modulate: the cross stays bright
+	dead_marks[player_id].visible = dead
+
 func _process(_delta):
-	var mensaje_muerte = "(DISABLED)"
-
-	if Global.player1Active:
-		var texto = str(Global.player1Score)
-		if dead_players[1]:
-			texto += mensaje_muerte
-		label1.text = texto
-
-	if Global.player2Active:	
-		var texto = str(Global.player2Score)
-		if dead_players[2]:
-			texto += mensaje_muerte
-		label2.text = texto
-
-	if Global.player3Active:	
-		var texto = str(Global.player3Score)
-		if dead_players[3]:
-			texto += mensaje_muerte
-		label3.text = texto
-
-	if Global.player4Active:	
-		var texto = str(Global.player4Score)
-		if dead_players[4]:
-			texto += mensaje_muerte
-		label4.text = texto
+	for id in [1, 2, 3, 4]:
+		if Global.get("player%dActive" % id):
+			[null, label1, label2, label3, label4][id].text = str(Global.get("player%dScore" % id))
+			_show_dead(id, dead_players[id])

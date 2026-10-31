@@ -169,10 +169,10 @@ func _send_twin_state(serial):
 		if entry.final_sends >= SEGMENT_REDUNDANCY:
 			local_twins.erase(serial)
 
-func _on_local_power_used(player_id):
+func _on_local_power_used(recast, player_id):
 	if not _online():
 		return
-	power_event.rpc(round_id, player_id)
+	power_event.rpc(round_id, player_id, recast)
 
 # Our snake died on our screen: send its last trail and let the host decide what that means
 func report_death(player_id):
@@ -307,7 +307,7 @@ func _stop_twin(key):
 		snake.bridge.clear_points()
 
 @rpc("any_peer", "call_remote", "reliable")
-func power_event(event_round, player_id):
+func power_event(event_round, player_id, recast = false):
 	if not _online():
 		return
 	var sender = multiplayer.get_remote_sender_id()
@@ -321,7 +321,9 @@ func power_event(event_round, player_id):
 	# The water twin arrives through twin_state instead
 	if player_id != 4:
 		player.use_power()
-	player.powerCooldown()
+	# Air's second jump is free: it must not restart the cooldown
+	if not recast:
+		player.powerCooldown()
 
 # Freeze a remote snake where its owner last reported it (its death spot)
 func _stop_snake(player_id):
@@ -345,6 +347,78 @@ func _stop_all_snakes():
 
 #region Host authority: rounds, deaths and scores
 
+# --- Upgrade screen between rounds ---
+# The host rolls every snake's options and opens the screen everywhere. Each machine
+# picks for its own snakes and sends the pick to the others, and every machine applies
+# every pick, so all copies of a snake have the same upgrades. Snakes whose player left
+# get their highlighted card from the host once time (plus a grace period) is up.
+
+const UPGRADE_GRACE = 3.0
+var pending_picks = {} # Picks that arrived before this machine opened its screen
+
+func host_run_upgrades(time_limit):
+	if not _online():
+		return
+	var options = {}
+	for slot in SteamNet.roster:
+		options[slot] = UpgradeCatalog.roll_options(slot, 3).map(func(upgrade): return String(upgrade.id))
+	open_upgrades.rpc(round_id, options, time_limit)
+	while _online() and playground.upgrade_screen == null:
+		await get_tree().process_frame
+	var screen = playground.upgrade_screen
+	if screen == null:
+		return
+	get_tree().create_timer(time_limit + UPGRADE_GRACE, false).timeout.connect(_host_force_picks.bind(screen))
+	await screen.finished
+
+func _host_force_picks(screen):
+	if not _online() or not is_instance_valid(screen) or screen.finishing:
+		return
+	for missing in screen.unpicked():
+		upgrade_pick.rpc(round_id, missing[0], missing[1])
+		screen.remote_pick(missing[0], missing[1])
+
+@rpc("authority", "call_local", "reliable")
+func open_upgrades(event_round, options, time_limit):
+	if not await _arrived():
+		return
+	if event_round != round_id:
+		return
+	if not multiplayer.is_server():
+		playground.clear_round()
+	var preset = {}
+	for slot in options:
+		preset[slot] = {
+			"options": options[slot],
+			"ai": SteamNet.roster.get(slot, {}).get("ai", false),
+			"input_id": input_id_for(slot),
+			"remote": not is_local(slot),
+		}
+	var screen = playground.open_upgrade_screen(time_limit, preset)
+	for slot in pending_picks:
+		screen.remote_pick(slot, pending_picks[slot])
+	pending_picks.clear()
+
+func send_upgrade_pick(slot, upgrade_id):
+	if _online():
+		upgrade_pick.rpc(round_id, slot, String(upgrade_id))
+
+@rpc("any_peer", "call_remote", "reliable")
+func upgrade_pick(event_round, slot, upgrade_id):
+	if not _online():
+		return
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	# The snake's own machine, or the host picking for a player who left
+	if event_round != round_id or (SteamNet.peer_for_slot(slot) != sender and sender != 1):
+		return
+	var screen = playground.upgrade_screen
+	if screen == null or not is_instance_valid(screen):
+		pending_picks[slot] = upgrade_id
+		return
+	screen.remote_pick(slot, upgrade_id)
+
 func host_start_round():
 	if not _online():
 		return
@@ -364,6 +438,7 @@ func start_round(new_round_id, spawns):
 	sequences.clear()
 	local_twins.clear()
 	remote_twins.clear()
+	pending_picks.clear()
 	playground.clear_round()
 	playground.call_deferred("setupPlayers", spawns)
 

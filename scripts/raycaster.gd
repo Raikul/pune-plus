@@ -28,8 +28,13 @@ func return_steering():
 	elif danger_full_left > danger_full_right:
 		return "Left"
 
+# INF when the ray hits nothing. (It used to measure to the origin (0, 0) then, which
+# made AI snakes turn for no reason, e.g. the water twin circling right after splitting.)
 func collision_distance(node_path : NodePath):
-	return get_node(node_path).get_collision_point().distance_to(global_position)
+	var ray = get_node(node_path)
+	if not ray.is_colliding():
+		return INF
+	return ray.get_collision_point().distance_to(global_position)
 	
 func is_fully_surrounded():
 #	if u_turn and $Up.is_colliding() and collistion_distance("Up") < 50:

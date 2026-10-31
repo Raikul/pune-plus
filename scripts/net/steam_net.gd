@@ -438,10 +438,11 @@ func start_match():
 		return
 	if steam_ready and lobby_id != 0:
 		steam.setLobbyJoinable(lobby_id, false)
-	begin_match.rpc(roster)
+	# The host's own toggles decide the match options
+	begin_match.rpc(roster, {"upgrades": Global.upgrades})
 
 @rpc("authority", "call_local", "reliable")
-func begin_match(final_roster):
+func begin_match(final_roster, options = {}):
 	roster = final_roster
 	ready_peers.clear()
 	if offline_ai == null:
@@ -452,9 +453,9 @@ func begin_match(final_roster):
 		Global.AI_Enabled[slot] = roster.has(slot) and roster[slot].ai
 	Global.reset_score()
 	Global.isMultiplayerActive = true
-	# Not synced online yet, see docs/multiplayer.md
-	Global.shrooms = false
-	Global.upgrades = false
+	# Shrooms aren't synced online yet (docs/multiplayer.md); the player's own saved
+	# toggles stay untouched, Global.shrooms_enabled() / upgrades_enabled() handle online
+	Global.online_upgrades = options.get("upgrades", false)
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
 # Every peer calls this once its Playground is loaded. The host starts the first round when all are in.

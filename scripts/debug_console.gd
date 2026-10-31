@@ -10,16 +10,20 @@ var label_fire_dur: Label
 var label_gap: Label
 var btn_air_double: Button
 var btn_water_triple: Button
+var btn_air_warp: Button
 
 var current_speed: float = 150.0
 var current_cooldown: float = 6.0
 var current_earth: float = 2.0
 var current_earth_scale: float = 2.0
 var current_fire_radius: float = 1.0
-var current_fire_dur: float = 0.0 # 0 = sin límite
+var current_fire_dur: float = 4.0 # 0 = sin límite
 var current_gap: float = 0.7
 var air_double_enabled: bool = false
+var air_warp_enabled: bool = false
 var water_triple_enabled: bool = false
+# Stats changed from the console. Each match starts with fresh stats, so they are applied again
+var overrides: Dictionary = {}
 
 func _ready():
 	# Corregido: la consola es solo para pruebas, no viene en el juego exportado
@@ -31,10 +35,11 @@ func _ready():
 	layer = 128
 	visible = false
 	crear_interfaz_botones()
+	Global.player_stats_reset.connect(_reaplicar_cambios)
 
 func crear_interfaz_botones() -> void:
 	panel = Panel.new()
-	panel.custom_minimum_size = Vector2(390, 540)
+	panel.custom_minimum_size = Vector2(390, 580)
 	panel.position = Vector2(25, 25)
 	add_child(panel)
 
@@ -79,10 +84,21 @@ func crear_interfaz_botones() -> void:
 	actualizar_boton_aire()
 	btn_air_double.pressed.connect(func():
 		air_double_enabled = !air_double_enabled
-		AirPower.double_jump_enabled = air_double_enabled
+		aplicar_stat_directo("air.recast_window", 1.0 if air_double_enabled else 0.0)
 		actualizar_boton_aire()
 	)
 	vbox.add_child(btn_air_double)
+
+	# BOTÓN ON/OFF PARA ATRAVESAR PAREDES CON AIRE (mejora Wall Warp)
+	btn_air_warp = Button.new()
+	btn_air_warp.custom_minimum_size = Vector2(0, 28)
+	actualizar_boton_warp()
+	btn_air_warp.pressed.connect(func():
+		air_warp_enabled = !air_warp_enabled
+		aplicar_stat_directo("air.wall_warp", 1.0 if air_warp_enabled else 0.0)
+		actualizar_boton_warp()
+	)
+	vbox.add_child(btn_air_warp)
 
 	# Fila 5: BOTÓN 2 / 3 CABEZAS DE AGUA
 	btn_water_triple = Button.new()
@@ -90,7 +106,7 @@ func crear_interfaz_botones() -> void:
 	actualizar_boton_agua()
 	btn_water_triple.pressed.connect(func():
 		water_triple_enabled = !water_triple_enabled
-		WaterPower.extra_clone_enabled = water_triple_enabled
+		aplicar_stat_directo("water.copies", 2.0 if water_triple_enabled else 1.0)
 		actualizar_boton_agua()
 	)
 	vbox.add_child(btn_water_triple)
@@ -114,7 +130,7 @@ func crear_interfaz_botones() -> void:
 	)
 
 	# Fila 9: FUEGO DURACIÓN EN EL AIRE
-	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: sin límite", 
+	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: 4.0s", 
 		func(): cambiar_stat("fire.duration", -0.5), 
 		func(): cambiar_stat("fire.duration", 0.5)
 	)
@@ -143,19 +159,23 @@ func crear_interfaz_botones() -> void:
 		current_earth = 2.0
 		current_earth_scale = 2.0
 		current_fire_radius = 1.0
-		current_fire_dur = 0.0
+		current_fire_dur = 4.0
 		current_gap = Global.gap_time()
 		air_double_enabled = false
+		air_warp_enabled = false
+		aplicar_stat_directo("air.wall_warp", 0.0)
+		actualizar_boton_warp()
 		water_triple_enabled = false
-		AirPower.double_jump_enabled = false
-		WaterPower.extra_clone_enabled = false
+		aplicar_stat_directo("air.recast_window", 0.0)
+		aplicar_stat_directo("water.copies", 1.0)
 		aplicar_stat_directo("speed", 150.0)
 		aplicar_stat_directo("cooldown", 6.0)
 		aplicar_stat_directo("earth.duration", 2.0)
 		aplicar_stat_directo("earth.scale", 2.0)
 		aplicar_stat_directo("fire.radius", 1.0)
-		aplicar_stat_directo("fire.duration", 0.0)
+		aplicar_stat_directo("fire.duration", 4.0)
 		aplicar_stat_directo("gap.time", current_gap)
+		overrides.clear()
 		actualizar_boton_aire()
 		actualizar_boton_agua()
 		actualizar_textos()
@@ -186,6 +206,11 @@ func crear_fila(parent: Control, texto_inicial: String, on_minus: Callable, on_p
 	hbox.add_child(btn_plus)
 
 	return lbl
+
+func actualizar_boton_warp() -> void:
+	if btn_air_warp:
+		btn_air_warp.text = "🧱 Aire atraviesa paredes: " + ("ACTIVADO" if air_warp_enabled else "DESACTIVADO")
+		btn_air_warp.modulate = Color(0.3, 1.0, 0.4) if air_warp_enabled else Color.WHITE
 
 func actualizar_boton_aire() -> void:
 	if btn_air_double:
@@ -248,7 +273,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			visible = !visible
 			get_viewport().set_input_as_handled()
 
+# Una partida nueva arranca con stats nuevos: se vuelven a aplicar los cambios de la consola
+func _reaplicar_cambios() -> void:
+	for stat_key in overrides:
+		aplicar_stat_directo(stat_key, overrides[stat_key])
+
 func aplicar_stat_directo(stat_key: String, valor: float) -> void:
+	overrides[stat_key] = valor
 	for id in [1, 2, 3, 4]:
 		if Global.player_stats.get(id) == null:
 			Global.player_stats[id] = PlayerStats.new()
@@ -263,9 +294,7 @@ func aplicar_stat_directo(stat_key: String, valor: float) -> void:
 			if timer:
 				timer.stop()
 				timer.wait_time = max(valor, 0.05)
-			player.powerAvailable = true
-			if player.has_node("ElementHeadSprite"):
-				player.get_node("ElementHeadSprite").modulate = Color.WHITE
+			player.powerReady()
 
 		if player.stats != null:
 			player.stats.set_stat(stat_key, valor)

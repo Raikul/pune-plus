@@ -14,4 +14,5 @@ func _process(_delta):
 
 func _on_option_button_item_selected(index):
 	Global.gapSize = index
+	Global.save_settings()
 	pass # Replace with function body.
