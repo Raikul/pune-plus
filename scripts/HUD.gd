@@ -17,6 +17,10 @@ var dead_players = {1: false, 2: false, 3: false, 4: false}
 var dead_marks = {}
 const DEAD_SYMBOL_ALPHA = 0.3
 const DEAD_CROSS_COLOR = Color(0.9, 0.1, 0.1)
+# Team letter before the symbol (2v2) and the snake's upgrades after the score
+var team_tags = {}
+var upgrade_badges = {}
+const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
@@ -36,6 +40,19 @@ func _ready():
 	
 	for id in [1, 2, 3, 4]:
 		dead_marks[id] = _make_dead_mark(_cooldown_bar(id))
+		var row = _cooldown_bar(id).get_parent()
+		var tag = Label.new()
+		tag.add_theme_font_override("font", ODIN_FONT)
+		tag.add_theme_font_size_override("font_size", 34)
+		tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tag.hide()
+		row.add_child(tag)
+		row.move_child(tag, 0)
+		team_tags[id] = tag
+		var badges = UpgradeBadges.new()
+		badges.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(badges)
+		upgrade_badges[id] = badges
 
 	add_to_group("HUD")
 
@@ -54,6 +71,22 @@ func set_cooldown(player_id, time_left, total = 0.0):
 	if total > 0:
 		cooldown.max_value = total
 	cooldown.value = time_left
+
+# 2v2: shows which team each snake is on ("A" / "B")
+func setup_teams(enabled):
+	for id in team_tags:
+		var team = Global.team_of(id)
+		team_tags[id].visible = enabled
+		team_tags[id].text = Global.TEAM_NAMES[team].right(1)
+		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+
+# can_see(player_id) -> bool: false shows only how many upgrades a rival has
+func refresh_upgrades(can_see: Callable):
+	for id in upgrade_badges:
+		if Global.get("player%dActive" % id):
+			upgrade_badges[id].refresh(id, not can_see.call(id))
+		else:
+			upgrade_badges[id].refresh(id, true)
 
 func set_player_dead(player_id: int):
 	dead_players[player_id] = true
@@ -93,6 +126,11 @@ func _show_dead(player_id, dead):
 	dead_marks[player_id].visible = dead
 
 func _process(_delta):
+	refresh()
+
+# Scores and dead marks. Also called once when time stops (round or match over), since
+# _process is off from then on and the last point would never be shown
+func refresh():
 	for id in [1, 2, 3, 4]:
 		if Global.get("player%dActive" % id):
 			[null, label1, label2, label3, label4][id].text = str(Global.get("player%dScore" % id))

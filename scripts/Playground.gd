@@ -15,6 +15,8 @@ var upgrade_selection_scene = preload("res://scenes/upgrade_selection.tscn")
 const UPGRADE_TIME_LIMIT = 10.0
 # Online play only: syncs snakes and lets the host drive rounds
 var net_session
+# 2v2: teams share their score and earn one point per enemy snake that dies (Global.team_of)
+var teams_mode = false
 
 @onready var animation_player = $AnimationPlayer
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
@@ -38,9 +40,19 @@ func _ready():
 		setupPlayers()
 	$Events.set_space(topLimit,bottomLimit)
 	setup_music()
-	var active_count = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active")).size()
-	Global.scoreToReach = (active_count - 1) * 10
-	Global.scoreToReach = max(Global.scoreToReach, 10)
+	var active_ids = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active"))
+	# Teams only make sense with players on both sides
+	var active_teams = {}
+	for id in active_ids:
+		active_teams[Global.team_of(id)] = true
+	teams_mode = Global.teams_enabled() and active_teams.size() >= 2
+	if Global.points_to_win_setting() > 0:
+		Global.scoreToReach = Global.points_to_win_setting()
+	elif teams_mode:
+		Global.scoreToReach = 10
+	else:
+		Global.scoreToReach = max((active_ids.size() - 1) * 10, 10)
+	$HUD.setup_teams(teams_mode)
 	#debug
 #	Global.scoreToReach = 1
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
@@ -119,6 +131,7 @@ func setupPlayers(spawns = {}):
 				timers.append(child)
 		player.show()
 	get_tree().get_first_node_in_group("HUD").set_process(true)
+	refresh_upgrade_badges()
 	time_flowing = true
 		
 # Random spawn point and heading for a snake: [x, y, rotation]
@@ -180,13 +193,42 @@ func playerDead(player):
 	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
-		for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
-			alivePlayer.emit_signal("score")
-	if get_tree().get_nodes_in_group("alivePlayers").size() <= 1 \
-	and gameEnded == false and time_flowing:
+		if teams_mode:
+			# One point for the other team, if it still has a snake alive
+			var enemy_team = 1 - Global.team_of(player.playerId)
+			if get_tree().get_nodes_in_group("alivePlayers").any(func(p): return Global.team_of(p.playerId) == enemy_team):
+				add_team_point(enemy_team)
+		else:
+			for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
+				alivePlayer.emit_signal("score")
+	# The match may have ended on the first survivor's point: show everyone's
+	$HUD.refresh()
+	if round_is_over() and gameEnded == false and time_flowing:
 		if net_session:
 			net_session.host_round_over()
 		restart()
+
+# Free for all: one snake left. Teams: only one team left.
+func round_is_over():
+	var alive = get_tree().get_nodes_in_group("alivePlayers")
+	if not teams_mode:
+		return alive.size() <= 1
+	var teams_alive = {}
+	for p in alive:
+		teams_alive[Global.team_of(p.playerId)] = true
+	return teams_alive.size() <= 1
+
+# Teams keep the same score on both members, so the scoreboard shows it on each
+func add_team_point(team):
+	var score = 0
+	var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+	for id in members:
+		score = max(score, Global.get("player%dScore" % id))
+	score += 1
+	for id in members:
+		Global.set("player%dScore" % id, score)
+	if score >= Global.scoreToReach and not members.is_empty():
+		finishGame(members[0])
 
 # Online clients: the host says this snake died
 func mark_player_dead(player):
@@ -197,11 +239,16 @@ func mark_player_dead(player):
 	player.remove_from_group("alivePlayers")
 
 func finishGame(playerId):
+	if gameEnded:
+		return
 	if net_session and multiplayer.is_server():
 		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
-	$Lesson.improvise("Player "+str(playerId)+" Wins")
+	if teams_mode:
+		$Lesson.improvise(Global.TEAM_NAMES[Global.team_of(playerId)] + " Wins")
+	else:
+		$Lesson.improvise("Player "+str(playerId)+" Wins")
 	$Lesson.show()
 	$Victory.play()
 	
@@ -213,13 +260,15 @@ func stopTime():
 		player.set_process(false)
 	for twinHead in get_tree().get_nodes_in_group("twinHeads"):
 		twinHead.set_process(false)
-	get_tree().get_first_node_in_group("HUD").set_process(false)
+	var hud = get_tree().get_first_node_in_group("HUD")
+	hud.refresh()
+	hud.set_process(false)
 	pass
 
 func restart(delay = 2):
 	stopTime()
 	var alive_players = get_tree().get_nodes_in_group("alivePlayers")
-	if alive_players.size() == 1:
+	if alive_players.size() == 1 or (teams_mode and alive_players.size() > 0):
 		var id = alive_players[0].playerId
 		animation_player.play("player_"+str(id)+"_win")
 	
@@ -287,9 +336,29 @@ func _apply_upgrade(player_id, upgrade_id):
 	var buff = UpgradeCatalog.make_buff(upgrade_id)
 	if stats != null and buff != null:
 		stats.add_buff(buff)
+	refresh_upgrade_badges()
+
+func refresh_upgrade_badges():
+	$HUD.refresh_upgrades(can_see_upgrades)
+
+# Online, rivals' upgrades stay hidden: you see your own snakes' and your team's
+func can_see_upgrades(player_id) -> bool:
+	if not net_session:
+		return true
+	if net_session.is_local(player_id):
+		return true
+	if teams_mode:
+		for slot in SteamNet.local_slots():
+			if Global.team_of(slot) == Global.team_of(player_id):
+				return true
+	return false
 #
 
 func _on_player_score(player_id):
+	# Shrooms: with teams the point goes to the team
+	if teams_mode:
+		add_team_point(Global.team_of(player_id))
+		return
 	match player_id:
 		1: _on_player_1_score()
 		2: _on_player_2_score()
@@ -325,10 +394,10 @@ func simulate_round():
 	var alive = get_tree().get_nodes_in_group("alivePlayers")
 	
 	
-	if alive.size() <= 1 or gameEnded:
+	if round_is_over() or gameEnded:
 		return
-		
-	while alive.size() > 1 and not gameEnded:
+
+	while not round_is_over() and not gameEnded:
 		var victim = alive.pick_random() # Kills random serpents 
 		playerDead(victim)               
 		alive = get_tree().get_nodes_in_group("alivePlayers") # Actualiza la lista

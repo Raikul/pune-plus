@@ -11,6 +11,8 @@ signal lobby_list_received(lobbies)
 signal all_peers_ready
 signal peer_left(peer_id, slots)
 signal session_ended(reason)
+## The host changed the match options (upgrades, teams, points to win)
+signal match_options_changed
 
 const APP_ID = 480 # Spacewar test app until Pune has its own Steam app id
 const MAX_PLAYERS = 4
@@ -44,6 +46,8 @@ var fake_latency = 0.0
 var clock_offset = 0.0
 var clock_samples = [] # [round_trip, offset], the lowest round trip is the most accurate
 var clock_timer = 0.0
+# The host's match options (Global.match_options()), shown in every lobby
+var match_options = {}
 # Offline AI toggles, put back after an online match changed them
 var offline_ai = null
 
@@ -411,6 +415,20 @@ func _host_remove_slot(peer_id, slot):
 func _roster_updated():
 	sync_roster.rpc(roster)
 	roster_changed.emit()
+	push_match_options()
+
+# Host: send the current match options to everyone in the lobby
+func push_match_options():
+	if not is_host():
+		return
+	match_options = Global.match_options()
+	sync_match_options.rpc(match_options)
+	match_options_changed.emit()
+
+@rpc("authority", "call_remote", "reliable")
+func sync_match_options(options):
+	match_options = options
+	match_options_changed.emit()
 
 @rpc("authority", "call_remote", "reliable")
 func sync_roster(new_roster):
@@ -439,7 +457,7 @@ func start_match():
 	if steam_ready and lobby_id != 0:
 		steam.setLobbyJoinable(lobby_id, false)
 	# The host's own toggles decide the match options
-	begin_match.rpc(roster, {"upgrades": Global.upgrades})
+	begin_match.rpc(roster, Global.match_options())
 
 @rpc("authority", "call_local", "reliable")
 func begin_match(final_roster, options = {}):
@@ -456,6 +474,9 @@ func begin_match(final_roster, options = {}):
 	# Shrooms aren't synced online yet (docs/multiplayer.md); the player's own saved
 	# toggles stay untouched, Global.shrooms_enabled() / upgrades_enabled() handle online
 	Global.online_upgrades = options.get("upgrades", false)
+	Global.online_teams = options.get("teams", false)
+	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1})
+	Global.online_points_to_win = options.get("points_to_win", 0)
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
 # Every peer calls this once its Playground is loaded. The host starts the first round when all are in.

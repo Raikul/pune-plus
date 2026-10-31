@@ -23,6 +23,8 @@ var rebind_step = 0
 var lobby_list
 var start_button
 var upgrades_button
+var mode_button
+var points_button
 var invite_button
 var latency_button
 
@@ -30,6 +32,7 @@ func _ready():
 	_build_layout()
 	SteamNet.status_changed.connect(_on_status_changed)
 	SteamNet.roster_changed.connect(_refresh_roster)
+	SteamNet.match_options_changed.connect(_refresh_roster)
 	SteamNet.lobby_list_received.connect(_show_lobbies)
 	status_label.text = SteamNet.steam_status
 	_refresh_roster()
@@ -37,6 +40,7 @@ func _ready():
 func _exit_tree():
 	SteamNet.status_changed.disconnect(_on_status_changed)
 	SteamNet.roster_changed.disconnect(_refresh_roster)
+	SteamNet.match_options_changed.disconnect(_refresh_roster)
 	SteamNet.lobby_list_received.disconnect(_show_lobbies)
 
 func _on_status_changed(text):
@@ -76,25 +80,32 @@ func _refresh_roster():
 	add_ai_button.disabled = not SteamNet.is_online() or full
 	start_button.disabled = not SteamNet.is_host() or SteamNet.roster.size() < 2
 	# The host's toggle decides the match (Global.online_upgrades)
-	upgrades_button.disabled = not SteamNet.is_host()
-	upgrades_button.text = "Upgrades: " + ("ON" if Global.upgrades else "OFF")
+	# Match options: the host's (Global) on the host, the synced copy everywhere else
+	var options = Global.match_options() if SteamNet.is_host() or not SteamNet.is_online() else SteamNet.match_options
+	var host = SteamNet.is_host()
+	upgrades_button.disabled = not host
+	upgrades_button.text = "Upgrades: " + ("ON" if options.get("upgrades", false) else "OFF")
+	mode_button.disabled = not host
+	mode_button.text = "Mode: " + ("2v2 Teams" if options.get("teams", false) else "Free for all")
+	points_button.disabled = not host
+	points_button.text = "Points to win: " + Global.points_to_win_text(options.get("points_to_win", 0))
+	var player_team = options.get("player_team", Global.player_team)
+	for slot in slot_rows:
+		var team_button = slot_rows[slot].team_button
+		var team = player_team.get(slot, 0)
+		team_button.visible = options.get("teams", false)
+		team_button.disabled = not host
+		team_button.text = Global.TEAM_NAMES[team]
+		team_button.add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+		team_button.add_theme_color_override("font_disabled_color", Global.TEAM_COLORS[team].darkened(0.2))
 	invite_button.disabled = SteamNet.lobby_id == 0
 
 func _keys_text(keys):
 	var parts = []
 	for action in KEY_ACTIONS:
-		parts.append(KEY_NAMES[action] + ": " + _key_name("Player" + str(keys) + action))
+		parts.append(KEY_NAMES[action] + ": " + Global.action_key_name("Player" + str(keys) + action))
 	return "   ".join(parts)
 
-func _key_name(action):
-	var events = InputMap.action_get_events(action)
-	if events.is_empty():
-		return "?"
-	var event = events[0]
-	if event is InputEventKey:
-		var code = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-		return OS.get_keycode_string(code)
-	return event.as_text()
 
 #region Open slot menu
 
@@ -168,7 +179,25 @@ func _show_lobbies(lobbies):
 
 func _toggle_upgrades():
 	Global.upgrades = not Global.upgrades
+	_match_options_edited()
+
+func _toggle_teams():
+	Global.teams = not Global.teams
+	_match_options_edited()
+
+func _cycle_points():
+	var choices = Global.POINTS_TO_WIN_OPTIONS
+	Global.points_to_win = choices[(choices.find(Global.points_to_win) + 1) % choices.size()]
+	_match_options_edited()
+
+func _toggle_team(slot):
+	Global.player_team[slot] = 1 - Global.team_of(slot)
+	_match_options_edited()
+
+# Host only: saved like the offline options and sent to the lobby
+func _match_options_edited():
 	Global.save_settings()
+	SteamNet.push_match_options()
 	_refresh_roster()
 
 func _on_back_pressed():
@@ -239,6 +268,10 @@ func _build_layout():
 	actions.add_child(add_ai_button)
 	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
 	actions.add_child(upgrades_button)
+	mode_button = _button("Mode: Free for all", _toggle_teams)
+	actions.add_child(mode_button)
+	points_button = _button("Points to win: Auto", _cycle_points)
+	actions.add_child(points_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))
@@ -281,10 +314,14 @@ func _build_layout():
 		var keys_button = _button("Keys", _start_rebind.bind(slot))
 		keys_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(keys_button)
+		var team_button = _button("Team A", _toggle_team.bind(slot))
+		team_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		team_button.hide()
+		row.add_child(team_button)
 		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
 		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(remove_button)
-		slot_rows[slot] = {"name": name_label, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button}
+		slot_rows[slot] = {"name": name_label, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
 		players_box.add_child(panel)
 
 	var lobbies_box = VBoxContainer.new()

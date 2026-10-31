@@ -94,6 +94,15 @@ const UPGRADES = [
 		"max_stacks": 2,
 	},
 	{
+		"id": &"earth_stone_walk",
+		"name": "Stone Walker",
+		"description": "You walk through your own stone walls. They still stop everyone else.",
+		"element": "earth",
+		"icon": "stone_walk",
+		"stat_mods": {"earth.stone_walk": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
 		"id": &"water_extra_copy",
 		"name": "Extra Twin",
 		"description": "Your power creates one more copy of your snake.",

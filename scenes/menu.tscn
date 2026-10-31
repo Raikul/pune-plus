@@ -214,7 +214,7 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 44
 action_mode = 0
-text = "Version 0.4.0 (Alpha)"
+text = "Version 0.4.1 (Alpha)"
 
 [node name="TopMenu" type="CenterContainer" parent="CanvasLayer" unique_id=704499331]
 anchors_preset = 8

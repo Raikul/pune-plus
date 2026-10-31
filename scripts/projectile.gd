@@ -4,8 +4,8 @@ var screen_size = Vector2.ZERO
 var colorRect
 ## Seconds of flight before fading out (set by FirePower); 0 = until it hits something
 var lifetime = 0.0
-## How long the fade-out takes
-const EXPIRE_TIME = 1.0
+## How long the fade-out takes (end of the flight, or after crashing)
+const EXPIRE_TIME = 0.4
 var age = 0.0
 var expiring = false
 
@@ -38,6 +38,8 @@ func _process(delta):
 # Placeholder look: shrinks and fades. For a custom effect, add an "expire" animation
 # (about EXPIRE_TIME long) to the AnimationPlayer and it is played instead.
 func expire():
+	if expiring:
+		return
 	expiring = true
 	set_deferred("monitoring", false)
 	var tween = create_tween()
@@ -52,12 +54,11 @@ func expire():
 	tween.tween_callback(queue_free)
 
 func _on_area_entered(area):
-	
-	if area != get_parent(): 
-		if not area.is_in_group("limits") and not area.is_in_group("activePlayers"):
-			area.queue_free()
-		if area.is_in_group("activePlayers") or area.is_in_group("limits") :
-			set_process(false)
-			await(get_tree().create_timer(2.0).timeout)
-			queue_free()
-	pass # Replace with function body.
+	if area == get_parent() or expiring:
+		return
+	# Walls, snakes and Earth's stone stop it: it crashes and fades away
+	if area.is_in_group("activePlayers") or area.is_in_group("limits") or area.is_in_group("Fissures"):
+		set_process(false)
+		expire()
+	else:
+		area.queue_free()

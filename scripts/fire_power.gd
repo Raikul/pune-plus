@@ -1,7 +1,7 @@
 class_name FirePower extends Power
 
 var projectile_scene: PackedScene = preload("res://scenes/projectile.tscn")
-const DEFAULT_DURATION = 4.0
+const DEFAULT_DURATION = 2.5
 
 func activate() -> void:
 	if projectile_scene == null:

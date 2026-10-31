@@ -17,7 +17,7 @@ var current_cooldown: float = 6.0
 var current_earth: float = 2.0
 var current_earth_scale: float = 2.0
 var current_fire_radius: float = 1.0
-var current_fire_dur: float = 4.0 # 0 = sin límite
+var current_fire_dur: float = 2.5 # 0 = sin límite
 var current_gap: float = 0.7
 var air_double_enabled: bool = false
 var air_warp_enabled: bool = false
@@ -130,7 +130,7 @@ func crear_interfaz_botones() -> void:
 	)
 
 	# Fila 9: FUEGO DURACIÓN EN EL AIRE
-	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: 4.0s", 
+	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: 2.5s", 
 		func(): cambiar_stat("fire.duration", -0.5), 
 		func(): cambiar_stat("fire.duration", 0.5)
 	)
@@ -159,7 +159,7 @@ func crear_interfaz_botones() -> void:
 		current_earth = 2.0
 		current_earth_scale = 2.0
 		current_fire_radius = 1.0
-		current_fire_dur = 4.0
+		current_fire_dur = 2.5
 		current_gap = Global.gap_time()
 		air_double_enabled = false
 		air_warp_enabled = false
@@ -173,7 +173,7 @@ func crear_interfaz_botones() -> void:
 		aplicar_stat_directo("earth.duration", 2.0)
 		aplicar_stat_directo("earth.scale", 2.0)
 		aplicar_stat_directo("fire.radius", 1.0)
-		aplicar_stat_directo("fire.duration", 4.0)
+		aplicar_stat_directo("fire.duration", 2.5)
 		aplicar_stat_directo("gap.time", current_gap)
 		overrides.clear()
 		actualizar_boton_aire()

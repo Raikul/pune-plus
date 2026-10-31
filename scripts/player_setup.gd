@@ -23,6 +23,7 @@ func _ready():
 	P2Box.set_ai_status(Global.AI_Enabled[2])
 	P3Box.set_ai_status(Global.AI_Enabled[3])
 	P4Box.set_ai_status(Global.AI_Enabled[4])	
+	_build_match_options()
 	
 
 func recalculate_all_labels():
@@ -72,6 +73,17 @@ func _on_back_pressed():
 	back.emit()
 
 func _on_go_pressed():
+	# Teams need players on both sides
+	if Global.teams:
+		var actives = {1: player1Active, 2: player2Active, 3: player3Active, 4: player4Active}
+		var sides = {}
+		for id in actives:
+			if actives[id]:
+				sides[Global.team_of(id)] = true
+		if sides.size() < 2:
+			options_warning.text = "Teams need at least one player on each team"
+			return
+	options_warning.text = ""
 	Global.player1Active = player1Active
 	Global.player2Active = player2Active
 	Global.player3Active = player3Active
@@ -148,7 +160,7 @@ func setKeys(playerId, control):
 	for i in InputMap.action_get_events("Player"+str(playerId)+control):
 		if text != "":
 			text += " / "
-		text +=  i.as_text().rstrip("(Physical)")
+		text += Global.input_event_name(i)
 		
 		
 	if control == "Up":
@@ -186,3 +198,61 @@ func enable_player(player_id:int) -> void:
 			if !player3Active : _on_p_3on_pressed()
 		4:
 			if !player4Active : _on_p_4on_pressed()
+
+
+#region Match options: 2v2 teams and points to win (saved in Global's settings)
+
+var mode_button: Button
+var points_button: Button
+var options_warning: Label
+var team_buttons = {}
+
+func _build_match_options():
+	var row = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2
+	row.add_theme_constant_override("separation", 60)
+	mode_button = Button.new()
+	mode_button.pressed.connect(_toggle_teams)
+	row.add_child(mode_button)
+	points_button = Button.new()
+	points_button.pressed.connect(_cycle_points)
+	row.add_child(points_button)
+	options_warning = Label.new()
+	options_warning.add_theme_color_override("font_color", Color(1, 0.4, 0.3))
+	row.add_child(options_warning)
+	for id in [1, 2, 3, 4]:
+		var box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer.get_node(str(id))
+		var team_button = Button.new()
+		team_button.pressed.connect(_toggle_team.bind(id))
+		box.add_child(team_button)
+		team_buttons[id] = team_button
+	_refresh_match_options()
+
+func _toggle_teams():
+	Global.teams = not Global.teams
+	Global.save_settings()
+	_refresh_match_options()
+
+func _cycle_points():
+	var options = Global.POINTS_TO_WIN_OPTIONS
+	Global.points_to_win = options[(options.find(Global.points_to_win) + 1) % options.size()]
+	Global.save_settings()
+	_refresh_match_options()
+
+func _toggle_team(id):
+	Global.player_team[id] = 1 - Global.team_of(id)
+	Global.save_settings()
+	_refresh_match_options()
+
+func _refresh_match_options():
+	mode_button.text = "Mode: " + ("2v2 Teams" if Global.teams else "Free for all")
+	points_button.text = "Points to win: " + Global.points_to_win_text(Global.points_to_win)
+	options_warning.text = ""
+	for id in team_buttons:
+		var team = Global.team_of(id)
+		team_buttons[id].visible = Global.teams
+		team_buttons[id].text = Global.TEAM_NAMES[team]
+		team_buttons[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+		team_buttons[id].add_theme_color_override("font_hover_color", Global.TEAM_COLORS[team].lightened(0.3))
+		team_buttons[id].add_theme_color_override("font_focus_color", Global.TEAM_COLORS[team])
+
+#endregion

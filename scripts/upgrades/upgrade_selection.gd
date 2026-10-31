@@ -60,7 +60,7 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 		if preset.has(id):
 			var row_preset = preset[id]
 			row.setup(id, UpgradeCatalog.options_from_ids(id, row_preset.options), row_preset.ai,
-				row_preset.input_id, row_preset.remote)
+				row_preset.input_id, row_preset.remote, row_preset.get("hidden", false))
 		else:
 			row.setup(id, UpgradeCatalog.roll_options(id, options_per_player), Global.AI_Enabled.get(id, false))
 		row.chosen.connect(_on_row_chosen)

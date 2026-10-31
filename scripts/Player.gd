@@ -218,7 +218,8 @@ func _on_area_entered(area):
 	if main_power and main_power.should_ignore_collision(area):
 		return
 
-	if area.is_in_group("Fissures"):
+	# Earth's stone: deadly like a trail, except its own with the Stone Walker upgrade
+	if area.is_in_group("Fissures") and has_stone_walk() and is_ancestor_of(area):
 		return
 
 	# Earth's power makes it pass through trails, not walls (it used to slip out of the arena
@@ -393,6 +394,9 @@ func _outside_arena() -> bool:
 		return false
 	var p = global_position
 	return p.x < left_limit_x - OUTSIDE_ARENA_MARGIN or p.x > right_limit_x + OUTSIDE_ARENA_MARGIN 		or p.y < top_limit_y - OUTSIDE_ARENA_MARGIN or p.y > bottom_limit_y + OUTSIDE_ARENA_MARGIN
+
+func has_stone_walk() -> bool:
+	return stats != null and stats.get_stat("earth.stone_walk") >= 1.0
 
 func has_wall_warp() -> bool:
 	return stats != null and stats.get_stat("air.wall_warp") >= 1.0

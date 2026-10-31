@@ -19,7 +19,7 @@ horizontal_alignment = 1
 
 [node name="Instructions" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
-text = "Please press a Key or move your Joystick for the action: "
+text = "Press a key or a gamepad button for: "
 
 [node name="Key" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2

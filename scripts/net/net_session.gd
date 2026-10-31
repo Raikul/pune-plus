@@ -393,6 +393,7 @@ func open_upgrades(event_round, options, time_limit):
 			"ai": SteamNet.roster.get(slot, {}).get("ai", false),
 			"input_id": input_id_for(slot),
 			"remote": not is_local(slot),
+			"hidden": not playground.can_see_upgrades(slot),
 		}
 	var screen = playground.open_upgrade_screen(time_limit, preset)
 	for slot in pending_picks:

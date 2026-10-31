@@ -12,9 +12,49 @@ var available_bodies : Array
 var available_ends : Array
 signal fissure_ready(step)
 
-# Called when the node enters the scene tree for the first time.
+# The stone is solid like a trail: snakes that touch it die (Earth too, unless it has
+# the Stone Walker upgrade) and the fireball crashes on it. Only the drawn rock collides,
+# not the transparent gaps between the rocks.
+static var _outlines = {} # texture path -> rock outlines in texture pixels
+
 func _ready() -> void:
-	pass # Replace with function body.
+	_add_wall.call_deferred()
+
+func _add_wall() -> void:
+	var texture = fissure_rect.texture
+	var area = Area2D.new()
+	area.collision_mask = 0
+	area.add_to_group("Fissures")
+	var pixel_scale = fissure_rect.size * fissure_rect.scale / Vector2(texture.get_size())
+	for outline in _rock_outlines(texture):
+		var points = PackedVector2Array()
+		for point in outline:
+			if fissure_rect.flip_h:
+				point.x = texture.get_width() - point.x
+			if fissure_rect.flip_v:
+				point.y = texture.get_height() - point.y
+			points.append(fissure_rect.position + point * pixel_scale)
+		var shape = CollisionPolygon2D.new()
+		shape.polygon = points
+		area.add_child(shape)
+	add_child(area)
+
+static func _rock_outlines(texture) -> Array:
+	if _outlines.has(texture.resource_path):
+		return _outlines[texture.resource_path]
+	var image = texture.get_image()
+	if image.is_compressed():
+		image.decompress()
+	var bitmap = BitMap.new()
+	bitmap.create_from_image_alpha(image, 0.5)
+	var outlines = []
+	for outline in bitmap.opaque_to_polygons(Rect2i(Vector2i.ZERO, image.get_size()), 2.0):
+		# A little inside the art, so grazing the jagged edges doesn't kill
+		for shrunk in Geometry2D.offset_polygon(outline, -4.0):
+			if shrunk.size() >= 3:
+				outlines.append(shrunk)
+	_outlines[texture.resource_path] = outlines
+	return outlines
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
