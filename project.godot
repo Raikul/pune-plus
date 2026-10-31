@@ -25,6 +25,7 @@ run/transparent_background=false
 
 Global="*res://scripts/global.gd"
 LessonList="*res://scripts/lessonList.gd"
+DebugConsole="*uid://ig5lna8yp7d2"
 SteamNet="*res://scripts/net/steam_net.gd"
 
 [display]

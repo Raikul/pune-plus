@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c6crx63yx7vcc"]
+
+[ext_resource type="Script" uid="uid://3d328q3kg5sd" path="res://scripts/fire_power.gd" id="1_67qwc"]
+[ext_resource type="AudioStream" uid="uid://bqi7qlp3r5wbx" path="res://assets/sounds/NewFireball.mp3" id="2_guda3"]
+
+[node name="Firepower" type="Node2D" unique_id=1674039437]
+script = ExtResource("1_67qwc")
+
+[node name="Shoot" type="AudioStreamPlayer" parent="." unique_id=2012780513]
+stream = ExtResource("2_guda3")

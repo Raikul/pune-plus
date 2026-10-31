@@ -132,6 +132,7 @@ func roll_spawn(player_id):
 func spawn_player(player_id, spawn):
 	var newPlayer = player_scene.instantiate()
 	newPlayer.playerId = player_id
+	newPlayer.stats = Global.player_stats[player_id]
 	newPlayer.global_position = Vector2(spawn[0], spawn[1])
 	newPlayer.rotation = spawn[2]
 	if net_session:
@@ -141,18 +142,16 @@ func spawn_player(player_id, spawn):
 	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
 	newPlayer.connect("score", _on_player_score.bind(player_id))
-	newPlayer.name = "Player"+str(player_id)
+	newPlayer.name = "Player" + str(player_id)
 	add_child(newPlayer)
 	newPlayer.add_to_group("activePlayers")
 	newPlayer.add_to_group("alivePlayers")
 	
-	#Test
+	# Límites del mapa
 	newPlayer.left_limit_x = $Colliders/LimitLeft/Collider.global_position.x
 	newPlayer.right_limit_x = $Colliders/LimitRight/Collider.global_position.x
 	newPlayer.top_limit_y = $Colliders/LimitTop/Collider.global_position.y
 	newPlayer.bottom_limit_y = $Colliders/Control/LimitBottom/Collider.global_position.y
-#	print("Player Added")
-
 
 	if newPlayer.playerId == 4:
 		var raycaster = newPlayer.get_node("Raycaster")

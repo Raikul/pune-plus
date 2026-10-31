@@ -8,7 +8,10 @@ var powerAvailable = true
 var colorRect
 var twinHeadInstance
 var invincible = false
-
+var stats: PlayerStats = null
+var is_chaining_power: bool = false
+var orig_col_scale: Vector2 = Vector2.ONE
+var orig_head_scale: Vector2 = Vector2.ONE
 
 signal dead()
 signal score()
@@ -20,6 +23,7 @@ signal power_used()
 signal twin_spawned(twin)
 
 var playerId
+var main_power: Power
 const FISSURE_Z_INDEX = 5
 # Which Player{N} input actions steer this snake (0 = no keys, e.g. an online AI).
 # Online each machine numbers its own players from 1, so the first one there uses the Player 1 keys.
@@ -60,7 +64,6 @@ func _ready():
 	snakeBodyScene = preload("res://scenes/snake_body.tscn")
 	fissure_scene = preload("res://scenes/fissure.tscn")
 	
-#	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 	gapTimer.connect("timeout", _on_gapTimer_timeout)
 	gapFrequencyTimer.connect("timeout", _on_gapFrequencyTimer_timeout)
 	
@@ -70,50 +73,55 @@ func _ready():
 	$HulkTimer.connect("timeout", unhulk.bind(Global.playerColors[playerId]))
 	$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
 	$CooldownTimer.connect("timeout", powerReady.bind(Global.playerColors[playerId]))
-	
-	#With Stop:
-	#$DashTimer.connect("timeout", stop_and_breathe.bind(speed, Global.playerColors[playerId]))
-	#$StopAndBreatheTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
-	##No Stop
 	$DashTimer.connect("timeout", undash.bind(speed, Global.playerColors[playerId]))
 	
 	$HulkTimer.add_to_group("timers", true)
-	
-	
+	if has_node("CollisionShape2D"):
+		orig_col_scale = $CollisionShape2D.scale
+	if has_node("HeadSprite"):
+		orig_head_scale = $HeadSprite.scale
+		
 	listOfNodes.append(self)
 	if input_id == null:
 		input_id = playerId
 	if playerId != null:
 		clonable_id = playerId
 		clonable_name = "Player"+str(playerId)
-	
+		main_power = Powers.create(playerId)
+		if main_power != null:
+			add_child(main_power)
+			main_power.setup(self)
+
+	actualizarPuntoDeTransporte()
+
+	if stats != null:
+		stats.stats_changed.connect(refresh_stats)
+		refresh_stats()
+func refresh_stats() -> void:
+	if stats != null:
+		speed = stats.get_stat("speed")
+		
 func _process(delta):
-		if net_remote:
-			return
-#	if not gap:
-#		createBody(snakeBodyScene)
-#	if (is_multiplayer_authority() or Global.isMultiplayerActive == false):
-		var direction = 0
-		if locked_movement: direction = locked_direction
-		else:
-			if input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Left") :direction = -1
-			elif input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Right"): direction = 1
-			elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
-			elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
-		
-#		elif $Raycaster.collision_distance("Left") < 400: direction = -1
-#		elif $Raycaster.collision_distance("Right") < 400: direction = 1
-		if ai_enabled and powerAvailable: ai_punchy(direction)
-		steer_direction = direction
+	if net_remote:
+		return
+	# 1. Primero siempre actualizamos la mirilla:
+	actualizarPuntoDeTransporte()
 
-		rotation += angular_speed * direction * delta
-		var	velocity = Vector2.UP.rotated(rotation) * speed
-		position += velocity * delta
-		
-	#Llamar función que actualiza la posición del Punto de Transporte
+	# 2. Luego el movimiento y la IA:
+	var direction = 0
+	if locked_movement: direction = locked_direction
+	else:
+		if input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Left") :direction = -1
+		elif input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Right"): direction = 1
+		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
+		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 
-		actualizarPuntoDeTransporte()
-	
+	if ai_enabled and powerAvailable: ai_punchy(direction)
+	steer_direction = direction
+
+	rotation += angular_speed * direction * delta
+	var velocity = Vector2.UP.rotated(rotation) * speed
+	position += velocity * delta
 func actualizarPuntoDeTransporte():
 	if not has_node("DynamicTeleportNode") or not has_node("FixedTeleportNode"):
 		return
@@ -153,8 +161,11 @@ func _on_gapTimer_timeout():
 	
 func _on_gapFrequencyTimer_timeout():
 	gap = true
-	gapTimer.start()
-	
+	# Corregido: sin stats se usa el hueco de la opción Gap Size (antes quedaba fijo en 0.6)
+	var dur = gapTimer.wait_time
+	if stats != null:
+		dur = stats.get_stat("gap.time")
+	gapTimer.start(max(dur, 0.05))
 func _on_bodyTimer_timeout():
 #	if not gap:
 #		createBody(snakeBodyScene)
@@ -169,8 +180,7 @@ func _physics_process(delta):
 		gap_delta_sum = 0
 		body_laid.emit(body.global_position, body.rotation)
 
-func _on_area_entered(area):	
-#	print(area)
+func _on_area_entered(area):
 	# A remote snake's owner decides its deaths and pickups
 	if net_remote:
 		return
@@ -178,28 +188,33 @@ func _on_area_entered(area):
 		$ShroomEaten.play()
 		emit_signal("score")
 		area.queue_free()
-	elif (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads"))  and is_water_my_friend:
-		pass
-	elif area.is_in_group("Fissures"):
-		pass
-	elif invincible == false:
+		return
+
+	# Si el poder activo decide ignorar la colisión (ej. Agua tocando su propio clon):
+	if main_power and main_power.should_ignore_collision(area):
+		return
+
+	if area.is_in_group("Fissures"):
+		return
+
+	if not invincible:
 		if listOfNodes.find(area) == -1:
-			var currentTwinHeadInstance = get_tree().get_first_node_in_group("twinHeads")
-#			if (twinHeadInstance == null or twinHeadInstance.alive == false):
-			if !is_instance_valid(currentTwinHeadInstance) or currentTwinHeadInstance.alive == false or !is_water_my_friend:
-				$CollisionShape2D.set_deferred("disabled", true)
-				$Split.play()
-				set_process(false)
-				emit_signal("dead")
-			elif is_water_my_friend: #twinHeadIsAlive
-				# Take the twin's place. Its trail stays, and since twin trails never hurt
-				# their water snake (is_water_my_friend), landing on its tail is safe.
-				var tempPosition = currentTwinHeadInstance.position
-				var tempRotation = currentTwinHeadInstance.rotation
-				currentTwinHeadInstance.absorb()
-				position = tempPosition
-				rotation = tempRotation
-				pass
+			# Le preguntamos al poder si puede salvar al jugador de morir (Agua reviviendo)
+			if main_power and main_power.try_prevent_death():
+				return
+
+			# Muerte normal
+			$CollisionShape2D.set_deferred("disabled", true)
+			$Split.play()
+			set_process(false)
+			emit_signal("dead")
+
+# Online: lay a segment of a remote snake where its owner laid it
+func create_body_at(body_position, body_rotation):
+	var body = createBody(snakeBodyScene)
+	body.global_position = body_position
+	body.rotation = body_rotation
+	return body
 
 # Online: the twin of a remote water snake, moved by NetSession
 func spawn_remote_twin():
@@ -209,13 +224,6 @@ func spawn_remote_twin():
 	twin.bufferListOfNodes = listOfNodes
 	twin.bufferListOfNodes.append(self)
 	return twin
-
-# Online: lay a segment of a remote snake where its owner laid it
-func create_body_at(body_position, body_rotation):
-	var body = createBody(snakeBodyScene)
-	body.global_position = body_position
-	body.rotation = body_rotation
-	return body
 
 func createBody(scene):
 	var sceneInstance = scene.instantiate()
@@ -238,19 +246,14 @@ func createBody(scene):
 	add_child(sceneInstance)
 	return sceneInstance
 
-func shoot_fireball(scene):	
+func spawn_projectile(scene: PackedScene) -> Node2D:
 	var sceneInstance = scene.instantiate()
-
 	sceneInstance.set_as_top_level(true)
 	sceneInstance.global_position = global_position
-#
-#	var bodySprite = sceneInstance.get_node("BodySprite")
-#	bodySprite.set_texture(head_texture)
-#	bodySprite.modulate = head_modulate
-
-#	sceneInstance.apply_scale(get_scale())
 	sceneInstance.rotation = rotation
-	
+
+	# Vital: registrar en listOfNodes para no suicidarse con su propio proyectil
+	# Corregido: se agregaba dos veces y sacaba de la lista dos segmentos propios
 	listOfNodes.append(sceneInstance)
 	if listOfNodes.size() == 1:
 		sceneInstance.rotation = rotation + PI
@@ -290,61 +293,49 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 	add_child(fissure_instance)
 	return fissure_instance
 	
-	
+func set_invincible(state: bool) -> void:
+	invincible = state	
 func _input(event):
 	if net_remote:
 		return
-	if powerAvailable and input_id != 0 and event.is_action_pressed("Player" + str(input_id) + "Up"):
-		use_power()
-		powerCooldown()
+	# Una sola línea universal para todos los jugadores:
+	if playerId != null and input_id != 0 and event.is_action_pressed("Player" + str(input_id) + "Up"):
+		try_use_power()
+
+func try_use_power() -> void:
+	# 1. Si el poder tiene el segundo salto listo, salta DE INMEDIATO sin cooldown:
+	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
+		main_power.execute_recast()
 		power_used.emit()
+		return
 
-# The element power of this snake, without cooldown checks
-func use_power():
-	match playerId:
-		1: shoot()
-		2: hulk()
-		3: teleport()
-		4: twinHead()
-
+	# 2. Si está en cooldown normal y no hay segundo salto, no hace nada:
+	if not powerAvailable:
+		return
+	
+	powerCooldown()
+	
+	if main_power != null:
+		main_power.activate()
+	power_used.emit()
+	
+	if stats != null:
+		for entry in stats.active_buffs.values():
+			if entry.behavior != null:
+				entry.behavior.on_power_activated(self, entry.stacks)
 
 func activate_power():
-	if powerAvailable:	
-		if playerId != 4 or !is_there_twin_head():
-			power_used.emit()
-		if playerId == 1:
-			powerCooldown()	
-			shoot()		
-		if playerId == 2:
-			powerCooldown()	
-			hulk()		
-		if playerId == 3:
-			powerCooldown()	
-			teleport()
-		if playerId == 4:
-				if !is_there_twin_head():
-					powerCooldown()	
-					twinHead()
-					locked_direction = -twinHeadInstance.split_direction
-					locked_movement = true
-					await get_tree().create_timer(0.2).timeout
-					locked_movement = false		
-	
+	try_use_power()
+
+# Online: replays another machine's power use on our copy of its snake (no cooldown checks)
+func use_power():
+	if main_power != null:
+		main_power.activate()
+func ai_punchy(direction):
+	if powerAvailable and main_power and main_power.ai_should_activate(direction):
+		try_use_power()
 func is_there_twin_head():
 	return is_instance_valid(get_tree().get_first_node_in_group("twinHeads"))
-
-func ai_punchy(direction):
-	if playerId == 1:
-		if $Raycaster/UpPlayer.is_colliding() or $Raycaster.collision_distance("Up") < 75:
-			activate_power()
-	if playerId == 2:
-		if $Raycaster.collision_distance("Up") < 25:
-			activate_power()
-	if playerId == 3 and direction == 0: 
-		activate_power()
-	if powerAvailable and playerId == 4:
-		activate_power()
-			
 func hulk():
 	
 
@@ -382,14 +373,20 @@ func stop_and_breathe(prevSpeed,prevColor):
 	speed = 0
 	$HeadSprite.modulate = Color.ORANGE
 	$StopAndBreatheTimer.start()
-
+	
 func shoot():
-	shoot_fireball(projectileScene)
-	$Shoot.play()
-#	add_child(tirito)
-	pass
+	if projectileScene != null:
+		spawn_projectile(projectileScene)
+	if has_node("Shoot"):
+		$Shoot.play()
 
-func twinHead():
+func spawn_twin(scene: PackedScene) -> Node2D:
+	var twin = createBody(scene)
+	twin.bufferListOfNodes = listOfNodes
+	twin.bufferListOfNodes.append(self)
+	twin.snakeBodyScene = snakeBodyScene
+	twin_spawned.emit(twin)
+	return twin
 	$NewSplit.play()
 #	has_twin_head = true
 	is_water_my_friend = true
@@ -399,14 +396,26 @@ func twinHead():
 	twinHeadInstance.bufferListOfNodes.append(self)
 	twinHeadInstance.snakeBodyScene = snakeBodyScene
 #	twinHead.syncBodyTimer = bodyTimer
-	twin_spawned.emit(twinHeadInstance)
 
 	pass
-	
+
+func twinHead():
+	if has_node("NewSplit"):
+		$NewSplit.play()
+	is_water_my_friend = true
+	if twinHeadScene != null:
+		twinHeadInstance = spawn_twin(twinHeadScene)
+		return twinHeadInstance
 func powerCooldown():
 	powerAvailable = false
-	$CooldownTimer.start()
-	#$ShaderSprite.hide()
+	var cd = 5.0
+	if stats != null:
+		cd = stats.get_stat("cooldown")
+	elif has_node("CooldownTimer"):
+		cd = $CooldownTimer.wait_time
+	
+	# Usamos max(cd, 0.05) para que nunca dé error si pones 0 en la consola
+	$CooldownTimer.start(max(cd, 0.05))
 func powerReady(_prevColor):
 	powerAvailable = true
 #	print(Global.playerColors[playerId])
@@ -415,10 +424,19 @@ func powerReady(_prevColor):
 	$ElementHeadSprite.modulate = Color.WHITE
 
 func set_gap_size():
-	match Global.gapSize:
-		0:
-			gapTimer.set_wait_time(0.4)
-		1:
-			gapTimer.set_wait_time(0.7)
-		2:
-			gapTimer.set_wait_time(1)
+	gapTimer.set_wait_time(Global.gap_time())
+func set_earth_collision_scale(mult: float) -> void:
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.scale = orig_col_scale * mult
+	if has_node("HeadSprite"):
+		$HeadSprite.scale = orig_head_scale * mult
+	if has_node("ElementHeadSprite"):
+		$ElementHeadSprite.scale = orig_head_scale * mult
+
+func reset_earth_collision_scale() -> void:
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.scale = orig_col_scale
+	if has_node("HeadSprite"):
+		$HeadSprite.scale = orig_head_scale
+	if has_node("ElementHeadSprite"):
+		$ElementHeadSprite.scale = orig_head_scale

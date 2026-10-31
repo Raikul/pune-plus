@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://y81ofosww7wl"]
+
+[ext_resource type="Script" uid="uid://ccptxcupjfxtl" path="res://scripts/WaterPower.gd" id="1_gmb0r"]
+[ext_resource type="AudioStream" uid="uid://bhbafwkh2dvke" path="res://assets/sounds/NewSplit.ogg" id="3_lfo53"]
+
+[node name="WaterPower" type="Node" unique_id=1236348445]
+script = ExtResource("1_gmb0r")
+
+[node name="NewSplit" type="AudioStreamPlayer" parent="." unique_id=2057120916]
+stream = ExtResource("3_lfo53")

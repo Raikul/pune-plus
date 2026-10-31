@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dch18dud8c454"]
+
+[ext_resource type="Script" uid="uid://dcck1631lf46" path="res://scripts/EarthPower.gd" id="1_3o5aw"]
+[ext_resource type="PackedScene" uid="uid://k1wa6jvfpeoq" path="res://scenes/fissure.tscn" id="2_pnqmq"]
+[ext_resource type="AudioStream" uid="uid://dexbo2gvthvoy" path="res://assets/sounds/Earth.ogg" id="3_4e6eh"]
+
+[node name="EarthPower" type="Node" unique_id=884350187]
+script = ExtResource("1_3o5aw")
+fissure_scene = ExtResource("2_pnqmq")
+
+[node name="Timer" type="Timer" parent="." unique_id=593810437]
+one_shot = true
+
+[node name="Hulk" type="AudioStreamPlayer" parent="." unique_id=2057306203]
+stream = ExtResource("3_4e6eh")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -48,6 +48,23 @@ var shrooms = true
 var upgrades = false
 var lessons = false
 
+var player_stats: Dictionary = {
+	1: null,
+	2: null,
+	3: null,
+	4: null
+}
+
+# Duración de los huecos de la estela según la opción Gap Size (Options > Gameplay)
+func gap_time() -> float:
+	match gapSize:
+		0: return 0.4
+		2: return 1.0
+		_: return 0.7
+
+func reset_all_player_stats() -> void:
+	for id in [1, 2, 3, 4]:
+		player_stats[id] = PlayerStats.new()
 func reset_score():
 	player1Score = 0
 	player2Score = 0

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://crqf467tpbd33"]
+
+[ext_resource type="Script" uid="uid://crbnch8kjal24" path="res://scripts/AirPower.gd" id="1_nnu2o"]
+[ext_resource type="AudioStream" uid="uid://dwl2whtbjtsfq" path="res://assets/sounds/airepunchy.mp3" id="2_cmu1p"]
+
+[node name="AirPower" type="Node" unique_id=1741763711]
+script = ExtResource("1_nnu2o")
+
+[node name="Dash" type="AudioStreamPlayer" parent="." unique_id=825122442]
+stream = ExtResource("2_cmu1p")
