@@ -20,8 +20,9 @@ func _ready():
 	version_button.tooltip_text = "Patch notes"
 	shrooms_button.button_pressed = Global.shrooms
 	upgrades_button.button_pressed = Global.upgrades
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
+	# Only when the game starts: afterwards the mode chosen in Options stays
+	if not Global.window_mode_applied:
+		Global.apply_window_mode()
 	get_tree().paused = false
 	play_button.grab_focus.call_deferred()
 	pass
@@ -71,9 +72,11 @@ func _on_change_log_button_pressed():
 
 func _on_shrooms_button_toggled(button_pressed):
 	Global.shrooms = button_pressed
+	Global.save_settings()
 
 func _on_upgrades_button_toggled(button_pressed):
 	Global.upgrades = button_pressed
+	Global.save_settings()
 
 #Region Multiplayer
 func _on_multiplayer_pressed():

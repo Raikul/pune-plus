@@ -11,8 +11,9 @@ func activate() -> void:
 		return
 
 	# 1. Invencibilidad
+	# (The trail used to turn invisible here, but it was still solid: snakes died on
+	# walls they couldn't see)
 	player.set_invincible(true)
-	player.head_modulate.a = 0
 
 	# 2. Agrandar colisión (2.0x por defecto o lo que diga la consola/stats)
 	var scale_mult: float = 2.0
@@ -36,7 +37,6 @@ func activate() -> void:
 func _on_timer_timeout() -> void:
 	# Vuelve al tamaño normal y quita invencibilidad
 	player.set_invincible(false)
-	player.head_modulate.a = 1.0
 	player.reset_earth_collision_scale()
 	finished.emit()
 

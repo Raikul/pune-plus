@@ -11,6 +11,7 @@ const FIREBALL_FRAMES = 60
 const FIREBALL_FPS = 15.0
 const FIRE_WATER_SYMBOL = preload("res://assets/jorge-resources/Game Selection/Fire-Water symbol.png")
 const AIR_EARTH_SYMBOL = preload("res://assets/jorge-resources/Game Selection/Air-Earth symbol.png")
+const STONE_TEXTURE = preload("res://assets/jorge-resources/Powers/Earth/cuerpo_3.png")
 const PUNCHY_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
 const COOLDOWN_CYCLE = 1.4
 
@@ -55,6 +56,8 @@ func _draw():
 			_draw_second_wind()
 		"wide_body":
 			_draw_wide_body(center)
+		"stone_walk":
+			_draw_stone_walk(center)
 		"extra_copy":
 			var split = 0.5 + 0.5 * sin(time * 2.5)
 			var offset = Vector2(size.x * 0.22 * split, 0)
@@ -178,6 +181,19 @@ func _draw_wide_body(center):
 		draw_line(base, tip, color, 4)
 		draw_line(tip, tip + Vector2(-side * 8, -8), color, 4)
 		draw_line(tip, tip + Vector2(-side * 8, 8), color, 4)
+
+# The Earth symbol walks through a stone wall, which turns see-through while it passes
+func _draw_stone_walk(center):
+	var span = size.x
+	var x = fposmod(time * 60.0, span)
+	var crossing = clamp(1.0 - abs(x - center.x) / 30.0, 0.0, 1.0)
+	var wall_height = size.y * 0.8
+	var wall_width = wall_height * STONE_TEXTURE.get_height() / float(STONE_TEXTURE.get_width())
+	draw_set_transform(center, PI / 2, Vector2.ONE)
+	draw_texture_rect(STONE_TEXTURE, Rect2(-wall_height / 2, -wall_width / 2, wall_height, wall_width), false,
+		Color(1, 1, 1, 1.0 - 0.6 * crossing))
+	draw_set_transform(Vector2.ZERO)
+	_draw_symbol(AIR_EARTH_SYMBOL, Vector2(x, center.y), size.x * 0.32, true)
 
 func _draw_symbol(texture, pos, width, flipped, alpha = 1.0, stretch = Vector2.ONE):
 	var height = width * texture.get_height() / float(texture.get_width())

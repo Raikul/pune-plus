@@ -13,6 +13,51 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.4.1",
+		"name": "Teams & Real Upgrades",
+		"date": "2026-10-31",
+		"sections": [
+			["2v2 and match options", [
+				"New 2v2 Teams mode, offline in player setup and online in the host's lobby. Teammates share one score, and a team scores a point each time an enemy snake dies. The round ends when only one team is left.",
+				"Choose how many points win the match: Auto, 5, 10, 15, 20, 30 or 50. Auto keeps the old rule.",
+				"Mode, teams, points to win, Shrooms, Upgrades, Gap Size and the window settings are remembered between runs.",
+			]],
+			["Upgrades", [
+				"Upgrades now really change your snake for the rest of the match: gaps, speed, recharge, fireball size and flight time, Air's jumps, Earth's size and Water's twins. Maxed upgrades stop showing up, and cards show their level (\"Swift Snake 2/3\").",
+				"Upgrades work online: everyone sees the same options and every pick is applied on every screen.",
+				"Your current upgrades are shown next to your score and on the upgrade screen. Online you only see your own and your teammates'; rivals show how many they have.",
+				"New Earth upgrade, Stone Walker: walk through your own stone walls.",
+			]],
+			["Powers", [
+				"Each power was rebuilt as its own piece, ready for upgrades (thanks Gus!).",
+				"Fire: the fireball flies 2.5 seconds, then quickly fades away. Hitting a wall, a snake or Earth's stone stops it on the spot.",
+				"Earth: the stone left by its power is now solid. Any snake that touches it dies, Earth included (unless it has Stone Walker).",
+				"Air: no double jump and no going through walls by default; jumps stop short of the wall. Second Wind and Wall Warp bring them back as upgrades. A lightning bolt shows the jump, and the landing spot is now a small sparkle.",
+				"Water: a splash shows where Water was when it takes its twin's place.",
+				"The symbol on your snake's head is white when the power is ready and dark while it recharges.",
+				"Smarter AI: Air jumps away from danger to a free spot and uses its upgrades, and Water's twin no longer circles into its own trail.",
+			]],
+			["Fixes", [
+				"Earth's trail turned invisible while its power was on but still killed: it's visible now.",
+				"Earth could get out of the arena and stay alive off screen.",
+				"The scoreboard froze one point short when a round or match ended.",
+				"Windowed mode and resolution now work, and the window fits your screen.",
+				"Water's twin no longer causes an error at the start of a round.",
+				"Gamepad buttons have short names (\"Pad A\") instead of stretching the setup and upgrade screens.",
+				"Redefining keys asks for Left, Right and PUNCHI, and the keys you press no longer move the menu.",
+			]],
+			["Also new", [
+				"Dead snakes get a red cross on the scoreboard.",
+				"A new mouse pointer in the colors of the four elements.",
+				"New sound for Air's teleport.",
+			]],
+			["Known issues (online)", [
+				"Fireballs can break slightly different trail pieces on each screen, and Earth's stone can be laid slightly differently.",
+				"Mushrooms are turned off online, and pausing doesn't stop an online match.",
+			]],
+		],
+	},
+	{
 		"version": "0.4.0",
 		"name": "Online & Upgrades",
 		"date": "2026-10-30",
@@ -146,7 +191,7 @@ const RELEASES = [
 static func current_version() -> String:
 	return ProjectSettings.get_setting("application/config/version", "0.0.0")
 
-# "Version 0.4.0 (Alpha)"
+# "Version 0.4.1 (Alpha)"
 static func version_label() -> String:
 	return "Version %s (%s)" % [current_version(), STAGE]
 

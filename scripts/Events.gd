@@ -8,7 +8,7 @@ var bottomLimit
 @onready var rng = RandomNumberGenerator.new()
 
 func _ready():
-	if Global.shrooms:
+	if Global.shrooms_enabled():
 		$ShroomTimer.start()
 
 

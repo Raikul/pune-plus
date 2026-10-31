@@ -63,6 +63,10 @@ Known tradeoff: head-to-head and "who crossed first" races near the front of a t
 
 Leaving mid-match: every received message and every delayed step checks `NetSession._online()` (still in the tree, session still open) before touching `multiplayer` or sending anything, so a player or the host leaving doesn't cascade into errors.
 
+Upgrades between rounds follow the host's Upgrades toggle (also in the lobby). The host rolls every snake's options and opens the screen everywhere (`open_upgrades`). Each machine picks for its own snakes and sends the pick (`upgrade_pick`), and every machine applies every pick to its copy of `Global.player_stats`, so remote copies of a snake (fireball size, twin count...) match. If a player leaves mid-selection, the host picks their highlighted cards after the timer plus a short grace period.
+
+Match options (Upgrades, 2v2 teams, points to win) are the host's. `SteamNet.push_match_options()` shows them in every lobby and `begin_match` hands them to `Global.online_*`, so players' own saved options are untouched. Online, rivals' upgrades are hidden on the scoreboard and the upgrade screen (`Playground.can_see_upgrades`): you see your own snakes' and, in 2v2, your team's.
+
 ## Code map
 
 - `scripts/net/steam_net.gd` — autoload `SteamNet`: Steam init, lobbies, invites, the peer, and the roster (peer → name + element slot). It also has a **LAN/ENet debug mode** and a **fake latency** setting for testing the netcode with two local game windows, without two Steam accounts.
@@ -80,6 +84,6 @@ Leaving mid-match: every received message and every delayed step checks `NetSess
 ## TODO (not synced yet)
 
 - Fireball trail destruction: each machine destroys what its own copy of the fireball hits. It should be decided by the shooter and broadcast as a list of segment indices.
-- Shrooms (spawned by the host; eating confirmed by the host) and the upgrade screen (each machine controls only its own row) are disabled online for now.
+- Shrooms (spawned by the host; eating confirmed by the host) are disabled online for now.
 - Pause doesn't pause online (the menu still opens). Host migration, reconnects and spectators are not handled.
 - Lobby polish: kicking, a ready check, rematch without leaving, saving rebound keys.

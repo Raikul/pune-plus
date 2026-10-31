@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Pune"
-config/version="0.4.0"
+config/version="0.4.1"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -36,6 +36,8 @@ window/size/mode=3
 window/size/resizable=false
 window/size/borderless=true
 window/stretch/mode="canvas_items"
+mouse_cursor/custom_image="res://assets/images/ui/cursor.png"
+mouse_cursor/custom_image_hotspot=Vector2(4, 3)
 
 [dotnet]
 

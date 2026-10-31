@@ -20,6 +20,10 @@ func is_active() -> bool:
 func ai_should_activate(_direction: int) -> bool:
 	return false
 
+# IA: usar una segunda vez gratis (doble salto de Aire)
+func ai_should_recast(_direction: int) -> bool:
+	return false
+
 # Solo para Agua: intercepta la muerte. Devuelve true si salvó al jugador
 func try_prevent_death() -> bool:
 	return false

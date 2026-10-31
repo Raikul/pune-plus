@@ -134,6 +134,8 @@ func createBody(scene):
 	
 # The water snake jumps into this twin's place: stop it and hide its head, keep its trail
 func absorb():
+	# Placeholder effect (scripts/fx/power_fx.gd): the water snake bursts out here
+	PowerFx.splash(get_parent().get_parent(), global_position, Color(Global.playerColors[get_parent().playerId]))
 	absorbed = true
 	alive = false
 	set_process(false)
