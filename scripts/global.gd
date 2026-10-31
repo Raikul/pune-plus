@@ -45,6 +45,7 @@ var musicProgress = 0
 #Gameplay
 var gapSize = 1
 var shrooms = true
+var upgrades = false
 var lessons = false
 
 var player_stats: Dictionary = {

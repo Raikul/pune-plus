@@ -24,10 +24,12 @@ func activate() -> void:
 			if cantidad_clones == 2:
 				var desvio = 0.55 if i == 0 else -0.55
 				twin.rotation = player.rotation + desvio
+				# The twin's forced split keeps turning the way it was fanned out
+				twin.split_direction = 1 if desvio > 0 else -1
 			copies.append(twin)
 
-	# Bloqueo de dirección temporal original
-	player.locked_direction = [-1, 1].pick_random()
+	# The snake turns away from its twin while they split (straight between two twins)
+	player.locked_direction = -copies.back().split_direction if cantidad_clones == 1 else 0
 	player.locked_movement = true
 	get_tree().create_timer(0.2).timeout.connect(func():
 		player.locked_movement = false
@@ -39,8 +41,11 @@ func is_active() -> bool:
 	copies = copies.filter(func(c): return is_instance_valid(c) and c.alive)
 	return not copies.is_empty()
 
+# Twin trails never hurt their water snake, even after the twin is gone: segments
+# block it again only once they shed back to the water color (twin_head.gd removes
+# them from "TwinBodies"). This also makes landing on a twin's tail safe.
 func should_ignore_collision(area: Area2D) -> bool:
-	return (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads")) and is_active()
+	return area.is_in_group("TwinBodies") or area.is_in_group("twinHeads")
 
 # Si tienes 2 clones vivos, podrás revivir DOS veces seguidas
 func try_prevent_death() -> bool:
@@ -54,7 +59,8 @@ func try_prevent_death() -> bool:
 
 	player.position = copy.position
 	player.rotation = copy.rotation
-	copy.queue_free()
+	# The twin's head goes, but its trail stays on the field
+	copy.absorb()
 
 	finished.emit()
 	return true

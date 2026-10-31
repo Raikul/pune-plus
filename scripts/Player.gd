@@ -15,9 +15,22 @@ var orig_head_scale: Vector2 = Vector2.ONE
 
 signal dead()
 signal score()
+## Online: a trail segment was laid by this (local) snake
+signal body_laid(body_position, body_rotation)
+## Online: this (local) snake used its power
+signal power_used()
+## Online: this (local) water snake split off a twin
+signal twin_spawned(twin)
 
 var playerId
 var main_power: Power
+const FISSURE_Z_INDEX = 5
+# Which Player{N} input actions steer this snake (0 = no keys, e.g. an online AI).
+# Online each machine numbers its own players from 1, so the first one there uses the Player 1 keys.
+var input_id
+# Online: another machine owns this snake. NetSession moves it and lays its trail.
+var net_remote = false
+var steer_direction = 0
 
 var listOfNodes = []
 var snakeBodyScene: PackedScene
@@ -69,6 +82,8 @@ func _ready():
 		orig_head_scale = $HeadSprite.scale
 		
 	listOfNodes.append(self)
+	if input_id == null:
+		input_id = playerId
 	if playerId != null:
 		clonable_id = playerId
 		clonable_name = "Player"+str(playerId)
@@ -87,6 +102,8 @@ func refresh_stats() -> void:
 		speed = stats.get_stat("speed")
 		
 func _process(delta):
+	if net_remote:
+		return
 	# 1. Primero siempre actualizamos la mirilla:
 	actualizarPuntoDeTransporte()
 
@@ -94,12 +111,13 @@ func _process(delta):
 	var direction = 0
 	if locked_movement: direction = locked_direction
 	else:
-		if Input.is_action_pressed("Player"+str(playerId)+"Left") :direction = -1
-		elif Input.is_action_pressed("Player"+str(playerId)+"Right"): direction = 1
+		if input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Left") :direction = -1
+		elif input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Right"): direction = 1
 		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 
 	if ai_enabled and powerAvailable: ai_punchy(direction)
+	steer_direction = direction
 
 	rotation += angular_speed * direction * delta
 	var velocity = Vector2.UP.rotated(rotation) * speed
@@ -153,12 +171,18 @@ func _on_bodyTimer_timeout():
 	pass
 
 func _physics_process(delta):
+	if net_remote:
+		return
 	gap_delta_sum += delta
 	if not gap and gap_delta_sum >= 0.05:
-		createBody(snakeBodyScene)
+		var body = createBody(snakeBodyScene)
 		gap_delta_sum = 0
+		body_laid.emit(body.global_position, body.rotation)
 
 func _on_area_entered(area):
+	# A remote snake's owner decides its deaths and pickups
+	if net_remote:
+		return
 	if area is Shroom:
 		$ShroomEaten.play()
 		emit_signal("score")
@@ -182,33 +206,23 @@ func _on_area_entered(area):
 			$CollisionShape2D.set_deferred("disabled", true)
 			$Split.play()
 			set_process(false)
-			emit_signal("dead")	
-#	print(area)
-	if area is Shroom:
-		$ShroomEaten.play()
-		emit_signal("score")
-		area.queue_free()
-	elif (area.is_in_group("TwinBodies") or area.is_in_group("twinHeads"))  and is_water_my_friend:
-		pass
-	elif area.is_in_group("Fissures"):
-		pass
-	elif invincible == false:
-		if listOfNodes.find(area) == -1:
-			var currentTwinHeadInstance = get_tree().get_first_node_in_group("twinHeads")
-#			if (twinHeadInstance == null or twinHeadInstance.alive == false):
-			if !is_instance_valid(currentTwinHeadInstance) or currentTwinHeadInstance.alive == false or !is_water_my_friend:
-				$CollisionShape2D.set_deferred("disabled", true)
-				$Split.play()
-				set_process(false)
-				emit_signal("dead")
-			elif is_water_my_friend: #twinHeadIsAlive
-				currentTwinHeadInstance.collider.set_deferred("disabled", true)
-				var tempPosition = currentTwinHeadInstance.position
-				var tempRotation = currentTwinHeadInstance.rotation
-				currentTwinHeadInstance.queue_free()
-				position = tempPosition
-				rotation = tempRotation
-				pass
+			emit_signal("dead")
+
+# Online: lay a segment of a remote snake where its owner laid it
+func create_body_at(body_position, body_rotation):
+	var body = createBody(snakeBodyScene)
+	body.global_position = body_position
+	body.rotation = body_rotation
+	return body
+
+# Online: the twin of a remote water snake, moved by NetSession
+func spawn_remote_twin():
+	is_water_my_friend = true
+	var twin = createBody(twinHeadScene)
+	twin.net_remote = true
+	twin.bufferListOfNodes = listOfNodes
+	twin.bufferListOfNodes.append(self)
+	return twin
 
 func createBody(scene):
 	var sceneInstance = scene.instantiate()
@@ -289,20 +303,25 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 		listOfNodes.pop_front()
 	
 	fissure_instance.add_to_group("Fissures", true)
+	# Above every trail and head, whichever snake was spawned later
+	fissure_instance.z_index = FISSURE_Z_INDEX
 	add_child(fissure_instance)
 	return fissure_instance
 	
 func set_invincible(state: bool) -> void:
 	invincible = state	
 func _input(event):
+	if net_remote:
+		return
 	# Una sola línea universal para todos los jugadores:
-	if playerId != null and event.is_action_pressed("Player" + str(playerId) + "Up"):
+	if playerId != null and input_id != 0 and event.is_action_pressed("Player" + str(input_id) + "Up"):
 		try_use_power()
 
 func try_use_power() -> void:
 	# 1. Si el poder tiene el segundo salto listo, salta DE INMEDIATO sin cooldown:
 	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
 		main_power.execute_recast()
+		power_used.emit()
 		return
 
 	# 2. Si está en cooldown normal y no hay segundo salto, no hace nada:
@@ -313,6 +332,7 @@ func try_use_power() -> void:
 	
 	if main_power != null:
 		main_power.activate()
+	power_used.emit()
 	
 	if stats != null:
 		for entry in stats.active_buffs.values():
@@ -321,12 +341,12 @@ func try_use_power() -> void:
 
 func activate_power():
 	try_use_power()
-func ai_punchy(direction):
-	if powerAvailable and main_power and main_power.ai_should_activate(direction):
-		try_use_power()
 
-				
-	try_use_power()
+# Online: replays another machine's power use on our copy of its snake (no cooldown checks)
+func use_power():
+	if main_power != null:
+		main_power.activate()
+func ai_punchy(direction):
 	if powerAvailable and main_power and main_power.ai_should_activate(direction):
 		try_use_power()
 func is_there_twin_head():
@@ -349,6 +369,8 @@ func unhulk(prevColor):
 	invincible = false
 	
 func teleport():
+	# The target is only refreshed in _process; the AI can teleport before that first runs
+	actualizarPuntoDeTransporte()
 	gap = true
 	gap_delta_sum = 0.0
 
@@ -378,6 +400,7 @@ func spawn_twin(scene: PackedScene) -> Node2D:
 	twin.bufferListOfNodes = listOfNodes
 	twin.bufferListOfNodes.append(self)
 	twin.snakeBodyScene = snakeBodyScene
+	twin_spawned.emit(twin)
 	return twin
 	$NewSplit.play()
 #	has_twin_head = true

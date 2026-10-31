@@ -15,6 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Pune"
+config/version="0.4.0"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -25,6 +26,7 @@ run/transparent_background=false
 Global="*res://scripts/global.gd"
 LessonList="*res://scripts/lessonList.gd"
 DebugConsole="*uid://ig5lna8yp7d2"
+SteamNet="*res://scripts/net/steam_net.gd"
 
 [display]
 
@@ -141,6 +143,7 @@ Player4Up={
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 viewport/hdr_2d=true

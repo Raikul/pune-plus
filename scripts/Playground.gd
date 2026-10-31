@@ -11,6 +11,10 @@ var players_to_reset = []
 var player_scene
 var RNG :RandomNumberGenerator
 var time_flowing = false
+var upgrade_selection_scene = preload("res://scenes/upgrade_selection.tscn")
+const UPGRADE_TIME_LIMIT = 10.0
+# Online play only: syncs snakes and lets the host drive rounds
+var net_session
 
 @onready var animation_player = $AnimationPlayer
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
@@ -19,10 +23,21 @@ func _ready():
 	RNG = RandomNumberGenerator.new()
 	player_scene = preload("res://scenes/player.tscn")
 	groupColliders()
-	setupPlayers()
+	if Global.isMultiplayerActive:
+		# Pickups aren't synced online yet (docs/multiplayer.md)
+		for child in get_children():
+			if child is Shroom:
+				child.queue_free()
+		net_session = NetSession.new()
+		net_session.name = "NetSession"
+		add_child(net_session)
+		net_session.setup(self) # The host spawns the first round once every peer has loaded
+	else:
+		setupPlayers()
 	$Events.set_space(topLimit,bottomLimit)
 	setup_music()
-	Global.scoreToReach = (get_tree().get_nodes_in_group("activePlayers").size() - 1) * 10
+	var active_count = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active")).size()
+	Global.scoreToReach = (active_count - 1) * 10
 	Global.scoreToReach = max(Global.scoreToReach, 10)
 	#debug
 #	Global.scoreToReach = 1
@@ -88,15 +103,13 @@ func groupColliders():
 	$Colliders/LimitRight.add_to_group("limits")
 	
 
-func setupPlayers():
-	if Global.player1Active:
-		spawn_player(1)
-	if Global.player2Active:
-		spawn_player(2)
-	if Global.player3Active:
-		spawn_player(3)
-	if Global.player4Active:
-		spawn_player(4)
+# spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
+func setupPlayers(spawns = {}):
+	for player_id in [1, 2, 3, 4]:
+		if spawns.has(player_id):
+			spawn_player(player_id, spawns[player_id])
+		elif spawns.is_empty() and Global.get("player" + str(player_id) + "Active"):
+			spawn_player(player_id, roll_spawn(player_id))
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		for child in player.get_children():
 			if child is Timer:
@@ -105,20 +118,26 @@ func setupPlayers():
 	get_tree().get_first_node_in_group("HUD").set_process(true)
 	time_flowing = true
 		
-func spawn_player(player_id):
-	var newPlayer = player_scene.instantiate()
+# Random spawn point and heading for a snake: [x, y, rotation]
+func roll_spawn(player_id):
 	var spawn_x = spawn_locations[player_id][0]
 	var spawn_y = spawn_locations[player_id][1]
 	var spawn_range = 150
-	
+	return [
+		spawn_x + randf_range(-spawn_range,spawn_range),
+		spawn_y + randf_range(-spawn_range,spawn_range),
+		(3/2 * PI) - (player_id * PI/2) - (randf_range(0,PI/2)) + PI/2,
+	]
+
+func spawn_player(player_id, spawn):
+	var newPlayer = player_scene.instantiate()
 	newPlayer.playerId = player_id
 	newPlayer.stats = Global.player_stats[player_id]
-	
-	newPlayer.global_position = Vector2(spawn_x + randf_range(-spawn_range, spawn_range), spawn_y + randf_range(-spawn_range, spawn_range))
-	print("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
-	newPlayer.rotate((3/2 * PI) - (player_id * PI/2) - (randf_range(0, PI/2)) + PI/2)
-	print("Player ID:" + str(player_id))
-	print("Rotation: " + str(rad_to_deg(newPlayer.rotation)))
+	newPlayer.global_position = Vector2(spawn[0], spawn[1])
+	newPlayer.rotation = spawn[2]
+	if net_session:
+		newPlayer.net_remote = not net_session.is_local(player_id)
+		newPlayer.input_id = net_session.input_id_for(player_id)
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
 	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
@@ -139,11 +158,19 @@ func spawn_player(player_id):
 		for raycast in raycaster.get_children():
 			if raycast.name != "UpPlayer":
 				raycast.collision_mask = 0b1
+	if net_session:
+		net_session.register_player(newPlayer)
+		
+#	
 #	if player_id == 4, set raycast masks to not 3. Por default marquemoslo como 3 true
 
 func _on_player_dead(player):
-	playerDead(player)
+	if net_session:
+		net_session.report_death(player.playerId)
+	else:
+		playerDead(player)
 	
+# Online this only runs on the host (NetSession tells the clients)
 func playerDead(player):	
 	player.powerAvailable = false
 	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
@@ -153,9 +180,20 @@ func playerDead(player):
 			alivePlayer.emit_signal("score")
 	if get_tree().get_nodes_in_group("alivePlayers").size() <= 1 \
 	and gameEnded == false and time_flowing:
+		if net_session:
+			net_session.host_round_over()
 		restart()
 
+# Online clients: the host says this snake died
+func mark_player_dead(player):
+	player.powerAvailable = false
+	player.set_process(false)
+	$HUD.set_player_dead(player.playerId)
+	player.remove_from_group("alivePlayers")
+
 func finishGame(playerId):
+	if net_session and multiplayer.is_server():
+		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
 	$Lesson.improvise("Player "+str(playerId)+" Wins")
@@ -180,7 +218,20 @@ func restart(delay = 2):
 		var id = alive_players[0].playerId
 		animation_player.play("player_"+str(id)+"_win")
 	
+	# Online clients wait for the host's next round instead (NetSession.start_round)
+	if net_session and not multiplayer.is_server():
+		return
 	await(get_tree().create_timer(delay).timeout)
+	clear_round()
+#	await(get_tree().create_timer(2.0).timeout)
+	if Global.upgrades:
+		await run_upgrade_selection()
+	if net_session:
+		net_session.host_start_round()
+	else:
+		call_deferred("setupPlayers")
+
+func clear_round():
 	animation_player.stop()
 	$HUD.reset_labels()
 	if Global.lessons:
@@ -188,11 +239,22 @@ func restart(delay = 2):
 		$Lesson.show()
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		player.remove_from_group("activePlayers")
+		player.remove_from_group("alivePlayers")
 		player.queue_free()
 	for shroom in get_tree().get_nodes_in_group("Shrooms"):
 		shroom.queue_free()
-#	await(get_tree().create_timer(2.0).timeout)
-	call_deferred("setupPlayers")
+
+# Shows the upgrade screen between rounds and waits until every snake picked or time ran out.
+# The picks aren't applied to the snakes yet.
+func run_upgrade_selection():
+	var layer = CanvasLayer.new()
+	layer.layer = 5 # Above the HUD, below the pause menu
+	add_child(layer)
+	var upgrade_selection = upgrade_selection_scene.instantiate()
+	layer.add_child(upgrade_selection)
+	upgrade_selection.start([], UPGRADE_TIME_LIMIT)
+	await upgrade_selection.finished
+	layer.queue_free()
 #
 
 func _on_player_score(player_id):
@@ -219,7 +281,7 @@ func _on_player_3_score():
 
 func _on_player_4_score():
 	Global.player4Score += 1
-	if Global.player1Score >= Global.scoreToReach:
+	if Global.player4Score >= Global.scoreToReach:
 		finishGame(4)
 	
 func _on_pause_button_pressed():
