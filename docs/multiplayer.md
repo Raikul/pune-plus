@@ -13,7 +13,8 @@ Branch: `ten_multiplayer`. Status: **draft**. Lobbies, round flow and snake move
 
 - GodotSteam 4.17 (the `T:\GodotSteam\4.6` build) ships `SteamMultiplayerPeer`. It plugs Steam Networking Sockets into Godot's high-level multiplayer API, so plain `@rpc` functions work.
 - Traffic goes over **Steam Datagram Relay (SDR)**. That's Valve's backbone, which is often a *shorter* route than the public internet, with free NAT traversal and IPs never exposed to other players.
-- Steam Lobbies handle matchmaking: create (friends-only/public), browse, invite through the overlay, and "Join game" from the friends list (`join_requested`). The host creates the lobby and runs `host_with_lobby`; members run `connect_to_lobby`.
+- Steam Lobbies handle matchmaking: create, browse, invite through the overlay, and "Join game" from the friends list (`join_requested`). The host creates the lobby and runs `host_with_lobby`; members run `connect_to_lobby`.
+- Lobbies are **public** by default (listed). **Private** ones use Steam's *invisible* type: not in friends lists, and tagged `private=1` so Find lobbies skips them, but searches still reach them. Every lobby gets a 6-character **code** (lobby data `code`, no 0/O/1/I); *Join* searches for it, so a code finds a private lobby or one lost in a long list. The host can switch public/private while in the lobby.
 - `no_delay` and `no_nagle` are on, so packets aren't batched up.
 - Topology is host plus clients. Godot relays client-to-client RPCs through the host.
 
@@ -39,6 +40,8 @@ The snake game is unusual: a snake's whole future is determined by its position,
 | Own death | **its owner** | The owner tests its head against the trails it sees (exact copies of everyone's trails, only the newest few cm may be a few ms behind), then reports to the host (reliable) |
 | Round start/spawns, deaths → scores, round end, match end | **host** | Reliable RPCs. The host rolls spawn positions and broadcasts them so everyone spawns identically |
 | Power use | owner | Reliable event, replayed on the remote copy of that snake |
+| Phoenix (Fire) | owner | `phoenix_event`: when the owner's snake turns to ash every machine freezes and hides it; when it rises they show the burst (clearing trails locally) and predict it again from there |
+| Static Shock (Air) | the victim's machine | Air's jump is replayed everywhere, so each machine checks its own snakes against it and applies the shock; others only show the sparks |
 | Water twin | **the water snake's machine** | Streamed like a snake (`twin_state`: state + trail segments + alive/dead/absorbed; an absorbed twin loses its head but keeps its trail) and dead-reckoned elsewhere. The twin is AI-steered after a short forced split, so it never reads anyone's keys. A water snake can have several twins at once; each one is streamed separately |
 
 Why not the alternatives:

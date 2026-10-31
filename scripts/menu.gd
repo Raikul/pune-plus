@@ -38,7 +38,7 @@ func _on_options_pressed():
 	Options.show()
 	$CanvasLayer/TopMenu.hide()
 	$CanvasLayer/ChangeLog.hide()
-	$CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode/OptionButton.grab_focus.call_deferred()
+	Options.focus_first()
 
 func _on_quit_pressed():
 	get_tree().quit()

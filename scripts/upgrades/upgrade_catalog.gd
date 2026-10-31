@@ -8,21 +8,37 @@ class_name UpgradeCatalog
 # "stat_mods" uses PlayerStats keys: {"stat": {"add": x}} or {"stat": {"mult": x}}, per stack.
 # "max_stacks" is how many times a snake can take it; at the limit it stops being offered.
 # "enabled": false keeps an upgrade out of the rolls until it does something.
+# "rarity" (RARITIES) sets how often it is offered and its color on the card.
+# "requires": the id of an upgrade the snake must already have.
 
 const PLAYER_ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water"}
 
+# weight: how likely an upgrade of that rarity is to be offered, relative to the others
+const RARITIES = {
+	"common": {"name": "Common", "color": Color(0.72, 0.72, 0.72), "weight": 40.0},
+	"uncommon": {"name": "Uncommon", "color": Color(0.35, 0.85, 0.35), "weight": 26.0},
+	"rare": {"name": "Rare", "color": Color(0.3, 0.6, 1.0), "weight": 18.0},
+	"epic": {"name": "Epic", "color": Color(0.7, 0.35, 0.95), "weight": 9.0},
+	"legendary": {"name": "Legendary", "color": Color(1.0, 0.6, 0.1), "weight": 4.0},
+}
+
+static func rarity_of(upgrade) -> Dictionary:
+	return RARITIES.get(upgrade.get("rarity", "common"), RARITIES.common)
+
 const UPGRADES = [
-	{
-		"id": &"gap_wider",
-		"name": "Wider Gaps",
-		"description": "The holes in your trail stay open 30% longer.",
-		"element": "generic",
-		"icon": "gap_wide",
-		"stat_mods": {"gap.time": {"mult": 1.3}},
-		"max_stacks": 3,
-	},
+	# Wider Gaps: of no real use, kept out of the game for now
+#	{
+#		"id": &"gap_wider",
+#		"name": "Wider Gaps",
+#		"description": "The holes in your trail stay open 30% longer.",
+#		"element": "generic",
+#		"icon": "gap_wide",
+#		"stat_mods": {"gap.time": {"mult": 1.3}},
+#		"max_stacks": 3,
+#	},
 	{
 		"id": &"gap_tighter",
+		"rarity": "common",
 		"name": "Tighter Trail",
 		"description": "The holes in your trail close 25% sooner.",
 		"element": "generic",
@@ -32,6 +48,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"speed_up",
+		"rarity": "common",
 		"name": "Swift Snake",
 		"description": "Your snake moves 10% faster.",
 		"element": "generic",
@@ -41,6 +58,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"cooldown_down",
+		"rarity": "uncommon",
 		"name": "Quick Recharge",
 		"description": "Your power recharges 15% faster.",
 		"element": "generic",
@@ -50,6 +68,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"fire_piercing",
+		"rarity": "rare",
 		"name": "Piercing Flame",
 		"description": "Your fireball flies 1.5 s longer, burning through more of the trail.",
 		"element": "fire",
@@ -59,6 +78,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"fire_radius",
+		"rarity": "rare",
 		"name": "Big Fireball",
 		"description": "Your fireball is 30% bigger.",
 		"element": "fire",
@@ -67,7 +87,18 @@ const UPGRADES = [
 		"max_stacks": 3,
 	},
 	{
+		"id": &"fire_phoenix",
+		"rarity": "legendary",
+		"name": "Phoenix",
+		"description": "Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right.",
+		"element": "fire",
+		"icon": "phoenix",
+		"stat_mods": {"fire.phoenix": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
 		"id": &"air_wall_warp",
+		"rarity": "rare",
 		"name": "Wall Warp",
 		"description": "Your teleport passes through the arena walls and comes out on the other side.",
 		"element": "air",
@@ -77,6 +108,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"air_second_wind",
+		"rarity": "rare",
 		"name": "Second Wind",
 		"description": "After teleporting, teleport once more for free within 1 second.",
 		"element": "air",
@@ -85,16 +117,39 @@ const UPGRADES = [
 		"max_stacks": 1,
 	},
 	{
+		"id": &"air_shock",
+		"rarity": "rare",
+		"name": "Static Shock",
+		"description": "Snakes whose heads you teleport through are electrocuted: no power for 5 s.",
+		"element": "air",
+		"icon": "shock",
+		"stat_mods": {"air.shock": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"air_scramble",
+		"rarity": "epic",
+		"name": "Scrambler",
+		"description": "Your shock also swaps their left and right for 3 s.",
+		"element": "air",
+		"icon": "scramble",
+		"stat_mods": {"air.scramble": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"air_shock",
+	},
+	{
 		"id": &"earth_wide_body",
+		"rarity": "rare",
 		"name": "Tectonic Bulk",
-		"description": "Your head grows 25% bigger while your power is active.",
+		"description": "Your rocky path is 30% wider: more ground for you, more wall for them.",
 		"element": "earth",
 		"icon": "wide_body",
-		"stat_mods": {"earth.scale": {"add": 0.5}},
+		"stat_mods": {"earth.scale": {"add": 0.3}},
 		"max_stacks": 2,
 	},
 	{
 		"id": &"earth_stone_walk",
+		"rarity": "rare",
 		"name": "Stone Walker",
 		"description": "You walk through your own stone walls. They still stop everyone else.",
 		"element": "earth",
@@ -104,6 +159,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"water_extra_copy",
+		"rarity": "rare",
 		"name": "Extra Twin",
 		"description": "Your power creates one more copy of your snake.",
 		"element": "water",
@@ -113,6 +169,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"water_lasting_twin",
+		"rarity": "rare",
 		"name": "Lasting Twin",
 		"description": "Your twin's trail never sheds: it stays aqua and never blocks you.",
 		"element": "water",
@@ -137,7 +194,7 @@ static func pool_for_player(player_id) -> Array:
 	return UPGRADES.filter(func(upgrade):
 		return (upgrade.element == "generic" or upgrade.element == element) \
 			and upgrade.get("enabled", true) \
-			and stacks_for(player_id, upgrade.id) < upgrade.get("max_stacks", 1))
+			and stacks_for(player_id, upgrade.id) < upgrade.get("max_stacks", 1) 			and (not upgrade.has("requires") or stacks_for(player_id, upgrade.requires) > 0))
 
 static func stacks_for(player_id, upgrade_id) -> int:
 	var stats = Global.player_stats.get(player_id)
@@ -158,22 +215,33 @@ static func make_buff(upgrade_id) -> Buff:
 	return buff
 
 # Random options for one snake, always including at least one upgrade of its own element.
+# Rarer upgrades are less likely to come up (RARITIES weight).
 static func roll_options(player_id, count = 3) -> Array:
 	var element = element_for_player(player_id)
 	var pool = pool_for_player(player_id)
-	pool.shuffle()
 	var options = []
-	for upgrade in pool:
-		if upgrade.element == element:
-			options.append(upgrade)
-			break
-	for upgrade in pool:
-		if options.size() >= count:
-			break
-		if not options.has(upgrade):
-			options.append(upgrade)
+	var own = pool.filter(func(upgrade): return upgrade.element == element)
+	if not own.is_empty():
+		var first = _weighted_pick(own)
+		options.append(first)
+		pool.erase(first)
+	while options.size() < count and not pool.is_empty():
+		var upgrade = _weighted_pick(pool)
+		options.append(upgrade)
+		pool.erase(upgrade)
 	options.shuffle()
 	return options.map(func(upgrade): return _with_level(player_id, upgrade))
+
+static func _weighted_pick(upgrades: Array) -> Dictionary:
+	var total = 0.0
+	for upgrade in upgrades:
+		total += rarity_of(upgrade).weight
+	var roll = randf() * total
+	for upgrade in upgrades:
+		roll -= rarity_of(upgrade).weight
+		if roll <= 0.0:
+			return upgrade
+	return upgrades.back()
 
 # Online: the options the host rolled, by id
 static func options_from_ids(player_id, ids: Array) -> Array:

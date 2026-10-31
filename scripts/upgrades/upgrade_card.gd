@@ -1,7 +1,8 @@
 extends PanelContainer
 class_name UpgradeCard
 
-# One selectable upgrade inside an UpgradeRow: icon, name, element tag and description.
+# One selectable upgrade inside an UpgradeRow: icon, name, rarity and element tags and
+# description. The rarity color is on its tag and on the card's border.
 
 const NORMAL_BG = Color(0.2, 0.2, 0.2)
 const FOCUSED_BG = Color(0.27, 0.27, 0.27)
@@ -15,10 +16,13 @@ var style
 var flash
 var tag_label
 var scale_tween
+var rarity_color = NORMAL_BORDER
 
 func setup(upgrade_data, color):
 	upgrade = upgrade_data
 	player_color = color
+	var rarity = UpgradeCatalog.rarity_of(upgrade)
+	rarity_color = rarity.color
 	custom_minimum_size = Vector2(390, 0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -45,12 +49,21 @@ func setup(upgrade_data, color):
 	content.add_child(text_box)
 
 	text_box.add_child(_label(upgrade.name, 28, Color.WHITE))
+	var tags = HBoxContainer.new()
+	tags.add_theme_constant_override("separation", 8)
+	text_box.add_child(tags)
+	var rarity_tag = _label(rarity.name.to_upper(), 16, rarity_color)
+	rarity_tag.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tags.add_child(rarity_tag)
 	if upgrade.element == "generic":
 		tag_label = _label("ANY SNAKE", 16, Color(0.6, 0.6, 0.6))
 	else:
 		tag_label = _label(upgrade.element.to_upper() + " POWER", 16, player_color)
-	text_box.add_child(tag_label)
-	text_box.add_child(_label(upgrade.description, 19, Color(0.82, 0.82, 0.82)))
+	tag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tags.add_child(tag_label)
+	# Long descriptions get a smaller font so they stay inside the card
+	var description_size = 19 if upgrade.description.length() <= 90 else 16
+	text_box.add_child(_label(upgrade.description, description_size, Color(0.82, 0.82, 0.82)))
 
 	# White overlay flashed when the card is chosen
 	flash = Panel.new()
@@ -67,10 +80,12 @@ func setup(upgrade_data, color):
 
 func set_focused(focused):
 	style.bg_color = FOCUSED_BG if focused else NORMAL_BG
-	style.border_color = player_color if focused else NORMAL_BORDER
+	style.border_color = player_color if focused else rarity_color.darkened(0.25)
 	style.set_border_width_all(6 if focused else 3)
-	style.shadow_color = Color(player_color, 0.45) if focused else Color.TRANSPARENT
-	style.shadow_size = 14 if focused else 0
+	# Unfocused cards glow in their rarity color (stronger for rarer ones)
+	var glow = clamp(UpgradeCatalog.RARITIES.keys().find(upgrade.get("rarity", "common")) * 0.08, 0.0, 0.35)
+	style.shadow_color = Color(player_color, 0.45) if focused else Color(rarity_color, glow)
+	style.shadow_size = 14 if focused else (8 if glow > 0 else 0)
 	icon.speed_scale = 1.8 if focused else 1.0
 	_tween_scale(FOCUS_SCALE if focused else Vector2.ONE, 0.12)
 

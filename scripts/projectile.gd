@@ -56,8 +56,10 @@ func expire():
 func _on_area_entered(area):
 	if area == get_parent() or expiring:
 		return
-	# Walls, snakes and Earth's stone stop it: it crashes and fades away
-	if area.is_in_group("activePlayers") or area.is_in_group("limits") or area.is_in_group("Fissures"):
+	# Walls, snakes (and Water's twin heads) and Earth's stone stop it: it crashes and fades
+	# away. Freeing a twin head would also free its whole trail (the segments are its children);
+	# the twin may already have died of this same hit, so the check is "twins", not "twinHeads".
+	if area.is_in_group("activePlayers") or area.is_in_group("twins") or area.is_in_group("limits") or area.is_in_group("Fissures"):
 		set_process(false)
 		expire()
 	else:

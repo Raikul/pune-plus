@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-var menu_font = preload("res://assets/fonts/Flat Earth Scribe.ttf")
 
 var label1: Label
 var label2: Label
@@ -33,11 +32,8 @@ func _ready():
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
 	
 
-	label1.add_theme_font_override("font", menu_font)
-	label2.add_theme_font_override("font", menu_font)
-	label3.add_theme_font_override("font", menu_font)
-	label4.add_theme_font_override("font", menu_font)
-	
+	_restyle()
+
 	for id in [1, 2, 3, 4]:
 		dead_marks[id] = _make_dead_mark(_cooldown_bar(id))
 		var row = _cooldown_bar(id).get_parent()
@@ -55,6 +51,66 @@ func _ready():
 		upgrade_badges[id] = badges
 
 	add_to_group("HUD")
+
+# Dark bar with one rounded card per snake, the score in its element's color
+const BAR_COLOR = Color(0.07, 0.07, 0.08, 0.94)
+const CARD_COLOR = Color(0.13, 0.13, 0.15)
+var target_label: Label
+
+func _restyle():
+	$PanelContainer/ColorRect.color = BAR_COLOR
+	var accent = ColorRect.new()
+	accent.color = Color(1, 1, 1, 0.07)
+	accent.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	accent.offset_top = -2
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(accent)
+	var margin = $PanelContainer/MarginContainer
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 22)
+	for id in [1, 2, 3, 4]:
+		var label = [null, label1, label2, label3, label4][id]
+		var color = Color(Global.playerColors[id])
+		label.self_modulate = Color.WHITE
+		label.add_theme_font_override("font", ODIN_FONT)
+		label.add_theme_font_size_override("font_size", 56)
+		label.add_theme_color_override("font_color", color.lightened(0.15))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+		label.add_theme_constant_override("outline_size", 6)
+		label.custom_minimum_size.x = 64
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var row = label.get_parent()
+		row.add_theme_constant_override("separation", 16)
+		var card = row.get_parent()
+		card.self_modulate = Color.WHITE
+		var style = StyleBoxFlat.new()
+		style.bg_color = CARD_COLOR
+		style.set_corner_radius_all(16)
+		style.content_margin_left = 18
+		style.content_margin_right = 22
+		style.content_margin_top = 8
+		style.content_margin_bottom = 8
+		style.border_color = color
+		style.border_width_bottom = 4
+		card.add_theme_stylebox_override("panel", style)
+		_cooldown_bar(id).custom_minimum_size = Vector2(64, 64)
+	# "FIRST TO 10" under the middle of the bar
+	target_label = Label.new()
+	target_label.add_theme_font_override("font", ODIN_FONT)
+	target_label.add_theme_font_size_override("font_size", 18)
+	target_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	target_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	target_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	target_label.offset_left = -150
+	target_label.offset_right = 150
+	target_label.offset_top = -24
+	target_label.offset_bottom = -2
+	target_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(target_label)
+
+func set_target(points):
+	target_label.text = "FIRST TO %d" % points
 
 # total: the cooldown's full length (upgrades can shorten it), so the bar starts full
 func set_cooldown(player_id, time_left, total = 0.0):

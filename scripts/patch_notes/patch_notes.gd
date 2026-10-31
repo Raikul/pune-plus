@@ -13,6 +13,59 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.5.0",
+		"name": "Rarities & Wisdom",
+		"date": "2026-10-31",
+		"sections": [
+			["Upgrades", [
+				"Upgrades now have a rarity, shown in its color on each card: Common, Uncommon, Rare, Epic and Legendary. Rarer upgrades show up less often.",
+				"Some upgrades need another one first (Scrambler needs Static Shock).",
+				"New Legendary Fire upgrade, Phoenix: once per round, you rise from your ashes 10 seconds after dying, in a burst that clears the trails and rocks around you. Aim where you'll fly off with Left/Right while you wait.",
+				"New Rare Air upgrade, Static Shock: snakes whose heads you teleport through get electrocuted and can't use their power for 5 seconds.",
+				"New Epic Air upgrade, Scrambler: your shock also swaps their left and right for 3 seconds.",
+				"Tectonic Bulk now makes Earth's rocky path 30% wider.",
+				"Wider Gaps is gone.",
+				"A quote for the element that won the last round now opens the upgrade screen.",
+			]],
+			["Powers", [
+				"Earth: the rocky path and the invincibility now last the same time, 1.2 seconds. The head no longer grows; it hides while the rocks are laid, and no trail is left on top of them.",
+				"Earth: with Stone Walker, your snake is drawn on top of your rocks when you cross them, so you can see where you've already been.",
+				"Air: a short grace after teleporting, so you no longer die on the spot you jumped from or landed on.",
+				"Air: the landing marker shines when you can jump (power ready or a free second jump) and turns small and faint while it recharges.",
+				"Water: the twin now looks like a ghost: see-through aqua with a shimmer running along it. Its trail turns solid after 7 seconds instead of 5, and a glow and a flash show the part that's turning solid.",
+				"AI: Air with Static Shock jumps through enemy heads on purpose, and an AI that gets scrambled finds its grip again after 1.5 seconds.",
+			]],
+			["Online", [
+				"Lobbies are public by default. The host can make one private, which hides it from the lobby list and friends lists.",
+				"Every lobby has a 6-character code. Copy it from the lobby and share it; others can type it in to join, even if the lobby isn't in the list.",
+				"The lobby list scrolls when there are many lobbies.",
+			]],
+			["Options", [
+				"New Options screen with Video, Audio, Gameplay and Controls tabs, usable with keyboard or gamepad.",
+				"New settings: VSync, max FPS, an FPS counter, separate Master, Music and Effects volume (now saved), upgrade pick time, the upgrade-screen quotes on or off, and a button to reset all keys.",
+				"Volume sliders right in the pause menu.",
+			]],
+			["Look", [
+				"New scoreboard with a card per snake and a \"First to\" target.",
+				"New win screen that fills the arena. Hold PUNCHI to go back to the menu.",
+				"The arena border is one thin line that marks exactly where snakes die.",
+				"Player setup polish: centered element names, bigger Mode and Points buttons, a lighter tint and a glowing border on selected players, and an \"AI player\" badge.",
+			]],
+			["Fixes", [
+				"A fireball hitting Water's twin made the twin's whole trail disappear.",
+				"Air's landing marker stayed on screen after Air died.",
+				"A dead Water twin kept laying hidden trail under its head.",
+				"Powers could still be used, sound included, on the win screen.",
+				"Long upgrade descriptions no longer overflow their card.",
+			]],
+			["Known issues (online)", [
+				"While a Phoenix waits to rise, other players see its starting direction, not the one being aimed.",
+				"Fireballs can break slightly different trail pieces on each screen, and Earth's stone can be laid slightly differently.",
+				"Mushrooms are turned off online, and pausing doesn't stop an online match.",
+			]],
+		],
+	},
+	{
 		"version": "0.4.1",
 		"name": "Teams & Real Upgrades",
 		"date": "2026-10-31",

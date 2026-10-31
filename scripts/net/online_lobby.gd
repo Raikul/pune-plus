@@ -27,6 +27,10 @@ var mode_button
 var points_button
 var invite_button
 var latency_button
+var privacy_button
+var code_label
+var copy_code_button
+var code_input
 
 func _ready():
 	_build_layout()
@@ -83,6 +87,12 @@ func _refresh_roster():
 	# Match options: the host's (Global) on the host, the synced copy everywhere else
 	var options = Global.match_options() if SteamNet.is_host() or not SteamNet.is_online() else SteamNet.match_options
 	var host = SteamNet.is_host()
+	var in_steam_lobby = SteamNet.lobby_code != ""
+	code_label.text = ("Code: " + SteamNet.lobby_code) if in_steam_lobby else ""
+	copy_code_button.visible = in_steam_lobby
+	privacy_button.text = "Lobby: " + ("Private" if SteamNet.lobby_private else "Public")
+	# Before hosting it picks the new lobby's type; in a lobby only the host changes it
+	privacy_button.disabled = SteamNet.is_lan or (SteamNet.is_online() and not host)
 	upgrades_button.disabled = not host
 	upgrades_button.text = "Upgrades: " + ("ON" if options.get("upgrades", false) else "OFF")
 	mode_button.disabled = not host
@@ -256,10 +266,11 @@ func _build_layout():
 	actions.custom_minimum_size.x = 420
 	actions.add_theme_constant_override("separation", 14)
 	columns.add_child(actions)
-	var host_button = _button("Host (friends)", func(): SteamNet.host_lobby(false))
+	var host_button = _button("Host lobby", SteamNet.host_lobby)
 	actions.add_child(host_button)
-	actions.add_child(_button("Host (public)", func(): SteamNet.host_lobby(true)))
-	actions.add_child(_button("Find lobbies", SteamNet.find_lobbies))
+	privacy_button = _button("Lobby: Public", func(): SteamNet.set_lobby_private(not SteamNet.lobby_private))
+	privacy_button.tooltip_text = "Private lobbies aren't listed: friends join with an invite or the lobby code"
+	actions.add_child(privacy_button)
 	invite_button = _button("Invite friends", SteamNet.invite_friends)
 	actions.add_child(invite_button)
 	add_player_button = _button("Add player (this keyboard)", func(): SteamNet.add_local_player(false))
@@ -280,7 +291,19 @@ func _build_layout():
 	players_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	players_box.add_theme_constant_override("separation", 14)
 	columns.add_child(players_box)
-	players_box.add_child(_label("Players", 34, Color.WHITE))
+	var players_header = HBoxContainer.new()
+	players_header.add_theme_constant_override("separation", 20)
+	players_box.add_child(players_header)
+	var players_title = _label("Players", 34, Color.WHITE)
+	players_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	players_header.add_child(players_title)
+	code_label = _label("", 30, HIGHLIGHT)
+	code_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	players_header.add_child(code_label)
+	copy_code_button = _button("Copy code", func():
+		DisplayServer.clipboard_set(SteamNet.lobby_code)
+		status_label.text = "Lobby code copied: " + SteamNet.lobby_code)
+	players_header.add_child(copy_code_button)
 	for slot in range(1, 5):
 		var panel = PanelContainer.new()
 		var style = _box_style(Color(0.16, 0.16, 0.16))
@@ -329,10 +352,32 @@ func _build_layout():
 	lobbies_box.add_theme_constant_override("separation", 14)
 	columns.add_child(lobbies_box)
 	lobbies_box.add_child(_label("Lobbies", 34, Color.WHITE))
+	# Join by code: for private lobbies, or when the list is too long to find one
+	var code_row = HBoxContainer.new()
+	code_row.add_theme_constant_override("separation", 10)
+	lobbies_box.add_child(code_row)
+	code_input = LineEdit.new()
+	code_input.placeholder_text = "Lobby code"
+	code_input.max_length = SteamNet.LOBBY_CODE_LENGTH
+	code_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	code_input.add_theme_stylebox_override("normal", _box_style(Color(0.16, 0.16, 0.16)))
+	code_input.add_theme_stylebox_override("focus", _box_style(Color(0.16, 0.16, 0.16), HIGHLIGHT))
+	code_input.text_changed.connect(func(text):
+		var caret = code_input.caret_column
+		code_input.text = text.to_upper()
+		code_input.caret_column = caret)
+	code_input.text_submitted.connect(func(text): SteamNet.join_by_code(text))
+	code_row.add_child(code_input)
+	code_row.add_child(_button("Join", func(): SteamNet.join_by_code(code_input.text)))
+	lobbies_box.add_child(_button("Find lobbies", SteamNet.find_lobbies))
 	lobby_list = VBoxContainer.new()
 	lobby_list.add_theme_constant_override("separation", 10)
-	lobby_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	lobbies_box.add_child(lobby_list)
+	lobby_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var lobby_scroll = ScrollContainer.new()
+	lobby_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lobby_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	lobby_scroll.add_child(lobby_list)
+	lobbies_box.add_child(lobby_scroll)
 	if OS.is_debug_build():
 		lobbies_box.add_child(_label("Debug", 22, Color(0.5, 0.5, 0.5)))
 		lobbies_box.add_child(_button("LAN host", SteamNet.host_lan))

@@ -12,7 +12,6 @@ var player_scene
 var RNG :RandomNumberGenerator
 var time_flowing = false
 var upgrade_selection_scene = preload("res://scenes/upgrade_selection.tscn")
-const UPGRADE_TIME_LIMIT = 10.0
 # Online play only: syncs snakes and lets the host drive rounds
 var net_session
 # 2v2: teams share their score and earn one point per enemy snake that dies (Global.team_of)
@@ -56,6 +55,7 @@ func _ready():
 	#debug
 #	Global.scoreToReach = 1
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
+	$HUD.set_target(Global.scoreToReach)
 	
 func _process(_delta):
 	#pause_menu_input()
@@ -116,7 +116,40 @@ func groupColliders():
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
-	
+	_draw_arena_border()
+
+# One thin line on the inner edge of the four wall colliders (where a head dies), instead
+# of the old mismatched color strips
+const BORDER_COLOR = Color(0.62, 0.36, 1.0, 0.9) # Purple
+const BORDER_WIDTH = 2.0
+func _draw_arena_border():
+	var edges = {}
+	for wall in ["LimitTop", "LimitLeft", "LimitRight", "Control/LimitBottom"]:
+		var collider = get_node("Colliders/" + wall + "/Collider")
+		get_node("Colliders/" + wall + "/ColorRect").hide()
+		var rect = collider.global_transform * collider.shape.get_rect()
+		edges[wall] = rect
+	var half = BORDER_WIDTH / 2
+	# The scoreboard bar (a CanvasLayer, always on top) reaches a little past the top wall:
+	# the line goes just under it so it shows like the other three
+	var top = edges["LimitTop"].end.y
+	var hud_bar = get_node_or_null("HUD/PanelContainer")
+	if hud_bar:
+		top = max(top, hud_bar.get_global_rect().end.y)
+	top += half
+	var bottom = edges["Control/LimitBottom"].position.y - half
+	var left = max(edges["LimitLeft"].end.x, 0.0) + half
+	var right = min(edges["LimitRight"].position.x, get_viewport_rect().size.x) - half
+	var border = Line2D.new()
+	border.name = "ArenaBorder"
+	border.width = BORDER_WIDTH
+	border.default_color = BORDER_COLOR
+	border.closed = true
+	border.joint_mode = Line2D.LINE_JOINT_SHARP
+	border.points = PackedVector2Array([Vector2(left, top), Vector2(right, top), Vector2(right, bottom), Vector2(left, bottom)])
+	border.z_index = 2
+	$Colliders.add_child(border)
+
 
 # spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
 func setupPlayers(spawns = {}):
@@ -190,6 +223,7 @@ func _on_player_dead(player):
 func playerDead(player):	
 	player.powerAvailable = false
 	player.update_power_indicator()
+	player.hide_teleport_marker()
 	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
 	if player.is_in_group("alivePlayers") :
 		player.remove_from_group("alivePlayers")
@@ -234,6 +268,7 @@ func add_team_point(team):
 func mark_player_dead(player):
 	player.powerAvailable = false
 	player.update_power_indicator()
+	player.hide_teleport_marker()
 	player.set_process(false)
 	$HUD.set_player_dead(player.playerId)
 	player.remove_from_group("alivePlayers")
@@ -245,10 +280,14 @@ func finishGame(playerId):
 		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
+	# Covers the whole arena, under the scoreboard
+	var screen = get_viewport_rect().size
+	var arena_top = $Colliders/ArenaBorder.points[0].y - BORDER_WIDTH
+	var arena = Rect2(0, arena_top, screen.x, screen.y - arena_top)
 	if teams_mode:
-		$Lesson.improvise(Global.TEAM_NAMES[Global.team_of(playerId)] + " Wins")
+		$Lesson.improvise(Global.TEAM_NAMES[Global.team_of(playerId)] + " Wins", arena)
 	else:
-		$Lesson.improvise("Player "+str(playerId)+" Wins")
+		$Lesson.improvise("Player "+str(playerId)+" Wins", arena)
 	$Lesson.show()
 	$Victory.play()
 	
@@ -268,8 +307,10 @@ func stopTime():
 func restart(delay = 2):
 	stopTime()
 	var alive_players = get_tree().get_nodes_in_group("alivePlayers")
+	last_round_winner = 0
 	if alive_players.size() == 1 or (teams_mode and alive_players.size() > 0):
 		var id = alive_players[0].playerId
+		last_round_winner = id
 		animation_player.play("player_"+str(id)+"_win")
 	
 	# Online clients wait for the host's next round instead (NetSession.start_round)
@@ -280,7 +321,7 @@ func restart(delay = 2):
 #	await(get_tree().create_timer(2.0).timeout)
 	if Global.upgrades_enabled():
 		if net_session:
-			await net_session.host_run_upgrades(UPGRADE_TIME_LIMIT)
+			await net_session.host_run_upgrades(Global.upgrade_time)
 		else:
 			await run_upgrade_selection()
 	if net_session:
@@ -303,13 +344,16 @@ func clear_round():
 
 # Shows the upgrade screen between rounds and waits until every snake picked or time ran out.
 func run_upgrade_selection():
-	var screen = open_upgrade_screen(UPGRADE_TIME_LIMIT)
+	var screen = open_upgrade_screen(Global.upgrade_time)
 	await screen.finished
 
 # The open upgrade screen, if any (online picks from other machines are passed to it)
 var upgrade_screen = null
 
 # preset: online options and row owners (see UpgradeSelection.start); closes itself when done
+# Snake that survived the last round (0 = nobody): its element picks the upgrade screen's quote
+var last_round_winner = 0
+
 func open_upgrade_screen(time_limit, preset = {}):
 	var layer = CanvasLayer.new()
 	layer.layer = 5 # Above the HUD, below the pause menu
@@ -322,6 +366,8 @@ func open_upgrade_screen(time_limit, preset = {}):
 		layer.queue_free())
 	upgrade_screen = screen
 	screen.start([], time_limit, preset)
+	if Global.show_quotes:
+		screen.show_wisdom(last_round_winner)
 	return screen
 
 func _on_upgrade_selected(player_id, upgrade_id):

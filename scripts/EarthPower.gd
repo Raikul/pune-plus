@@ -1,7 +1,7 @@
 class_name EarthPower extends Power
 
 @export var fissure_scene: PackedScene
-@export var duration: float = 2.0
+@export var duration: float = 1.2
 
 @onready var timer: Timer = $Timer
 @onready var hulk_sound: AudioStreamPlayer = $Hulk
@@ -14,30 +14,31 @@ func activate() -> void:
 	# (The trail used to turn invisible here, but it was still solid: snakes died on
 	# walls they couldn't see)
 	player.set_invincible(true)
+	player.set_head_visible(false)
 
-	# 2. Agrandar colisión (2.0x por defecto o lo que diga la consola/stats)
-	var scale_mult: float = 2.0
+	var dur: float = duration
 	if player.stats != null:
-		scale_mult = player.stats.get_stat("earth.scale")
-	player.set_earth_collision_scale(scale_mult)
+		dur = player.stats.get_stat("earth.duration")
 
-	# 3. Fisuras y sonido
+	# 2. Rocky path: its width grows with earth.scale (Tectonic Bulk); it lasts as long
+	# as the invincibility
+	player.rock_time = dur
+	player.on_fresh_path = true
 	if fissure_scene:
 		player.start_fissure(1, fissure_scene)
+	# The first rock needs a physics frame before the head overlaps it: no trail meanwhile
+	player.gap_delta_sum = 0.0
 
 	if hulk_sound:
 		hulk_sound.play()
 	
-	var dur: float = duration
-	if player.stats != null:
-		dur = player.stats.get_stat("earth.duration")
 	timer.start(dur)
 	activated.emit()
 
 func _on_timer_timeout() -> void:
 	# Vuelve al tamaño normal y quita invencibilidad
 	player.set_invincible(false)
-	player.reset_earth_collision_scale()
+	player.set_head_visible(true)
 	finished.emit()
 
 func is_active() -> bool:

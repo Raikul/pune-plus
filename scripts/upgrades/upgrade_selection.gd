@@ -25,6 +25,10 @@ var rows_box
 var footer_label
 var signal_label
 var timer_label
+var subtitle_label
+var quote_box
+var quote_label
+var quote_source
 
 func _ready():
 	_build_layout()
@@ -70,6 +74,18 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 
 	footer_label.text = "Left / Right to browse   |   Punchy to confirm"
 	signal_label.text = ""
+
+# winner_id: the snake that won the last round (0 = nobody); its element picks the quote
+func show_wisdom(winner_id):
+	if not is_node_ready():
+		await ready
+	var quote = Wisdom.for_winner(winner_id)
+	quote_label.text = "“%s”" % quote.text
+	quote_label.add_theme_color_override("font_color",
+		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4] else Color(0.9, 0.9, 0.9))
+	quote_source.text = "— " + quote.source
+	quote_box.show()
+	subtitle_label.hide()
 
 # Online: another machine picked for this snake
 func remote_pick(player_id, upgrade_id):
@@ -181,8 +197,23 @@ func _build_layout():
 	layout.add_theme_constant_override("separation", 10)
 	margin.add_child(layout)
 
-	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 60, Color.WHITE))
-	layout.add_child(_centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6)))
+	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 56, Color.WHITE))
+	subtitle_label = _centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6))
+	layout.add_child(subtitle_label)
+	# Wise words for the element that won the last round (show_wisdom)
+	quote_box = VBoxContainer.new()
+	quote_box.add_theme_constant_override("separation", 6)
+	quote_box.hide()
+	layout.add_child(quote_box)
+	quote_label = _centered_label("", 28, Color.WHITE)
+	quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	quote_box.add_child(quote_label)
+	quote_source = _centered_label("", 18, Color(0.55, 0.55, 0.55))
+	quote_box.add_child(quote_source)
+	# Breathing room between the quote and the cards
+	var quote_gap = Control.new()
+	quote_gap.custom_minimum_size = Vector2(0, 22)
+	quote_box.add_child(quote_gap)
 
 	rows_box = VBoxContainer.new()
 	rows_box.size_flags_vertical = Control.SIZE_EXPAND_FILL

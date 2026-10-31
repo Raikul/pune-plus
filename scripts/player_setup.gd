@@ -23,7 +23,61 @@ func _ready():
 	P2Box.set_ai_status(Global.AI_Enabled[2])
 	P3Box.set_ai_status(Global.AI_Enabled[3])
 	P4Box.set_ai_status(Global.AI_Enabled[4])	
+	_polish_cards()
 	_build_match_options()
+	# Borders start hidden (nobody selected yet)
+	for id in [1, 2, 3, 4]:
+		activatePlayer(get("player%dActive" % id), [P1Box, P2Box, P3Box, P4Box][id - 1], Global.playerColors[id])
+
+# Look tweaks on the four player cards (individual_player_setup.tscn)
+const SETUP_ACCENT = Color(1, 0.6, 0.15)
+func _polish_cards():
+	for id in [1, 2, 3, 4]:
+		var box = [P1Box, P2Box, P3Box, P4Box][id - 1]
+		var element_color = Color(Global.playerColors[id])
+		# Element name: centered in its header, which gets a thin line in the element color
+		var header = box.get_node("PanelContainer2/PanelContainer/MarginContainer2/PanelContainer")
+		var name_label = header.get_node("Label")
+		name_label.text = name_label.text.strip_edges()
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		name_label.add_theme_constant_override("line_spacing", 0)
+		header.custom_minimum_size.y = 76
+		var header_style = StyleBoxFlat.new()
+		header_style.bg_color = Color(0.2, 0.2, 0.2)
+		header_style.set_corner_radius_all(15)
+		header_style.border_color = element_color
+		header_style.border_width_bottom = 4
+		header.add_theme_stylebox_override("panel", header_style)
+		# PUNCHI key: no black plate behind the key name, like Left and Right
+		var punchi_plate = box.get_node("InputList/Up/MarginContainer/PanelContainer")
+		punchi_plate.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		punchi_plate.self_modulate = Color.WHITE
+
+# Rounded dark pill buttons with an orange outline when focused
+func _pill_button(text_size, min_width):
+	var button = Button.new()
+	button.custom_minimum_size = Vector2(min_width, 72)
+	button.add_theme_font_size_override("font_size", text_size)
+	var styles = {"normal": Color(0.2, 0.2, 0.2), "hover": Color(0.27, 0.27, 0.27), "pressed": Color(0.32, 0.32, 0.32)}
+	for state in styles:
+		var style = StyleBoxFlat.new()
+		style.bg_color = styles[state]
+		style.set_corner_radius_all(16)
+		style.content_margin_left = 30
+		style.content_margin_right = 30
+		button.add_theme_stylebox_override(state, style)
+	var focus = StyleBoxFlat.new()
+	focus.draw_center = false
+	focus.border_color = SETUP_ACCENT
+	focus.set_border_width_all(3)
+	focus.set_corner_radius_all(16)
+	button.add_theme_stylebox_override("focus", focus)
+	button.add_theme_color_override("font_color", Color(0.92, 0.92, 0.92))
+	button.add_theme_color_override("font_hover_color", SETUP_ACCENT)
+	button.add_theme_color_override("font_focus_color", SETUP_ACCENT)
+	button.add_theme_color_override("font_pressed_color", SETUP_ACCENT)
+	return button
 	
 
 func recalculate_all_labels():
@@ -56,8 +110,19 @@ func _on_p_4on_pressed():
 
 func activatePlayer(active, playerBox, color):
 #	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
+	# Selected: the card takes a light tint of the element color (a full tint made its
+	# text hard to read) and a glowing border in that color
+	var card = playerBox.get_node("PanelContainer2")
+	var style = card.get_theme_stylebox("panel").duplicate()
+	if style is StyleBoxFlat:
+		# Same width on every card (invisible when not selected), so the columns stay aligned
+		style.border_color = Color(Color(color), 1.0 if active else 0.0)
+		style.set_border_width_all(4)
+		style.shadow_color = Color(Color(color), 0.35 if active else 0.0)
+		style.shadow_size = 14 if active else 0
+		card.add_theme_stylebox_override("panel", style)
 	if active:
-		playerBox.modulate = color
+		playerBox.modulate = Color.WHITE.lerp(Color(color), 0.45)
 #		playerBox.get_node("TextureRect").modulate = color
 		playerBox.get_node("VBoxContainer/Select").text = "Deselect"
 	else :
@@ -209,19 +274,30 @@ var team_buttons = {}
 
 func _build_match_options():
 	var row = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2
-	row.add_theme_constant_override("separation", 60)
-	mode_button = Button.new()
+	row.add_theme_constant_override("separation", 40)
+	# Some room above and below the row
+	var options_box = row.get_parent()
+	var spacer_top = Control.new()
+	spacer_top.custom_minimum_size.y = 24
+	options_box.add_child(spacer_top)
+	options_box.move_child(spacer_top, row.get_index())
+	mode_button = _pill_button(34, 460)
 	mode_button.pressed.connect(_toggle_teams)
 	row.add_child(mode_button)
-	points_button = Button.new()
+	points_button = _pill_button(34, 460)
 	points_button.pressed.connect(_cycle_points)
 	row.add_child(points_button)
+	# The warning goes under the row, so it doesn't push the buttons off center
 	options_warning = Label.new()
+	options_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	options_warning.add_theme_font_size_override("font_size", 28)
 	options_warning.add_theme_color_override("font_color", Color(1, 0.4, 0.3))
-	row.add_child(options_warning)
+	options_box.add_child(options_warning)
+	options_box.move_child(options_warning, row.get_index() + 1)
 	for id in [1, 2, 3, 4]:
 		var box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer.get_node(str(id))
-		var team_button = Button.new()
+		var team_button = _pill_button(28, 0)
+		team_button.custom_minimum_size.y = 56
 		team_button.pressed.connect(_toggle_team.bind(id))
 		box.add_child(team_button)
 		team_buttons[id] = team_button

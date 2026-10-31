@@ -58,6 +58,12 @@ func _draw():
 			_draw_wide_body(center)
 		"stone_walk":
 			_draw_stone_walk(center)
+		"phoenix":
+			_draw_phoenix(center)
+		"shock":
+			_draw_shock(center, false)
+		"scramble":
+			_draw_shock(center, true)
 		"extra_copy":
 			var split = 0.5 + 0.5 * sin(time * 2.5)
 			var offset = Vector2(size.x * 0.22 * split, 0)
@@ -194,6 +200,48 @@ func _draw_stone_walk(center):
 		Color(1, 1, 1, 1.0 - 0.6 * crossing))
 	draw_set_transform(Vector2.ZERO)
 	_draw_symbol(AIR_EARTH_SYMBOL, Vector2(x, center.y), size.x * 0.32, true)
+
+# Fire symbol burns down to an ember and bursts back
+func _draw_phoenix(center):
+	var cycle = fmod(time, 2.4) / 2.4
+	if cycle < 0.35:
+		_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, false, 1.0 - cycle / 0.35)
+	elif cycle < 0.75:
+		var pulse = 0.5 + 0.5 * sin(time * 9.0)
+		draw_circle(center, 6.0 + 3.0 * pulse, Color(1, 0.6, 0.15, 0.9))
+		draw_arc(center, 20.0, -PI / 2, -PI / 2 + TAU * (cycle - 0.35) / 0.4, 32, Color(1, 0.5, 0.1), 3.0, true)
+	else:
+		var burst = (cycle - 0.75) / 0.25
+		draw_circle(center, size.x * 0.4 * burst, Color(1, 0.55, 0.1, 0.4 * (1.0 - burst)))
+		_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, false, burst)
+
+# A bolt hits a head, which crackles; the Scrambler swaps its arrows too
+func _draw_shock(center, scramble):
+	var head = center + Vector2(size.x * 0.18, 0)
+	var flash = 0.5 + 0.5 * sin(time * 30.0)
+	var from = Vector2(4, 10)
+	var points = PackedVector2Array([from])
+	for i in range(1, 5):
+		points.append(from.lerp(head, i / 5.0) + Vector2(0, (8 if i % 2 == 0 else -8)))
+	points.append(head)
+	draw_polyline(points, Color(0.55, 0.85, 1.0, 0.6), 6.0, true)
+	draw_polyline(points, Color(1, 1, 1, 0.6 + 0.4 * flash), 2.0, true)
+	draw_circle(head, 12.0, Color(color, 0.9))
+	for i in 3:
+		var angle = time * 5.0 + i * TAU / 3.0
+		var a = head + Vector2.RIGHT.rotated(angle) * 15.0
+		var b = head + Vector2.RIGHT.rotated(angle + 0.7) * 24.0
+		draw_line(a, b, Color(0.7, 0.95, 1.0, flash), 2.0, true)
+	if scramble:
+		var swap = 0.5 + 0.5 * sin(time * 3.0)
+		var y = size.y * 0.85
+		var left = lerp(center.x - 24.0, center.x + 24.0, swap)
+		var right = lerp(center.x + 24.0, center.x - 24.0, swap)
+		# Left arrow and right arrow trading places
+		draw_colored_polygon(PackedVector2Array([Vector2(left - 8, y), Vector2(left + 6, y - 9), Vector2(left + 6, y + 9)]), Color.WHITE)
+		draw_colored_polygon(PackedVector2Array([Vector2(right + 8, y), Vector2(right - 6, y - 9), Vector2(right - 6, y + 9)]), Color.WHITE)
+	else:
+		_draw_text("5s", size.y * 0.95, 24)
 
 func _draw_symbol(texture, pos, width, flipped, alpha = 1.0, stretch = Vector2.ONE):
 	var height = width * texture.get_height() / float(texture.get_width())

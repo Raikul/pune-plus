@@ -81,6 +81,7 @@ func register_player(player):
 		player.body_laid.connect(_on_local_body_laid.bind(player_id))
 		player.power_used.connect(_on_local_power_used.bind(player_id))
 		player.twin_spawned.connect(_on_local_twin_spawned.bind(player_id))
+		player.phoenix_changed.connect(_on_local_phoenix.bind(player_id))
 		return
 	remote_snakes[player_id] = _new_remote_snake(player, Color(Global.playerColors[player_id]))
 
@@ -125,7 +126,7 @@ func _send_state(local, final = false):
 	for segment in local_segments[player_id].slice(-SEGMENT_REDUNDANCY):
 		recent.append_array(segment)
 	snake_state.rpc(round_id, player_id, sequences[player_id], SteamNet.net_time(), local.global_position,
-		local.rotation, local.steer_direction, 0.0 if final else local.speed, local.gap, recent)
+		local.rotation, local.steer_direction, 0.0 if final or local.reviving else local.speed, local.gap, recent)
 
 func _on_local_body_laid(body_position, body_rotation, player_id):
 	var segments = local_segments[player_id]
@@ -173,6 +174,43 @@ func _on_local_power_used(recast, player_id):
 	if not _online():
 		return
 	power_event.rpc(round_id, player_id, recast)
+
+# Phoenix: our fire snake turned to ash (frozen and hidden everywhere) or rose again
+func _on_local_phoenix(rising, player_id):
+	if not _online():
+		return
+	var player = players.get(player_id)
+	if not rising:
+		_send_state(player, true)
+	phoenix_event.rpc(round_id, player_id, rising, player.global_position, player.rotation)
+
+@rpc("any_peer", "call_remote", "reliable")
+func phoenix_event(event_round, player_id, rising, point, heading):
+	if not _online():
+		return
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if event_round != round_id or SteamNet.peer_for_slot(player_id) != sender:
+		return
+	var player = players.get(player_id)
+	var snake = remote_snakes.get(player_id)
+	if player == null or not is_instance_valid(player) or snake == null or not player.main_power is FirePower:
+		return
+	if rising:
+		# Predict it again from where it rose
+		snake.dead = false
+		snake.state_position = point
+		snake.state_rotation = heading
+		snake.direction = 0
+		snake.speed = player.speed
+		snake.sent_at = SteamNet.net_time()
+		snake.position_offset = Vector2.ZERO
+		snake.rotation_offset = 0.0
+		snake.newest_segment_position = null
+	else:
+		_stop_snake(player_id)
+	player.main_power.remote_phoenix(rising, point, heading)
 
 # Our snake died on our screen: send its last trail and let the host decide what that means
 func report_death(player_id):
@@ -282,7 +320,7 @@ func twin_state(state_round, player_id, serial, state_sequence, sent_at, state_p
 		var twin = player.spawn_remote_twin()
 		twin.global_position = state_position
 		twin.rotation = state_rotation
-		snake = _new_remote_snake(twin, Color.AQUA)
+		snake = _new_remote_snake(twin, twin.GHOST_COLOR)
 		snake.serial = serial
 		remote_twins[key] = snake
 	if not is_instance_valid(snake.player):

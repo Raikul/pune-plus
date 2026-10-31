@@ -19,8 +19,14 @@ const MAX_PLAYERS = 4
 const LOBBY_GAME_KEY = "game"
 const LOBBY_GAME_VALUE = "pune_plus"
 const LAN_PORT = 7531
-const LOBBY_TYPE_FRIENDS_ONLY = 1
 const LOBBY_TYPE_PUBLIC = 2
+# Invisible lobbies don't show in friends lists but searches still find them: private
+# lobbies use it so they can be joined by code (the public list filters them out)
+const LOBBY_TYPE_INVISIBLE = 3
+const LOBBY_CODE_KEY = "code"
+const LOBBY_PRIVATE_KEY = "private"
+const LOBBY_CODE_LENGTH = 6
+const LOBBY_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" # No 0/O or 1/I
 const LOBBY_COMPARISON_EQUAL = 0
 const LOBBY_DISTANCE_WORLDWIDE = 3
 const STEAM_RESULT_OK = 1
@@ -33,6 +39,12 @@ var steam_ready = false
 var steam_status = "Steam not available"
 var persona_name = "Player"
 var lobby_id = 0
+# The lobby's join code ("" when not in a Steam lobby)
+var lobby_code = ""
+# Private lobbies aren't listed; hosting uses this, and the host can change it later
+var lobby_private = false
+# Code being searched for by join_by_code ("" for a normal lobby list)
+var searching_code = ""
 var is_lan = false
 # slot (element 1-4) -> {"peer": peer id that runs the snake, "name": String,
 # "ai": bool, "keys": which Player{N} input actions steer it on its machine (0 = AI)}.
@@ -158,13 +170,47 @@ func roster_peers():
 
 #region Hosting and joining
 
-func host_lobby(public = false):
+func host_lobby():
 	if not steam_ready:
 		_set_status(steam_status)
 		return
+	var make_private = lobby_private
 	leave()
+	lobby_private = make_private
 	_set_status("Creating lobby...")
-	steam.createLobby(LOBBY_TYPE_PUBLIC if public else LOBBY_TYPE_FRIENDS_ONLY, MAX_PLAYERS)
+	steam.createLobby(_lobby_type(), MAX_PLAYERS)
+
+func _lobby_type():
+	return LOBBY_TYPE_INVISIBLE if lobby_private else LOBBY_TYPE_PUBLIC
+
+# Before hosting it picks the type of the next lobby; the host can also change it live
+func set_lobby_private(make_private):
+	lobby_private = make_private
+	if steam_ready and lobby_id != 0 and is_host():
+		steam.setLobbyType(lobby_id, _lobby_type())
+		steam.setLobbyData(lobby_id, LOBBY_PRIVATE_KEY, "1" if lobby_private else "0")
+	roster_changed.emit()
+
+func _new_lobby_code():
+	var code = ""
+	for i in LOBBY_CODE_LENGTH:
+		code += LOBBY_CODE_CHARS[randi() % LOBBY_CODE_CHARS.length()]
+	return code
+
+func join_by_code(code):
+	code = code.strip_edges().to_upper()
+	if code.length() != LOBBY_CODE_LENGTH:
+		_set_status("Lobby codes have %d letters and numbers" % LOBBY_CODE_LENGTH)
+		return
+	if not steam_ready:
+		_set_status(steam_status)
+		return
+	searching_code = code
+	_set_status("Looking for lobby " + code + "...")
+	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListStringFilter(LOBBY_CODE_KEY, code, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
+	steam.requestLobbyList()
 
 func _on_lobby_created(result, new_lobby_id):
 	if result != STEAM_RESULT_OK:
@@ -173,6 +219,9 @@ func _on_lobby_created(result, new_lobby_id):
 	lobby_id = new_lobby_id
 	steam.setLobbyData(lobby_id, LOBBY_GAME_KEY, LOBBY_GAME_VALUE)
 	steam.setLobbyData(lobby_id, "name", persona_name + "'s Pune")
+	lobby_code = _new_lobby_code()
+	steam.setLobbyData(lobby_id, LOBBY_CODE_KEY, lobby_code)
+	steam.setLobbyData(lobby_id, LOBBY_PRIVATE_KEY, "1" if lobby_private else "0")
 	var peer = _new_steam_peer()
 	var error = peer.host_with_lobby(lobby_id)
 	if error != OK:
@@ -195,6 +244,8 @@ func _on_lobby_joined(joined_lobby, _permissions, _locked, response):
 		_set_status("Could not join lobby (" + str(response) + ")")
 		return
 	lobby_id = joined_lobby
+	lobby_code = steam.getLobbyData(lobby_id, LOBBY_CODE_KEY)
+	lobby_private = steam.getLobbyData(lobby_id, LOBBY_PRIVATE_KEY) == "1"
 	# The owner already hosts through _on_lobby_created
 	if steam.getLobbyOwner(lobby_id) == steam.getSteamID():
 		return
@@ -217,12 +268,22 @@ func find_lobbies():
 	if not steam_ready:
 		_set_status(steam_status)
 		return
+	searching_code = ""
 	_set_status("Searching lobbies...")
 	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListStringFilter(LOBBY_PRIVATE_KEY, "0", LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
 	steam.requestLobbyList()
 
 func _on_lobby_match_list(lobbies):
+	if searching_code != "":
+		var code = searching_code
+		searching_code = ""
+		if lobbies.is_empty():
+			_set_status("No lobby with code " + code)
+		else:
+			join_lobby(lobbies[0])
+		return
 	var found = []
 	for id in lobbies:
 		found.append({
@@ -268,6 +329,8 @@ func leave():
 	if steam_ready and lobby_id != 0:
 		steam.leaveLobby(lobby_id)
 	lobby_id = 0
+	lobby_code = ""
+	lobby_private = false
 	is_lan = false
 	clock_offset = 0.0
 	clock_samples.clear()

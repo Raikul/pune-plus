@@ -7,7 +7,8 @@ var _fissure_step: = 1
 var delta_sum : float = 0
 var next_created := false
 var fissure_gap := 0.1
-var maximum_step_number := 8
+var maximum_step_number := 8 # Set by the player from Earth's duration (Player.start_fissure)
+const BODY_TEXTURES = 8 # cuerpo_1..8.png
 var available_bodies : Array
 var available_ends : Array
 signal fissure_ready(step)
@@ -66,10 +67,7 @@ func _physics_process(delta: float) -> void:
 
 func set_body(fissure_step: int, body_list = []) -> Array:
 	if fissure_step == 1:
-		var index = 1
-		while index < maximum_step_number:
-			available_bodies.append(index)
-			index += 1
+		available_bodies = range(1, BODY_TEXTURES + 1)
 		#index = 0
 		#while index < 4:
 			#available_ends.append(index)
@@ -86,6 +84,9 @@ func set_body(fissure_step: int, body_list = []) -> Array:
 		if fissure_step == 1:
 			$FissureBody.set_flip_v(true)
 	else: 
+		# Long paths use every rock once, then start over
+		if available_bodies.is_empty():
+			available_bodies = range(1, BODY_TEXTURES + 1)
 		var random_body = available_bodies[randi_range(0,available_bodies.size() - 1)]
 		available_bodies.erase(random_body)
 		$FissureBody.texture = load(texture_path + "cuerpo_" + str(random_body) + ".png")

@@ -457,7 +457,7 @@ script = ExtResource("12_ihapt")
 
 [node name="Collider" type="CollisionShape2D" parent="Colliders/LimitRight" unique_id=1288661645]
 position = Vector2(7, 455)
-rotation = -1.56936
+rotation = -1.5708
 scale = Vector2(0.790066, 1.23849)
 shape = SubResource("RectangleShape2D_c1ycn")
 
@@ -621,4 +621,3 @@ visible = false
 
 [editable path="Lesson"]
 [editable path="PauseLayer/Instrucciones"]
-[editable path="PauseLayer/Options"]

@@ -188,6 +188,8 @@ const SETTINGS_PATH = "user://settings.cfg"
 
 func _ready():
 	load_settings()
+	apply_volumes()
+	apply_video_settings()
 
 func load_settings() -> void:
 	var config = ConfigFile.new()
@@ -201,6 +203,13 @@ func load_settings() -> void:
 	teams = config.get_value("match", "teams", teams)
 	player_team = config.get_value("match", "player_team", player_team)
 	points_to_win = config.get_value("match", "points_to_win", points_to_win)
+	vsync = config.get_value("video", "vsync", vsync)
+	max_fps = config.get_value("video", "max_fps", max_fps)
+	show_fps = config.get_value("video", "show_fps", show_fps)
+	for bus in volumes:
+		volumes[bus] = config.get_value("audio", bus.to_lower(), volumes[bus])
+	upgrade_time = config.get_value("game", "upgrade_time", upgrade_time)
+	show_quotes = config.get_value("game", "show_quotes", show_quotes)
 
 func save_settings() -> void:
 	var config = ConfigFile.new()
@@ -212,7 +221,55 @@ func save_settings() -> void:
 	config.set_value("match", "teams", teams)
 	config.set_value("match", "player_team", player_team)
 	config.set_value("match", "points_to_win", points_to_win)
+	config.set_value("video", "vsync", vsync)
+	config.set_value("video", "max_fps", max_fps)
+	config.set_value("video", "show_fps", show_fps)
+	for bus in volumes:
+		config.set_value("audio", bus.to_lower(), volumes[bus])
+	config.set_value("game", "upgrade_time", upgrade_time)
+	config.set_value("game", "show_quotes", show_quotes)
 	config.save(SETTINGS_PATH)
+
+# --- Options screen settings (scripts/options.gd) ---
+var vsync = true
+var max_fps = 0 # 0 = no limit
+const MAX_FPS_OPTIONS = [0, 60, 120, 144, 240]
+var show_fps = false
+# Linear volume (0-1) per audio bus
+var volumes = {"Master": 0.75, "Music": 0.68, "Effects": 1.0}
+# Seconds to pick an upgrade between rounds (online the host's value is used)
+var upgrade_time = 10.0
+const UPGRADE_TIME_OPTIONS = [5.0, 10.0, 15.0, 20.0, 30.0]
+# Wise quote at the top of the upgrade screen
+var show_quotes = true
+var fps_label: Label
+
+func apply_video_settings() -> void:
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = max_fps
+	if show_fps and fps_label == null:
+		var layer = CanvasLayer.new()
+		layer.layer = 100
+		fps_label = Label.new()
+		fps_label.position = Vector2(12, 8)
+		fps_label.add_theme_font_size_override("font_size", 22)
+		fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		fps_label.add_theme_constant_override("outline_size", 6)
+		layer.add_child(fps_label)
+		add_child(layer)
+	if fps_label:
+		fps_label.get_parent().visible = show_fps
+
+func apply_volumes() -> void:
+	for bus in volumes:
+		var index = AudioServer.get_bus_index(bus)
+		if index >= 0:
+			AudioServer.set_bus_volume_db(index, linear_to_db(volumes[bus]))
+			AudioServer.set_bus_mute(index, volumes[bus] <= 0.001)
+
+func _process(_delta):
+	if fps_label and show_fps:
+		fps_label.text = "%d FPS" % Engine.get_frames_per_second()
 
 func reset_score():
 	player1Score = 0

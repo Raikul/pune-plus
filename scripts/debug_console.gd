@@ -14,8 +14,8 @@ var btn_air_warp: Button
 
 var current_speed: float = 150.0
 var current_cooldown: float = 6.0
-var current_earth: float = 2.0
-var current_earth_scale: float = 2.0
+var current_earth: float = 1.2
+var current_earth_scale: float = 1.0
 var current_fire_radius: float = 1.0
 var current_fire_dur: float = 2.5 # 0 = sin límite
 var current_gap: float = 0.7
@@ -118,9 +118,9 @@ func crear_interfaz_botones() -> void:
 	)
 
 	# Fila 7: TIERRA TAMAÑO COLISIÓN
-	label_earth_scale = crear_fila(vbox, "Tierra Tamaño: 2.00x", 
-		func(): cambiar_stat("earth.scale", -0.5), 
-		func(): cambiar_stat("earth.scale", 0.5)
+	label_earth_scale = crear_fila(vbox, "Tierra Rocas: 1.00x", 
+		func(): cambiar_stat("earth.scale", -0.25), 
+		func(): cambiar_stat("earth.scale", 0.25)
 	)
 
 	# Fila 8: FUEGO RADIO
@@ -156,8 +156,8 @@ func crear_interfaz_botones() -> void:
 	btn_reset.pressed.connect(func():
 		current_speed = 150.0
 		current_cooldown = 6.0
-		current_earth = 2.0
-		current_earth_scale = 2.0
+		current_earth = 1.2
+		current_earth_scale = 1.0
 		current_fire_radius = 1.0
 		current_fire_dur = 2.5
 		current_gap = Global.gap_time()
@@ -170,8 +170,8 @@ func crear_interfaz_botones() -> void:
 		aplicar_stat_directo("water.copies", 1.0)
 		aplicar_stat_directo("speed", 150.0)
 		aplicar_stat_directo("cooldown", 6.0)
-		aplicar_stat_directo("earth.duration", 2.0)
-		aplicar_stat_directo("earth.scale", 2.0)
+		aplicar_stat_directo("earth.duration", 1.2)
+		aplicar_stat_directo("earth.scale", 1.0)
 		aplicar_stat_directo("fire.radius", 1.0)
 		aplicar_stat_directo("fire.duration", 2.5)
 		aplicar_stat_directo("gap.time", current_gap)
@@ -242,7 +242,7 @@ func cambiar_stat(tipo: String, delta: float) -> void:
 			current_earth = clamp(current_earth + delta, 0.5, 15.0)
 			aplicar_stat_directo("earth.duration", current_earth)
 		"earth.scale":
-			current_earth_scale = clamp(current_earth_scale + delta, 1.0, 5.0)
+			current_earth_scale = clamp(current_earth_scale + delta, 0.5, 3.0)
 			aplicar_stat_directo("earth.scale", current_earth_scale)
 		"fire.radius":
 			current_fire_radius = clamp(current_fire_radius + delta, 0.25, 4.0)
@@ -259,7 +259,7 @@ func actualizar_textos() -> void:
 	if label_speed: label_speed.text = "Velocidad: %d" % int(current_speed)
 	if label_cooldown: label_cooldown.text = "Cooldown: %.1fs" % current_cooldown
 	if label_earth: label_earth.text = "Tierra Dur: %.1fs" % current_earth
-	if label_earth_scale: label_earth_scale.text = "Tierra Tamaño: %.2fx" % current_earth_scale
+	if label_earth_scale: label_earth_scale.text = "Tierra Rocas: %.2fx" % current_earth_scale
 	if label_fire_radius: label_fire_radius.text = "Fuego Radio: %.2fx" % current_fire_radius
 	if label_fire_dur: label_fire_dur.text = "Fuego Vuelo: sin límite" if current_fire_dur <= 0 else "Fuego Vuelo: %.1fs" % current_fire_dur
 	if label_gap: label_gap.text = "Hueco Estela: %.2fs" % current_gap

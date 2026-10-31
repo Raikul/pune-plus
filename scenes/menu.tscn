@@ -361,4 +361,3 @@ offset_bottom = -221.0
 [connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
 [connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]
 
-[editable path="CanvasLayer/Options"]
