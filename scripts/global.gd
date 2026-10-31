@@ -55,6 +55,13 @@ var player_stats: Dictionary = {
 	4: null
 }
 
+# Duración de los huecos de la estela según la opción Gap Size (Options > Gameplay)
+func gap_time() -> float:
+	match gapSize:
+		0: return 0.4
+		2: return 1.0
+		_: return 0.7
+
 func reset_all_player_stats() -> void:
 	for id in [1, 2, 3, 4]:
 		player_stats[id] = PlayerStats.new()

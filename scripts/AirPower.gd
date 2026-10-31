@@ -15,19 +15,16 @@ func is_recast_ready() -> bool:
 	return double_jump_enabled and recast_active
 
 func execute_recast() -> void:
-	print(">>> [AIRE] ¡SEGUNDO SALTO EJECUTADO CON ÉXITO!")
 	recast_active = false
 	realizar_salto()
 
 func activate() -> void:
-	print(">>> [AIRE] SALTO 1. ¿Doble salto encendido?: ", double_jump_enabled)
 	realizar_salto()
 
 	if double_jump_enabled:
 		recast_active = true
 		get_tree().create_timer(1.0).timeout.connect(func():
 			if recast_active:
-				print(">>> [AIRE] Se terminó el tiempo de 1s para el segundo salto.")
 				recast_active = false
 		)
 

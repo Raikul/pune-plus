@@ -161,7 +161,8 @@ func _on_gapTimer_timeout():
 	
 func _on_gapFrequencyTimer_timeout():
 	gap = true
-	var dur = 0.6
+	# Corregido: sin stats se usa el hueco de la opción Gap Size (antes quedaba fijo en 0.6)
+	var dur = gapTimer.wait_time
 	if stats != null:
 		dur = stats.get_stat("gap.time")
 	gapTimer.start(max(dur, 0.05))
@@ -252,23 +253,7 @@ func spawn_projectile(scene: PackedScene) -> Node2D:
 	sceneInstance.rotation = rotation
 
 	# Vital: registrar en listOfNodes para no suicidarse con su propio proyectil
-	listOfNodes.append(sceneInstance)
-	if listOfNodes.size() == 1:
-		sceneInstance.rotation = rotation + PI
-	if listOfNodes.size() > 4:
-		listOfNodes.pop_front()
-
-
-	sceneInstance.set_as_top_level(true)
-	sceneInstance.global_position = global_position
-#
-#	var bodySprite = sceneInstance.get_node("BodySprite")
-#	bodySprite.set_texture(head_texture)
-#	bodySprite.modulate = head_modulate
-
-#	sceneInstance.apply_scale(get_scale())
-	sceneInstance.rotation = rotation
-	
+	# Corregido: se agregaba dos veces y sacaba de la lista dos segmentos propios
 	listOfNodes.append(sceneInstance)
 	if listOfNodes.size() == 1:
 		sceneInstance.rotation = rotation + PI
@@ -439,13 +424,7 @@ func powerReady(_prevColor):
 	$ElementHeadSprite.modulate = Color.WHITE
 
 func set_gap_size():
-	match Global.gapSize:
-		0:
-			gapTimer.set_wait_time(0.4)
-		1:
-			gapTimer.set_wait_time(0.7)
-		2:
-			gapTimer.set_wait_time(1)
+	gapTimer.set_wait_time(Global.gap_time())
 func set_earth_collision_scale(mult: float) -> void:
 	if has_node("CollisionShape2D"):
 		$CollisionShape2D.scale = orig_col_scale * mult

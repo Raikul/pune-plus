@@ -12,16 +12,21 @@ var btn_air_double: Button
 var btn_water_triple: Button
 
 var current_speed: float = 150.0
-var current_cooldown: float = 5.0
+var current_cooldown: float = 6.0
 var current_earth: float = 2.0
 var current_earth_scale: float = 2.0
 var current_fire_radius: float = 1.0
-var current_fire_dur: float = 2.0
-var current_gap: float = 0.6
+var current_fire_dur: float = 0.0 # 0 = sin límite
+var current_gap: float = 0.7
 var air_double_enabled: bool = false
 var water_triple_enabled: bool = false
 
 func _ready():
+	# Corregido: la consola es solo para pruebas, no viene en el juego exportado
+	if not OS.is_debug_build():
+		queue_free()
+		return
+	current_gap = Global.gap_time()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 128
 	visible = false
@@ -57,13 +62,13 @@ func crear_interfaz_botones() -> void:
 	)
 
 	# Fila 2: COOLDOWN
-	label_cooldown = crear_fila(vbox, "Cooldown: 5.0s", 
+	label_cooldown = crear_fila(vbox, "Cooldown: 6.0s", 
 		func(): cambiar_stat("cooldown", -0.5), 
 		func(): cambiar_stat("cooldown", 0.5)
 	)
 
 	# Fila 3: HUECO DE ESTELA (GAP)
-	label_gap = crear_fila(vbox, "Hueco Estela: 0.60s", 
+	label_gap = crear_fila(vbox, "Hueco Estela: %.2fs" % current_gap, 
 		func(): cambiar_stat("gap.time", -0.15), 
 		func(): cambiar_stat("gap.time", 0.15)
 	)
@@ -109,7 +114,7 @@ func crear_interfaz_botones() -> void:
 	)
 
 	# Fila 9: FUEGO DURACIÓN EN EL AIRE
-	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: 2.0s", 
+	label_fire_dur = crear_fila(vbox, "Fuego Vuelo: sin límite", 
 		func(): cambiar_stat("fire.duration", -0.5), 
 		func(): cambiar_stat("fire.duration", 0.5)
 	)
@@ -134,23 +139,23 @@ func crear_interfaz_botones() -> void:
 	btn_reset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn_reset.pressed.connect(func():
 		current_speed = 150.0
-		current_cooldown = 5.0
+		current_cooldown = 6.0
 		current_earth = 2.0
 		current_earth_scale = 2.0
 		current_fire_radius = 1.0
-		current_fire_dur = 2.0
-		current_gap = 0.6
+		current_fire_dur = 0.0
+		current_gap = Global.gap_time()
 		air_double_enabled = false
 		water_triple_enabled = false
 		AirPower.double_jump_enabled = false
 		WaterPower.extra_clone_enabled = false
 		aplicar_stat_directo("speed", 150.0)
-		aplicar_stat_directo("cooldown", 5.0)
+		aplicar_stat_directo("cooldown", 6.0)
 		aplicar_stat_directo("earth.duration", 2.0)
 		aplicar_stat_directo("earth.scale", 2.0)
 		aplicar_stat_directo("fire.radius", 1.0)
-		aplicar_stat_directo("fire.duration", 2.0)
-		aplicar_stat_directo("gap.time", 0.6)
+		aplicar_stat_directo("fire.duration", 0.0)
+		aplicar_stat_directo("gap.time", current_gap)
 		actualizar_boton_aire()
 		actualizar_boton_agua()
 		actualizar_textos()
@@ -218,7 +223,7 @@ func cambiar_stat(tipo: String, delta: float) -> void:
 			current_fire_radius = clamp(current_fire_radius + delta, 0.25, 4.0)
 			aplicar_stat_directo("fire.radius", current_fire_radius)
 		"fire.duration":
-			current_fire_dur = clamp(current_fire_dur + delta, 0.5, 10.0)
+			current_fire_dur = clamp(current_fire_dur + delta, 0.0, 10.0)
 			aplicar_stat_directo("fire.duration", current_fire_dur)
 		"gap.time":
 			current_gap = clamp(current_gap + delta, 0.1, 2.0)
@@ -231,12 +236,15 @@ func actualizar_textos() -> void:
 	if label_earth: label_earth.text = "Tierra Dur: %.1fs" % current_earth
 	if label_earth_scale: label_earth_scale.text = "Tierra Tamaño: %.2fx" % current_earth_scale
 	if label_fire_radius: label_fire_radius.text = "Fuego Radio: %.2fx" % current_fire_radius
-	if label_fire_dur: label_fire_dur.text = "Fuego Vuelo: %.1fs" % current_fire_dur
+	if label_fire_dur: label_fire_dur.text = "Fuego Vuelo: sin límite" if current_fire_dur <= 0 else "Fuego Vuelo: %.1fs" % current_fire_dur
 	if label_gap: label_gap.text = "Hueco Estela: %.2fs" % current_gap
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_QUOTELEFT or event.keycode == KEY_ASCIITILDE or event.unicode == 96:
+			# Corregido: en online cada máquina tendría reglas distintas, así que no se abre
+			if Global.isMultiplayerActive:
+				return
 			visible = !visible
 			get_viewport().set_input_as_handled()
 
