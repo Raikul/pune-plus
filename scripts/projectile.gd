@@ -14,6 +14,7 @@ func _ready():
 #	colorRect = $"../ColorRect/Collider"
 #	bodyTimer.connect("timeout", _on_bodyTimer_timeout)
 #	gapTimer.connect("timeout", _on_gapTimer_timeout)
+	add_to_group("fireballs")
 	screen_size = get_viewport_rect().size
 	scale = Vector2(1,1)
 #	$Meteor.rotate(rotation - PI/2)
@@ -60,6 +61,12 @@ func _on_area_entered(area):
 	# away. Freeing a twin head would also free its whole trail (the segments are its children);
 	# the twin may already have died of this same hit, so the check is "twins", not "twinHeads".
 	if area.is_in_group("activePlayers") or area.is_in_group("twins") or area.is_in_group("limits") or area.is_in_group("Fissures"):
+		# End-screen stats: Earth's rock stopped it (counted on the shooter's machine only)
+		var shooter = get_parent()
+		if area.is_in_group("Fissures") and "net_remote" in shooter and not shooter.net_remote:
+			var earth = Fissure.owner_of(area)
+			if earth != null:
+				Global.add_stat(earth.playerId, "earth_blocked")
 		set_process(false)
 		expire()
 	else:

@@ -45,6 +45,8 @@ func realizar_salto() -> void:
 	if reticle:
 		player.global_position = reticle.global_position
 	var parts = _jump_parts(start, player.global_position)
+	if player.teleport_wrapped and not player.net_remote:
+		Global.add_stat(player.playerId, "air_warps")
 	PowerFx.lightning(player.get_parent(), parts, Color(Global.playerColors[player.playerId]))
 	_shock_heads(parts)
 
@@ -86,7 +88,8 @@ func _shock_heads(parts: Array) -> void:
 				PowerFx.lightning(player.get_parent(), [[closest, other.global_position]], player.SHOCK_COLOR)
 				# Only the snake's own machine decides (remote copies just show it)
 				if not other.net_remote:
-					other.shock(SHOCK_TIME, scramble)
+					other.shock(SHOCK_TIME, scramble, player.playerId)
+					Global.add_stat(player.playerId, "air_shocks")
 				else:
 					other.shock_visual(SHOCK_TIME)
 				break

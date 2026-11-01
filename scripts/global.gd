@@ -70,6 +70,34 @@ func reset_all_player_stats() -> void:
 		player_stats[id] = PlayerStats.new()
 	player_stats_reset.emit()
 
+## What each snake did this match, for the end screen (scripts/match_stats_screen.gd):
+## {player_id: {stat: amount}}. Online every machine only counts what it decides (its own
+## snakes, deaths it sees first) and the machines add theirs up at the end
+## (NetSession.send_stats), so nothing is counted twice.
+var match_stats = {}
+
+func reset_match_stats() -> void:
+	match_stats = {1: {}, 2: {}, 3: {}, 4: {}}
+
+func add_stat(player_id, stat, amount = 1) -> void:
+	if not match_stats.has(player_id):
+		match_stats[player_id] = {}
+	match_stats[player_id][stat] = match_stats[player_id].get(stat, 0) + amount
+
+# Several machines' match_stats added up
+static func sum_stats(sources: Array) -> Dictionary:
+	var total = {}
+	for source in sources:
+		for player_id in source:
+			if not total.has(player_id):
+				total[player_id] = {}
+			for stat in source[player_id]:
+				total[player_id][stat] = total[player_id].get(stat, 0) + source[player_id][stat]
+	return total
+
+## Leaving a match's end screen with "Quit" opens the menu right at player setup
+var open_player_setup = false
+
 # Window mode chosen in Options (index of WindowMode.WINDOW_MODE_ARRAY) and the window
 # size for the windowed modes (index of RESOLUTIONS). Saved in the settings file.
 var window_mode = 3 # Borderless Full-Screen

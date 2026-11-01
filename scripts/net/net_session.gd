@@ -566,6 +566,89 @@ func _on_peer_left(_peer_id, slots):
 		Global.set("player" + str(slot) + "Active", false)
 		if multiplayer.is_server():
 			_host_player_died(slot)
+	if multiplayer.is_server():
+		_host_check_end_votes()
+
+#endregion
+
+#region End of the match: stats and rematch
+# Each machine counted what it decided (Global.match_stats); at game over they all send
+# theirs and add up everyone's. On the stats screen each machine's players pick REMATCH or
+# QUIT; once every machine confirmed, the host starts a rematch if everybody wants one,
+# otherwise everyone goes back to the lobby.
+
+signal stats_received
+signal end_choice_received(slot, rematch)
+var peer_stats = {}   # peer id -> that machine's Global.match_stats
+var end_choices = {}  # slot -> rematch, picks made on other machines
+var end_votes = {}    # Host: peer id -> {slot: rematch}, once that machine confirmed
+
+func send_stats():
+	if _online():
+		stats_shared.rpc(Global.match_stats)
+
+@rpc("any_peer", "call_remote", "reliable")
+func stats_shared(stats):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	peer_stats[sender] = stats
+	stats_received.emit()
+
+func send_end_choice(slot, rematch):
+	if _online() and is_local(slot):
+		end_choice.rpc(slot, rematch)
+
+@rpc("any_peer", "call_remote", "reliable")
+func end_choice(slot, rematch):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if SteamNet.peer_for_slot(slot) != sender:
+		return
+	end_choices[slot] = rematch
+	end_choice_received.emit(slot, rematch)
+
+# This machine's players are done: their final picks go to the host
+func confirm_end(choices):
+	if not _online():
+		return
+	if multiplayer.is_server():
+		_host_end_confirmed(1, choices)
+	else:
+		end_confirmed.rpc_id(1, choices)
+
+@rpc("any_peer", "call_remote", "reliable")
+func end_confirmed(choices):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if multiplayer.is_server():
+		_host_end_confirmed(sender, choices)
+
+func _host_end_confirmed(peer_id, choices):
+	end_votes[peer_id] = choices
+	_host_check_end_votes()
+
+func _host_check_end_votes():
+	if end_votes.is_empty() or not _online():
+		return
+	var peers = SteamNet.roster_peers()
+	if not peers.all(func(peer_id): return end_votes.has(peer_id)):
+		return
+	var rematch = SteamNet.roster.size() >= 2
+	for peer_id in peers:
+		for wants_more in end_votes[peer_id].values():
+			rematch = rematch and wants_more
+	end_votes.clear()
+	if rematch:
+		SteamNet.start_match()
+	else:
+		back_to_lobby.rpc()
+
+@rpc("authority", "call_local", "reliable")
+func back_to_lobby():
+	SteamNet.return_to_lobby()
 
 #endregion
 

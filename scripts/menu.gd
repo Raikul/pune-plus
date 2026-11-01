@@ -25,7 +25,10 @@ func _ready():
 		Global.apply_window_mode()
 	get_tree().paused = false
 	play_button.grab_focus.call_deferred()
-	pass
+	# "Quit" on a match's end screen: back to player setup, ready for another one
+	if Global.open_player_setup:
+		Global.open_player_setup = false
+		_on_play_pressed()
 
 func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()

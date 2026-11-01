@@ -42,6 +42,7 @@ const TELEPORT_WALL_MARGIN = 40.0
 var shocked_time = 0.0
 var scrambled_time = 0.0
 var scrambled_age = 0.0
+var scrambled_by = 0 # The Air snake that scrambled it (end-screen stats)
 # Seconds after Air's teleport in which only walls can kill it (no dying on the spot
 # it left or landed on)
 var teleport_grace = 0.0
@@ -237,6 +238,7 @@ func _physics_process(delta):
 		var body = createBody(snakeBodyScene)
 		_extend_trail(body)
 		gap_delta_sum = 0
+		Global.add_stat(playerId, "length", TRAIL_SPACING)
 		body_laid.emit(body.global_position, body.rotation)
 
 ## Distance between trail pieces (what 0.05 s at the base speed used to give)
@@ -276,10 +278,20 @@ func _on_area_entered(area):
 				return
 
 			# Muerte normal
+			_credit_death(area)
 			$CollisionShape2D.set_deferred("disabled", true)
 			$Split.play()
 			set_process(false)
 			emit_signal("dead")
+
+# End-screen stats: a rival's fireball, or dying while a rival Air had it scrambled
+func _credit_death(cause):
+	if cause.is_in_group("fireballs"):
+		var shooter = cause.get_parent()
+		if shooter != self and "playerId" in shooter:
+			Global.add_stat(shooter.playerId, "fire_kills")
+	if scrambled_time > 0 and scrambled_by != 0 and scrambled_by != playerId:
+		Global.add_stat(scrambled_by, "air_scramble_kills")
 
 # Online: lay a segment of a remote snake where its owner laid it
 func create_body_at(body_position, body_rotation):
@@ -421,6 +433,7 @@ func try_use_power() -> void:
 	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
 		main_power.execute_recast()
 		power_used.emit(true)
+		Global.add_stat(playerId, "powers")
 		return
 
 	# 2. Si está en cooldown normal y no hay segundo salto, no hace nada:
@@ -435,6 +448,7 @@ func try_use_power() -> void:
 	if main_power != null:
 		main_power.activate()
 	power_used.emit(false)
+	Global.add_stat(playerId, "powers")
 
 	if stats != null:
 		for entry in stats.active_buffs.values():
@@ -482,8 +496,8 @@ func update_power_indicator():
 
 # Air's Static Shock went through this snake's head. Every machine runs it on its own
 # copy of the snake (Air's jump is replayed everywhere); only the owner's matters.
-# scramble: seconds with left and right swapped (0 = none)
-func shock(duration, scramble = 0.0):
+# scramble: seconds with left and right swapped (0 = none); by: the Air snake that did it
+func shock(duration, scramble = 0.0, by = 0):
 	if not is_in_group("alivePlayers") or reviving:
 		return
 	var parent = get_parent()
@@ -493,6 +507,7 @@ func shock(duration, scramble = 0.0):
 	if scramble > 0:
 		scrambled_time = max(scrambled_time, scramble)
 		scrambled_age = 0.0
+		scrambled_by = by
 	update_power_indicator()
 
 # Online: a snake run by another machine; its owner applies the effect, we only show it

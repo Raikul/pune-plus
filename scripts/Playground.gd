@@ -23,6 +23,7 @@ var teams_mode = false
 func _ready():
 	# Every match starts without upgrades; they build up round after round
 	Global.reset_all_player_stats()
+	Global.reset_match_stats()
 	RNG = RandomNumberGenerator.new()
 	player_scene = preload("res://scenes/player.tscn")
 	groupColliders()
@@ -63,7 +64,8 @@ func _ready():
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
 	$HUD.set_target(Global.scoreToReach)
 	
-func _process(_delta):
+func _process(delta):
+	_count_dead_time(delta)
 	#pause_menu_input()
 	#exit_menu_input()
 	#if Input.is_key_pressed(KEY_ESCAPE):
@@ -90,6 +92,17 @@ func exit_menu_input() -> void:
 			$ExitButton.show()
 			get_tree().paused = true
 
+
+# End-screen stats: seconds each snake spends dead (or as a Phoenix ember) while the
+# round goes on. Online each machine counts its own snakes.
+func _count_dead_time(delta):
+	if not time_flowing:
+		return
+	for player in get_tree().get_nodes_in_group("activePlayers"):
+		if net_session and not net_session.is_local(player.playerId):
+			continue
+		if not player.is_in_group("alivePlayers") or player.reviving:
+			Global.add_stat(player.playerId, "dead_time", delta)
 
 func set_cooldowns_ui():
 	if is_instance_valid(get_tree()):
@@ -382,6 +395,8 @@ func finishGame(playerId):
 		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
+	if net_session:
+		net_session.send_stats()
 	# Let the final moment (last crash, last point on the scoreboard) sink in first
 	await get_tree().create_timer(FINAL_RESULT_TIME, false).timeout
 	if not is_inside_tree():
@@ -396,6 +411,97 @@ func finishGame(playerId):
 		$Lesson.improvise("Player "+str(playerId)+" Wins", arena)
 	$Lesson.show()
 	$Victory.play()
+	winners = _winners(playerId)
+	_start_celebration()
+	$Lesson.closed.connect(_show_match_stats, CONNECT_ONE_SHOT)
+
+# --- End of the match: victory lap, stats, rematch ---
+
+var winners = []
+var celebration: Celebration
+var stats_screen: MatchStatsScreen
+
+func _active_ids():
+	return [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id))
+
+# The winning snake, or the whole winning team
+func _winners(player_id):
+	if not teams_mode:
+		return [player_id]
+	return _active_ids().filter(func(id): return Global.team_of(id) == Global.team_of(player_id))
+
+# Who's behind a snake, for the end screens. input_id: the Player{N} keys that steer it on
+# this machine (0 = an AI, or a snake of another machine)
+func _end_info(player_id):
+	var entry = {"name": "Player %d" % player_id, "input_id": player_id, "ai": Global.AI_Enabled[player_id]}
+	if net_session:
+		var slot = SteamNet.roster.get(player_id, {})
+		entry.name = slot.get("name", entry.name)
+		entry.ai = slot.get("ai", false)
+		entry.input_id = net_session.input_id_for(player_id)
+	if entry.ai:
+		entry.input_id = 0
+		if not net_session:
+			entry.name = "AI"
+	return entry
+
+# The winners take a lap behind the win screen's text (scripts/celebration.gd)
+func _start_celebration():
+	var backdrop = $Lesson/DopamineContainer/Dopamine
+	backdrop.clip_contents = true
+	celebration = Celebration.new()
+	backdrop.add_child(celebration)
+	backdrop.move_child(celebration, 0) # Under the text
+	celebration.setup(winners.map(func(id): return {"id": id, "input_id": _end_info(id).input_id}))
+
+func _show_match_stats():
+	$Lesson.hide()
+	if is_instance_valid(celebration):
+		celebration.queue_free()
+	var layer = CanvasLayer.new()
+	layer.layer = 6 # Above the HUD and upgrade screen, below the pause menu
+	add_child(layer)
+	stats_screen = MatchStatsScreen.new()
+	layer.add_child(stats_screen)
+	var ids = _active_ids()
+	if teams_mode:
+		ids.sort_custom(func(a, b): return Global.team_of(a) < Global.team_of(b))
+	var info = {}
+	for id in ids:
+		info[id] = _end_info(id)
+	stats_screen.setup(ids, winners, match_stats_totals(), info)
+	stats_screen.confirmed.connect(_on_stats_confirmed)
+	if net_session:
+		stats_screen.choice_changed.connect(net_session.send_end_choice)
+		net_session.end_choice_received.connect(stats_screen.set_choice)
+		net_session.stats_received.connect(func(): stats_screen.set_totals(match_stats_totals()))
+		# Picks other machines made before this screen opened
+		for slot in net_session.end_choices:
+			stats_screen.set_choice(slot, net_session.end_choices[slot])
+
+# Every machine's counts added up (offline just this one's)
+func match_stats_totals():
+	if net_session:
+		return Global.sum_stats([Global.match_stats] + net_session.peer_stats.values())
+	return Global.match_stats
+
+# Everyone on REMATCH plays again with the same snakes and rules; anything else goes back
+# to the lobby. Online the host decides once every machine confirmed (NetSession).
+func _on_stats_confirmed(choices):
+	if net_session:
+		var mine = {}
+		for id in choices:
+			if net_session.is_local(id):
+				mine[id] = choices[id]
+		net_session.confirm_end(mine)
+		stats_screen.show_waiting()
+		return
+	if choices.values().all(func(rematch): return rematch):
+		Global.reset_score()
+		get_tree().change_scene_to_file("res://scenes/Playground.tscn")
+	else:
+		Global.open_player_setup = true
+		get_tree().change_scene_to_file("res://scenes/menu.tscn")
 	
 func stopTime():
 	time_flowing = false

@@ -221,6 +221,11 @@ func _on_area_entered(area):
 #	if area.playerId == null or area.playerId != 4:
 		if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
 	#		if area.is_in_group("activePlayers"):
+			# End-screen stats: crashed on Earth's rock
+			if area.is_in_group("Fissures"):
+				var earth = Fissure.owner_of(area)
+				if earth != null:
+					Global.add_stat(earth.playerId, "earth_blocked")
 			$CollisionShape2D.set_deferred("disabled", true)
 			remove_from_group("twinHeads")
 			alive = false

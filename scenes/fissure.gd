@@ -40,6 +40,14 @@ func _add_wall() -> void:
 		area.add_child(shape)
 	add_child(area)
 
+# The Earth snake that laid this rock's collider (null if it's gone)
+static func owner_of(area: Area2D):
+	var fissure = area.get_parent()
+	var snake = fissure.get_parent() if fissure != null else null
+	if snake != null and is_instance_valid(snake) and "playerId" in snake:
+		return snake
+	return null
+
 static func _rock_outlines(texture) -> Array:
 	if _outlines.has(texture.resource_path):
 		return _outlines[texture.resource_path]

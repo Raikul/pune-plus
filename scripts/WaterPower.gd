@@ -47,6 +47,8 @@ func activate() -> void:
 			spawned.append(twin)
 	if spawned.is_empty():
 		return
+	if not player.net_remote:
+		Global.add_stat(player.playerId, "water_twins", spawned.size())
 
 	# The snake turns away from its twin while they split (straight between two twins)
 	player.locked_direction = -spawned.back().split_direction if spawned.size() == 1 else 0
@@ -82,6 +84,7 @@ func try_prevent_death() -> bool:
 	player.rotation = copy.rotation
 	# The twin's head goes, but its trail stays on the field
 	copy.absorb()
+	Global.add_stat(player.playerId, "water_saves")
 
 	finished.emit()
 	return true

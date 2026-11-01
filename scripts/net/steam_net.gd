@@ -543,6 +543,19 @@ func begin_match(final_roster, options = {}):
 	Global.online_random_spawns = options.get("random_spawns", false)
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
+# End of a match without a rematch: everyone stays connected and goes back to the lobby
+# screen, where the roster and options can change before the next one
+func return_to_lobby():
+	Global.isMultiplayerActive = false
+	if offline_ai != null:
+		Global.AI_Enabled = offline_ai
+		offline_ai = null
+	ready_peers.clear()
+	if steam_ready and lobby_id != 0 and multiplayer.is_server():
+		steam.setLobbyJoinable(lobby_id, true)
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/net/online_lobby.tscn")
+
 # Every peer calls this once its Playground is loaded. The host starts the first round when all are in.
 func report_scene_ready():
 	if multiplayer.is_server():

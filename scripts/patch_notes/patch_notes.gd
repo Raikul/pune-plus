@@ -13,6 +13,23 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.6.0",
+		"name": "Victory Lap",
+		"date": "2026-11-01",
+		"sections": [
+			["Win screen", [
+				"The winner takes a victory lap behind the win screen: steer your snake with Left and Right, it can't crash and wraps around the edges. In 2v2 the whole winning team gets a lap.",
+				"Each element shows off on the lap: Fire throws fireballs four ways every 2 seconds, Earth stays in rocky mode, Air zaps ahead every 1.5 seconds, and Water splits into three twins every 3 seconds, up to nine.",
+			]],
+			["Match stats", [
+				"After the win screen, a stats screen shows a column per snake: trail length, time spent dead and powers used.",
+				"Plus a stat or two per element: Fire's fireball kills, fireballs and twins stopped by Earth's rocks, Air's warps through the edge, enemies electrocuted and kills on scrambled foes, and Water's twins summoned and lives saved by a twin.",
+				"Each player picks REMATCH or QUIT with their own Left and Right (or the mouse); hold PUNCHI for 2 seconds to go on. If everyone wants a rematch, a new match starts right away with the same snakes and rules; otherwise it's back to the lobby.",
+				"Online the stats of every machine are added up, everyone sees the others' picks, and QUIT takes everyone back to the online lobby, still together.",
+			]],
+		],
+	},
+	{
 		"version": "0.5.1",
 		"name": "Twins & Takeovers",
 		"date": "2026-10-31",

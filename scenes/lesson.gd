@@ -7,13 +7,11 @@ var lessonText
 @onready var lessonTextBox = $PanelContainer/MarginContainer/LessonTextBox
 @onready var dopamineLabel = $DopamineContainer/Dopamine/DopamineLabel
 
-# Win screen: hold any PUNCHI (or Enter) to fill the ring and go back to the menu
+# Win screen: hold any PUNCHI (or Enter) to fill the ring and close it (closed: the
+# Playground shows the match stats next; without a listener it goes back to the menu)
 const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
-const HOLD_TIME = 1.2
-const RING_RADIUS = 22.0
-var hold = 0.0
-var armed = false # Keys held when the game ended must be released first
-var hold_ring
+var hold_ring: HoldRing
+signal closed
 
 func _ready():
 	_style_dopamine()
@@ -31,8 +29,8 @@ func improvise(improvisedText, area = Rect2()):
 		$DopamineContainer.size = area.size
 	else:
 		$DopamineContainer.global_position = (get_viewport_rect().size - $DopamineContainer.size) / 2
-	hold = 0.0
-	armed = false
+	hold_ring.reset()
+	set_process(true)
 #	$DopamineContainer/Dopamine/Winner
 func teach(type):
 	randomizeLesson(type)
@@ -80,9 +78,9 @@ func _style_dopamine():
 	prompt.offset_top = -130
 	prompt.offset_bottom = -70
 	$DopamineContainer/Dopamine.add_child(prompt)
-	hold_ring = Control.new()
-	hold_ring.custom_minimum_size = Vector2.ONE * (RING_RADIUS * 2 + 8)
-	hold_ring.draw.connect(_draw_ring)
+	hold_ring = HoldRing.new()
+	hold_ring.back_color = Color(winnerTextBox.get_theme_color("font_outline_color"), 0.35)
+	hold_ring.fill_color = winnerTextBox.get_theme_color("font_color")
 	prompt.add_child(hold_ring)
 	var hint = Label.new()
 	hint.text = "HOLD PUNCHI TO CONTINUE"
@@ -96,40 +94,15 @@ func _style_dopamine():
 	hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	prompt.add_child(hint)
 
-func _draw_ring():
-	var center = hold_ring.size / 2
-	var outline = winnerTextBox.get_theme_color("font_outline_color")
-	var fill = winnerTextBox.get_theme_color("font_color")
-	hold_ring.draw_circle(center, RING_RADIUS, Color(outline, 0.35))
-	hold_ring.draw_arc(center, RING_RADIUS, 0, TAU, 48, Color(1, 1, 1, 0.6), 3.0, true)
-	if hold > 0:
-		var t = hold / HOLD_TIME
-		hold_ring.draw_arc(center, RING_RADIUS, -PI / 2, -PI / 2 + TAU * t, 48, fill, 7.0, true)
-		hold_ring.draw_circle(center, RING_RADIUS * 0.45 * t, fill)
-
-func _hold_pressed() -> bool:
-	if Input.is_action_pressed("ui_accept"):
-		return true
-	for id in range(1, 5):
-		if Input.is_action_pressed("Player%dUp" % id):
-			return true
-	return false
-
 func _process(delta):
 	if not visible or not $DopamineContainer.visible:
 		return
-	var pressed = _hold_pressed()
-	if not armed:
-		armed = not pressed
-		return
-	if pressed:
-		hold = min(hold + delta, HOLD_TIME)
-	else:
-		hold = max(hold - delta * 2.0, 0.0)
-	hold_ring.queue_redraw()
-	if hold >= HOLD_TIME:
+	if hold_ring.advance(delta, HoldRing.punchi_pressed()):
 		set_process(false)
-		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		if closed.get_connections().is_empty():
+			get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		else:
+			closed.emit()
 
 func _input(event: InputEvent) -> void:
 	# The win screen only closes by holding (_process)
