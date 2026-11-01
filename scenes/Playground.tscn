@@ -120,10 +120,6 @@ grow_vertical = 2
 scale = Vector2(1.59795, 0.892334)
 color = Color(0.08, 0.08, 0.08, 1)
 
-[node name="Shroom" parent="." unique_id=612766281 instance=ExtResource("12_erhbx")]
-position = Vector2(937, 553)
-scale = Vector2(2, 2)
-
 [node name="Lesson" parent="." unique_id=1305694609 instance=ExtResource("10_tlq7d")]
 visible = false
 z_index = 10

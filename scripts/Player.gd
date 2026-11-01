@@ -229,10 +229,24 @@ func _physics_process(delta):
 	gap_delta_sum += delta
 	if on_fresh_path and not invincible and not _on_own_rock():
 		on_fresh_path = false
-	if not gap and not reviving and gap_delta_sum >= 0.05 and not on_fresh_path:
+	if gap or reviving or on_fresh_path:
+		# The stroke ends here; the next piece starts a new one
+		trail_tail = null
+	# Laid by distance, not time, so the trail is just as dense at any speed
+	elif trail_tail == null or not is_instance_valid(trail_tail) 			or global_position.distance_to(trail_tail.global_position) >= TRAIL_SPACING:
 		var body = createBody(snakeBodyScene)
+		_extend_trail(body)
 		gap_delta_sum = 0
 		body_laid.emit(body.global_position, body.rotation)
+
+## Distance between trail pieces (what 0.05 s at the base speed used to give)
+const TRAIL_SPACING = 7.5
+# The newest piece of the trail being laid (null at the start of a stroke)
+var trail_tail = null
+
+func _extend_trail(body):
+	body.link_to(trail_tail)
+	trail_tail = body
 
 func _on_area_entered(area):
 	# A remote snake's owner decides its deaths and pickups
@@ -272,6 +286,8 @@ func create_body_at(body_position, body_rotation):
 	var body = createBody(snakeBodyScene)
 	body.global_position = body_position
 	body.rotation = body_rotation
+	# Gaps aren't sent: pieces too far apart start a new stroke (TrailSegment.MAX_LINK)
+	_extend_trail(body)
 	return body
 
 # Online: the twin of a remote water snake, moved by NetSession
@@ -289,9 +305,13 @@ func createBody(scene):
 	sceneInstance.set_as_top_level(true)
 	sceneInstance.global_position = global_position
 	
-	var bodySprite = sceneInstance.get_node("BodySprite")
-	bodySprite.set_texture(head_texture)
-	bodySprite.modulate = head_modulate
+	if sceneInstance is TrailSegment:
+		# Drawn as a line in the snake's color (scripts/trail_segment.gd)
+		sceneInstance.modulate = head_modulate
+	else:
+		var bodySprite = sceneInstance.get_node("BodySprite")
+		bodySprite.set_texture(head_texture)
+		bodySprite.modulate = head_modulate
 
 	sceneInstance.apply_scale(get_scale())
 	sceneInstance.rotation = rotation

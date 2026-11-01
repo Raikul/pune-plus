@@ -33,7 +33,7 @@ No test suite; verify changes by headless runs (look for `ERROR`/`SCRIPT ERROR`)
 - Autoloads: `Global` (`scripts/global.gd`: active players, scores, AI flags, colors, options) and `LessonList` (quotes shown between rounds).
 - Flow: `scenes/menu.tscn` (`scripts/menu.gd`) → player setup (`scripts/player_setup.gd`, toggles players/AI, key remap via `redefine_keys`) → `scenes/Playground.tscn` (`scripts/Playground.gd`).
 - `Playground.gd`: spawns `player.tscn` per active player, wires `dead`/`score` signals, round restart, win at `scoreToReach` (= (players-1)*10, min 10), "simulate round" debug from pause menu (`scenes/menu_pause.gd`).
-- `Player.gd` (Area2D): snake head turning left/right, leaves `snake_body.tscn` segments every 0.05 s except during periodic gaps; collision with any non-own-recent segment = death. Each player id has a fixed elemental power on its "Up" key, with cooldown:
+- `Player.gd` (Area2D): snake head turning left/right, leaves `snake_body.tscn` segments (`scripts/trail_segment.gd`) every 7.5 px except during periodic gaps, each drawn as a rounded line to the previous one; collision with any non-own-recent segment = death. Each player id has a fixed elemental power on its "Up" key, with cooldown:
   1. Fire – `shoot()` fires `projectile.tscn` (`scripts/projectile.gd`) which deletes trail segments it hits.
   2. Earth – `hulk()`: temporary invincibility + spawns a chain of `fissure.tscn` segments (`scenes/fissure.gd`).
   3. Air – `teleport()` jumps to `DynamicTeleportNode` (point ahead, wrapped around the arena limits).

@@ -16,7 +16,7 @@ const MAX_EXTRAPOLATION = 0.5
 ## Corrections bigger than this (teleports) snap instead of sliding.
 const SNAP_DISTANCE = 120.0
 const CORRECTION_SPEED = 10.0
-const BRIDGE_WIDTH = 8.0
+const BRIDGE_WIDTH = TrailSegment.WIDTH
 # Water twin status in twin_state packets
 const TWIN_ALIVE = 0
 const TWIN_DEAD = 1 # Crashed: it stays where it died, with its trail

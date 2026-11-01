@@ -131,17 +131,16 @@ func _shed(segment):
 	if not is_instance_valid(segment):
 		return
 	var water_color = Color(Global.playerColors[get_parent().playerId])
-	var sprite = segment.get_node("BodySprite")
-	sprite.material = null
+	segment.material = null
+	segment.round_joints = true
 	_place_shed_marker(segment.global_position)
-	# White flash and a small pop (the sprite only, not the collider), then it settles
+	# White flash and a small pop (the drawn line only, not the collider), then it settles
 	# into the water color
 	segment.modulate = Color(1.6, 1.6, 1.6)
-	var base_scale = sprite.scale
-	sprite.scale = base_scale * 1.6
+	segment.thickness = 1.6
 	var tween = segment.create_tween()
 	tween.set_parallel()
-	tween.tween_property(sprite, "scale", base_scale, SHED_FADE)
+	tween.tween_property(segment, "thickness", 1.0, SHED_FADE)
 	tween.tween_property(segment, "modulate", water_color, SHED_FADE)
 	tween.chain()
 	# Once it looks like the water snake's own trail, it blocks it like one
@@ -153,15 +152,26 @@ func _on_gapTimer_timeout():
 func _on_bodyTimer_timeout():
 	if net_remote or not alive:
 		return
-	if not gap:
+	if gap:
+		trail_tail = null
+	else:
 		var body = createBody(snakeBodyScene)
+		_extend_trail(body)
 		body_laid.emit(body.global_position, body.rotation)
+
+# The newest piece of the ghost trail (null at the start of a stroke)
+var trail_tail = null
+
+func _extend_trail(body):
+	body.link_to(trail_tail)
+	trail_tail = body
 
 # Online: lay a segment of a remote twin where its owner laid it
 func create_body_at(body_position, body_rotation):
 	var body = createBody(snakeBodyScene)
 	body.global_position = body_position
 	body.rotation = body_rotation
+	_extend_trail(body)
 	return body
 
 func createBody(scene):
@@ -170,19 +180,14 @@ func createBody(scene):
 	snakeBody.set_as_top_level(true)
 	snakeBody.global_position = global_position
 
-	var bodySprite = snakeBody.get_node("BodySprite")
-	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
-#		if $HeadSprite != null:
-#	bodySprite.modulate = get_parent().get_node("HeadSprite").modulate
-
-#		snakeBody.transform.scaled(transform.get_scale())
 	snakeBody.apply_scale(transform.get_scale())
 	snakeBody.rotation = rotation
 
-#	$Sprite2D.set_offset(Vector2(100,100))}
 	snakeBody.add_to_group("TwinBodies")
+	# Drawn as a line (scripts/trail_segment.gd); see-through, so no overlapping joints
 	snakeBody.modulate = GHOST_COLOR
-	bodySprite.material = get_ghost_material()
+	snakeBody.material = get_ghost_material()
+	snakeBody.round_joints = false
 	snakeBody.collision_layer = 0b100
 #	print (snakeBody.collision_layer)
 	add_child(snakeBody)

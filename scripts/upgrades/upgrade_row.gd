@@ -202,7 +202,10 @@ func _build_header():
 	info.add_child(_label("Player " + str(player_id) + ("  (AI)" if is_ai else ""), 22, Color(0.7, 0.7, 0.7)))
 	info.add_child(_build_key_hints())
 	# What this snake already has (only a count for online rivals)
+	# Small and in one row (a snake has at most 7 different upgrades), so the header keeps
+	# its width and every row's cards line up
 	var badges = UpgradeBadges.new()
+	badges.icon_size = 30.0
 	info.add_child(badges)
 	badges.refresh(player_id, is_hidden)
 	return panel

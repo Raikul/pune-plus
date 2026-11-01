@@ -52,6 +52,7 @@ func _ready():
 	else:
 		Global.scoreToReach = max((active_ids.size() - 1) * 10, 10)
 	$HUD.setup_teams(teams_mode)
+	add_child(CursorFade.new())
 	if teams_mode:
 		var takeover = AiTakeover.new()
 		takeover.name = "AiTakeover"

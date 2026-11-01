@@ -45,7 +45,11 @@ func _ready():
 		row.add_child(tag)
 		row.move_child(tag, 0)
 		team_tags[id] = tag
+		# Two rows of small icons, no taller than the symbol, so a pile of upgrades
+		# never stretches the scoreboard off screen
 		var badges = UpgradeBadges.new()
+		badges.icon_size = 29.0
+		badges.columns = 4
 		badges.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(badges)
 		upgrade_badges[id] = badges

@@ -27,6 +27,12 @@ const RELEASES = [
 				"Died while your AI teammate is still alive? Hold PUNCHI for 1 second to take it over for the rest of the round. A faint ring around it fills while you hold.",
 				"The scoreboard groups each team into one card: both symbols side by side and a single team score.",
 			]],
+			["Look", [
+				"Trails are now smooth lines instead of a row of stamped dots, and they look the same at any speed: a faster snake no longer leaves a beaded, gappy trail.",
+				"Holes burned by a fireball end in clean rounded tips.",
+				"Upgrade icons are smaller and wrap into two rows on the scoreboard, so a late-game pile of upgrades no longer pushes the scoreboard or the upgrade screen off screen. If the upgrade screen still doesn't fit, it shrinks to fit.",
+				"The mouse pointer fades out after 2 seconds without moving during a match, and comes back as soon as you move it or pause.",
+			]],
 			["Match flow", [
 				"The first round starts with a 3, 2, 1 countdown, with every snake waiting in place.",
 				"When the match is won, the final moment stays on screen for 2 seconds before the win screen.",

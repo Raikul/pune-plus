@@ -185,17 +185,21 @@ func _build_layout():
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
 
-	var margin = MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 40)
 	margin.add_theme_constant_override("margin_right", 40)
 	margin.add_theme_constant_override("margin_top", 24)
 	margin.add_theme_constant_override("margin_bottom", 24)
 	add_child(margin)
 
-	var layout = VBoxContainer.new()
+	layout = VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 10)
 	margin.add_child(layout)
+	# Too much to fit (four snakes, long quote, small window): shrink it all instead of
+	# pushing cards and status off screen
+	layout.minimum_size_changed.connect(_fit_to_screen)
+	resized.connect(_fit_to_screen)
+	_fit_to_screen.call_deferred()
 
 	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 56, Color.WHITE))
 	subtitle_label = _centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6))
@@ -238,6 +242,19 @@ func _build_layout():
 	timer_label.pivot_offset = Vector2(70, 45)
 	timer_label.visible = false
 	add_child(timer_label)
+
+var margin
+var layout
+
+func _fit_to_screen():
+	if margin == null:
+		return
+	var padding = Vector2(80, 48)
+	var needed = layout.get_combined_minimum_size() + padding
+	var factor = min(1.0, size.x / needed.x, size.y / needed.y)
+	margin.scale = Vector2.ONE * factor
+	margin.position = Vector2.ZERO
+	margin.size = size / factor
 
 func _centered_label(text, font_size, font_color):
 	var label = Label.new()
