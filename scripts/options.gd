@@ -157,8 +157,8 @@ func _audio_page(page):
 
 func _gameplay_page(page):
 	_selector(page, "Gap size", GAP_SIZES, func(): return Global.gapSize, func(i): Global.gapSize = i)
-	var times = Global.UPGRADE_TIME_OPTIONS.map(func(t): return "%d s" % t)
-	_selector(page, "Upgrade pick time", times,
+	var times = Global.UPGRADE_TIME_OPTIONS.map(Global.upgrade_time_text)
+	_selector(page, "Upgrade pick time (offline)", times,
 		func(): return max(Global.UPGRADE_TIME_OPTIONS.find(Global.upgrade_time), 0),
 		func(i): Global.upgrade_time = Global.UPGRADE_TIME_OPTIONS[i])
 	_toggle(page, "Wisdom on the upgrade screen", func(): return Global.show_quotes, func(on): Global.show_quotes = on)

@@ -25,7 +25,7 @@ Branch: `ten_multiplayer`. Status: **draft**. Lobbies, round flow and snake move
 - Every machine joins with one snake in the lowest free element. Clicking an **Open** slot opens a menu: *Take slot* moves one of your snakes to that element, and *Add player here* / *Add my AI here* add one there.
 - Besides that menu, the **Add player (this keyboard)** button gives a machine another one for a second person on the same keyboard, and **Add AI player** adds an AI snake simulated on that machine (handy for testing with only two clients).
 - `keys` is the `Player{N}` input set that steers the snake *on its machine*. Each machine numbers its own people from 1, so the first person anywhere uses the Player 1 keys. AI snakes have `keys = 0`.
-- The lobby shows every local snake's keys and has a **Keys** button to rebind them (Left, Right, Punchy). Rebinding only changes this machine's `InputMap`, like the offline player setup, and isn't saved yet.
+- The lobby shows every local snake's keys and has a **Keys** button to rebind them (Left, Right, Punchi). Rebinding only changes this machine's `InputMap`, like the offline player setup, and isn't saved yet.
 - Owners can remove their extra snakes (never their last human one); the host can remove any AI. A peer that disconnects loses all its snakes, and mid-match the host counts them as dead.
 
 ## Netcode model: owner-authoritative heads + dead reckoning

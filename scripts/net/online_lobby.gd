@@ -10,7 +10,7 @@ const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Roun
 const ELEMENT_NAMES = ["", "FIRE", "EARTH", "AIR", "WATER"]
 const FAKE_LATENCIES = [0.0, 0.1, 0.2]
 const KEY_ACTIONS = ["Left", "Right", "Up"]
-const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchy"}
+const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchi"}
 const HIGHLIGHT = Color(0.91, 0.61, 0.17)
 
 var status_label
@@ -25,6 +25,8 @@ var start_button
 var upgrades_button
 var mode_button
 var points_button
+var upgrade_time_button
+var spawns_button
 var invite_button
 var latency_button
 var privacy_button
@@ -99,6 +101,11 @@ func _refresh_roster():
 	mode_button.text = "Mode: " + ("2v2 Teams" if options.get("teams", false) else "Free for all")
 	points_button.disabled = not host
 	points_button.text = "Points to win: " + Global.points_to_win_text(options.get("points_to_win", 0))
+	# Seconds each snake has to pick its upgrade (only matters with upgrades on)
+	upgrade_time_button.disabled = not host or not options.get("upgrades", false)
+	upgrade_time_button.text = "Upgrade time: %d s" % int(options.get("upgrade_time", Global.online_upgrade_time))
+	spawns_button.disabled = not host
+	spawns_button.text = "Spawns: " + ("Random" if options.get("random_spawns", false) else "Fixed")
 	var player_team = options.get("player_team", Global.player_team)
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
@@ -200,6 +207,15 @@ func _cycle_points():
 	Global.points_to_win = choices[(choices.find(Global.points_to_win) + 1) % choices.size()]
 	_match_options_edited()
 
+func _toggle_random_spawns():
+	Global.random_spawns = not Global.random_spawns
+	_match_options_edited()
+
+func _cycle_upgrade_time():
+	var choices = Global.ONLINE_UPGRADE_TIME_OPTIONS
+	Global.online_upgrade_time = choices[(choices.find(Global.online_upgrade_time) + 1) % choices.size()]
+	_match_options_edited()
+
 func _toggle_team(slot):
 	Global.player_team[slot] = 1 - Global.team_of(slot)
 	_match_options_edited()
@@ -264,7 +280,7 @@ func _build_layout():
 
 	var actions = VBoxContainer.new()
 	actions.custom_minimum_size.x = 420
-	actions.add_theme_constant_override("separation", 14)
+	actions.add_theme_constant_override("separation", 10)
 	columns.add_child(actions)
 	var host_button = _button("Host lobby", SteamNet.host_lobby)
 	actions.add_child(host_button)
@@ -283,9 +299,21 @@ func _build_layout():
 	actions.add_child(mode_button)
 	points_button = _button("Points to win: Auto", _cycle_points)
 	actions.add_child(points_button)
+	upgrade_time_button = _button("Upgrade time: 10 s", _cycle_upgrade_time)
+	actions.add_child(upgrade_time_button)
+	spawns_button = _button("Spawns: Fixed", _toggle_random_spawns)
+	actions.add_child(spawns_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))
+	# Twelve buttons: a bit smaller than the rest so the column fits on screen
+	for button in actions.get_children():
+		button.add_theme_font_size_override("font_size", 24)
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			var style = ui_theme.get_stylebox(state, "Button").duplicate()
+			style.content_margin_top = 9
+			style.content_margin_bottom = 9
+			button.add_theme_stylebox_override(state, style)
 
 	var players_box = VBoxContainer.new()
 	players_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -320,6 +348,9 @@ func _build_layout():
 		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(texts)
 		var name_label = _label("Open", 30, Color.WHITE)
+		# Long names and key lists shrink or wrap instead of pushing the buttons off screen
+		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		name_label.clip_text = true
 		texts.add_child(name_label)
 		var open_button = MenuButton.new()
 		open_button.text = "Open  -  choose..."
@@ -333,6 +364,7 @@ func _build_layout():
 		open_button.hide()
 		texts.add_child(open_button)
 		var keys_label = _label("", 22, Color(0.7, 0.7, 0.7))
+		keys_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		texts.add_child(keys_label)
 		var keys_button = _button("Keys", _start_rebind.bind(slot))
 		keys_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER

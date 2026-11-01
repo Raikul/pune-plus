@@ -92,7 +92,9 @@ func set_focused(focused):
 func set_dimmed(dimmed):
 	create_tween().tween_property(self, "modulate", Color(1, 1, 1, 0.35 if dimmed else 1.0), 0.25)
 
-func play_chosen():
+# show_text: the "+ Upgrade" text that floats up (it is top-level, so a hidden row's
+# transparency doesn't hide it)
+func play_chosen(show_text = true):
 	style.bg_color = player_color.darkened(0.55)
 	style.border_color = player_color.lightened(0.3)
 	style.shadow_color = Color(player_color, 0.75)
@@ -104,7 +106,8 @@ func play_chosen():
 	create_tween().tween_property(flash, "modulate:a", 0.0, 0.45)
 	scale = Vector2(1.2, 1.2)
 	_tween_scale(FOCUS_SCALE, 0.6).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	_float_text("+ " + upgrade.name)
+	if show_text:
+		_float_text("+ " + upgrade.name)
 
 # Text that rises from the card and fades out as pick confirmation
 func _float_text(text):

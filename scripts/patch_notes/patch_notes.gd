@@ -13,6 +13,38 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.5.1",
+		"name": "Twins & Takeovers",
+		"date": "2026-10-31",
+		"sections": [
+			["Water", [
+				"Water's twins were rebalanced. You start with one twin at a time: while it lives, the power can't be cast and doesn't go on cooldown.",
+				"Extra Twin now lets you keep up to 2 twins, summoned one per cast: cast, wait for the recharge, cast again.",
+				"New Epic upgrade, Twin Burst (needs Extra Twin): your power summons twins two at a time, up to your maximum.",
+				"New Legendary upgrade, Triplets (needs Twin Burst): keep up to 3 twins alive.",
+			]],
+			["2v2", [
+				"Died while your AI teammate is still alive? Hold PUNCHI for 1 second to take it over for the rest of the round. A faint ring around it fills while you hold.",
+				"The scoreboard groups each team into one card: both symbols side by side and a single team score.",
+			]],
+			["Match flow", [
+				"The first round starts with a 3, 2, 1 countdown, with every snake waiting in place.",
+				"When the match is won, the final moment stays on screen for 2 seconds before the win screen.",
+				"Online, the host can set the upgrade pick time in the lobby (10 seconds by default). Offline it now has its own setting in Options, with a new Off choice that is the default: no countdown, take your time.",
+				"New Spawns option (player setup and online lobby): Random puts the snakes anywhere in the arena each round, well apart from each other and the walls and facing roughly inwards. Every round then starts with a 2 second countdown so you can find yourself.",
+				"A bit more room between \"First to\" and the arena.",
+				"Punchi is now spelled with an \"i\" everywhere.",
+			]],
+			["Fixes", [
+				"The upgrade screen no longer breaks when a snake has no upgrades left to pick; its row shows \"Maxed out\".",
+				"Online, the \"+ Upgrade\" text no longer gives away the pick of a rival whose cards are hidden.",
+				"Online, another player's Air landing marker could appear frozen after a teleport. It now stays hidden.",
+				"Rows with fewer than three cards keep their status lined up with the others.",
+				"Online lobby: long player names and key lists no longer push the Keys, Team and Remove buttons off screen.",
+			]],
+		],
+	},
+	{
 		"version": "0.5.0",
 		"name": "Rarities & Wisdom",
 		"date": "2026-10-31",
@@ -205,8 +237,8 @@ const RELEASES = [
 		"note": "From the in-game changelog of the time.",
 		"sections": [
 			["Changes", [
-				"Upgraded Water Punchy.",
-				"Added a visual for Punchy ready.",
+				"Upgraded Water Punchi.",
+				"Added a visual for Punchi ready.",
 				"New logo, fonts and menu art.",
 			]],
 		],

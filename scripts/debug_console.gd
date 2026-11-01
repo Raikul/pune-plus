@@ -106,7 +106,8 @@ func crear_interfaz_botones() -> void:
 	actualizar_boton_agua()
 	btn_water_triple.pressed.connect(func():
 		water_triple_enabled = !water_triple_enabled
-		aplicar_stat_directo("water.copies", 2.0 if water_triple_enabled else 1.0)
+		aplicar_stat_directo("water.max_twins", 2.0 if water_triple_enabled else 1.0)
+		aplicar_stat_directo("water.twins_per_cast", 2.0 if water_triple_enabled else 1.0)
 		actualizar_boton_agua()
 	)
 	vbox.add_child(btn_water_triple)
@@ -167,7 +168,8 @@ func crear_interfaz_botones() -> void:
 		actualizar_boton_warp()
 		water_triple_enabled = false
 		aplicar_stat_directo("air.recast_window", 0.0)
-		aplicar_stat_directo("water.copies", 1.0)
+		aplicar_stat_directo("water.max_twins", 1.0)
+		aplicar_stat_directo("water.twins_per_cast", 1.0)
 		aplicar_stat_directo("speed", 150.0)
 		aplicar_stat_directo("cooldown", 6.0)
 		aplicar_stat_directo("earth.duration", 1.2)

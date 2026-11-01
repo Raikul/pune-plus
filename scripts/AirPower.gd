@@ -9,7 +9,7 @@ func setup(p: Node2D) -> void:
 	super.setup(p)
 	var reticle = player.get_node_or_null("DynamicTeleportNode")
 	if reticle:
-		reticle.show()
+		reticle.visible = not player.net_remote
 
 func is_recast_ready() -> bool:
 	return recast_active

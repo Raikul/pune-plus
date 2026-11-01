@@ -90,7 +90,8 @@ func _new_remote_snake(node, color):
 	snake.player = node
 	snake.state_position = node.global_position
 	snake.state_rotation = node.rotation
-	snake.speed = node.speed
+	# Still until its owner reports it moving (the first round waits for a countdown)
+	snake.speed = 0.0
 	snake.angular_speed = node.angular_speed
 	snake.sent_at = SteamNet.net_time()
 	snake.bridge = Line2D.new()
@@ -461,9 +462,7 @@ func upgrade_pick(event_round, slot, upgrade_id):
 func host_start_round():
 	if not _online():
 		return
-	var spawns = {}
-	for slot in SteamNet.roster:
-		spawns[slot] = playground.roll_spawn(slot)
+	var spawns = playground.roll_spawns(SteamNet.roster.keys())
 	start_round.rpc(round_id + 1, spawns)
 
 @rpc("authority", "call_local", "reliable")

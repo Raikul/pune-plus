@@ -131,6 +131,12 @@ const TEAM_COLORS = [Color(1.0, 0.55, 0.15), Color(0.45, 0.6, 1.0)]
 var online_teams = false
 var online_player_team = {1: 0, 2: 1, 3: 0, 4: 1}
 var online_points_to_win = 0
+# Random starting spots each round (spread out, away from walls, facing inwards)
+var random_spawns = false
+var online_random_spawns = false
+
+func random_spawns_enabled() -> bool:
+	return online_random_spawns if isMultiplayerActive else random_spawns
 
 func teams_enabled() -> bool:
 	return online_teams if isMultiplayerActive else teams
@@ -146,7 +152,8 @@ func points_to_win_text(points) -> String:
 
 # The options a host plays an online match with
 func match_options() -> Dictionary:
-	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win}
+	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win,
+		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns}
 
 func shrooms_enabled() -> bool:
 	return shrooms and not isMultiplayerActive
@@ -203,12 +210,15 @@ func load_settings() -> void:
 	teams = config.get_value("match", "teams", teams)
 	player_team = config.get_value("match", "player_team", player_team)
 	points_to_win = config.get_value("match", "points_to_win", points_to_win)
+	random_spawns = config.get_value("match", "random_spawns", random_spawns)
 	vsync = config.get_value("video", "vsync", vsync)
 	max_fps = config.get_value("video", "max_fps", max_fps)
 	show_fps = config.get_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		volumes[bus] = config.get_value("audio", bus.to_lower(), volumes[bus])
-	upgrade_time = config.get_value("game", "upgrade_time", upgrade_time)
+	# Own key for the offline limit, so it starts Off even where the old shared one was saved
+	upgrade_time = config.get_value("game", "offline_upgrade_time", upgrade_time)
+	online_upgrade_time = config.get_value("game", "upgrade_time", online_upgrade_time)
 	show_quotes = config.get_value("game", "show_quotes", show_quotes)
 
 func save_settings() -> void:
@@ -221,12 +231,14 @@ func save_settings() -> void:
 	config.set_value("match", "teams", teams)
 	config.set_value("match", "player_team", player_team)
 	config.set_value("match", "points_to_win", points_to_win)
+	config.set_value("match", "random_spawns", random_spawns)
 	config.set_value("video", "vsync", vsync)
 	config.set_value("video", "max_fps", max_fps)
 	config.set_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		config.set_value("audio", bus.to_lower(), volumes[bus])
-	config.set_value("game", "upgrade_time", upgrade_time)
+	config.set_value("game", "offline_upgrade_time", upgrade_time)
+	config.set_value("game", "upgrade_time", online_upgrade_time)
 	config.set_value("game", "show_quotes", show_quotes)
 	config.save(SETTINGS_PATH)
 
@@ -237,9 +249,16 @@ const MAX_FPS_OPTIONS = [0, 60, 120, 144, 240]
 var show_fps = false
 # Linear volume (0-1) per audio bus
 var volumes = {"Master": 0.75, "Music": 0.68, "Effects": 1.0}
-# Seconds to pick an upgrade between rounds (online the host's value is used)
-var upgrade_time = 10.0
-const UPGRADE_TIME_OPTIONS = [5.0, 10.0, 15.0, 20.0, 30.0]
+
+# Seconds to pick an upgrade. Offline it can be off (0 = no limit, the default);
+# online the host always sets a limit, so nobody waits forever on a rival
+var upgrade_time = 0.0
+const UPGRADE_TIME_OPTIONS = [0.0, 5.0, 10.0, 15.0, 20.0, 30.0]
+var online_upgrade_time = 10.0
+const ONLINE_UPGRADE_TIME_OPTIONS = [5.0, 10.0, 15.0, 20.0, 30.0]
+
+func upgrade_time_text(seconds) -> String:
+	return "Off" if seconds <= 0 else "%d s" % seconds
 # Wise quote at the top of the upgrade screen
 var show_quotes = true
 var fps_label: Label

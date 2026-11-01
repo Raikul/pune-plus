@@ -129,7 +129,7 @@ func _process(delta):
 		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 
-	if ai_enabled and powerAvailable: ai_punchy(direction)
+	if ai_enabled and powerAvailable: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
 	_update_shock(delta)
 	teleport_grace = max(teleport_grace - delta, 0.0)
@@ -155,7 +155,9 @@ func actualizarPuntoDeTransporte():
 		$DynamicTeleportNode.hide()
 		return
 	else:
-		$DynamicTeleportNode.show()
+		# Online, another machine's Air never shows it: our copy only places it when it
+		# jumps, so it would sit frozen where that jump landed
+		$DynamicTeleportNode.visible = not net_remote
 		# Shinier when Air can jump now (power ready or its free second jump), fainter
 		# while it recharges or is electrocuted
 		var second_jump = main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready()
@@ -363,6 +365,20 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 func set_invincible(state: bool) -> void:
 	invincible = state	
 
+# Start-of-match countdown: the snake waits in place, no trail, no power, no gap clock
+func set_frozen(state: bool) -> void:
+	set_process(not state)
+	set_physics_process(not state)
+	if state:
+		gapFrequencyTimer.stop()
+	else:
+		gapFrequencyTimer.start()
+
+# 2v2: a dead human teammate takes this AI snake over (AiTakeover) until the round ends
+func take_control(new_input_id) -> void:
+	ai_enabled = false
+	input_id = new_input_id
+
 # Earth hides its head while it lays the rocky path (the rocks are all you see)
 func set_head_visible(state: bool) -> void:
 	$HeadSprite.visible = state
@@ -390,6 +406,9 @@ func try_use_power() -> void:
 	# 2. Si está en cooldown normal y no hay segundo salto, no hace nada:
 	if not powerAvailable:
 		return
+	# Nothing to cast (Water with every twin already out): no cooldown, no sound
+	if main_power != null and not main_power.can_activate():
+		return
 	
 	powerCooldown()
 	
@@ -406,7 +425,7 @@ func try_use_power() -> void:
 func use_power():
 	if main_power != null:
 		main_power.activate()
-func ai_punchy(direction):
+func ai_punchi(direction):
 	if powerAvailable and main_power and main_power.ai_should_activate(direction):
 		try_use_power()
 func spawn_twin(scene: PackedScene) -> Node2D:

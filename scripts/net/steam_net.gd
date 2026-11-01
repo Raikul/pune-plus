@@ -540,6 +540,7 @@ func begin_match(final_roster, options = {}):
 	Global.online_teams = options.get("teams", false)
 	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1})
 	Global.online_points_to_win = options.get("points_to_win", 0)
+	Global.online_random_spawns = options.get("random_spawns", false)
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
 # Every peer calls this once its Playground is loaded. The host starts the first round when all are in.

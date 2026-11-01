@@ -161,11 +161,33 @@ const UPGRADES = [
 		"id": &"water_extra_copy",
 		"rarity": "rare",
 		"name": "Extra Twin",
-		"description": "Your power creates one more copy of your snake.",
+		"description": "Keep up to 2 twins alive. Cast again while your twin lives to summon another.",
 		"element": "water",
 		"icon": "extra_copy",
-		"stat_mods": {"water.copies": {"add": 1.0}},
+		"stat_mods": {"water.max_twins": {"add": 1.0}},
 		"max_stacks": 1,
+	},
+	{
+		"id": &"water_twin_burst",
+		"rarity": "epic",
+		"name": "Twin Burst",
+		"description": "Your power summons twins two at a time, up to your maximum.",
+		"element": "water",
+		"icon": "twin_burst",
+		"stat_mods": {"water.twins_per_cast": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"water_extra_copy",
+	},
+	{
+		"id": &"water_third_twin",
+		"rarity": "legendary",
+		"name": "Triplets",
+		"description": "Keep up to 3 twins alive.",
+		"element": "water",
+		"icon": "third_twin",
+		"stat_mods": {"water.max_twins": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"water_twin_burst",
 	},
 	{
 		"id": &"water_lasting_twin",
@@ -194,7 +216,8 @@ static func pool_for_player(player_id) -> Array:
 	return UPGRADES.filter(func(upgrade):
 		return (upgrade.element == "generic" or upgrade.element == element) \
 			and upgrade.get("enabled", true) \
-			and stacks_for(player_id, upgrade.id) < upgrade.get("max_stacks", 1) 			and (not upgrade.has("requires") or stacks_for(player_id, upgrade.requires) > 0))
+			and stacks_for(player_id, upgrade.id) < upgrade.get("max_stacks", 1) \
+			and (not upgrade.has("requires") or stacks_for(player_id, upgrade.requires) > 0))
 
 static func stacks_for(player_id, upgrade_id) -> int:
 	var stats = Global.player_stats.get(player_id)

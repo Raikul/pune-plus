@@ -12,7 +12,7 @@ const FIREBALL_FPS = 15.0
 const FIRE_WATER_SYMBOL = preload("res://assets/jorge-resources/Game Selection/Fire-Water symbol.png")
 const AIR_EARTH_SYMBOL = preload("res://assets/jorge-resources/Game Selection/Air-Earth symbol.png")
 const STONE_TEXTURE = preload("res://assets/jorge-resources/Powers/Earth/cuerpo_3.png")
-const PUNCHY_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
+const PUNCHI_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
 const COOLDOWN_CYCLE = 1.4
 
 var kind = ""
@@ -65,14 +65,22 @@ func _draw():
 		"scramble":
 			_draw_shock(center, true)
 		"extra_copy":
-			var split = 0.5 + 0.5 * sin(time * 2.5)
-			var offset = Vector2(size.x * 0.22 * split, 0)
-			_draw_symbol(FIRE_WATER_SYMBOL, center - offset, size.x * 0.42, true, 0.5)
-			_draw_symbol(FIRE_WATER_SYMBOL, center + offset, size.x * 0.42, true, 0.5)
-			_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, true)
-			_draw_text("+1", size.y * 0.95, 26)
+			_draw_twins(center, "2 MAX")
+		"twin_burst":
+			_draw_twins(center, "x2")
+		"third_twin":
+			_draw_twins(center, "3 MAX")
 		"lasting_twin":
 			_draw_lasting_twin()
+
+# Water symbols splitting from the middle one, with a caption
+func _draw_twins(center, caption):
+	var split = 0.5 + 0.5 * sin(time * 2.5)
+	var offset = Vector2(size.x * 0.22 * split, 0)
+	_draw_symbol(FIRE_WATER_SYMBOL, center - offset, size.x * 0.42, true, 0.5)
+	_draw_symbol(FIRE_WATER_SYMBOL, center + offset, size.x * 0.42, true, 0.5)
+	_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, true)
+	_draw_text(caption, size.y * 0.95, 26)
 
 # Draws one frame of the fireball sprite sheet flying to the right and returns where the ball is
 func _draw_fireball(pos, scale_mult) -> Vector2:
@@ -131,7 +139,7 @@ func _draw_speed(center):
 		var tip_x = size.x * 0.82 + i * 13 + fposmod(time * 30.0, 6.0)
 		draw_polyline([Vector2(tip_x - 9, center.y - 11), Vector2(tip_x, center.y), Vector2(tip_x - 9, center.y + 11)], Color.WHITE, 4)
 
-# Cooldown ring around the Punchy icon that refills quickly and pops when ready
+# Cooldown ring around the Punchi icon that refills quickly and pops when ready
 func _draw_cooldown(center):
 	var progress = fmod(time, COOLDOWN_CYCLE) / (COOLDOWN_CYCLE * 0.7)
 	var radius = size.y * 0.38
@@ -144,8 +152,8 @@ func _draw_cooldown(center):
 		draw_arc(center, radius, 0, TAU, 48, color.lightened(0.4), 8)
 		draw_arc(center, radius + 4 + burst * 14, 0, TAU, 48, Color(color, 1.0 - burst), 3)
 	var icon_height = radius * 1.2
-	var icon_width = icon_height * PUNCHY_ICON.get_width() / float(PUNCHY_ICON.get_height())
-	draw_texture_rect(PUNCHY_ICON, Rect2(center - Vector2(icon_width, icon_height) / 2, Vector2(icon_width, icon_height)), false)
+	var icon_width = icon_height * PUNCHI_ICON.get_width() / float(PUNCHI_ICON.get_height())
+	draw_texture_rect(PUNCHI_ICON, Rect2(center - Vector2(icon_width, icon_height) / 2, Vector2(icon_width, icon_height)), false)
 
 func _draw_wall_warp(center):
 	var span = size.x

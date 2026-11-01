@@ -269,6 +269,7 @@ func enable_player(player_id:int) -> void:
 
 var mode_button: Button
 var points_button: Button
+var spawns_button: Button
 var options_warning: Label
 var team_buttons = {}
 
@@ -287,6 +288,9 @@ func _build_match_options():
 	points_button = _pill_button(34, 460)
 	points_button.pressed.connect(_cycle_points)
 	row.add_child(points_button)
+	spawns_button = _pill_button(34, 460)
+	spawns_button.pressed.connect(_toggle_random_spawns)
+	row.add_child(spawns_button)
 	# The warning goes under the row, so it doesn't push the buttons off center
 	options_warning = Label.new()
 	options_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -314,6 +318,11 @@ func _cycle_points():
 	Global.save_settings()
 	_refresh_match_options()
 
+func _toggle_random_spawns():
+	Global.random_spawns = not Global.random_spawns
+	Global.save_settings()
+	_refresh_match_options()
+
 func _toggle_team(id):
 	Global.player_team[id] = 1 - Global.team_of(id)
 	Global.save_settings()
@@ -322,6 +331,7 @@ func _toggle_team(id):
 func _refresh_match_options():
 	mode_button.text = "Mode: " + ("2v2 Teams" if Global.teams else "Free for all")
 	points_button.text = "Points to win: " + Global.points_to_win_text(Global.points_to_win)
+	spawns_button.text = "Spawns: " + ("Random" if Global.random_spawns else "Fixed")
 	options_warning.text = ""
 	for id in team_buttons:
 		var team = Global.team_of(id)

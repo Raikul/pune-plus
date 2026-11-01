@@ -2,12 +2,12 @@ extends HBoxContainer
 class_name UpgradeRow
 
 # One snake's row in the upgrade screen: its element and keys, its upgrade cards
-# and its pick status. Only that snake's own Left/Right/Punchy keys drive it.
+# and its pick status. Only that snake's own Left/Right/Punchi keys drive it.
 
 signal chosen(player_id, upgrade_id)
 
 const DIRECTION_ICON = preload("res://assets/jorge-resources/Game Selection/direction icon.png")
-const PUNCHY_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
+const PUNCHI_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
 const MOVE_SOUND = preload("res://assets/sounds/Button.ogg")
 const CONFIRM_SOUND = preload("res://assets/sounds/ShroomEaten.ogg")
 const AI_STEP_TIME = 0.3
@@ -46,6 +46,8 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 
 	card_box = HBoxContainer.new()
 	card_box.add_theme_constant_override("separation", 20)
+	# Room for three cards even with fewer left, so every row's status lines up
+	card_box.custom_minimum_size.x = 390 * 3 + 20 * 2
 	add_child(card_box)
 	if is_hidden:
 		card_box.modulate.a = 0.0 # Keeps the layout, shows nothing
@@ -54,6 +56,12 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 		card.setup(upgrade, player_color)
 		card_box.add_child(card)
 		cards.append(card)
+	if options.is_empty():
+		var none_label = _label("Every upgrade taken!", 30, Color(0.6, 0.6, 0.6))
+		none_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		none_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		none_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card_box.add_child(none_label)
 
 	add_child(_build_status())
 
@@ -61,7 +69,10 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 	confirm_sound_player = _sound_player(CONFIRM_SOUND, -4.0)
 
 	_focus(0, false)
-	if is_ai:
+	if cards.is_empty():
+		# Nothing left to pick: done right away, on every machine (the screen hears it next frame)
+		_confirm.call_deferred()
+	elif is_ai:
 		_ai_pick()
 
 func _process(delta):
@@ -84,6 +95,8 @@ func _unhandled_input(event):
 	get_viewport().set_input_as_handled()
 
 func _focus(index, play_sound = true):
+	if cards.is_empty():
+		return
 	focus_index = posmod(index, cards.size())
 	for i in cards.size():
 		cards[i].set_focused(i == focus_index)
@@ -107,17 +120,23 @@ func pick(upgrade_id):
 
 # The card that would be picked now (the host uses it for players who left)
 func highlighted_id():
-	return cards[focus_index].upgrade.id
+	return cards[focus_index].upgrade.id if not cards.is_empty() else &""
 
 func _confirm():
 	if has_chosen:
 		return
 	has_chosen = true
+	if cards.is_empty():
+		status_label.text = "MAXED OUT"
+		status_label.modulate.a = 1.0
+		chosen.emit(player_id, &"")
+		return
 	var card = cards[focus_index]
 	for other in cards:
 		if other != card:
 			other.set_dimmed(true)
-	card.play_chosen()
+	# A rival's hidden row doesn't show which card it took
+	card.play_chosen(not is_hidden)
 	confirm_sound_player.play()
 	status_label.text = "READY!"
 	status_label.modulate.a = 1.0
@@ -195,7 +214,7 @@ func _build_key_hints():
 		hints.add_child(_label("Picking online", 20, Color(0.75, 0.75, 0.75)))
 		return hints
 	var prefix = "Player" + str(input_id)
-	for hint in [["Left", DIRECTION_ICON, true], ["Right", DIRECTION_ICON, false], ["Up", PUNCHY_ICON, false]]:
+	for hint in [["Left", DIRECTION_ICON, true], ["Right", DIRECTION_ICON, false], ["Up", PUNCHI_ICON, false]]:
 		var hint_icon = TextureRect.new()
 		hint_icon.texture = hint[1]
 		hint_icon.flip_h = hint[2]

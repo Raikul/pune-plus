@@ -2,7 +2,7 @@ extends Control
 
 # Between-rounds upgrade screen. Every active snake picks one of its own upgrades
 # at the same time, browsing with its Left/Right keys and confirming with its
-# Punchy (Up) key. For now the picks are only reported through the signals below.
+# Punchi (Up) key. For now the picks are only reported through the signals below.
 
 signal upgrade_selected(player_id, upgrade_id)
 signal all_upgrades_selected(selections)
@@ -72,7 +72,7 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 		row.modulate.a = 0
 		create_tween().tween_property(row, "modulate:a", 1.0, 0.3).set_delay(0.08 * i)
 
-	footer_label.text = "Left / Right to browse   |   Punchy to confirm"
+	footer_label.text = "Left / Right to browse   |   Punchi to confirm"
 	signal_label.text = ""
 
 # winner_id: the snake that won the last round (0 = nobody); its element picks the quote
@@ -149,7 +149,7 @@ func _finish():
 	finished.emit()
 	if get_tree().current_scene == self:
 		waiting_for_reroll = true
-		footer_label.text = "Press any Punchy key to roll new upgrades"
+		footer_label.text = "Press any Punchi key to roll new upgrades"
 
 func _unhandled_input(event):
 	if not waiting_for_reroll:

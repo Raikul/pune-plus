@@ -52,6 +52,11 @@ func _ready():
 	else:
 		Global.scoreToReach = max((active_ids.size() - 1) * 10, 10)
 	$HUD.setup_teams(teams_mode)
+	if teams_mode:
+		var takeover = AiTakeover.new()
+		takeover.name = "AiTakeover"
+		takeover.playground = self
+		add_child(takeover)
 	#debug
 #	Global.scoreToReach = 1
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
@@ -153,11 +158,11 @@ func _draw_arena_border():
 
 # spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
 func setupPlayers(spawns = {}):
+	if spawns.is_empty() and not net_session:
+		spawns = roll_spawns([1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active")))
 	for player_id in [1, 2, 3, 4]:
 		if spawns.has(player_id):
 			spawn_player(player_id, spawns[player_id])
-		elif spawns.is_empty() and Global.get("player" + str(player_id) + "Active"):
-			spawn_player(player_id, roll_spawn(player_id))
 	for player in get_tree().get_nodes_in_group("activePlayers"):
 		for child in player.get_children():
 			if child is Timer:
@@ -165,8 +170,101 @@ func setupPlayers(spawns = {}):
 		player.show()
 	get_tree().get_first_node_in_group("HUD").set_process(true)
 	refresh_upgrade_badges()
+	# 3 s before the first round; with random starting spots, 2 s before every other round
+	# so players can find where they are
+	var countdown = 0 if counted_down else 3
+	if countdown == 0 and Global.random_spawns_enabled():
+		countdown = 2
+	counted_down = true
+	if countdown > 0:
+		await _start_countdown(countdown)
+		if not is_inside_tree():
+			return
 	time_flowing = true
-		
+
+var counted_down = false
+
+# The snakes wait in place through "3, 2, 1, GO!" (from seconds down)
+func _start_countdown(seconds):
+	var steps = range(seconds, 0, -1).map(func(n): return str(n)) + ["GO!"]
+	var snakes = get_tree().get_nodes_in_group("activePlayers")
+	for snake in snakes:
+		snake.set_frozen(true)
+	var layer = CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	var label = Label.new()
+	label.add_theme_font_override("font", preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf"))
+	label.add_theme_font_size_override("font_size", 220)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_constant_override("outline_size", 24)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(label)
+	for step in steps:
+		label.text = step
+		label.pivot_offset = get_viewport_rect().size / 2
+		label.scale = Vector2(1.4, 1.4)
+		label.modulate.a = 1.0
+		var tween = label.create_tween().set_parallel()
+		tween.tween_property(label, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		var last = step == steps.back()
+		tween.tween_property(label, "modulate:a", 0.0 if last else 0.25, 0.6).set_delay(0.4)
+		if last:
+			# GO: the snakes are off while it fades
+			for snake in snakes:
+				if is_instance_valid(snake):
+					snake.set_frozen(false)
+			tween.chain().tween_callback(layer.queue_free)
+			return
+		# Not process_always, so pausing also holds the countdown
+		await get_tree().create_timer(1.0, false).timeout
+		if not is_inside_tree():
+			return
+
+## Random starting spots: distance from the walls, from each other, and how far the
+## heading can stray from facing the middle of the arena
+const SPAWN_WALL_MARGIN = 160.0
+const SPAWN_MIN_DISTANCE = 380.0
+const SPAWN_HEADING_SPREAD = PI / 4
+
+# {player_id: [x, y, rotation]} for these snakes: fixed corners, or anywhere with Random starts
+func roll_spawns(ids):
+	var spawns = {}
+	if not Global.random_spawns_enabled():
+		for id in ids:
+			spawns[id] = roll_spawn(id)
+		return spawns
+	var arena = _arena_rect().grow(-SPAWN_WALL_MARGIN)
+	var middle = arena.get_center()
+	var taken = []
+	for id in ids:
+		var point = Vector2.ZERO
+		# The spot farthest from the others, if no try gets far enough (it always should)
+		var best_distance = -1.0
+		for attempt in 200:
+			var candidate = Vector2(randf_range(arena.position.x, arena.end.x), randf_range(arena.position.y, arena.end.y))
+			var nearest = INF
+			for other in taken:
+				nearest = min(nearest, candidate.distance_to(other))
+			if nearest > best_distance:
+				best_distance = nearest
+				point = candidate
+			if nearest >= SPAWN_MIN_DISTANCE:
+				break
+		taken.append(point)
+		var heading = Vector2.UP.angle_to(middle - point) + randf_range(-SPAWN_HEADING_SPREAD, SPAWN_HEADING_SPREAD)
+		spawns[id] = [point.x, point.y, heading]
+	return spawns
+
+# Inside the walls and under the scoreboard (the purple border)
+func _arena_rect() -> Rect2:
+	var points = $Colliders/ArenaBorder.points
+	return Rect2(points[0], points[2] - points[0])
+
 # Random spawn point and heading for a snake: [x, y, rotation]
 func roll_spawn(player_id):
 	var spawn_x = spawn_locations[player_id][0]
@@ -273,6 +371,9 @@ func mark_player_dead(player):
 	$HUD.set_player_dead(player.playerId)
 	player.remove_from_group("alivePlayers")
 
+## Seconds the arena stays frozen on the final result before the win screen
+const FINAL_RESULT_TIME = 2.0
+
 func finishGame(playerId):
 	if gameEnded:
 		return
@@ -280,6 +381,10 @@ func finishGame(playerId):
 		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
+	# Let the final moment (last crash, last point on the scoreboard) sink in first
+	await get_tree().create_timer(FINAL_RESULT_TIME, false).timeout
+	if not is_inside_tree():
+		return
 	# Covers the whole arena, under the scoreboard
 	var screen = get_viewport_rect().size
 	var arena_top = $Colliders/ArenaBorder.points[0].y - BORDER_WIDTH
@@ -321,7 +426,7 @@ func restart(delay = 2):
 #	await(get_tree().create_timer(2.0).timeout)
 	if Global.upgrades_enabled():
 		if net_session:
-			await net_session.host_run_upgrades(Global.upgrade_time)
+			await net_session.host_run_upgrades(Global.online_upgrade_time)
 		else:
 			await run_upgrade_selection()
 	if net_session:

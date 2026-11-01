@@ -104,8 +104,9 @@ func _restyle():
 	target_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	target_label.offset_left = -150
 	target_label.offset_right = 150
-	target_label.offset_top = -24
-	target_label.offset_bottom = -2
+	# Lifted off the bar's bottom edge, so it has some room above the arena border
+	target_label.offset_top = -34
+	target_label.offset_bottom = -12
 	target_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	$PanelContainer/ColorRect.add_child(target_label)
 
@@ -135,6 +136,45 @@ func setup_teams(enabled):
 		team_tags[id].visible = enabled
 		team_tags[id].text = Global.TEAM_NAMES[team].right(1)
 		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+	if enabled:
+		_group_by_team()
+
+# 2v2: one card per team, its snakes' symbols side by side and one shared score (teammates
+# always have the same score). Each snake's upgrades sit on its own side of the card.
+func _group_by_team():
+	var cards_row = $PanelContainer/MarginContainer/HBoxContainer
+	var position_in_bar = 0
+	for team in [0, 1]:
+		var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+		if members.is_empty():
+			continue
+		var lead = members[0]
+		var card = _card(lead)
+		cards_row.move_child(card, position_in_bar)
+		position_in_bar += 1
+		var team_color = Global.TEAM_COLORS[team]
+		card.get_theme_stylebox("panel").border_color = team_color
+		var row = _cooldown_bar(lead).get_parent()
+		var score = _score_label(lead)
+		score.add_theme_color_override("font_color", team_color.lightened(0.15))
+		# The lead's upgrades go before its symbol
+		row.move_child(upgrade_badges[lead], team_tags[lead].get_index() + 1)
+		for mate in members.slice(1):
+			_cooldown_bar(mate).reparent(row, false)
+			row.move_child(_cooldown_bar(mate), score.get_index())
+			upgrade_badges[mate].reparent(row, false)
+			_card(mate).hide()
+	# Inactive snakes have no team card
+	for id in [1, 2, 3, 4]:
+		if not Global.get("player%dActive" % id):
+			_card(id).hide()
+
+func _score_label(player_id):
+	return [null, label1, label2, label3, label4][player_id]
+
+# The rounded card a snake starts in
+func _card(player_id):
+	return _score_label(player_id).get_parent().get_parent()
 
 # can_see(player_id) -> bool: false shows only how many upgrades a rival has
 func refresh_upgrades(can_see: Callable):

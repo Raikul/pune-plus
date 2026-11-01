@@ -16,7 +16,8 @@ var base: Dictionary = {
 	"gap.time": 0.6,
 	"air.recast_window": 0.0,   # Segundos para el segundo salto (0 = sin doble salto)
 	"air.wall_warp": 0.0,       # 1 = el teletransporte atraviesa las paredes
-	"water.copies": 1.0,        # Gemelos por poder
+	"water.max_twins": 1.0,     # Gemelos vivos a la vez
+	"water.twins_per_cast": 1.0, # Gemelos por cada uso del poder (hasta el máximo)
 	"water.lasting_twin": 0.0,  # 1 = la estela del gemelo nunca cambia de color
 }
 var active_buffs: Dictionary = {}
