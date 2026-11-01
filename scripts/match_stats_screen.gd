@@ -12,7 +12,9 @@ signal confirmed(choices) # {player_id: rematch}
 
 const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 const HOLD_TIME = 2.0
-const ELEMENT_NAMES = ["", "FIRE", "EARTH", "AIR", "WATER"]
+# Each element's symbol, as on the scoreboard (tinted with the snake's color)
+const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
+const SYMBOLS = ["", "Fire-Water symbol.png", "Air-Earth symbol rot.png", "Air-Earth symbol.png", "Fire-Water symbol rot.png"]
 const GENERIC_STATS = [["length", "Trail length"], ["dead_time", "Time dead"], ["powers", "Powers used"]]
 const ELEMENT_STATS = {
 	1: [["fire_kills", "Fireball kills"]],
@@ -94,7 +96,13 @@ func _column(id, winner):
 	panel.add_child(box)
 
 	box.add_child(_label("WINNER" if winner else " ", 26, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
-	box.add_child(_label(ELEMENT_NAMES[id], 52, color, HORIZONTAL_ALIGNMENT_CENTER))
+	var symbol = TextureRect.new()
+	symbol.texture = load(SYMBOLS_PATH + SYMBOLS[id])
+	symbol.modulate = color
+	symbol.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	symbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	symbol.custom_minimum_size = Vector2(0, 72)
+	box.add_child(symbol)
 	var name_label = _label(info[id].name, 26, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	box.add_child(name_label)
