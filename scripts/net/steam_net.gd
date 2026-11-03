@@ -541,6 +541,10 @@ func begin_match(final_roster, options = {}):
 	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1})
 	Global.online_points_to_win = options.get("points_to_win", 0)
 	Global.online_random_spawns = options.get("random_spawns", false)
+	Global.online_round_countdown = options.get("round_countdown", true)
+	Global.online_level = options.get("level", "")
+	if Global.online_level != "" and not ResourceLoader.exists(Global.online_level):
+		Global.online_level = "" # A level this build doesn't have
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
 # End of a match without a rematch: everyone stays connected and goes back to the lobby

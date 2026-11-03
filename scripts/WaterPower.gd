@@ -26,6 +26,8 @@ func activate() -> void:
 
 	if split_sound:
 		split_sound.play()
+	# A small ripple as the snake splits (the big splash is for when a twin saves it)
+	PowerFx.splash(player.get_parent(), player.global_position, Color(Global.playerColors[player.playerId]), 0.35, 0.55)
 
 	# One twin per cast, two with Twin Burst, never past the maximum
 	var cantidad_clones: int = mini(twins_per_cast(), max_twins() - alive_twins())
@@ -49,13 +51,7 @@ func activate() -> void:
 		return
 	if not player.net_remote:
 		Global.add_stat(player.playerId, "water_twins", spawned.size())
-
-	# The snake turns away from its twin while they split (straight between two twins)
-	player.locked_direction = -spawned.back().split_direction if spawned.size() == 1 else 0
-	player.locked_movement = true
-	get_tree().create_timer(0.2).timeout.connect(func():
-		player.locked_movement = false
-	)
+	# Only the twins veer off: the water snake keeps its course and its player keeps steering
 
 	activated.emit()
 

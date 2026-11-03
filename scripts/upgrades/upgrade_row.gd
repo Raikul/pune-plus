@@ -199,7 +199,11 @@ func _build_header():
 	info.add_theme_constant_override("separation", 6)
 	box.add_child(info)
 	info.add_child(_label(element.to_upper(), 40, player_color))
-	info.add_child(_label("Player " + str(player_id) + ("  (AI)" if is_ai else ""), 22, Color(0.7, 0.7, 0.7)))
+	var name_label = _label(Global.player_name(player_id), 22, Color(0.7, 0.7, 0.7))
+	name_label.custom_minimum_size.x = KEY_HINTS_WIDTH
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.clip_text = true
+	info.add_child(name_label)
 	info.add_child(_build_key_hints())
 	# What this snake already has (only a count for online rivals)
 	# Small and in one row (a snake has at most 7 different upgrades), so the header keeps
@@ -210,8 +214,13 @@ func _build_header():
 	badges.refresh(player_id, is_hidden)
 	return panel
 
+# The header keeps one width whatever the keys are called (gamepad names are long)
+const KEY_HINTS_WIDTH = 250
+const KEY_NAME_WIDTH = 56
+
 func _build_key_hints():
 	var hints = HBoxContainer.new()
+	hints.custom_minimum_size.x = KEY_HINTS_WIDTH
 	hints.add_theme_constant_override("separation", 6)
 	if is_remote:
 		hints.add_child(_label("Picking online", 20, Color(0.75, 0.75, 0.75)))
@@ -225,7 +234,12 @@ func _build_key_hints():
 		hint_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hint_icon.custom_minimum_size = Vector2(20, 22)
 		hints.add_child(hint_icon)
-		hints.add_child(_label(Global.action_key_name(prefix + hint[0]) + " ", 20, Color.WHITE))
+		# "Pad" goes: the icons already say which key it is
+		var key_label = _label(Global.action_key_name(prefix + hint[0]).trim_prefix("Pad "), 20, Color.WHITE)
+		key_label.custom_minimum_size.x = KEY_NAME_WIDTH
+		key_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		key_label.clip_text = true
+		hints.add_child(key_label)
 	return hints
 
 func _build_status():

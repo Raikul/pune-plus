@@ -15,7 +15,7 @@ const ROW_WIDTH = 1000
 
 const WINDOW_MODES = ["Full-screen", "Windowed", "Borderless Window", "Borderless Full-screen"]
 const GAP_SIZES = ["Small", "Medium", "Large"]
-const TABS = ["Video", "Audio", "Gameplay", "Controls"]
+const TABS = ["Video", "Audio", "Gameplay", "Controls", "Accessibility"]
 
 var tab_buttons = []
 var pages = []
@@ -97,7 +97,7 @@ func _build():
 	var page_holder = Control.new()
 	page_holder.custom_minimum_size = Vector2(ROW_WIDTH, 440)
 	column.add_child(page_holder)
-	for builder in [_video_page, _audio_page, _gameplay_page, _controls_page]:
+	for builder in [_video_page, _audio_page, _gameplay_page, _controls_page, _accessibility_page]:
 		var page = VBoxContainer.new()
 		page.add_theme_constant_override("separation", 10)
 		page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -162,6 +162,16 @@ func _gameplay_page(page):
 		func(): return max(Global.UPGRADE_TIME_OPTIONS.find(Global.upgrade_time), 0),
 		func(i): Global.upgrade_time = Global.UPGRADE_TIME_OPTIONS[i])
 	_toggle(page, "Wisdom on the upgrade screen", func(): return Global.show_quotes, func(on): Global.show_quotes = on)
+
+func _accessibility_page(page):
+	_toggle(page, "Nameplates on snakes", func(): return Global.nameplates, func(on): Global.nameplates = on)
+	_toggle(page, "Direction arrow", func(): return Global.direction_arrow, func(on): Global.direction_arrow = on)
+	_toggle(page, "Snake eyes (look at the nearest snake)", func(): return Global.snake_eyes, func(on): Global.snake_eyes = on)
+	var note = Label.new()
+	note.text = "Both apply from the next round."
+	note.add_theme_color_override("font_color", DIM_COLOR)
+	note.add_theme_font_size_override("font_size", 24)
+	page.add_child(note)
 
 func _controls_page(page):
 	var note = Label.new()

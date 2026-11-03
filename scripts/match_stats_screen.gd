@@ -17,8 +17,8 @@ const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = ["", "Fire-Water symbol.png", "Air-Earth symbol rot.png", "Air-Earth symbol.png", "Fire-Water symbol rot.png"]
 const GENERIC_STATS = [["length", "Trail length"], ["dead_time", "Time dead"], ["powers", "Powers used"]]
 const ELEMENT_STATS = {
-	1: [["fire_kills", "Fireball kills"]],
-	2: [["earth_blocked", "Fireballs & twins blocked"]],
+	1: [["fire_kills", "Fireball kills"], ["fire_revives", "Times revived"]],
+	2: [["earth_blocked", "Fireballs & twins blocked"], ["earth_own_trail", "Own trail crossed"]],
 	3: [["air_warps", "Warps through the edge"], ["air_shocks", "Enemies electrocuted"], ["air_scramble_kills", "Kills on scrambled foes"]],
 	4: [["water_twins", "Twins summoned"], ["water_saves", "Lives saved by a twin"]],
 }

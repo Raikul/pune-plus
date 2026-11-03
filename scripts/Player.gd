@@ -107,10 +107,22 @@ func _ready():
 		$ElementHeadSprite.z_index = FISSURE_Z_INDEX + 2
 
 	actualizarPuntoDeTransporte()
+	if Global.snake_eyes:
+		face = SnakeFace.new()
+		add_child(face)
+	if Global.nameplates or Global.direction_arrow:
+		add_child(SnakeOverlay.new())
 
 	if stats != null:
 		stats.stats_changed.connect(refresh_stats)
 		refresh_stats()
+var face: SnakeFace
+
+# "effort" for a moment when it uses its power, "dead" when it crashes
+func set_face(mood, seconds = 0.0):
+	if face:
+		face.set_mood(mood, seconds)
+
 func refresh_stats() -> void:
 	if stats != null:
 		speed = stats.get_stat("speed")
@@ -129,11 +141,15 @@ func _process(delta):
 		elif input_id != 0 and Input.is_action_pressed("Player"+str(input_id)+"Right"): direction = 1
 		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
+		if ai_enabled and not _human_steering():
+			direction = _ai_dodge_moving_walls(direction)
 
 	if ai_enabled and powerAvailable: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
 	_update_shock(delta)
 	teleport_grace = max(teleport_grace - delta, 0.0)
+	if phoenix_grace > 0:
+		_update_phoenix_grace(delta)
 	if scrambled_time > 0 and not (ai_enabled and scrambled_age >= AI_SCRAMBLE_CONFUSION):
 		direction = -direction
 	steer_direction = direction
@@ -141,6 +157,63 @@ func _process(delta):
 	rotation += angular_speed * direction * delta
 	var velocity = Vector2.UP.rotated(rotation) * speed
 	position += velocity * delta
+func _human_steering() -> bool:
+	return input_id != 0 and (Input.is_action_pressed("Player%dLeft" % input_id) or Input.is_action_pressed("Player%dRight" % input_id))
+
+# --- AI and moving level walls ---
+# The raycasts only see what's ahead right now, so a spinning or sliding wall coming from
+# the side catches the AI. Near one, it plays its three options (turn left, straight, turn
+# right) forward for a moment against where the walls will be, and if its choice would hit,
+# takes the one that stays clear the longest.
+const AI_LOOKAHEAD_STEPS = 8
+const AI_LOOKAHEAD_STEP = 0.1
+const AI_WALL_CLEARANCE = 14.0
+const AI_WALL_NOTICE = 260.0
+
+func _ai_dodge_moving_walls(preferred) -> int:
+	var level = get_parent().get("level") if get_parent() else null
+	if level == null:
+		return preferred
+	var near = []
+	for wall in level.walls():
+		if wall.is_moving() and _distance_to_polygon(global_position, wall.global_polygon()) < AI_WALL_NOTICE:
+			near.append(wall)
+	if near.is_empty():
+		return preferred
+	var futures = [] # Each step's wall outlines
+	for step in range(1, AI_LOOKAHEAD_STEPS + 1):
+		futures.append(near.map(func(wall): return wall.global_polygon_in(step * AI_LOOKAHEAD_STEP)))
+	var best = preferred
+	var best_steps = _steps_clear(preferred, futures)
+	if best_steps >= AI_LOOKAHEAD_STEPS:
+		return preferred
+	for option in [-1, 0, 1]:
+		var steps = _steps_clear(option, futures)
+		if steps > best_steps:
+			best = option
+			best_steps = steps
+	return best
+
+# How many look-ahead steps this steering stays off the walls (and inside the arena)
+func _steps_clear(steer, futures) -> int:
+	var at = global_position
+	var heading = rotation
+	for step in futures.size():
+		heading += angular_speed * steer * AI_LOOKAHEAD_STEP
+		at += Vector2.UP.rotated(heading) * speed * AI_LOOKAHEAD_STEP
+		if left_limit_x != null and (at.x < left_limit_x + AI_WALL_CLEARANCE or at.x > right_limit_x - AI_WALL_CLEARANCE 				or at.y < top_limit_y + AI_WALL_CLEARANCE or at.y > bottom_limit_y - AI_WALL_CLEARANCE):
+			return step
+		for shape in futures[step]:
+			if Geometry2D.is_point_in_polygon(at, shape) or _distance_to_polygon(at, shape) < AI_WALL_CLEARANCE:
+				return step
+	return futures.size()
+
+static func _distance_to_polygon(point, shape) -> float:
+	var best = INF
+	for i in shape.size():
+		best = min(best, Geometry2D.get_closest_point_to_segment(point, shape[i], shape[(i + 1) % shape.size()]).distance_to(point))
+	return best
+
 # Air's landing marker is top-level, so it stays on screen unless hidden (death)
 func hide_teleport_marker():
 	if has_node("DynamicTeleportNode"):
@@ -260,6 +333,10 @@ func _on_area_entered(area):
 		area.queue_free()
 		return
 
+	# Just risen from its ashes: untouchable for a moment (_end_phoenix_grace checks again)
+	if phoenix_grace > 0:
+		return
+
 	# Si el poder activo decide ignorar la colisión (ej. Agua tocando su propio clon):
 	if main_power and main_power.should_ignore_collision(area):
 		return
@@ -271,6 +348,8 @@ func _on_area_entered(area):
 
 	# Earth's power makes it pass through trails, not walls (it used to slip out of the arena
 	# and stay alive off screen)
+	if invincible and area is TrailSegment and area.get_parent() == self and listOfNodes.find(area) == -1:
+		_count_own_trail_pass()
 	if (not invincible and teleport_grace <= 0) or area.is_in_group("limits"):
 		if listOfNodes.find(area) == -1:
 			# Le preguntamos al poder si puede salvar al jugador de morir (Agua reviviendo)
@@ -283,6 +362,16 @@ func _on_area_entered(area):
 			$Split.play()
 			set_process(false)
 			emit_signal("dead")
+
+# End-screen stats: Earth's armor taking it through its own trail. One crossing touches a
+# few pieces in a row, so touches close together count once.
+const OWN_PASS_GAP_MS = 400
+var last_own_pass = -OWN_PASS_GAP_MS
+func _count_own_trail_pass():
+	var now = Time.get_ticks_msec()
+	if now - last_own_pass >= OWN_PASS_GAP_MS:
+		Global.add_stat(playerId, "earth_own_trail")
+	last_own_pass = now
 
 # End-screen stats: a rival's fireball, or dying while a rival Air had it scrambled
 func _credit_death(cause):
@@ -307,6 +396,7 @@ func spawn_remote_twin():
 	is_water_my_friend = true
 	var twin = createBody(twinHeadScene)
 	twin.net_remote = true
+	PowerFx.splash(get_parent(), global_position, Color(Global.playerColors[playerId]), 0.35, 0.55)
 	twin.bufferListOfNodes = listOfNodes
 	twin.bufferListOfNodes.append(self)
 	return twin
@@ -415,6 +505,8 @@ func take_control(new_input_id) -> void:
 func set_head_visible(state: bool) -> void:
 	$HeadSprite.visible = state
 	$ElementHeadSprite.visible = state
+	if face:
+		face.visible = state
 func _input(event):
 	if net_remote:
 		return
@@ -432,6 +524,7 @@ func try_use_power() -> void:
 	# 1. Si el poder tiene el segundo salto listo, salta DE INMEDIATO sin cooldown:
 	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
 		main_power.execute_recast()
+		set_face("effort", 0.5)
 		power_used.emit(true)
 		Global.add_stat(playerId, "powers")
 		return
@@ -447,6 +540,7 @@ func try_use_power() -> void:
 	
 	if main_power != null:
 		main_power.activate()
+	set_face("effort", 0.5)
 	power_used.emit(false)
 	Global.add_stat(playerId, "powers")
 
@@ -459,6 +553,7 @@ func try_use_power() -> void:
 func use_power():
 	if main_power != null:
 		main_power.activate()
+	set_face("effort", 0.5)
 func ai_punchi(direction):
 	if powerAvailable and main_power and main_power.ai_should_activate(direction):
 		try_use_power()
@@ -485,6 +580,8 @@ func powerReady(_prevColor = null):
 		return
 	powerAvailable = true
 	update_power_indicator()
+	if get_parent() and is_processing():
+		PowerFx.pulse(get_parent(), self, Color(Global.playerColors[playerId]))
 
 # The element symbol on the head is white while the power is ready and dark while it recharges
 func update_power_indicator():
@@ -536,6 +633,8 @@ func phoenix_ash():
 	$CollisionShape2D.set_deferred("disabled", true)
 	$HeadSprite.hide()
 	$ElementHeadSprite.hide()
+	if face:
+		face.hide()
 	if has_node("DynamicTeleportNode"):
 		$DynamicTeleportNode.hide()
 	if not net_remote:
@@ -550,20 +649,37 @@ func phoenix_rise_point() -> Array:
 		var inside = Vector2(
 			clamp(point.x, left_limit_x + PHOENIX_WALL_MARGIN, right_limit_x - PHOENIX_WALL_MARGIN),
 			clamp(point.y, top_limit_y + PHOENIX_WALL_MARGIN, bottom_limit_y - PHOENIX_WALL_MARGIN))
+		var middle = Vector2((left_limit_x + right_limit_x) / 2, (top_limit_y + bottom_limit_y) / 2)
+		# A level wall there: step towards the middle until it's clear
+		var level = get_parent().get("level") if get_parent() else null
+		if level != null:
+			for step in 30:
+				if level.is_clear(inside, PHOENIX_WALL_MARGIN * 0.6):
+					break
+				inside = inside.move_toward(middle, 30.0)
 		if inside != point:
 			# Face the middle of the arena instead of the wall it hit
-			var middle = Vector2((left_limit_x + right_limit_x) / 2, (top_limit_y + bottom_limit_y) / 2)
 			heading = Vector2.UP.angle_to(middle - inside)
 		point = inside
 	return [point, heading]
 
+## Seconds after rising in which nothing can kill it (it can rise next to a level wall)
+const PHOENIX_GRACE = 0.8
+var phoenix_grace = 0.0
+
 func phoenix_rise(point, heading):
 	global_position = point
 	rotation = heading
+	phoenix_grace = PHOENIX_GRACE
+	if not net_remote:
+		Global.add_stat(playerId, "fire_revives")
 	_clear_area(point, PHOENIX_CLEAR_RADIUS)
 	PowerFx.explosion(get_parent(), point, Color(Global.playerColors[playerId]), PHOENIX_CLEAR_RADIUS)
 	$HeadSprite.show()
 	$ElementHeadSprite.show()
+	if face:
+		face.show()
+		face.set_mood("normal")
 	reviving = false
 	gap_delta_sum = 0
 	if not net_remote:
@@ -571,6 +687,16 @@ func phoenix_rise(point, heading):
 		set_process(true)
 		actualizarPuntoDeTransporte()
 		phoenix_changed.emit(true)
+
+# The risen phoenix flickers while untouchable; when that ends, whatever it's still
+# touching counts (an overlap that started during the grace sends no new signal)
+func _update_phoenix_grace(delta):
+	phoenix_grace = max(phoenix_grace - delta, 0.0)
+	$HeadSprite.modulate.a = 0.45 + 0.55 * absf(sin(phoenix_grace * 18.0)) if phoenix_grace > 0 else 1.0
+	if phoenix_grace <= 0:
+		for area in get_overlapping_areas():
+			if is_processing():
+				_on_area_entered(area)
 
 # Burns every trail piece and rock within the radius (walls, heads and pickups stay)
 func _clear_area(point, radius):

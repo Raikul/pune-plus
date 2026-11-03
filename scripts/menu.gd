@@ -10,6 +10,8 @@ var patch_notes_scene = preload("res://scenes/patch_notes.tscn")
 func _ready():
 	Options = $CanvasLayer/Options
 	Options.hide()
+	# Shrooms and upgrades moved to player setup's match settings
+	$CanvasLayer/Modifiers.hide()
 	# Back from an online match
 	if SteamNet.is_online():
 		SteamNet.leave()
@@ -34,7 +36,6 @@ func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()
 	$CanvasLayer/TopMenu.hide()
 	$CanvasLayer/ChangeLog.hide()
-	$CanvasLayer/Modifiers.show()
 	$CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup.recalculate_all_labels()
 
 func _on_options_pressed():

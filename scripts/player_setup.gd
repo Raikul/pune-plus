@@ -25,6 +25,7 @@ func _ready():
 	P4Box.set_ai_status(Global.AI_Enabled[4])	
 	_polish_cards()
 	_build_match_options()
+	_build_name_boxes()
 	# Borders start hidden (nobody selected yet)
 	for id in [1, 2, 3, 4]:
 		activatePlayer(get("player%dActive" % id), [P1Box, P2Box, P3Box, P4Box][id - 1], Global.playerColors[id])
@@ -53,6 +54,16 @@ func _polish_cards():
 		var punchi_plate = box.get_node("InputList/Up/MarginContainer/PanelContainer")
 		punchi_plate.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		punchi_plate.self_modulate = Color.WHITE
+		# What the power does, in two words, under the symbol
+		var tagline = Label.new()
+		tagline.text = Global.POWER_TAGLINES[id]
+		tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tagline.add_theme_font_size_override("font_size", 28)
+		tagline.add_theme_color_override("font_color", element_color.lightened(0.3))
+		box.get_node("PanelContainer2/PanelContainer").add_child(tagline)
+		var bottom_space = Control.new()
+		bottom_space.custom_minimum_size.y = 10
+		box.get_node("PanelContainer2/PanelContainer").add_child(bottom_space)
 
 # Rounded dark pill buttons with an orange outline when focused
 func _pill_button(text_size, min_width):
@@ -265,33 +276,61 @@ func enable_player(player_id:int) -> void:
 			if !player4Active : _on_p_4on_pressed()
 
 
-#region Match options: 2v2 teams and points to win (saved in Global's settings)
+#region Match options (saved in Global's settings): a panel in the top left corner with
+# the mode and points always in view, and the rest folding out under "Match settings"
 
 var mode_button: Button
 var points_button: Button
 var spawns_button: Button
+var countdown_button: Button
+var arena_button: Button
+var upgrades_button: Button
+var shrooms_button: Button
+var upgrade_time_button: Button
+var settings_toggle: Button
+var settings_box: VBoxContainer
 var options_warning: Label
 var team_buttons = {}
 
 func _build_match_options():
 	var row = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2
-	row.add_theme_constant_override("separation", 40)
-	# Some room above and below the row
 	var options_box = row.get_parent()
-	var spacer_top = Control.new()
-	spacer_top.custom_minimum_size.y = 24
-	options_box.add_child(spacer_top)
-	options_box.move_child(spacer_top, row.get_index())
-	mode_button = _pill_button(34, 460)
-	mode_button.pressed.connect(_toggle_teams)
-	row.add_child(mode_button)
-	points_button = _pill_button(34, 460)
-	points_button.pressed.connect(_cycle_points)
-	row.add_child(points_button)
-	spawns_button = _pill_button(34, 460)
-	spawns_button.pressed.connect(_toggle_random_spawns)
-	row.add_child(spawns_button)
-	# The warning goes under the row, so it doesn't push the buttons off center
+	var panel = VBoxContainer.new()
+	# Pinned to the screen's corner, whatever the cards' layout
+	panel.top_level = true
+	panel.position = Vector2(28, 44)
+	panel.add_theme_constant_override("separation", 10)
+	add_child(panel)
+	var title = Label.new()
+	title.text = "MATCH"
+	title.add_theme_font_size_override("font_size", 30)
+	title.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	panel.add_child(title)
+	mode_button = _match_button(panel, _toggle_teams)
+	points_button = _match_button(panel, _cycle_points)
+	settings_toggle = _match_button(panel, func():
+		settings_box.visible = not settings_box.visible
+		_refresh_match_options())
+	settings_box = VBoxContainer.new()
+	settings_box.add_theme_constant_override("separation", 10)
+	settings_box.hide()
+	panel.add_child(settings_box)
+	arena_button = _match_button(settings_box, _cycle_arena)
+	upgrades_button = _match_button(settings_box, func():
+		Global.upgrades = not Global.upgrades
+		_options_changed())
+	upgrade_time_button = _match_button(settings_box, func():
+		var times = Global.UPGRADE_TIME_OPTIONS
+		Global.upgrade_time = times[(max(times.find(Global.upgrade_time), 0) + 1) % times.size()]
+		_options_changed())
+	shrooms_button = _match_button(settings_box, func():
+		Global.shrooms = not Global.shrooms
+		_options_changed())
+	spawns_button = _match_button(settings_box, _toggle_random_spawns)
+	countdown_button = _match_button(settings_box, func():
+		Global.round_countdown = not Global.round_countdown
+		_options_changed())
+	# The warning goes under the cards, so it doesn't push them off center
 	options_warning = Label.new()
 	options_warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	options_warning.add_theme_font_size_override("font_size", 28)
@@ -306,6 +345,23 @@ func _build_match_options():
 		box.add_child(team_button)
 		team_buttons[id] = team_button
 	_refresh_match_options()
+
+func _match_button(parent, callback):
+	var button = _pill_button(28, 400)
+	button.custom_minimum_size.y = 58
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.pressed.connect(callback)
+	parent.add_child(button)
+	return button
+
+func _options_changed():
+	Global.save_settings()
+	_refresh_match_options()
+
+func _cycle_arena():
+	var choices = [""] + Global.level_paths()
+	Global.level = choices[(max(choices.find(Global.level), 0) + 1) % choices.size()]
+	_options_changed()
 
 func _toggle_teams():
 	Global.teams = not Global.teams
@@ -332,6 +388,13 @@ func _refresh_match_options():
 	mode_button.text = "Mode: " + ("2v2 Teams" if Global.teams else "Free for all")
 	points_button.text = "Points to win: " + Global.points_to_win_text(Global.points_to_win)
 	spawns_button.text = "Spawns: " + ("Random" if Global.random_spawns else "Fixed")
+	settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+")
+	arena_button.text = "Arena: " + Global.level_name(Global.level)
+	upgrades_button.text = "Upgrades: " + ("On" if Global.upgrades else "Off")
+	upgrade_time_button.text = "Upgrade pick time: " + Global.upgrade_time_text(Global.upgrade_time)
+	upgrade_time_button.disabled = not Global.upgrades
+	shrooms_button.text = "Shrooms: " + ("On" if Global.shrooms else "Off")
+	countdown_button.text = "Countdown: " + ("On" if Global.round_countdown else "Off")
 	options_warning.text = ""
 	for id in team_buttons:
 		var team = Global.team_of(id)
@@ -340,5 +403,130 @@ func _refresh_match_options():
 		team_buttons[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
 		team_buttons[id].add_theme_color_override("font_hover_color", Global.TEAM_COLORS[team].lightened(0.3))
 		team_buttons[id].add_theme_color_override("font_focus_color", Global.TEAM_COLORS[team])
+
+#endregion
+
+#region Player names: a box on each card, dragged onto another card to swap elements
+
+# The person moves with their name: keys, AI, selection and team go along, and whoever
+# was on the other element takes this one
+var name_edits = {}
+
+func _build_name_boxes():
+	for id in [1, 2, 3, 4]:
+		var box = _card(id)
+		var holder = PanelContainer.new()
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.16, 0.16, 0.16)
+		style.set_corner_radius_all(14)
+		style.content_margin_left = 8
+		style.content_margin_right = 12
+		style.border_color = Color(Global.playerColors[id])
+		style.border_width_bottom = 3
+		holder.add_theme_stylebox_override("panel", style)
+		holder.tooltip_text = "Drag to swap elements with another player"
+		holder.mouse_default_cursor_shape = Control.CURSOR_MOVE
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		holder.add_child(row)
+		var grip = Label.new()
+		grip.text = "::"
+		grip.add_theme_font_size_override("font_size", 30)
+		grip.add_theme_color_override("font_color", Color(1, 1, 1, 0.4))
+		grip.custom_minimum_size.x = 30
+		grip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		grip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		grip.mouse_filter = Control.MOUSE_FILTER_PASS
+		grip.mouse_default_cursor_shape = Control.CURSOR_MOVE
+		row.add_child(grip)
+		var edit = LineEdit.new()
+		edit.max_length = 14
+		edit.placeholder_text = "Player %d" % id
+		edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		edit.custom_minimum_size.y = 52
+		edit.add_theme_font_size_override("font_size", 30)
+		edit.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		var focus = StyleBoxFlat.new()
+		focus.bg_color = Color(1, 1, 1, 0.06)
+		focus.set_corner_radius_all(10)
+		edit.add_theme_stylebox_override("focus", focus)
+		# Only by clicking: browsing the buttons with the keys skips it
+		edit.focus_mode = Control.FOCUS_CLICK
+		edit.text_changed.connect(func(text): Global.player_names[_slot_of(edit)] = text)
+		edit.text_submitted.connect(func(_text): edit.release_focus())
+		edit.focus_exited.connect(Global.save_settings)
+		row.add_child(edit)
+		name_edits[id] = edit
+		for control in [holder, edit, box.get_node("PanelContainer2")]:
+			control.set_drag_forwarding(_drag_name.bind(id), _can_drop_name, _drop_name.bind(id))
+		box.add_child(holder)
+		box.move_child(holder, box.get_node("PanelContainer2").get_index() + 1)
+	_refresh_names()
+
+func _card(id):
+	return $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer.get_node(str(id))
+
+func _slot_of(edit):
+	for id in name_edits:
+		if name_edits[id] == edit:
+			return id
+	return 0
+
+func _refresh_names():
+	for id in name_edits:
+		name_edits[id].text = str(Global.player_names.get(id, ""))
+
+func _drag_name(_at, id):
+	var preview = Label.new()
+	var name = name_edits[id].text if name_edits[id].text != "" else name_edits[id].placeholder_text
+	preview.text = name
+	preview.add_theme_font_size_override("font_size", 34)
+	preview.add_theme_color_override("font_color", Color(Global.playerColors[id]))
+	preview.add_theme_constant_override("outline_size", 8)
+	preview.add_theme_color_override("font_outline_color", Color.BLACK)
+	set_drag_preview(preview)
+	return {"swap_player": id}
+
+func _can_drop_name(_at, data):
+	return data is Dictionary and data.has("swap_player")
+
+func _drop_name(_at, data, id):
+	swap_players(data.swap_player, id)
+
+func swap_players(a, b):
+	if a == b:
+		return
+	var names = Global.player_names
+	var name_a = names.get(a, "")
+	names[a] = names.get(b, "")
+	names[b] = name_a
+	for control in ["Left", "Right", "Up"]:
+		var action_a = "Player%d%s" % [a, control]
+		var action_b = "Player%d%s" % [b, control]
+		var events_a = InputMap.action_get_events(action_a)
+		var events_b = InputMap.action_get_events(action_b)
+		InputMap.action_erase_events(action_a)
+		InputMap.action_erase_events(action_b)
+		for event in events_b:
+			InputMap.action_add_event(action_a, event)
+		for event in events_a:
+			InputMap.action_add_event(action_b, event)
+	var ai_a = Global.AI_Enabled[a]
+	Global.AI_Enabled[a] = Global.AI_Enabled[b]
+	Global.AI_Enabled[b] = ai_a
+	var team_a = Global.team_of(a)
+	Global.player_team[a] = Global.team_of(b)
+	Global.player_team[b] = team_a
+	var active_a = get("player%dActive" % a)
+	set("player%dActive" % a, get("player%dActive" % b))
+	set("player%dActive" % b, active_a)
+	for id in [a, b]:
+		_card(id).set_ai_status(Global.AI_Enabled[id])
+		activatePlayer(get("player%dActive" % id), _card(id), Global.playerColors[id])
+		_on_redefine_keys_recalculate_labels(id)
+	_refresh_names()
+	_refresh_match_options()
+	Global.save_settings()
 
 #endregion

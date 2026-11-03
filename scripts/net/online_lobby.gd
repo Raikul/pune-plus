@@ -27,6 +27,10 @@ var mode_button
 var points_button
 var upgrade_time_button
 var spawns_button
+var countdown_button
+var arena_button
+var settings_toggle
+var settings_box
 var invite_button
 var latency_button
 var privacy_button
@@ -106,6 +110,10 @@ func _refresh_roster():
 	upgrade_time_button.text = "Upgrade time: %d s" % int(options.get("upgrade_time", Global.online_upgrade_time))
 	spawns_button.disabled = not host
 	spawns_button.text = "Spawns: " + ("Random" if options.get("random_spawns", false) else "Fixed")
+	countdown_button.disabled = not host
+	countdown_button.text = "Countdown: " + ("ON" if options.get("round_countdown", true) else "OFF")
+	arena_button.disabled = not host
+	arena_button.text = "Arena: " + Global.level_name(options.get("level", ""))
 	var player_team = options.get("player_team", Global.player_team)
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
@@ -211,6 +219,15 @@ func _toggle_random_spawns():
 	Global.random_spawns = not Global.random_spawns
 	_match_options_edited()
 
+func _toggle_round_countdown():
+	Global.round_countdown = not Global.round_countdown
+	_match_options_edited()
+
+func _cycle_arena():
+	var choices = [""] + Global.level_paths()
+	Global.level = choices[(max(choices.find(Global.level), 0) + 1) % choices.size()]
+	_match_options_edited()
+
 func _cycle_upgrade_time():
 	var choices = Global.ONLINE_UPGRADE_TIME_OPTIONS
 	Global.online_upgrade_time = choices[(choices.find(Global.online_upgrade_time) + 1) % choices.size()]
@@ -293,26 +310,41 @@ func _build_layout():
 	actions.add_child(add_player_button)
 	add_ai_button = _button("Add AI player", func(): SteamNet.add_local_player(true))
 	actions.add_child(add_ai_button)
-	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
-	actions.add_child(upgrades_button)
+	# Mode and points always show; the rest of the match settings fold out
 	mode_button = _button("Mode: Free for all", _toggle_teams)
 	actions.add_child(mode_button)
 	points_button = _button("Points to win: Auto", _cycle_points)
 	actions.add_child(points_button)
+	settings_toggle = _button("Match settings  +", func():
+		settings_box.visible = not settings_box.visible
+		settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+"))
+	actions.add_child(settings_toggle)
+	settings_box = VBoxContainer.new()
+	settings_box.add_theme_constant_override("separation", 10)
+	settings_box.hide()
+	actions.add_child(settings_box)
+	arena_button = _button("Arena: Classic", _cycle_arena)
+	settings_box.add_child(arena_button)
+	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
+	settings_box.add_child(upgrades_button)
 	upgrade_time_button = _button("Upgrade time: 10 s", _cycle_upgrade_time)
-	actions.add_child(upgrade_time_button)
+	settings_box.add_child(upgrade_time_button)
 	spawns_button = _button("Spawns: Fixed", _toggle_random_spawns)
-	actions.add_child(spawns_button)
+	settings_box.add_child(spawns_button)
+	countdown_button = _button("Countdown: ON", _toggle_round_countdown)
+	settings_box.add_child(countdown_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))
-	# Twelve buttons: a bit smaller than the rest so the column fits on screen
-	for button in actions.get_children():
+	# Many buttons: a bit smaller than the rest so the column fits on screen
+	for button in actions.get_children() + settings_box.get_children():
+		if not button is Button:
+			continue
 		button.add_theme_font_size_override("font_size", 24)
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
 			var style = ui_theme.get_stylebox(state, "Button").duplicate()
-			style.content_margin_top = 9
-			style.content_margin_bottom = 9
+			style.content_margin_top = 7
+			style.content_margin_bottom = 7
 			button.add_theme_stylebox_override(state, style)
 
 	var players_box = VBoxContainer.new()
@@ -341,9 +373,14 @@ func _build_layout():
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 30)
 		panel.add_child(row)
-		var element = _label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot]))
-		element.custom_minimum_size.x = 170
-		row.add_child(element)
+		var element_box = VBoxContainer.new()
+		element_box.custom_minimum_size.x = 190
+		element_box.alignment = BoxContainer.ALIGNMENT_CENTER
+		element_box.add_theme_constant_override("separation", 0)
+		element_box.add_child(_label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot])))
+		# What its power does, in two words
+		element_box.add_child(_label(Global.POWER_TAGLINES[slot], 20, Color(Global.playerColors[slot]).lightened(0.35)))
+		row.add_child(element_box)
 		var texts = VBoxContainer.new()
 		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(texts)

@@ -44,8 +44,8 @@ var musicProgress = 0
 
 #Gameplay
 var gapSize = 1
-var shrooms = true
-var upgrades = false
+var shrooms = false
+var upgrades = true
 var lessons = false
 
 var player_stats: Dictionary = {
@@ -163,6 +163,63 @@ var online_points_to_win = 0
 var random_spawns = false
 var online_random_spawns = false
 
+# "3, 2, 1, GO!" before every round (the first one always has it)
+var round_countdown = true
+var online_round_countdown = true
+
+func round_countdown_enabled() -> bool:
+	return online_round_countdown if isMultiplayerActive else round_countdown
+
+# Arena: a level scene with walls (res://levels, see docs/levels.md); "" = the empty classic arena
+var level = ""
+var online_level = ""
+const LEVELS_DIR = "res://levels/"
+
+# A level scene run on its own from the editor (Level._playtest) plays on itself
+var test_level = ""
+
+func level_path() -> String:
+	if test_level != "":
+		return test_level
+	return online_level if isMultiplayerActive else level
+
+# Every level scene in LEVELS_DIR (exports list them too)
+func level_paths() -> Array:
+	var paths = []
+	if DirAccess.dir_exists_absolute(LEVELS_DIR):
+		for file in ResourceLoader.list_directory(LEVELS_DIR):
+			if file.ends_with(".tscn") and not file.begins_with("_"):
+				paths.append(LEVELS_DIR + file)
+	paths.sort()
+	return paths
+
+func level_name(path) -> String:
+	if path == "":
+		return "Classic"
+	return path.get_file().get_basename().capitalize()
+
+# Names of the people at the keyboard, by the element they play (player setup). They move
+# with their keys when they drag their name to another element.
+var player_names = {1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4"}
+
+func player_name(player_id) -> String:
+	if isMultiplayerActive:
+		var entry = SteamNet.roster.get(player_id, {})
+		if not entry.is_empty():
+			return entry.name
+	if AI_Enabled.get(player_id, false):
+		return ["", "Fire", "Earth", "Air", "Water"][player_id] + " AI"
+	var name = str(player_names.get(player_id, ""))
+	return name if name.strip_edges() != "" else "Player %d" % player_id
+
+# What each element's power does, in two words (player setup and online lobby)
+const POWER_TAGLINES = ["", "Burning Shot", "Rock Armor", "Lightning Jump", "Twin Split"]
+
+# --- Accessibility (Options), off by default ---
+var nameplates = false   # Each snake's name under its head
+var snake_eyes = false   # Eyes on the heads, looking at the nearest snake
+var direction_arrow = false # A small arrow in front of each head
+
 func random_spawns_enabled() -> bool:
 	return online_random_spawns if isMultiplayerActive else random_spawns
 
@@ -181,7 +238,8 @@ func points_to_win_text(points) -> String:
 # The options a host plays an online match with
 func match_options() -> Dictionary:
 	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win,
-		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns}
+		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns, "round_countdown": round_countdown,
+		"level": level}
 
 func shrooms_enabled() -> bool:
 	return shrooms and not isMultiplayerActive
@@ -225,6 +283,16 @@ func _ready():
 	load_settings()
 	apply_volumes()
 	apply_video_settings()
+	_set_cursors()
+
+# Same look as the arrow (project setting mouse_cursor/custom_image): an I-beam over text
+# fields and a four-way arrow over things that can be dragged (player names in setup)
+func _set_cursors():
+	var center = Vector2(24, 24)
+	Input.set_custom_mouse_cursor(load("res://assets/images/ui/cursor_text.png"), Input.CURSOR_IBEAM, center)
+	var move = load("res://assets/images/ui/cursor_move.png")
+	for shape in [Input.CURSOR_MOVE, Input.CURSOR_DRAG, Input.CURSOR_CAN_DROP]:
+		Input.set_custom_mouse_cursor(move, shape, center)
 
 func load_settings() -> void:
 	var config = ConfigFile.new()
@@ -239,6 +307,14 @@ func load_settings() -> void:
 	player_team = config.get_value("match", "player_team", player_team)
 	points_to_win = config.get_value("match", "points_to_win", points_to_win)
 	random_spawns = config.get_value("match", "random_spawns", random_spawns)
+	round_countdown = config.get_value("match", "round_countdown", round_countdown)
+	level = config.get_value("match", "level", level)
+	if level != "" and not ResourceLoader.exists(level):
+		level = ""
+	player_names = config.get_value("game", "player_names", player_names)
+	nameplates = config.get_value("accessibility", "nameplates", nameplates)
+	snake_eyes = config.get_value("accessibility", "snake_eyes", snake_eyes)
+	direction_arrow = config.get_value("accessibility", "direction_arrow", direction_arrow)
 	vsync = config.get_value("video", "vsync", vsync)
 	max_fps = config.get_value("video", "max_fps", max_fps)
 	show_fps = config.get_value("video", "show_fps", show_fps)
@@ -260,6 +336,12 @@ func save_settings() -> void:
 	config.set_value("match", "player_team", player_team)
 	config.set_value("match", "points_to_win", points_to_win)
 	config.set_value("match", "random_spawns", random_spawns)
+	config.set_value("match", "round_countdown", round_countdown)
+	config.set_value("match", "level", level)
+	config.set_value("game", "player_names", player_names)
+	config.set_value("accessibility", "nameplates", nameplates)
+	config.set_value("accessibility", "snake_eyes", snake_eyes)
+	config.set_value("accessibility", "direction_arrow", direction_arrow)
 	config.set_value("video", "vsync", vsync)
 	config.set_value("video", "max_fps", max_fps)
 	config.set_value("video", "show_fps", show_fps)

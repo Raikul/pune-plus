@@ -13,6 +13,46 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.6.1",
+		"name": "Faces & Arenas",
+		"date": "2026-11-03",
+		"sections": [
+			["Snakes", [
+"Water's power no longer pulls the snake to the side: only the twins veer off, and you keep steering.",
+				"A soft pulse in the snake's color when its power finishes recharging.",
+				"Water casting its power makes a small ripple. Crashing makes a burst of shards, and every point gained pops a +1 over the snake.",
+			]],
+			["Fire", [
+				"Phoenix is untouchable for a moment after rising, so it can't die on the spot next to a wall, and it never rises inside a level's wall.",
+				"Phoenix no longer triggers in a duel: with a single rival left, the round just ends.",
+			]],
+			["AI", [
+				"The AI sees spinning and sliding walls coming and steers out of their way.",
+			]],
+			["Player setup", [
+				"Match settings moved to the top left corner: Mode and Points to win always in view, everything else under Match settings: Arena, Upgrades, Upgrade pick time, Shrooms, Spawns and Countdown. The online lobby folds them the same way.",
+				"Shrooms and Upgrades left the main menu for Match settings. New players start with Upgrades on and Shrooms off.",
+				"Player names are editable on each card. Drag a name onto another card to swap elements: the name, keys, AI and selection move together.",
+				"Each element shows what its power does in two words, offline and online.",
+				"The mouse pointer turns into a text cursor over the name boxes and a move cursor over what can be dragged.",
+				"Gamepad keys no longer stretch the player boxes on the upgrade screen.",
+			]],
+			["Match flow", [
+				"There's a countdown before every round, for every mode. Turn it off with the Countdown match setting (the first round always counts down).",
+				"The first countdown shows the match's goal, like FREE FOR ALL - FIRST TO 30 - DODGE EVERYTHING.",
+				"The win and stats screens use the players' names.",
+				"New stats: Fire's times revived and Earth's crossings of its own trail.",
+			]],
+			["Arenas", [
+				"New Arena setting with two layouts besides the classic empty arena: Pillars and Windmill, whose walls spin and slide.",
+				"Levels are made in the Godot editor: draw walls as polygons, give them a slide or a spin, place starting spots and playtest with F6 (docs/levels.md).",
+			]],
+			["Accessibility", [
+				"New Accessibility tab in Options, all off by default: nameplates under the snakes, a small arrow showing where each snake is heading, and snake eyes that look at the nearest snake (with a forked tongue now and then).",
+			]],
+		],
+	},
+	{
 		"version": "0.6.0",
 		"name": "Victory Lap",
 		"date": "2026-11-01",

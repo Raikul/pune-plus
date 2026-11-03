@@ -47,6 +47,10 @@ func ai_should_activate(_direction: int) -> bool:
 func try_prevent_death() -> bool:
 	if phoenix_used or player.stats == null or player.stats.get_stat("fire.phoenix") < 1.0:
 		return false
+	# Down to a duel (one other snake left): rising would only keep the winner waiting
+	var others = get_tree().get_nodes_in_group("alivePlayers").filter(func(p): return p != player)
+	if others.size() <= 1:
+		return false
 	phoenix_used = true
 	player.phoenix_ash()
 	aim = player.phoenix_rise_point()[1]

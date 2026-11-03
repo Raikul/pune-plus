@@ -7,6 +7,9 @@ class_name PowerFx
 # - ember: a glowing ember with a countdown ring (Phoenix waiting to rise)
 # - explosion: a burst of fire (Phoenix rising, clearing the trails around it)
 # - shock: electric arcs crackling around a snake while it is electrocuted (Air's Static Shock)
+# - pulse: a soft ring around a snake whose power just recharged
+# - burst: shards flying out where a snake died
+# - score: a "+1" floating up from a snake that scored
 # Each effect is its own node on the playground, so it outlives the snake that made it.
 
 const LIGHTNING_TIME = 0.35
@@ -28,6 +31,8 @@ var target: Node2D = null # Shock: the snake it follows
 var radius = 90.0         # Explosion size
 var sparks = []           # Shock: current small arcs
 var heading = null        # Ember: the rotation it will rise with (null = no arrow)
+var text = ""             # Score popup
+const SCORE_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 
 # Air: one bolt per straight part of the jump (two when it wrapped around a wall)
 static func lightning(parent: Node, parts: Array, bolt_color: Color) -> void:
@@ -38,14 +43,40 @@ static func lightning(parent: Node, parts: Array, bolt_color: Color) -> void:
 	fx.segments = parts
 	parent.add_child(fx)
 
-# Water: a burst where the snake appears
-static func splash(parent: Node, at: Vector2, splash_color: Color, size: float = 1.0) -> void:
+# Water: a burst where the snake appears. opacity < 1 for a subtler one (casting the power)
+static func splash(parent: Node, at: Vector2, splash_color: Color, size: float = 1.0, opacity: float = 1.0) -> void:
 	var fx = PowerFx.new()
 	fx.kind = "splash"
 	fx.color = splash_color
 	fx.duration = SPLASH_TIME
 	fx.center = at
 	fx.scale = Vector2(size, size)
+	fx.modulate.a = opacity
+	parent.add_child(fx)
+
+static func pulse(parent: Node, snake: Node2D, pulse_color: Color) -> void:
+	var fx = PowerFx.new()
+	fx.kind = "pulse"
+	fx.color = pulse_color
+	fx.duration = 0.55
+	fx.target = snake
+	parent.add_child(fx)
+
+static func burst(parent: Node, at: Vector2, burst_color: Color) -> void:
+	var fx = PowerFx.new()
+	fx.kind = "burst"
+	fx.color = burst_color
+	fx.duration = 0.6
+	fx.center = at
+	parent.add_child(fx)
+
+static func score(parent: Node, at: Vector2, text_color: Color, text: String = "+1") -> void:
+	var fx = PowerFx.new()
+	fx.kind = "score"
+	fx.color = text_color
+	fx.duration = 1.0
+	fx.center = at
+	fx.text = text
 	parent.add_child(fx)
 
 # Phoenix: the ember left where the snake died, until it rises
@@ -78,7 +109,16 @@ static func shock(parent: Node, snake: Node2D, shock_color: Color, time: float) 
 func _ready():
 	top_level = true
 	z_index = 20 # Above trails and heads
-	if kind in ["ember", "explosion"]:
+	if kind == "burst":
+		position = center
+		for i in 10:
+			droplets.append(Vector2.RIGHT.rotated(TAU * i / 10.0 + randf_range(-0.25, 0.25)) * randf_range(0.5, 1.1))
+	elif kind == "score":
+		position = center
+		z_index = 30
+	elif kind == "pulse":
+		position = target.global_position
+	elif kind in ["ember", "explosion"]:
 		position = center
 		for i in 18:
 			droplets.append(Vector2.RIGHT.rotated(TAU * i / 18.0 + randf_range(-0.15, 0.15)) * randf_range(0.6, 1.15))
@@ -101,6 +141,9 @@ func _process(delta):
 		if flicker >= FLICKER_INTERVAL:
 			flicker = 0.0
 			_roll_bolts()
+	elif kind == "pulse":
+		if is_instance_valid(target) and target.is_inside_tree():
+			position = target.global_position
 	elif kind == "shock":
 		if not is_instance_valid(target) or not target.is_inside_tree():
 			queue_free()
@@ -167,6 +210,29 @@ func _draw():
 		draw_arc(Vector2.ZERO, radius * grow, 0, TAU, 64, Color(color.lightened(0.3), fade), 6.0, true)
 		for direction in droplets:
 			draw_circle(direction * radius * 1.1 * grow, 7.0 * fade, Color(color.lightened(0.2), fade))
+	elif kind == "pulse":
+		# One ring growing out of the head and fading: subtle, never covers the trail
+		var grow = ease(t, 0.35)
+		draw_arc(Vector2.ZERO, 10.0 + 26.0 * grow, 0, TAU, 40, Color(color.lightened(0.25), 0.55 * fade), 3.0 * fade + 1.0, true)
+		draw_circle(Vector2.ZERO, 10.0 + 18.0 * grow, Color(color, 0.12 * fade))
+	elif kind == "burst":
+		# Shards of the snake's color flying apart, and a quick flash
+		var grow = ease(t, 0.3)
+		draw_circle(Vector2.ZERO, 22.0 * (1.0 - t), Color(1, 1, 1, 0.55 * fade))
+		draw_arc(Vector2.ZERO, 8.0 + 30.0 * grow, 0, TAU, 32, Color(color, 0.7 * fade), 3.0, true)
+		for direction in droplets:
+			var tip = direction * 48.0 * grow
+			draw_line(tip * 0.6, tip, Color(color.lightened(0.2), fade), 3.0, true)
+	elif kind == "score":
+		var rise = ease(t, 0.4) * 34.0
+		var alpha = 1.0 if t < 0.6 else 1.0 - (t - 0.6) / 0.4
+		var pop = 1.0 + 0.35 * max(0.0, 1.0 - t * 6.0)
+		draw_set_transform(Vector2(0, -26.0 - rise), 0.0, Vector2.ONE * pop)
+		var font_size = 26
+		var width = SCORE_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		draw_string_outline(SCORE_FONT, Vector2(-width / 2, 9), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 6, Color(0, 0, 0, 0.7 * alpha))
+		draw_string(SCORE_FONT, Vector2(-width / 2, 9), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(color.lightened(0.15), alpha))
+		draw_set_transform(Vector2.ZERO)
 	elif kind == "shock":
 		var flash = 0.6 + 0.4 * sin(age * 40.0)
 		draw_circle(Vector2.ZERO, 18.0, Color(color, 0.12 * flash))

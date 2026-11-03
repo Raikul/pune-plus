@@ -27,17 +27,6 @@ func _ready():
 	RNG = RandomNumberGenerator.new()
 	player_scene = preload("res://scenes/player.tscn")
 	groupColliders()
-	if Global.isMultiplayerActive:
-		# Pickups aren't synced online yet (docs/multiplayer.md)
-		for child in get_children():
-			if child is Shroom:
-				child.queue_free()
-		net_session = NetSession.new()
-		net_session.name = "NetSession"
-		add_child(net_session)
-		net_session.setup(self) # The host spawns the first round once every peer has loaded
-	else:
-		setupPlayers()
 	$Events.set_space(topLimit,bottomLimit)
 	setup_music()
 	var active_ids = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active"))
@@ -63,9 +52,19 @@ func _ready():
 #	Global.scoreToReach = 1
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
 	$HUD.set_target(Global.scoreToReach)
+	_load_level()
+	# After the rules above: the first countdown shows them
+	if Global.isMultiplayerActive:
+		net_session = NetSession.new()
+		net_session.name = "NetSession"
+		add_child(net_session)
+		net_session.setup(self) # The host spawns the first round once every peer has loaded
+	else:
+		setupPlayers()
 	
 func _process(delta):
 	_count_dead_time(delta)
+	_pop_scores()
 	#pause_menu_input()
 	#exit_menu_input()
 	#if Input.is_key_pressed(KEY_ESCAPE):
@@ -92,6 +91,18 @@ func exit_menu_input() -> void:
 			$ExitButton.show()
 			get_tree().paused = true
 
+
+# "+1" over a snake whenever its score goes up (online too: it watches the synced scores)
+var shown_scores = {}
+func _pop_scores():
+	for id in [1, 2, 3, 4]:
+		var score = Global.get("player%dScore" % id)
+		var before = shown_scores.get(id, score)
+		shown_scores[id] = score
+		if score > before:
+			var snake = get_node_or_null("Player%d" % id)
+			if snake and is_instance_valid(snake):
+				PowerFx.score(self, snake.global_position, Color(Global.playerColors[id]), "+%d" % (score - before))
 
 # End-screen stats: seconds each snake spends dead (or as a Phoenix ember) while the
 # round goes on. Online each machine counts its own snakes.
@@ -184,22 +195,26 @@ func setupPlayers(spawns = {}):
 		player.show()
 	get_tree().get_first_node_in_group("HUD").set_process(true)
 	refresh_upgrade_badges()
-	# 3 s before the first round; with random starting spots, 2 s before every other round
-	# so players can find where they are
-	var countdown = 0 if counted_down else 3
-	if countdown == 0 and Global.random_spawns_enabled():
-		countdown = 2
+	# 3 s before the first round, with the match's goal; 2 s before every other round unless
+	# the Countdown match setting is off
+	var first = not counted_down
+	var countdown = 3 if first else (2 if Global.round_countdown_enabled() else 0)
 	counted_down = true
 	if countdown > 0:
-		await _start_countdown(countdown)
+		await _start_countdown(countdown, _quest_text() if first else "")
 		if not is_inside_tree():
 			return
 	time_flowing = true
 
 var counted_down = false
 
-# The snakes wait in place through "3, 2, 1, GO!" (from seconds down)
-func _start_countdown(seconds):
+# The match's goal, shown under the first countdown
+func _quest_text() -> String:
+	var mode = "2V2 TEAMS" if teams_mode else "FREE FOR ALL"
+	return "%s - FIRST TO %d - DODGE EVERYTHING" % [mode, Global.scoreToReach]
+
+# The snakes wait in place through "3, 2, 1, GO!" (from seconds down); quest: a line under it
+func _start_countdown(seconds, quest = ""):
 	var steps = range(seconds, 0, -1).map(func(n): return str(n)) + ["GO!"]
 	var snakes = get_tree().get_nodes_in_group("activePlayers")
 	for snake in snakes:
@@ -218,6 +233,25 @@ func _start_countdown(seconds):
 	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(label)
+	if quest != "":
+		var line = Label.new()
+		line.text = quest
+		line.add_theme_font_override("font", preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf"))
+		line.add_theme_font_size_override("font_size", 46)
+		line.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+		line.add_theme_constant_override("outline_size", 14)
+		line.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Across the screen, a bit under the middle
+		line.anchor_right = 1.0
+		line.anchor_top = 0.5
+		line.anchor_bottom = 0.5
+		line.offset_top = 150
+		line.offset_bottom = 220
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		layer.add_child(line)
+		# Fades out with the GO!
+		line.create_tween().tween_property(line, "modulate:a", 0.0, 0.6).set_delay(seconds + 0.4)
 	for step in steps:
 		label.text = step
 		label.pivot_offset = get_viewport_rect().size / 2
@@ -239,6 +273,24 @@ func _start_countdown(seconds):
 		if not is_inside_tree():
 			return
 
+# The chosen arena layout (Global.level_path(), scripts/levels/level.gd), if any
+var level: Level
+
+func _load_level():
+	var path = Global.level_path()
+	if path == "" or not ResourceLoader.exists(path):
+		return
+	level = load(path).instantiate()
+	add_child(level)
+	# Over the floor and outer walls, under the snakes (added later)
+	move_child(level, $Colliders.get_index() + 1)
+
+## How far from a level's walls a snake can start
+const SPAWN_LEVEL_MARGIN = 110.0
+
+func _clear_of_level(point) -> bool:
+	return level == null or level.is_clear(point, SPAWN_LEVEL_MARGIN)
+
 ## Random starting spots: distance from the walls, from each other, and how far the
 ## heading can stray from facing the middle of the arena
 const SPAWN_WALL_MARGIN = 160.0
@@ -248,19 +300,31 @@ const SPAWN_HEADING_SPREAD = PI / 4
 # {player_id: [x, y, rotation]} for these snakes: fixed corners, or anywhere with Random starts
 func roll_spawns(ids):
 	var spawns = {}
-	if not Global.random_spawns_enabled():
-		for id in ids:
-			spawns[id] = roll_spawn(id)
-		return spawns
 	var arena = _arena_rect().grow(-SPAWN_WALL_MARGIN)
 	var middle = arena.get_center()
 	var taken = []
-	for id in ids:
-		var point = Vector2.ZERO
+	var to_roll = ids
+	if not Global.random_spawns_enabled():
+		# Fixed spots: the level's markers, else the usual corners; a corner that lands on a
+		# level wall gets a random spot instead
+		to_roll = []
+		for id in ids:
+			var spot = level.spawn_for(id) if level else []
+			if spot.is_empty():
+				spot = roll_spawn(id)
+				if not _clear_of_level(Vector2(spot[0], spot[1])):
+					to_roll.append(id)
+					continue
+			spawns[id] = spot
+			taken.append(Vector2(spot[0], spot[1]))
+	for id in to_roll:
+		var point = middle
 		# The spot farthest from the others, if no try gets far enough (it always should)
 		var best_distance = -1.0
 		for attempt in 200:
 			var candidate = Vector2(randf_range(arena.position.x, arena.end.x), randf_range(arena.position.y, arena.end.y))
+			if not _clear_of_level(candidate):
+				continue
 			var nearest = INF
 			for other in taken:
 				nearest = min(nearest, candidate.distance_to(other))
@@ -338,6 +402,7 @@ func playerDead(player):
 	player.hide_teleport_marker()
 	$HUD.set_player_dead(player.playerId) # <--- AGREGAR ESTA LÍNEA
 	if player.is_in_group("alivePlayers") :
+		_death_fx(player)
 		player.remove_from_group("alivePlayers")
 		if teams_mode:
 			# One point for the other team, if it still has a snake alive
@@ -383,7 +448,14 @@ func mark_player_dead(player):
 	player.hide_teleport_marker()
 	player.set_process(false)
 	$HUD.set_player_dead(player.playerId)
+	if player.is_in_group("alivePlayers"):
+		_death_fx(player)
 	player.remove_from_group("alivePlayers")
+
+func _death_fx(player):
+	PowerFx.burst(self, player.global_position, Color(Global.playerColors[player.playerId]))
+	if player.has_method("set_face"):
+		player.set_face("dead")
 
 ## Seconds the arena stays frozen on the final result before the win screen
 const FINAL_RESULT_TIME = 2.0
@@ -408,7 +480,7 @@ func finishGame(playerId):
 	if teams_mode:
 		$Lesson.improvise(Global.TEAM_NAMES[Global.team_of(playerId)] + " Wins", arena)
 	else:
-		$Lesson.improvise("Player "+str(playerId)+" Wins", arena)
+		$Lesson.improvise(Global.player_name(playerId) + " Wins", arena)
 	$Lesson.show()
 	$Victory.play()
 	winners = _winners(playerId)
@@ -433,7 +505,7 @@ func _winners(player_id):
 # Who's behind a snake, for the end screens. input_id: the Player{N} keys that steer it on
 # this machine (0 = an AI, or a snake of another machine)
 func _end_info(player_id):
-	var entry = {"name": "Player %d" % player_id, "input_id": player_id, "ai": Global.AI_Enabled[player_id]}
+	var entry = {"name": Global.player_name(player_id), "input_id": player_id, "ai": Global.AI_Enabled[player_id]}
 	if net_session:
 		var slot = SteamNet.roster.get(player_id, {})
 		entry.name = slot.get("name", entry.name)
@@ -441,8 +513,6 @@ func _end_info(player_id):
 		entry.input_id = net_session.input_id_for(player_id)
 	if entry.ai:
 		entry.input_id = 0
-		if not net_session:
-			entry.name = "AI"
 	return entry
 
 # The winners take a lap behind the win screen's text (scripts/celebration.gd)

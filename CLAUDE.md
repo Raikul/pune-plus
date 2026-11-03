@@ -22,6 +22,7 @@ No test suite; verify changes by headless runs (look for `ERROR`/`SCRIPT ERROR`)
 ## Layout
 
 - `scripts/` and `scenes/` – game code (scripts live in both folders, `.tscn` scenes in `scenes/`).
+- `levels/` – arena layouts (walls inside the playground), made with `scripts/levels/` (`Level`, `LevelWall`); how-to in `docs/levels.md`.
 - `assets/` – art, fonts, sounds; `assets/jorge-resources/` is the artist's (Jorge) UI/power art.
 - `fireball sprite/` – fireball sprite sheets/frames (work in progress on `ivo_bola_de_fuego`).
 - `addons/AS2P/` – editor plugin (AnimatedSprite → AnimationPlayer converter).

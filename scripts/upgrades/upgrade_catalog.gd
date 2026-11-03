@@ -90,7 +90,7 @@ const UPGRADES = [
 		"id": &"fire_phoenix",
 		"rarity": "legendary",
 		"name": "Phoenix",
-		"description": "Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right.",
+		"description": "Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right. Doesn't trigger in a duel: with a single rival left, the round just ends.",
 		"element": "fire",
 		"icon": "phoenix",
 		"stat_mods": {"fire.phoenix": {"add": 1.0}},
