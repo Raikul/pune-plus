@@ -8,6 +8,7 @@ var base: Dictionary = {
 	"earth.duration": 1.2,
 	"earth.scale": 1.0,         # Ancho del camino de rocas (1 = normal)
 	"earth.stone_walk": 0.0,    # 1 = atraviesa sus propias fisuras sin morir
+	"earth.border_pass": 0.0,   # 1 = con la armadura puede salir del área de juego
 	"fire.radius": 1.0,
 	"fire.duration": 2.5,       # Segundos de vuelo; después se desvanece (0 = sin límite)
 	"fire.phoenix": 0.0,        # 1 = renace una vez por ronda

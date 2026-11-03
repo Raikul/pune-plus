@@ -158,6 +158,16 @@ const UPGRADES = [
 		"max_stacks": 1,
 	},
 	{
+		"id": &"earth_off_the_map",
+		"rarity": "epic",
+		"name": "Off the Map",
+		"description": "While your armor lasts you can leave the arena through its edges. Be back inside when it wears off, or you're crushed.",
+		"element": "earth",
+		"icon": "off_the_map",
+		"stat_mods": {"earth.border_pass": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
 		"id": &"water_extra_copy",
 		"rarity": "rare",
 		"name": "Extra Twin",

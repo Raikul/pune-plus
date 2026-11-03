@@ -146,6 +146,9 @@ func groupColliders():
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
+	# The outer border only (not the level's walls): Earth's Off the Map passes it
+	for border in [$Colliders/Control/LimitBottom, $Colliders/LimitTop, $Colliders/LimitLeft, $Colliders/LimitRight]:
+		border.add_to_group("border")
 	_draw_arena_border()
 
 # One thin line on the inner edge of the four wall colliders (where a head dies), instead

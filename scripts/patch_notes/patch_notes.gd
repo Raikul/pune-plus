@@ -26,6 +26,12 @@ const RELEASES = [
 				"Phoenix is untouchable for a moment after rising, so it can't die on the spot next to a wall, and it never rises inside a level's wall.",
 				"Phoenix no longer triggers in a duel: with a single rival left, the round just ends.",
 			]],
+			["Earth", [
+				"New epic upgrade, Off the Map: while the armor lasts, Earth can leave the arena through its edges. Be back inside when it wears off, or you're crushed. An arrow on the edge of the screen shows where you are while you're out.",
+			]],
+			["Instructions", [
+				"Power gallery: every base power and upgrade on one screen, a column per element and a row per rarity, with open slots and totals to see where each element stands.",
+			]],
 			["AI", [
 				"The AI sees spinning and sliding walls coming and steers out of their way.",
 			]],

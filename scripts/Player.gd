@@ -112,6 +112,7 @@ func _ready():
 		add_child(face)
 	if Global.nameplates or Global.direction_arrow:
 		add_child(SnakeOverlay.new())
+	add_child(OffscreenMarker.new())
 
 	if stats != null:
 		stats.stats_changed.connect(refresh_stats)
@@ -143,6 +144,8 @@ func _process(delta):
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 		if ai_enabled and not _human_steering():
 			direction = _ai_dodge_moving_walls(direction)
+			if invincible and has_border_pass() and _beyond_border():
+				direction = _ai_steer_home()
 
 	if ai_enabled and powerAvailable: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
@@ -157,6 +160,15 @@ func _process(delta):
 	rotation += angular_speed * direction * delta
 	var velocity = Vector2.UP.rotated(rotation) * speed
 	position += velocity * delta
+# Off the Map: outside the arena the raycasts see the border from behind and would steer
+# further out; head back to the middle instead
+func _ai_steer_home() -> int:
+	var middle = Vector2((left_limit_x + right_limit_x) / 2.0, (top_limit_y + bottom_limit_y) / 2.0)
+	var turn = Vector2.UP.rotated(rotation).angle_to(middle - global_position)
+	if abs(turn) < 0.1:
+		return 0
+	return 1 if turn > 0 else -1
+
 func _human_steering() -> bool:
 	return input_id != 0 and (Input.is_action_pressed("Player%dLeft" % input_id) or Input.is_action_pressed("Player%dRight" % input_id))
 
@@ -294,8 +306,9 @@ func _physics_process(delta):
 	if net_remote:
 		return
 	# Safety net: a snake that got outside the arena somehow (power, lag) dies instead of
-	# wandering off screen forever
-	if is_processing() and _outside_arena():
+	# wandering off screen forever. Earth with Off the Map may roam out there while its
+	# armor lasts (set_invincible checks where it is when the armor ends).
+	if is_processing() and _outside_arena() and not (invincible and has_border_pass()):
 		$CollisionShape2D.set_deferred("disabled", true)
 		set_process(false)
 		emit_signal("dead")
@@ -347,7 +360,10 @@ func _on_area_entered(area):
 		return
 
 	# Earth's power makes it pass through trails, not walls (it used to slip out of the arena
-	# and stay alive off screen)
+	# and stay alive off screen). Off the Map lets it through the arena's border, not through
+	# the level's walls.
+	if invincible and has_border_pass() and area.is_in_group("border"):
+		return
 	if invincible and area is TrailSegment and area.get_parent() == self and listOfNodes.find(area) == -1:
 		_count_own_trail_pass()
 	if (not invincible and teleport_grace <= 0) or area.is_in_group("limits"):
@@ -357,11 +373,14 @@ func _on_area_entered(area):
 				return
 
 			# Muerte normal
-			_credit_death(area)
-			$CollisionShape2D.set_deferred("disabled", true)
-			$Split.play()
-			set_process(false)
-			emit_signal("dead")
+			_crash(area)
+
+func _crash(cause):
+	_credit_death(cause)
+	$CollisionShape2D.set_deferred("disabled", true)
+	$Split.play()
+	set_process(false)
+	emit_signal("dead")
 
 # End-screen stats: Earth's armor taking it through its own trail. One crossing touches a
 # few pieces in a row, so touches close together count once.
@@ -485,7 +504,10 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 	return fissure_instance
 	
 func set_invincible(state: bool) -> void:
-	invincible = state	
+	invincible = state
+	# Off the Map: the armor wore off with the snake outside the arena, or still in its border
+	if not state and has_border_pass() and is_processing() and not net_remote and _beyond_border():
+		_crash(self)
 
 # Start-of-match countdown: the snake waits in place, no trail, no power, no gap clock
 func set_frozen(state: bool) -> void:
@@ -732,6 +754,21 @@ func _on_own_rock() -> bool:
 		if area.is_in_group("Fissures") and is_ancestor_of(area):
 			return true
 	return false
+
+# Past the arena's border lines, or touching one of them
+func _beyond_border() -> bool:
+	if left_limit_x == null or right_limit_x == null or top_limit_y == null or bottom_limit_y == null:
+		return false
+	var p = global_position
+	if p.x < left_limit_x or p.x > right_limit_x or p.y < top_limit_y or p.y > bottom_limit_y:
+		return true
+	for area in get_overlapping_areas():
+		if area.is_in_group("border"):
+			return true
+	return false
+
+func has_border_pass() -> bool:
+	return stats != null and stats.get_stat("earth.border_pass") >= 1.0
 
 func has_stone_walk() -> bool:
 	return stats != null and stats.get_stat("earth.stone_walk") >= 1.0

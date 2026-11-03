@@ -58,6 +58,8 @@ func _draw():
 			_draw_wide_body(center)
 		"stone_walk":
 			_draw_stone_walk(center)
+		"off_the_map":
+			_draw_off_the_map(center)
 		"phoenix":
 			_draw_phoenix(center)
 		"shock":
@@ -208,6 +210,21 @@ func _draw_stone_walk(center):
 		Color(1, 1, 1, 1.0 - 0.6 * crossing))
 	draw_set_transform(Vector2.ZERO)
 	_draw_symbol(AIR_EARTH_SYMBOL, Vector2(x, center.y), size.x * 0.32, true)
+
+# The Earth symbol loops out through the edge of the arena and back in, the edge dashed
+# while it can pass
+func _draw_off_the_map(center):
+	var edge_x = size.x * 0.7
+	var cycle = fmod(time, 2.4) / 2.4
+	var angle = TAU * cycle
+	var pos = Vector2(edge_x - size.x * 0.12, center.y) + Vector2(cos(angle), sin(angle) * 0.7) * size.x * 0.28
+	var dash = 10.0
+	var y = 6.0
+	while y < size.y - 6:
+		draw_line(Vector2(edge_x, y), Vector2(edge_x, min(y + dash, size.y - 6)), Color(0.62, 0.36, 1.0), 4)
+		y += dash * 1.8
+	draw_rect(Rect2(edge_x + 2, 0, size.x - edge_x, size.y), Color(0, 0, 0, 0.35))
+	_draw_symbol(AIR_EARTH_SYMBOL, pos, size.x * 0.3, true, 0.55 if pos.x > edge_x else 1.0)
 
 # Fire symbol burns down to an ember and bursts back
 func _draw_phoenix(center):
