@@ -58,7 +58,7 @@ func _add_volume_sliders():
 	box.add_child(grid)
 	for bus in ["Master", "Music", "Effects"]:
 		var name_label = Label.new()
-		name_label.text = bus
+		name_label.text = "AUDIO_" + bus.to_upper() # Translation key
 		name_label.custom_minimum_size.x = 150
 		var slider = HSlider.new()
 		slider.min_value = 0.0

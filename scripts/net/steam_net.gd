@@ -41,7 +41,7 @@ const CLOCK_SAMPLES = 8
 
 var steam = null
 var steam_ready = false
-var steam_status = "Steam not started"
+var steam_status = "NET_STEAM_NOT_STARTED" # Shown translated (a key, or tr() of one)
 var steam_signals_connected = false
 var persona_name = "Player"
 var lobby_id = 0
@@ -74,8 +74,8 @@ func _ready():
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
-	multiplayer.connection_failed.connect(func(): _end_session("Could not connect"))
-	multiplayer.server_disconnected.connect(func(): _end_session("The host left"))
+	multiplayer.connection_failed.connect(func(): _end_session(tr("NET_COULD_NOT_CONNECT")))
+	multiplayer.server_disconnected.connect(func(): _end_session(tr("NET_HOST_LEFT")))
 	_check_launch_invite()
 
 func _process(delta):
@@ -128,16 +128,16 @@ func start_steam() -> bool:
 	if steam_ready:
 		return true
 	if not Engine.has_singleton("Steam") or not ClassDB.class_exists("SteamMultiplayerPeer"):
-		steam_status = "This build has no Steam support (use the GodotSteam editor)"
+		steam_status = tr("NET_NO_STEAM")
 		return false
 	steam = Engine.get_singleton("Steam")
 	var result = steam.steamInitEx(APP_ID, true)
 	if result.status != 0:
-		steam_status = "Steam failed to start: " + str(result.verbal)
+		steam_status = tr("NET_STEAM_FAILED") % str(result.verbal)
 		return false
 	steam_ready = true
 	persona_name = steam.getPersonaName()
-	steam_status = "Steam ready - " + persona_name
+	steam_status = tr("NET_STEAM_READY") % persona_name
 	if not steam_signals_connected:
 		steam_signals_connected = true
 		steam.lobby_created.connect(_on_lobby_created)
@@ -153,7 +153,7 @@ func stop_steam():
 		return
 	steam.steamShutdown()
 	steam_ready = false
-	steam_status = "Steam not started"
+	steam_status = "NET_STEAM_NOT_STARTED"
 
 # A friend's invite can also start the game with "+connect_lobby <id>": the game goes
 # straight to the Multiplayer screen, which starts Steam and joins (take_pending_invite).
@@ -206,7 +206,7 @@ func host_lobby():
 	var make_private = lobby_private
 	leave()
 	lobby_private = make_private
-	_set_status("Creating lobby...")
+	_set_status(tr("NET_CREATING_LOBBY"))
 	steam.createLobby(_lobby_type(), MAX_PLAYERS)
 
 func _lobby_type():
@@ -229,13 +229,13 @@ func _new_lobby_code():
 func join_by_code(code):
 	code = code.strip_edges().to_upper()
 	if code.length() != LOBBY_CODE_LENGTH:
-		_set_status("Lobby codes have %d letters and numbers" % LOBBY_CODE_LENGTH)
+		_set_status(tr("NET_CODE_LENGTH") % LOBBY_CODE_LENGTH)
 		return
 	if not steam_ready:
 		_set_status(steam_status)
 		return
 	searching_code = code
-	_set_status("Looking for lobby " + code + "...")
+	_set_status(tr("NET_LOOKING_FOR_LOBBY") % code)
 	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListStringFilter(LOBBY_CODE_KEY, code, LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
@@ -243,34 +243,34 @@ func join_by_code(code):
 
 func _on_lobby_created(result, new_lobby_id):
 	if result != STEAM_RESULT_OK:
-		_set_status("Could not create lobby (" + str(result) + ")")
+		_set_status(tr("NET_CREATE_FAILED") % str(result))
 		return
 	lobby_id = new_lobby_id
 	steam.setLobbyData(lobby_id, LOBBY_GAME_KEY, LOBBY_GAME_VALUE)
-	steam.setLobbyData(lobby_id, "name", persona_name + "'s Pune")
+	steam.setLobbyData(lobby_id, "name", tr("NET_LOBBY_NAME") % persona_name)
 	lobby_code = _new_lobby_code()
 	steam.setLobbyData(lobby_id, LOBBY_CODE_KEY, lobby_code)
 	steam.setLobbyData(lobby_id, LOBBY_PRIVATE_KEY, "1" if lobby_private else "0")
 	var peer = _new_steam_peer()
 	var error = peer.host_with_lobby(lobby_id)
 	if error != OK:
-		_set_status("Could not host (" + str(error) + ")")
+		_set_status(tr("NET_HOST_FAILED") % str(error))
 		return
 	multiplayer.multiplayer_peer = peer
 	_start_roster()
-	_set_status("Lobby ready - invite your friends")
+	_set_status(tr("NET_LOBBY_READY"))
 
 func join_lobby(id):
 	if not steam_ready:
 		_set_status(steam_status)
 		return
 	leave()
-	_set_status("Joining lobby...")
+	_set_status(tr("NET_JOINING"))
 	steam.joinLobby(id)
 
 func _on_lobby_joined(joined_lobby, _permissions, _locked, response):
 	if response != CHAT_ROOM_ENTER_SUCCESS:
-		_set_status("Could not join lobby (" + str(response) + ")")
+		_set_status(tr("NET_JOIN_FAILED") % str(response))
 		return
 	lobby_id = joined_lobby
 	lobby_code = steam.getLobbyData(lobby_id, LOBBY_CODE_KEY)
@@ -281,10 +281,10 @@ func _on_lobby_joined(joined_lobby, _permissions, _locked, response):
 	var peer = _new_steam_peer()
 	var error = peer.connect_to_lobby(lobby_id)
 	if error != OK:
-		_set_status("Could not connect to lobby (" + str(error) + ")")
+		_set_status(tr("NET_CONNECT_FAILED") % str(error))
 		return
 	multiplayer.multiplayer_peer = peer
-	_set_status("Connecting to host...")
+	_set_status(tr("NET_CONNECTING_HOST"))
 
 func _new_steam_peer():
 	var peer = ClassDB.instantiate("SteamMultiplayerPeer")
@@ -298,7 +298,7 @@ func find_lobbies():
 		_set_status(steam_status)
 		return
 	searching_code = ""
-	_set_status("Searching lobbies...")
+	_set_status(tr("NET_SEARCHING"))
 	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListStringFilter(LOBBY_PRIVATE_KEY, "0", LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
@@ -309,7 +309,7 @@ func _on_lobby_match_list(lobbies):
 		var code = searching_code
 		searching_code = ""
 		if lobbies.is_empty():
-			_set_status("No lobby with code " + code)
+			_set_status(tr("NET_NO_CODE") % code)
 		else:
 			join_lobby(lobbies[0])
 		return
@@ -320,7 +320,7 @@ func _on_lobby_match_list(lobbies):
 			"name": steam.getLobbyData(id, "name"),
 			"members": steam.getNumLobbyMembers(id),
 		})
-	_set_status("Found " + str(found.size()) + " lobbies")
+	_set_status(tr("NET_FOUND") % found.size())
 	lobby_list_received.emit(found)
 
 func invite_friends():
@@ -333,23 +333,23 @@ func host_lan():
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(LAN_PORT, MAX_PLAYERS - 1)
 	if error != OK:
-		_set_status("LAN host failed (" + str(error) + ")")
+		_set_status(tr("NET_LAN_HOST_FAILED") % str(error))
 		return
 	multiplayer.multiplayer_peer = peer
 	is_lan = true
 	_start_roster()
-	_set_status("LAN host on port " + str(LAN_PORT))
+	_set_status(tr("NET_LAN_HOSTING") % LAN_PORT)
 
 func join_lan(address = "127.0.0.1"):
 	leave()
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_client(address, LAN_PORT)
 	if error != OK:
-		_set_status("LAN join failed (" + str(error) + ")")
+		_set_status(tr("NET_LAN_JOIN_FAILED") % str(error))
 		return
 	multiplayer.multiplayer_peer = peer
 	is_lan = true
-	_set_status("Connecting to " + address + "...")
+	_set_status(tr("NET_CONNECTING_TO") % address)
 
 func leave():
 	if is_online():
@@ -394,10 +394,10 @@ func _local_name():
 	var chosen = str(Global.online_names.get(1, "")).strip_edges()
 	if chosen != "":
 		return chosen
-	return persona_name if steam_ready and not is_lan else "Player " + str(multiplayer.get_unique_id() % 1000)
+	return persona_name if steam_ready and not is_lan else tr("PLAYER_N") % (multiplayer.get_unique_id() % 1000)
 
 func _on_connected_to_server():
-	_set_status("Connected")
+	_set_status(tr("NET_CONNECTED"))
 	introduce.rpc_id(1, _local_name())
 
 func _on_peer_connected(_peer_id):
@@ -455,7 +455,7 @@ func _host_add_extra(peer_id, ai, slot = 0):
 	if owner_slots.is_empty():
 		return
 	var owner_name = roster[owner_slots[0]].name
-	var player_name = "AI (" + owner_name + ")" if ai else owner_name + " #" + str(owner_slots.size() + 1)
+	var player_name = tr("NET_AI_OF") % owner_name if ai else owner_name + " #" + str(owner_slots.size() + 1)
 	var added = _add_slot(peer_id, player_name, ai, slot)
 	if added != 0:
 		# A person who named themselves on that machine before (the name comes with the

@@ -40,7 +40,7 @@ func randomizeLesson(type):
 	match type:
 		"Water":
 			lessonNumber = rng.randf_range(0, LessonList.WaterLessons.size())
-			lessonText = LessonList.WaterLessons[lessonNumber]
+			lessonText = tr(LessonList.WaterLessons[lessonNumber])
 
 func showLesson():
 	lessonTextBox.set_text(lessonText)
@@ -83,7 +83,7 @@ func _style_dopamine():
 	hold_ring.fill_color = winnerTextBox.get_theme_color("font_color")
 	prompt.add_child(hold_ring)
 	var hint = Label.new()
-	hint.text = "HOLD PUNCHI TO CONTINUE"
+	hint.text = "HINT_HOLD_PUNCHI"
 	hint.add_theme_font_override("font", ODIN)
 	hint.add_theme_font_size_override("font_size", 28)
 	hint.add_theme_color_override("font_color", Color.WHITE)

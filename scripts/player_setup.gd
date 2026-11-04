@@ -56,7 +56,7 @@ func _polish_cards():
 		punchi_plate.self_modulate = Color.WHITE
 		# What the power does, in two words, under the symbol
 		var tagline = Label.new()
-		tagline.text = Global.POWER_TAGLINES[id]
+		tagline.text = Global.POWER_TAGLINES[id] # Translation key
 		tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		tagline.add_theme_font_size_override("font_size", 28)
 		tagline.add_theme_color_override("font_color", element_color.lightened(0.3))
@@ -135,11 +135,11 @@ func activatePlayer(active, playerBox, color):
 	if active:
 		playerBox.modulate = Color.WHITE.lerp(Color(color), 0.45)
 #		playerBox.get_node("TextureRect").modulate = color
-		playerBox.get_node("VBoxContainer/Select").text = "Deselect"
+		playerBox.get_node("VBoxContainer/Select").text = "SETUP_DESELECT"
 	else :
 		playerBox.modulate = Color.WHITE
 #		playerBox.get_node("TextureRect").modulate = Color.WHITE
-		playerBox.get_node("VBoxContainer/Select").text = "Select"
+		playerBox.get_node("VBoxContainer/Select").text = "SETUP_SELECT"
 	
 func _on_color_picker_color_changed(color):
 	P4Box.get_node("Label").modulate = color
@@ -157,7 +157,7 @@ func _on_go_pressed():
 			if actives[id]:
 				sides[Global.team_of(id)] = true
 		if sides.size() < 2:
-			options_warning.text = "Teams need at least one player on each team"
+			options_warning.text = tr("SETUP_TEAMS_WARNING")
 			return
 	options_warning.text = ""
 	Global.player1Active = player1Active
@@ -302,7 +302,7 @@ func _build_match_options():
 	panel.add_theme_constant_override("separation", 10)
 	add_child(panel)
 	var title = Label.new()
-	title.text = "MATCH"
+	title.text = "SETUP_MATCH"
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	panel.add_child(title)
@@ -346,6 +346,13 @@ func _build_match_options():
 		team_buttons[id] = team_button
 	_refresh_match_options()
 
+# A new language (Options): the texts built in code again
+func _notification(what):
+	if what == NOTIFICATION_TRANSLATION_CHANGED and mode_button != null:
+		_refresh_match_options()
+		for id in name_edits:
+			name_edits[id].placeholder_text = tr("PLAYER_N") % id
+
 func _match_button(parent, callback):
 	var button = _pill_button(28, 400)
 	button.custom_minimum_size.y = 58
@@ -388,21 +395,21 @@ func _toggle_team(id):
 	_refresh_match_options()
 
 func _refresh_match_options():
-	mode_button.text = "Mode: " + ("2v2 Teams" if Global.teams else "Free for all")
-	points_button.text = "Points to win: " + Global.points_to_win_text(Global.points_to_win)
-	spawns_button.text = "Spawns: " + ("Random" if Global.random_spawns else "Fixed")
-	settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+")
-	arena_button.text = "Arena rotation: " + Global.level_rotation_text(Global.level_rotation)
-	upgrades_button.text = "Upgrades: " + ("On" if Global.upgrades else "Off")
-	upgrade_time_button.text = "Upgrade pick time: " + Global.upgrade_time_text(Global.upgrade_time)
+	mode_button.text = tr("MATCH_MODE") % (tr("MATCH_TEAMS") if Global.teams else tr("MATCH_FFA"))
+	points_button.text = tr("MATCH_POINTS") % Global.points_to_win_text(Global.points_to_win)
+	spawns_button.text = tr("MATCH_SPAWNS") % (tr("MATCH_SPAWNS_RANDOM") if Global.random_spawns else tr("MATCH_SPAWNS_FIXED"))
+	settings_toggle.text = tr("MATCH_SETTINGS") + "  " + ("-" if settings_box.visible else "+")
+	arena_button.text = tr("MATCH_ARENAS") % Global.level_rotation_text(Global.level_rotation)
+	upgrades_button.text = tr("MATCH_UPGRADES") % Global.on_off(Global.upgrades)
+	upgrade_time_button.text = tr("MATCH_UPGRADE_TIME") % Global.upgrade_time_text(Global.upgrade_time)
 	upgrade_time_button.disabled = not Global.upgrades
-	shrooms_button.text = "Shrooms: " + ("On" if Global.shrooms else "Off")
-	countdown_button.text = "Countdown: " + ("On" if Global.round_countdown else "Off")
+	shrooms_button.text = tr("MATCH_SHROOMS") % Global.on_off(Global.shrooms)
+	countdown_button.text = tr("MATCH_COUNTDOWN") % Global.on_off(Global.round_countdown)
 	options_warning.text = ""
 	for id in team_buttons:
 		var team = Global.team_of(id)
 		team_buttons[id].visible = Global.teams
-		team_buttons[id].text = Global.TEAM_NAMES[team]
+		team_buttons[id].text = Global.team_name(team)
 		team_buttons[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
 		team_buttons[id].add_theme_color_override("font_hover_color", Global.TEAM_COLORS[team].lightened(0.3))
 		team_buttons[id].add_theme_color_override("font_focus_color", Global.TEAM_COLORS[team])
@@ -427,7 +434,7 @@ func _build_name_boxes():
 		style.border_color = Color(Global.playerColors[id])
 		style.border_width_bottom = 3
 		holder.add_theme_stylebox_override("panel", style)
-		holder.tooltip_text = "Drag to swap elements with another player"
+		holder.tooltip_text = "SETUP_DRAG_NAME"
 		holder.mouse_default_cursor_shape = Control.CURSOR_MOVE
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 4)
@@ -444,7 +451,7 @@ func _build_name_boxes():
 		row.add_child(grip)
 		var edit = LineEdit.new()
 		edit.max_length = 14
-		edit.placeholder_text = "Player %d" % id
+		edit.placeholder_text = tr("PLAYER_N") % id
 		edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit.custom_minimum_size.y = 52

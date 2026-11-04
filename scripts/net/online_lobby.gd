@@ -7,10 +7,11 @@ extends Control
 # setting to test the netcode with two game windows on one machine.
 
 const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
-const ELEMENT_NAMES = ["", "FIRE", "EARTH", "AIR", "WATER"]
+# Translation keys (shown with tr())
+const ELEMENT_NAMES = ["", "ELEMENT_FIRE_UPPER", "ELEMENT_EARTH_UPPER", "ELEMENT_AIR_UPPER", "ELEMENT_WATER_UPPER"]
 const FAKE_LATENCIES = [0.0, 0.1, 0.2]
 const KEY_ACTIONS = ["Left", "Right", "Up"]
-const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchi"}
+const KEY_NAMES = {"Left": "KEY_LEFT", "Right": "KEY_RIGHT", "Up": "KEY_PUNCHI"}
 const HIGHLIGHT = Color(0.91, 0.61, 0.17)
 
 var status_label
@@ -82,13 +83,13 @@ func _refresh_roster():
 		row.name.visible = not row.open_button.visible
 		row.name_edit.visible = false
 		if entry == null:
-			row.name.text = "Open"
+			row.name.text = tr("LOBBY_OPEN")
 			row.name.modulate = Color(1, 1, 1, 0.4)
 			row.keys.text = ""
 			continue
 		row.name.modulate = Color.WHITE
 		var local = entry.peer == me
-		row.name.text = entry.name + ("  (you)" if local and not entry.ai else "")
+		row.name.text = entry.name + ("  " + tr("LOBBY_YOU") if local and not entry.ai else "")
 		# Your own people: a name box instead (and the name they used last time comes back)
 		if local and not entry.ai:
 			row.name.visible = false
@@ -97,12 +98,12 @@ func _refresh_roster():
 				row.name_edit.text = entry.name
 			_restore_name(slot, entry)
 		if entry.ai:
-			row.keys.text = "AI, runs on " + ("this machine" if local else "its owner's machine")
+			row.keys.text = tr("LOBBY_AI_HERE") if local else tr("LOBBY_AI_THERE")
 		elif local:
 			row.keys.text = _keys_text(entry.keys)
 			row.keys_button.visible = true
 		else:
-			row.keys.text = "Plays on their machine"
+			row.keys.text = tr("LOBBY_PLAYS_THERE")
 		row.keys.modulate = Color(0.7, 0.7, 0.7)
 		row.remove_button.visible = SteamNet.can_remove_slot(slot, me)
 	if rebind_keys != 0:
@@ -116,33 +117,33 @@ func _refresh_roster():
 	var options = Global.match_options() if SteamNet.is_host() or not SteamNet.is_online() else SteamNet.match_options
 	var host = SteamNet.is_host()
 	var in_steam_lobby = SteamNet.lobby_code != ""
-	code_label.text = ("Code: " + SteamNet.lobby_code) if in_steam_lobby else ""
+	code_label.text = (tr("LOBBY_CODE_LABEL") % SteamNet.lobby_code) if in_steam_lobby else ""
 	copy_code_button.visible = in_steam_lobby
-	privacy_button.text = "Lobby: " + ("Private" if SteamNet.lobby_private else "Public")
+	privacy_button.text = tr("LOBBY_PRIVACY") % (tr("LOBBY_PRIVATE") if SteamNet.lobby_private else tr("LOBBY_PUBLIC"))
 	# Before hosting it picks the new lobby's type; in a lobby only the host changes it
 	privacy_button.disabled = SteamNet.is_lan or (SteamNet.is_online() and not host)
 	upgrades_button.disabled = not host
-	upgrades_button.text = "Upgrades: " + ("ON" if options.get("upgrades", false) else "OFF")
+	upgrades_button.text = tr("MATCH_UPGRADES") % Global.on_off(options.get("upgrades", false))
 	mode_button.disabled = not host
-	mode_button.text = "Mode: " + ("2v2 Teams" if options.get("teams", false) else "Free for all")
+	mode_button.text = tr("MATCH_MODE") % (tr("MATCH_TEAMS") if options.get("teams", false) else tr("MATCH_FFA"))
 	points_button.disabled = not host
-	points_button.text = "Points to win: " + Global.points_to_win_text(options.get("points_to_win", 0))
+	points_button.text = tr("MATCH_POINTS") % Global.points_to_win_text(options.get("points_to_win", 0))
 	# Seconds each snake has to pick its upgrade (only matters with upgrades on)
 	upgrade_time_button.disabled = not host or not options.get("upgrades", false)
-	upgrade_time_button.text = "Upgrade time: %d s" % int(options.get("upgrade_time", Global.online_upgrade_time))
+	upgrade_time_button.text = tr("MATCH_UPGRADE_TIME") % Global.upgrade_time_text(int(options.get("upgrade_time", Global.online_upgrade_time)))
 	spawns_button.disabled = not host
-	spawns_button.text = "Spawns: " + ("Random" if options.get("random_spawns", false) else "Fixed")
+	spawns_button.text = tr("MATCH_SPAWNS") % (tr("MATCH_SPAWNS_RANDOM") if options.get("random_spawns", false) else tr("MATCH_SPAWNS_FIXED"))
 	countdown_button.disabled = not host
-	countdown_button.text = "Countdown: " + ("ON" if options.get("round_countdown", true) else "OFF")
+	countdown_button.text = tr("MATCH_COUNTDOWN") % Global.on_off(options.get("round_countdown", true))
 	arena_button.disabled = not host
-	arena_button.text = "Arena rotation: " + Global.level_rotation_text(options.get("levels", [options.get("level", "")]))
+	arena_button.text = tr("MATCH_ARENAS") % Global.level_rotation_text(options.get("levels", [options.get("level", "")]))
 	var player_team = options.get("player_team", Global.player_team)
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
 		var team = player_team.get(slot, 0)
 		team_button.visible = options.get("teams", false)
 		team_button.disabled = not host
-		team_button.text = Global.TEAM_NAMES[team]
+		team_button.text = Global.team_name(team)
 		team_button.add_theme_color_override("font_color", Global.TEAM_COLORS[team])
 		team_button.add_theme_color_override("font_disabled_color", Global.TEAM_COLORS[team].darkened(0.2))
 	invite_button.disabled = SteamNet.lobby_id == 0
@@ -150,7 +151,7 @@ func _refresh_roster():
 func _keys_text(keys):
 	var parts = []
 	for action in KEY_ACTIONS:
-		parts.append(KEY_NAMES[action] + ": " + Global.action_key_name("Player" + str(keys) + action))
+		parts.append(tr(KEY_NAMES[action]) + ": " + Global.action_key_name("Player" + str(keys) + action))
 	return "   ".join(parts)
 
 
@@ -165,11 +166,11 @@ func _fill_open_menu(slot):
 	popup.clear()
 	for own_slot in SteamNet.local_slots():
 		var entry = SteamNet.roster[own_slot]
-		popup.add_item("Take slot: move " + entry.name + " (" + ELEMENT_NAMES[own_slot] + ")", own_slot)
+		popup.add_item(tr("LOBBY_TAKE_SLOT") % [entry.name, tr(ELEMENT_NAMES[own_slot])], own_slot)
 	var full = SteamNet.roster.size() >= SteamNet.MAX_PLAYERS
-	popup.add_item("Add player here (this keyboard)", MENU_ADD_PLAYER)
+	popup.add_item(tr("LOBBY_ADD_PLAYER_HERE"), MENU_ADD_PLAYER)
 	popup.set_item_disabled(popup.get_item_index(MENU_ADD_PLAYER), full)
-	popup.add_item("Add my AI here", MENU_ADD_AI)
+	popup.add_item(tr("LOBBY_ADD_AI_HERE"), MENU_ADD_AI)
 	popup.set_item_disabled(popup.get_item_index(MENU_ADD_AI), full)
 
 func _on_open_menu_chosen(id, slot):
@@ -194,7 +195,7 @@ func _show_rebind_prompt():
 	for slot in slot_rows:
 		var entry = SteamNet.roster.get(slot)
 		if entry and SteamNet.is_local_slot(slot) and entry.keys == rebind_keys:
-			slot_rows[slot].keys.text = "Press the key for " + KEY_NAMES[KEY_ACTIONS[rebind_step]].to_upper() + "..."
+			slot_rows[slot].keys.text = tr("LOBBY_PRESS_KEY") % tr(KEY_NAMES[KEY_ACTIONS[rebind_step]]).to_upper()
 			slot_rows[slot].keys.modulate = HIGHLIGHT
 			return
 	rebind_keys = 0 # That snake is gone
@@ -219,7 +220,7 @@ func _show_lobbies(lobbies):
 	for child in lobby_list.get_children():
 		child.queue_free()
 	if lobbies.is_empty():
-		lobby_list.add_child(_label("No lobbies found", 24, Color(0.6, 0.6, 0.6)))
+		lobby_list.add_child(_label(tr("LOBBY_NONE_FOUND"), 24, Color(0.6, 0.6, 0.6)))
 	for lobby in lobbies:
 		var button = _button("%s  (%d/4)" % [lobby.name, lobby.members], func(): SteamNet.join_lobby(lobby.id))
 		lobby_list.add_child(button)
@@ -275,7 +276,7 @@ func _on_back_pressed():
 func _cycle_fake_latency():
 	var index = (FAKE_LATENCIES.find(SteamNet.fake_latency) + 1) % FAKE_LATENCIES.size()
 	SteamNet.fake_latency = FAKE_LATENCIES[index]
-	latency_button.text = "Fake latency: %d ms" % int(SteamNet.fake_latency * 1000)
+	latency_button.text = tr("LOBBY_FAKE_LATENCY") % int(SteamNet.fake_latency * 1000)
 
 #region Layout
 
@@ -308,7 +309,7 @@ func _build_layout():
 	layout.add_theme_constant_override("separation", 30)
 	margin.add_child(layout)
 
-	var title = _label("ONLINE", 72, Color.WHITE)
+	var title = _label(tr("LOBBY_TITLE"), 72, Color.WHITE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(title)
 	status_label = _label("", 26, Color(0.7, 0.7, 0.7))
@@ -324,43 +325,43 @@ func _build_layout():
 	actions.custom_minimum_size.x = 420
 	actions.add_theme_constant_override("separation", 10)
 	columns.add_child(actions)
-	var host_button = _button("Host lobby", SteamNet.host_lobby)
+	var host_button = _button(tr("LOBBY_HOST"), SteamNet.host_lobby)
 	actions.add_child(host_button)
-	privacy_button = _button("Lobby: Public", func(): SteamNet.set_lobby_private(not SteamNet.lobby_private))
-	privacy_button.tooltip_text = "Private lobbies aren't listed: friends join with an invite or the lobby code"
+	privacy_button = _button(tr("LOBBY_PRIVACY") % tr("LOBBY_PUBLIC"), func(): SteamNet.set_lobby_private(not SteamNet.lobby_private))
+	privacy_button.tooltip_text = tr("LOBBY_PRIVATE_TIP")
 	actions.add_child(privacy_button)
-	invite_button = _button("Invite friends", SteamNet.invite_friends)
+	invite_button = _button(tr("LOBBY_INVITE"), SteamNet.invite_friends)
 	actions.add_child(invite_button)
-	add_player_button = _button("Add player (this keyboard)", func(): SteamNet.add_local_player(false))
+	add_player_button = _button(tr("LOBBY_ADD_PLAYER"), func(): SteamNet.add_local_player(false))
 	actions.add_child(add_player_button)
-	add_ai_button = _button("Add AI player", func(): SteamNet.add_local_player(true))
+	add_ai_button = _button(tr("LOBBY_ADD_AI"), func(): SteamNet.add_local_player(true))
 	actions.add_child(add_ai_button)
 	# Mode and points always show; the rest of the match settings fold out
-	mode_button = _button("Mode: Free for all", _toggle_teams)
+	mode_button = _button(tr("MATCH_MODE") % tr("MATCH_FFA"), _toggle_teams)
 	actions.add_child(mode_button)
-	points_button = _button("Points to win: Auto", _cycle_points)
+	points_button = _button(tr("MATCH_POINTS") % tr("VALUE_AUTO"), _cycle_points)
 	actions.add_child(points_button)
-	settings_toggle = _button("Match settings  +", func():
+	settings_toggle = _button(tr("MATCH_SETTINGS") + "  +", func():
 		settings_box.visible = not settings_box.visible
-		settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+"))
+		settings_toggle.text = tr("MATCH_SETTINGS") + "  " + ("-" if settings_box.visible else "+"))
 	actions.add_child(settings_toggle)
 	settings_box = VBoxContainer.new()
 	settings_box.add_theme_constant_override("separation", 10)
 	settings_box.hide()
 	actions.add_child(settings_box)
-	arena_button = _button("Arena rotation: Classic", _open_arena_rotation)
+	arena_button = _button(tr("MATCH_ARENAS") % tr("LEVEL_CLASSIC"), _open_arena_rotation)
 	settings_box.add_child(arena_button)
-	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
+	upgrades_button = _button(tr("MATCH_UPGRADES") % tr("VALUE_OFF"), _toggle_upgrades)
 	settings_box.add_child(upgrades_button)
-	upgrade_time_button = _button("Upgrade time: 10 s", _cycle_upgrade_time)
+	upgrade_time_button = _button(tr("MATCH_UPGRADE_TIME") % Global.upgrade_time_text(10), _cycle_upgrade_time)
 	settings_box.add_child(upgrade_time_button)
-	spawns_button = _button("Spawns: Fixed", _toggle_random_spawns)
+	spawns_button = _button(tr("MATCH_SPAWNS") % tr("MATCH_SPAWNS_FIXED"), _toggle_random_spawns)
 	settings_box.add_child(spawns_button)
-	countdown_button = _button("Countdown: ON", _toggle_round_countdown)
+	countdown_button = _button(tr("MATCH_COUNTDOWN") % tr("VALUE_ON"), _toggle_round_countdown)
 	settings_box.add_child(countdown_button)
-	start_button = _button("Start match", SteamNet.start_match)
+	start_button = _button(tr("LOBBY_START"), SteamNet.start_match)
 	actions.add_child(start_button)
-	actions.add_child(_button("Back", _on_back_pressed))
+	actions.add_child(_button(tr("UI_BACK"), _on_back_pressed))
 	# Many buttons: a bit smaller than the rest so the column fits on screen
 	for button in actions.get_children() + settings_box.get_children():
 		if not button is Button:
@@ -379,15 +380,15 @@ func _build_layout():
 	var players_header = HBoxContainer.new()
 	players_header.add_theme_constant_override("separation", 20)
 	players_box.add_child(players_header)
-	var players_title = _label("Players", 34, Color.WHITE)
+	var players_title = _label(tr("LOBBY_PLAYERS"), 34, Color.WHITE)
 	players_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	players_header.add_child(players_title)
 	code_label = _label("", 30, HIGHLIGHT)
 	code_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	players_header.add_child(code_label)
-	copy_code_button = _button("Copy code", func():
+	copy_code_button = _button(tr("LOBBY_COPY_CODE"), func():
 		DisplayServer.clipboard_set(SteamNet.lobby_code)
-		status_label.text = "Lobby code copied: " + SteamNet.lobby_code)
+		status_label.text = tr("LOBBY_CODE_COPIED") % SteamNet.lobby_code)
 	players_header.add_child(copy_code_button)
 	for slot in range(1, 5):
 		var panel = PanelContainer.new()
@@ -402,14 +403,14 @@ func _build_layout():
 		element_box.custom_minimum_size.x = 190
 		element_box.alignment = BoxContainer.ALIGNMENT_CENTER
 		element_box.add_theme_constant_override("separation", 0)
-		element_box.add_child(_label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot])))
+		element_box.add_child(_label(tr(ELEMENT_NAMES[slot]), 34, Color(Global.playerColors[slot])))
 		# What its power does, in two words
-		element_box.add_child(_label(Global.POWER_TAGLINES[slot], 20, Color(Global.playerColors[slot]).lightened(0.35)))
+		element_box.add_child(_label(tr(Global.POWER_TAGLINES[slot]), 20, Color(Global.playerColors[slot]).lightened(0.35)))
 		row.add_child(element_box)
 		var texts = VBoxContainer.new()
 		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(texts)
-		var name_label = _label("Open", 30, Color.WHITE)
+		var name_label = _label(tr("LOBBY_OPEN"), 30, Color.WHITE)
 		# Long names and key lists shrink or wrap instead of pushing the buttons off screen
 		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		name_label.clip_text = true
@@ -417,7 +418,7 @@ func _build_layout():
 		# This machine's people type the name they go by
 		var name_edit = LineEdit.new()
 		name_edit.max_length = SteamNet.MAX_NAME_LENGTH
-		name_edit.placeholder_text = "Your name"
+		name_edit.placeholder_text = tr("LOBBY_YOUR_NAME")
 		name_edit.add_theme_font_size_override("font_size", 28)
 		name_edit.custom_minimum_size = Vector2(320, 0)
 		name_edit.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -429,7 +430,7 @@ func _build_layout():
 		name_edit.hide()
 		texts.add_child(name_edit)
 		var open_button = MenuButton.new()
-		open_button.text = "Open  -  choose..."
+		open_button.text = tr("LOBBY_OPEN_CHOOSE")
 		open_button.flat = false
 		open_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		open_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -442,14 +443,14 @@ func _build_layout():
 		var keys_label = _label("", 22, Color(0.7, 0.7, 0.7))
 		keys_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		texts.add_child(keys_label)
-		var keys_button = _button("Keys", _start_rebind.bind(slot))
+		var keys_button = _button(tr("OPT_KEYS"), _start_rebind.bind(slot))
 		keys_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(keys_button)
-		var team_button = _button("Team A", _toggle_team.bind(slot))
+		var team_button = _button(Global.team_name(0), _toggle_team.bind(slot))
 		team_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		team_button.hide()
 		row.add_child(team_button)
-		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
+		var remove_button = _button(tr("LOBBY_REMOVE"), func(): SteamNet.remove_slot(slot))
 		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(remove_button)
 		slot_rows[slot] = {"name": name_label, "name_edit": name_edit, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
@@ -459,13 +460,13 @@ func _build_layout():
 	lobbies_box.custom_minimum_size.x = 440
 	lobbies_box.add_theme_constant_override("separation", 14)
 	columns.add_child(lobbies_box)
-	lobbies_box.add_child(_label("Lobbies", 34, Color.WHITE))
+	lobbies_box.add_child(_label(tr("LOBBY_LOBBIES"), 34, Color.WHITE))
 	# Join by code: for private lobbies, or when the list is too long to find one
 	var code_row = HBoxContainer.new()
 	code_row.add_theme_constant_override("separation", 10)
 	lobbies_box.add_child(code_row)
 	code_input = LineEdit.new()
-	code_input.placeholder_text = "Lobby code"
+	code_input.placeholder_text = tr("LOBBY_CODE_PLACEHOLDER")
 	code_input.max_length = SteamNet.LOBBY_CODE_LENGTH
 	code_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	code_input.add_theme_stylebox_override("normal", _box_style(Color(0.16, 0.16, 0.16)))
@@ -476,8 +477,8 @@ func _build_layout():
 		code_input.caret_column = caret)
 	code_input.text_submitted.connect(func(text): SteamNet.join_by_code(text))
 	code_row.add_child(code_input)
-	code_row.add_child(_button("Join", func(): SteamNet.join_by_code(code_input.text)))
-	lobbies_box.add_child(_button("Find lobbies", SteamNet.find_lobbies))
+	code_row.add_child(_button(tr("LOBBY_JOIN"), func(): SteamNet.join_by_code(code_input.text)))
+	lobbies_box.add_child(_button(tr("LOBBY_FIND"), SteamNet.find_lobbies))
 	lobby_list = VBoxContainer.new()
 	lobby_list.add_theme_constant_override("separation", 10)
 	lobby_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -487,10 +488,10 @@ func _build_layout():
 	lobby_scroll.add_child(lobby_list)
 	lobbies_box.add_child(lobby_scroll)
 	if OS.is_debug_build():
-		lobbies_box.add_child(_label("Debug", 22, Color(0.5, 0.5, 0.5)))
-		lobbies_box.add_child(_button("LAN host", SteamNet.host_lan))
-		lobbies_box.add_child(_button("LAN join (this PC)", func(): SteamNet.join_lan()))
-		latency_button = _button("Fake latency: 0 ms", _cycle_fake_latency)
+		lobbies_box.add_child(_label(tr("LOBBY_DEBUG"), 22, Color(0.5, 0.5, 0.5)))
+		lobbies_box.add_child(_button(tr("LOBBY_LAN_HOST"), SteamNet.host_lan))
+		lobbies_box.add_child(_button(tr("LOBBY_LAN_JOIN"), func(): SteamNet.join_lan()))
+		latency_button = _button(tr("LOBBY_FAKE_LATENCY") % 0, _cycle_fake_latency)
 		lobbies_box.add_child(latency_button)
 
 	host_button.grab_focus.call_deferred()

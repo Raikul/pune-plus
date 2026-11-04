@@ -50,8 +50,8 @@ func _ready():
 	page.add_theme_constant_override("separation", 18)
 	panel.add_child(page)
 
-	page.add_child(_label("ARENA ROTATION", 44, Color.WHITE))
-	page.add_child(_label("Every round plays a random arena from the ones checked.", 24, Color(0.7, 0.7, 0.7)))
+	page.add_child(_label(tr("ARENAS_TITLE"), 44, Color.WHITE))
+	page.add_child(_label(tr("ARENAS_SUBTITLE"), 24, Color(0.7, 0.7, 0.7)))
 
 	var scroll = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -76,9 +76,9 @@ func _ready():
 	count_label = _label("", 26, ACCENT)
 	count_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(count_label)
-	footer.add_child(_button("ALL", _select_all))
-	footer.add_child(_button("CLASSIC ONLY", func(): _set_rotation([""])))
-	var done = _button("DONE", _close)
+	footer.add_child(_button(tr("ARENAS_ALL_BUTTON"), _select_all))
+	footer.add_child(_button(tr("ARENAS_CLASSIC_ONLY"), func(): _set_rotation([""])))
+	var done = _button(tr("ARENAS_DONE"), _close)
 	footer.add_child(done)
 	_refresh()
 	first.grab_focus.call_deferred()
@@ -155,7 +155,7 @@ func _refresh():
 		card.modulate = Color.WHITE if on else Color(1, 1, 1, 0.55)
 		var check = card.find_child("Check", true, false)
 		check.text = "✓" if on else ""
-	count_label.text = "In rotation: " + Global.level_rotation_text(picked)
+	count_label.text = tr("ARENAS_IN_ROTATION") % Global.level_rotation_text(picked)
 
 func _button(text, callback) -> Button:
 	var button = Button.new()

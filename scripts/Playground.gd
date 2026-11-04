@@ -231,18 +231,18 @@ func _countdown_text(first) -> String:
 	if first:
 		lines.append(_quest_text())
 	if Global.level_rotation_setting().size() > 1:
-		lines.append("ARENA: " + Global.level_name(level_path).to_upper())
+		lines.append(tr("COUNTDOWN_ARENA") % Global.level_name(level_path).to_upper())
 	return "
 ".join(lines)
 
 # The match's goal, shown under the first countdown
 func _quest_text() -> String:
-	var mode = "2V2 TEAMS" if teams_mode else "FREE FOR ALL"
-	return "%s - FIRST TO %d - DODGE EVERYTHING" % [mode, Global.scoreToReach]
+	var mode = tr("COUNTDOWN_TEAMS") if teams_mode else tr("COUNTDOWN_FFA")
+	return tr("COUNTDOWN_QUEST") % [mode, Global.scoreToReach]
 
 # The snakes wait in place through "3, 2, 1, GO!" (from seconds down); quest: a line under it
 func _start_countdown(seconds, quest = ""):
-	var steps = range(seconds, 0, -1).map(func(n): return str(n)) + ["GO!"]
+	var steps = range(seconds, 0, -1).map(func(n): return str(n)) + [tr("COUNTDOWN_GO")]
 	var snakes = get_tree().get_nodes_in_group("activePlayers")
 	for snake in snakes:
 		snake.set_frozen(true)
@@ -589,9 +589,9 @@ func finishGame(playerId):
 	var arena_top = $Colliders/ArenaBorder.points[0].y - BORDER_WIDTH
 	var arena = Rect2(0, arena_top, screen.x, screen.y - arena_top)
 	if teams_mode:
-		$Lesson.improvise(Global.TEAM_NAMES[Global.team_of(playerId)] + " Wins", arena)
+		$Lesson.improvise(tr("WIN_NAME") % Global.team_name(Global.team_of(playerId)), arena)
 	else:
-		$Lesson.improvise(Global.player_name(playerId) + " Wins", arena)
+		$Lesson.improvise(tr("WIN_NAME") % Global.player_name(playerId), arena)
 	$Lesson.show()
 	$Victory.play()
 	winners = _winners(playerId)

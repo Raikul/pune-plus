@@ -21,9 +21,9 @@ func set_ai_status(status):
 func _on_enable_ai_toggled(button_pressed):
 
 	if button_pressed:
-		$"VBoxContainer/Enable AI".text = "Disable AI"
+		$"VBoxContainer/Enable AI".text = "SETUP_DISABLE_AI"
 	else:
-		$"VBoxContainer/Enable AI".text = "Enable AI"
+		$"VBoxContainer/Enable AI".text = "SETUP_ENABLE_AI"
 	_get_ai_badge().visible = button_pressed
 	pass # Replace with function body.
 
@@ -49,7 +49,7 @@ func _get_ai_badge():
 	style.content_margin_bottom = 2
 	ai_badge.add_theme_stylebox_override("panel", style)
 	var label = Label.new()
-	label.text = "AI PLAYER"
+	label.text = "SETUP_AI_PLAYER"
 	label.add_theme_font_size_override("font_size", 30)
 	label.add_theme_color_override("font_color", Color.WHITE)
 	ai_badge.add_child(label)

@@ -62,11 +62,12 @@ func setup(play: Dictionary):
 	bottom.offset_top = -96
 	add_child(bottom)
 
-	var title = _label("PLAY OF THE GAME", 64, Color.WHITE)
+	var title = _label(tr("REPLAY_TITLE"), 64, Color.WHITE)
 	title.position = Vector2(60, 18)
 	add_child(title)
 	var who = Global.player_name(star) if star in [1, 2, 3, 4] else ""
-	var caption = _label(("%s  -  %s" % [who.to_upper(), clip.get("caption", "")]) if who != "" else clip.get("caption", ""), 34, star_color)
+	var caption_text = tr(clip.get("caption", ""))
+	var caption = _label(("%s  -  %s" % [who.to_upper(), caption_text]) if who != "" else caption_text, 34, star_color)
 	caption.position = Vector2(64, 92)
 	add_child(caption)
 
@@ -76,7 +77,7 @@ func setup(play: Dictionary):
 	rec_dot.draw.connect(_draw_rec)
 	add_child(rec_dot)
 
-	var hint = _label("PRESS PUNCHI TO SKIP", 30, Color(1, 1, 1, 0.85))
+	var hint = _label(tr("REPLAY_SKIP"), 30, Color(1, 1, 1, 0.85))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -161,7 +162,7 @@ func _draw_rec():
 	var on = fmod(age, 1.0) < 0.6
 	if on:
 		rec_dot.draw_circle(Vector2(18, 30), 13, RED)
-	rec_dot.draw_string(ODIN, Vector2(42, 44), "REPLAY", HORIZONTAL_ALIGNMENT_LEFT, -1, 38, Color.WHITE)
+	rec_dot.draw_string(ODIN, Vector2(42, 44), tr("REPLAY_TAG"), HORIZONTAL_ALIGNMENT_LEFT, -1, 38, Color.WHITE)
 
 func _input(event):
 	if done or age < LOCKOUT:

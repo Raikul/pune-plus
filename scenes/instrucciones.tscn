@@ -4157,7 +4157,7 @@ size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0.8980392, 0, 0.02745098, 1)
 theme_override_fonts/font = SubResource("FontFile_s5yn3")
 theme_override_font_sizes/font_size = 24
-text = "Throws a ball of fire that destroys everything it comes into contact "
+text = "INSTR_FIRE"
 horizontal_alignment = 2
 
 [node name="PanelContainer2" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=1544115801]
@@ -4189,7 +4189,7 @@ size_flags_horizontal = 10
 theme_override_colors/font_color = Color(0.9019608, 0.7490196, 0, 1)
 theme_override_fonts/font = SubResource("FontFile_xlxhr")
 theme_override_font_sizes/font_size = 24
-text = " Provides temporary invincibility, making you immune to attacks         "
+text = "INSTR_EARTH"
 
 [node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=725750737]
 self_modulate = Color(1, 1, 1, 0)
@@ -4220,7 +4220,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.03137255, 0.21176471, 1, 1)
 theme_override_fonts/font = SubResource("FontFile_g7b7q")
 theme_override_font_sizes/font_size = 24
-text = "  Teleports you to the point, passing through snakes unharmed           "
+text = "INSTR_AIR"
 
 [node name="PanelContainer4" type="PanelContainer" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=895410247]
 self_modulate = Color(1, 1, 1, 0)
@@ -4251,7 +4251,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.7647059, 0.2, 1)
 theme_override_fonts/font = SubResource("FontFile_2xs0u")
 theme_override_font_sizes/font_size = 24
-text = " The player splits into two. If one dies, you control the other              "
+text = "INSTR_WATER"
 
 [node name="Button" type="Button" parent="." unique_id=849591867]
 layout_mode = 0
@@ -4259,7 +4259,7 @@ offset_left = 876.0
 offset_top = 587.0
 offset_right = 1030.0
 offset_bottom = 630.0
-text = "CLOSE"
+text = "UI_CLOSE_UPPER"
 
 [node name="Label" type="Label" parent="." unique_id=124205885]
 layout_mode = 1
@@ -4272,10 +4272,7 @@ offset_bottom = 185.0
 grow_horizontal = 2
 theme_override_fonts/font = SubResource("FontFile_0piu8")
 theme_override_font_sizes/font_size = 40
-text = "Players earn points when other players die either by touching walls or an opponent.
-Additionaly you may earn points by picking up shrooms, only in Shroom Mode
-
-"
+text = "INSTR_SCORING"
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

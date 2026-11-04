@@ -1,0 +1,400 @@
+keys,en,es,zh_CN
+VALUE_ON,On,Sí,开
+VALUE_OFF,Off,No,关
+VALUE_AUTO,Auto,Auto,自动
+SECONDS_N,%d s,%d s,%d 秒
+UPGRADE_TIME_OFF,Off,Sin límite,无限制
+PLAYER_N,Player %d,Jugador %d,玩家 %d
+AI_FALLBACK_NAME,%s AI,IA de %s,%s AI
+KEY_PAD,Pad,Mando,手柄
+KEY_MOUSE,Mouse,Ratón,鼠标
+TEAM_A,Team A,Equipo A,A 队
+TEAM_B,Team B,Equipo B,B 队
+ELEMENT_FIRE,Fire,Fuego,火
+ELEMENT_EARTH,Earth,Tierra,土
+ELEMENT_AIR,Air,Aire,风
+ELEMENT_WATER,Water,Agua,水
+ELEMENT_FIRE_UPPER,FIRE,FUEGO,火
+ELEMENT_EARTH_UPPER,EARTH,TIERRA,土
+ELEMENT_AIR_UPPER,AIR,AIRE,风
+ELEMENT_WATER_UPPER,WATER,AGUA,水
+POWER_FIRE,Burning Shot,Disparo Ardiente,烈焰射击
+POWER_EARTH,Rock Armor,Armadura de Roca,岩石护甲
+POWER_AIR,Lightning Jump,Salto Relámpago,闪电跳跃
+POWER_WATER,Twin Split,División Gemela,双生分身
+ARENAS_ALL,All %d arenas,Las %d arenas,全部 %d 个竞技场
+ARENAS_COUNT,%d arenas,%d arenas,%d 个竞技场
+LEVEL_CLASSIC,Classic,Clásica,经典
+LEVEL_CHEVRONS,Chevrons,Galones,人字纹
+LEVEL_CROSSROADS,Crossroads,Encrucijada,十字路口
+LEVEL_FUNNELS,Funnels,Embudos,漏斗
+LEVEL_LENS,Lens,Lente,透镜
+LEVEL_PARALLELS,Parallels,Paralelas,平行线
+LEVEL_SERPENT,Serpent,Serpiente,巨蛇
+LEVEL_TWIN_BLOCKS,Twin Blocks,Bloques Gemelos,双子方块
+LEVEL_ZIGZAG,Zigzag,Zigzag,之字形
+AI_BLAZE,Blaze,Llamarada,烈焰
+AI_CINDER,Cinder,Brasa,余烬
+AI_SCORCH,Scorch,Abrasador,焦灼
+AI_EMBER,Ember,Ascua,火星
+AI_INFERNO,Inferno,Infierno,炼狱
+AI_BOULDER,Boulder,Peñasco,巨石
+AI_GRANITE,Granite,Granito,花岗
+AI_TREMOR,Tremor,Temblor,震颤
+AI_PEBBLE,Pebble,Guijarro,卵石
+AI_QUAKE,Quake,Sismo,地震
+AI_GALE,Gale,Vendaval,疾风
+AI_ZEPHYR,Zephyr,Céfiro,和风
+AI_CYCLONE,Cyclone,Ciclón,气旋
+AI_BREEZE,Breeze,Brisa,微风
+AI_TEMPEST,Tempest,Tempestad,暴风
+AI_TIDE,Tide,Marea,潮汐
+AI_RIPPLE,Ripple,Onda,涟漪
+AI_TORRENT,Torrent,Torrente,激流
+AI_DRIZZLE,Drizzle,Llovizna,细雨
+AI_RIPTIDE,Riptide,Resaca,离岸流
+UI_BACK,Back,Volver,返回
+UI_CLOSE,Close,Cerrar,关闭
+UI_CLOSE_UPPER,CLOSE,CERRAR,关闭
+OPT_TITLE,OPTIONS,OPCIONES,选项
+OPT_TAB_VIDEO,Video,Vídeo,视频
+OPT_TAB_AUDIO,Audio,Audio,音频
+OPT_TAB_GAMEPLAY,Gameplay,Juego,游戏
+OPT_TAB_CONTROLS,Controls,Controles,操作
+OPT_TAB_ACCESSIBILITY,Accessibility,Accesibilidad,辅助功能
+OPT_FULLSCREEN,Full-screen,Pantalla completa,全屏
+OPT_WINDOWED,Windowed,Ventana,窗口
+OPT_BORDERLESS_WINDOW,Borderless Window,Ventana sin bordes,无边框窗口
+OPT_BORDERLESS_FULLSCREEN,Borderless Full-screen,Pantalla completa sin bordes,无边框全屏
+OPT_GAP_SMALL,Small,Pequeño,小
+OPT_GAP_MEDIUM,Medium,Mediano,中
+OPT_GAP_LARGE,Large,Grande,大
+OPT_WINDOW_MODE,Window mode,Modo de ventana,窗口模式
+OPT_WINDOW_SIZE,Window size,Tamaño de ventana,窗口大小
+OPT_VSYNC,VSync,Sincronización vertical,垂直同步
+OPT_NO_LIMIT,No limit,Sin límite,无限制
+OPT_MAX_FPS,Max FPS,FPS máximos,最大帧率
+OPT_SHOW_FPS,Show FPS,Mostrar FPS,显示帧率
+OPT_ONLY_WINDOWED,Only for the windowed modes,Solo en los modos de ventana,仅适用于窗口模式
+OPT_VOLUME_MASTER,Master volume,Volumen general,主音量
+OPT_VOLUME_MUSIC,Music volume,Volumen de la música,音乐音量
+OPT_VOLUME_EFFECTS,Effects volume,Volumen de los efectos,音效音量
+AUDIO_MASTER,Master,General,主音量
+AUDIO_MUSIC,Music,Música,音乐
+AUDIO_EFFECTS,Effects,Efectos,音效
+OPT_LANGUAGE,Language,Idioma,语言
+OPT_GAP_SIZE,Gap size,Tamaño de los huecos,缺口大小
+OPT_UPGRADE_TIME,Upgrade pick time (offline),Tiempo para elegir mejora (local),强化选择时间（本地）
+OPT_WISDOM,Wisdom on the upgrade screen,Sabiduría en la pantalla de mejoras,强化界面显示箴言
+OPT_NAMEPLATES,Nameplates on snakes,Nombres sobre las serpientes,蛇身显示名字
+OPT_DIRECTION_ARROW,Direction arrow,Flecha de dirección,方向箭头
+OPT_SNAKE_EYES,Snake eyes (look at the nearest snake),Ojos (miran a la serpiente más cercana),蛇眼（注视最近的蛇）
+OPT_NEXT_ROUND_NOTE,Both apply from the next round.,Se aplican desde la siguiente ronda.,从下一回合开始生效。
+OPT_KEYS_NOTE,"Each player's keys are set in player setup (Redefine Keys)
+or in the online lobby (Keys).","Las teclas de cada jugador se configuran en la selección de jugadores (Redefinir teclas)
+o en la sala en línea (Teclas).","每位玩家的按键可在玩家设置（重设按键）
+或在线大厅（按键）中设置。"
+OPT_RESET_KEYS,Reset all keys to default,Restablecer todas las teclas,将所有按键恢复默认
+OPT_KEYS_RESET_DONE,Keys reset to default,Teclas restablecidas,按键已恢复默认
+OPT_KEYS,Keys,Teclas,按键
+MENU_PLAY,Play,Jugar,开始游戏
+MENU_MULTIPLAYER,Multiplayer,Multijugador,多人游戏
+MENU_OPTIONS,Options,Opciones,选项
+MENU_INSTRUCTIONS,Instructions,Instrucciones,游戏说明
+MENU_QUIT,Quit,Salir,退出
+MENU_SHROOMS_Q,Shrooms?,¿Hongos?,蘑菇？
+MENU_UPGRADES_Q,Upgrades?,¿Mejoras?,强化？
+MENU_PATCH_NOTES,Patch notes,Notas del parche,更新日志
+VERSION_LABEL,Version %s (%s),Versión %s (%s),版本 %s（%s）
+STAGE_ALPHA,Alpha,Alfa,Alpha
+STAGE_BETA,Beta,Beta,Beta
+LOGO_PRESS_ANY_KEY,PRESS ANY KEY,PULSA CUALQUIER TECLA,按任意键
+PATCH_NOTES_TITLE,PATCH NOTES,NOTAS DEL PARCHE,更新日志
+PATCH_NOTES_CURRENT,current version,versión actual,当前版本
+PAUSE_RESUME,Resume,Continuar,继续
+PAUSE_SIMULATE,Simulate Round,Simular ronda,模拟回合
+INSTR_FIRE,Throws a ball of fire that destroys everything it comes into contact with,Lanza una bola de fuego que destruye todo lo que toca,发射火球，摧毁接触到的一切
+INSTR_EARTH,"Provides temporary invincibility, making you immune to attacks",Da invencibilidad temporal: los ataques no te afectan,获得短暂无敌，免疫一切攻击
+INSTR_AIR,"Teleports you to the point, passing through snakes unharmed","Te teletransporta al punto, atravesando serpientes sin daño",瞬移到标记点，穿过蛇身毫发无伤
+INSTR_WATER,"The player splits into two. If one dies, you control the other","El jugador se divide en dos. Si uno muere, controlas al otro",玩家一分为二。若其中一个死亡，你将控制另一个
+INSTR_SCORING,"Players earn points when other players die either by touching walls or an opponent.
+Additionally you may earn points by picking up shrooms, only in Shroom Mode","Los jugadores ganan puntos cuando otros mueren al tocar una pared o a un rival.
+Además puedes ganar puntos recogiendo hongos, solo en el modo Hongos","当其他玩家撞墙或撞上对手而死亡时，你会得分。
+在蘑菇模式中，拾取蘑菇也能得分"
+SETUP_REDEFINE_KEYS,Redefine Keys,Redefinir teclas,重设按键
+SETUP_SELECT,Select,Elegir,选择
+SETUP_DESELECT,Deselect,Quitar,取消选择
+SETUP_ENABLE_AI,Enable AI,Activar IA,启用 AI
+SETUP_DISABLE_AI,Disable AI,Desactivar IA,停用 AI
+SETUP_AI_PLAYER,AI PLAYER,JUGADOR IA,AI 玩家
+SETUP_TEAMS_WARNING,Teams need at least one player on each team,Cada equipo necesita al menos un jugador,每队至少需要一名玩家
+SETUP_MATCH,MATCH,PARTIDA,比赛
+SETUP_DRAG_NAME,Drag to swap elements with another player,Arrastra para intercambiar elementos con otro jugador,拖动以与其他玩家交换元素
+MATCH_MODE,Mode: %s,Modo: %s,模式：%s
+MATCH_TEAMS,2v2 Teams,Equipos 2v2,2v2 组队
+MATCH_FFA,Free for all,Todos contra todos,混战
+MATCH_POINTS,Points to win: %s,Puntos para ganar: %s,获胜分数：%s
+MATCH_SPAWNS,Spawns: %s,Salidas: %s,出生点：%s
+MATCH_SPAWNS_RANDOM,Random,Aleatorias,随机
+MATCH_SPAWNS_FIXED,Fixed,Fijas,固定
+MATCH_SETTINGS,Match settings,Ajustes de partida,比赛设置
+MATCH_ARENAS,Arena rotation: %s,Rotación de arenas: %s,竞技场轮换：%s
+MATCH_UPGRADES,Upgrades: %s,Mejoras: %s,强化：%s
+MATCH_UPGRADE_TIME,Upgrade pick time: %s,Tiempo para elegir mejora: %s,强化选择时间：%s
+MATCH_SHROOMS,Shrooms: %s,Hongos: %s,蘑菇：%s
+MATCH_COUNTDOWN,Countdown: %s,Cuenta atrás: %s,倒计时：%s
+REDEFINE_PRESS,Press a key or a gamepad button for: ,Pulsa una tecla o un botón del mando para: ,请按下按键或手柄按钮：
+KEY_LEFT_UPPER,LEFT,IZQUIERDA,左
+KEY_RIGHT_UPPER,RIGHT,DERECHA,右
+KEY_PUNCHI_UPPER,PUNCHI,PUNCHI,PUNCHI
+KEY_LEFT,Left,Izquierda,左
+KEY_RIGHT,Right,Derecha,右
+KEY_PUNCHI,Punchi,Punchi,Punchi
+HUD_FIRST_TO,FIRST TO %d,PRIMERO A %d,先得 %d 分
+COUNTDOWN_ARENA,ARENA: %s,ARENA: %s,竞技场：%s
+COUNTDOWN_TEAMS,2V2 TEAMS,EQUIPOS 2V2,2V2 组队
+COUNTDOWN_FFA,FREE FOR ALL,TODOS CONTRA TODOS,混战
+COUNTDOWN_QUEST,%s - FIRST TO %d - DODGE EVERYTHING,%s - PRIMERO A %d - ESQUIVA TODO,%s - 先得 %d 分 - 躲开一切
+COUNTDOWN_GO,GO!,¡YA!,开始！
+WIN_NAME,%s Wins,¡Gana %s!,%s 获胜
+WIN_DOPAMINE,ENJOY YOUR DOPAMINE,DISFRUTA TU DOPAMINA,尽情享受你的多巴胺
+HINT_HOLD_PUNCHI,HOLD PUNCHI TO CONTINUE,MANTÉN PUNCHI PARA CONTINUAR,按住 PUNCHI 继续
+LESSON_WATER_DROP,Anyone knows the drop is in the sea; the wise know the sea is in the drop.,"Cualquiera sabe que la gota está en el mar, el sabio sabe que también el mar está en la gota.",人人都知道水滴在大海中，智者却知道大海也在水滴中。
+LESSON_WATER_ADAPT,"Adapt, improvise and overcome","Adaptarse, improvisar y superar",适应、即兴、克服
+RARITY_COMMON,Common,Común,普通
+RARITY_UNCOMMON,Uncommon,Poco común,优秀
+RARITY_RARE,Rare,Rara,稀有
+RARITY_EPIC,Epic,Épica,史诗
+RARITY_LEGENDARY,Legendary,Legendaria,传说
+UPG_GAP_TIGHTER,Tighter Trail,Estela Cerrada,紧密尾迹
+UPG_GAP_TIGHTER_DESC,The holes in your trail close 25% sooner.,Los huecos de tu estela se cierran un 25% antes.,你尾迹中的缺口提前 25% 闭合。
+UPG_SPEED_UP,Swift Snake,Serpiente Veloz,迅捷之蛇
+UPG_SPEED_UP_DESC,Your snake moves 10% faster.,Tu serpiente se mueve un 10% más rápido.,你的蛇移动速度提升 10%。
+UPG_COOLDOWN_DOWN,Quick Recharge,Recarga Rápida,快速充能
+UPG_COOLDOWN_DOWN_DESC,Your power recharges 15% faster.,Tu poder se recarga un 15% más rápido.,你的能力充能速度提升 15%。
+UPG_FIRE_PIERCING,Piercing Flame,Llama Perforante,穿透烈焰
+UPG_FIRE_PIERCING_DESC,"Your fireball flies 1.5 s longer, burning through more of the trail.","Tu bola de fuego vuela 1,5 s más y quema más estela.",你的火球多飞行 1.5 秒，烧穿更多尾迹。
+UPG_FIRE_RADIUS,Big Fireball,Gran Bola de Fuego,巨型火球
+UPG_FIRE_RADIUS_DESC,Your fireball is 30% bigger.,Tu bola de fuego es un 30% más grande.,你的火球体积增大 30%。
+UPG_FIRE_WILDFIRE,Wildfire,Incendio,野火
+UPG_FIRE_WILDFIRE_DESC,"Your fireball leaves a trail of flames that burns for 2 s. It kills other snakes, never you.","Tu bola de fuego deja un rastro de llamas que arde 2 s. Mata a las demás serpientes, nunca a ti.",你的火球留下燃烧 2 秒的火焰轨迹。它会烧死其他蛇，但不会伤到你。
+UPG_FIRE_PHOENIX,Phoenix,Fénix,凤凰
+UPG_FIRE_PHOENIX_DESC,"Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right. Doesn't trigger in a duel: with a single rival left, the round just ends.","Una vez por ronda, renaces de tus cenizas 10 s después de morir, con un estallido que borra las estelas a tu alrededor. Apunta con Izquierda/Derecha. No se activa en un duelo: si solo queda un rival, la ronda termina.",每回合一次，死亡 10 秒后浴火重生，并清除周围的尾迹。用左/右瞄准。只剩一个对手的决斗中不触发。
+UPG_AIR_WALL_WARP,Wall Warp,Salto de Muro,穿墙传送
+UPG_AIR_WALL_WARP_DESC,Your teleport passes through the arena walls and comes out on the other side.,Tu teletransporte atraviesa los muros de la arena y sale por el otro lado.,你的瞬移可以穿过竞技场边界，从另一侧出现。
+UPG_AIR_SECOND_WIND,Second Wind,Segundo Aliento,再度起风
+UPG_AIR_SECOND_WIND_DESC,"After teleporting, teleport once more for free within 1 second.","Tras teletransportarte, puedes volver a hacerlo gratis durante 1 segundo.",瞬移后 1 秒内可以免费再瞬移一次。
+UPG_AIR_SHOCK,Static Shock,Descarga Estática,静电冲击
+UPG_AIR_SHOCK_DESC,Snakes whose heads you teleport through are electrocuted: no power for 5 s.,Las serpientes cuya cabeza atraviesas al teletransportarte quedan electrocutadas: sin poder durante 5 s.,被你瞬移穿过头部的蛇会触电：5 秒内无法使用能力。
+UPG_AIR_SCRAMBLE,Scrambler,Revoltijo,错乱
+UPG_AIR_SCRAMBLE_DESC,Your shock also swaps their left and right for 3 s.,Tu descarga además les intercambia izquierda y derecha durante 3 s.,你的电击还会让对方的左右方向颠倒 3 秒。
+UPG_AIR_STORM_FENCE,Storm Fence,Cerca de Tormenta,风暴栅栏
+UPG_AIR_STORM_FENCE_DESC,"When you teleport, lightning crackles across every gap in your trail for 1 s. Snakes caught in a gap are electrocuted: no power for 5 s (and with Scrambler, left and right swapped for 3 s).","Al teletransportarte, los rayos chisporrotean en cada hueco de tu estela durante 1 s. Las serpientes atrapadas en un hueco quedan electrocutadas: sin poder durante 5 s (y con Revoltijo, izquierda y derecha intercambiadas durante 3 s).",瞬移时，尾迹的每个缺口中电光闪烁 1 秒。困在缺口中的蛇会触电：5 秒无法使用能力（有错乱时左右颠倒 3 秒）。
+UPG_EARTH_WIDE_BODY,Tectonic Bulk,Masa Tectónica,板块巨躯
+UPG_EARTH_WIDE_BODY_DESC,"Your rocky path is 30% wider: more ground for you, more wall for them.","Tu camino de roca es un 30% más ancho: más suelo para ti, más muro para ellos.",你的岩石之路加宽 30%：你的地盘更大，对手的墙更多。
+UPG_EARTH_STONE_WALK,Stone Walker,Caminante de Piedra,踏石者
+UPG_EARTH_STONE_WALK_DESC,You walk through your own stone walls. They still stop everyone else.,Atraviesas tus propios muros de piedra. A los demás los siguen deteniendo.,你可以穿过自己的石墙，其他人仍会被挡住。
+UPG_EARTH_BURROWER,Burrower,Excavador,掘地者
+UPG_EARTH_BURROWER_DESC,"While your armor lasts you dig through walls: the arena's obstacles and its edges. Be out in the open when it wears off, or you're crushed.",Mientras dura tu armadura atraviesas muros cavando: los obstáculos de la arena y sus bordes. Sal a campo abierto antes de que se acabe o quedarás aplastado.,护甲期间可掘穿障碍物与边界。护甲结束前须回到空地，否则会被压碎。
+UPG_EARTH_BEDROCK,Bedrock,Lecho de Roca,基岩
+UPG_EARTH_BEDROCK_DESC,Your armor and rocky path last 0.25 s longer.,"Tu armadura y tu camino de roca duran 0,25 s más.",你的护甲和岩石之路多持续 0.25 秒。
+UPG_WATER_EXTRA_COPY,Extra Twin,Gemelo Extra,额外分身
+UPG_WATER_EXTRA_COPY_DESC,Keep up to 2 twins alive. Cast again while your twin lives to summon another.,Mantén hasta 2 gemelos vivos. Vuelve a lanzar el poder mientras tu gemelo vive para invocar otro.,最多同时保留 2 个分身。分身存活时再次施放可召唤另一个。
+UPG_WATER_TWIN_BURST,Twin Burst,Ráfaga Gemela,分身爆发
+UPG_WATER_TWIN_BURST_DESC,"Your power summons twins two at a time, up to your maximum.","Tu poder invoca gemelos de dos en dos, hasta tu máximo.",你的能力一次召唤两个分身，直至上限。
+UPG_WATER_THIRD_TWIN,Triplets,Trillizos,三胞胎
+UPG_WATER_THIRD_TWIN_DESC,Keep up to 3 twins alive.,Mantén hasta 3 gemelos vivos.,最多同时保留 3 个分身。
+UPG_WATER_LASTING_TWIN,Lasting Twin,Gemelo Duradero,持久分身
+UPG_WATER_LASTING_TWIN_DESC,Your twin's trail never sheds: it stays aqua and never blocks you.,La estela de tu gemelo nunca se suelta: sigue siendo agua y nunca te bloquea.,分身的尾迹永不脱落：始终保持水色，永远不会挡住你。
+UPG_SKIP,Skip,Saltar,跳过
+UPG_SKIP_DESC,Take nothing this time and keep the rest for later.,No elijas nada esta vez y guarda el resto para más adelante.,这次什么都不拿，把剩下的留到以后。
+UPGRADES_TITLE,CHOOSE YOUR UPGRADE,ELIGE TU MEJORA,选择你的强化
+UPGRADES_SUBTITLE,Each snake picks one of its own upgrades,Cada serpiente elige una de sus propias mejoras,每条蛇从自己的强化中选择一个
+UPGRADES_FOOTER,Left / Right to browse   |   Punchi to confirm,Izquierda / Derecha para ver   |   Punchi para confirmar,左 / 右 浏览   |   Punchi 确认
+UPGRADES_ALL_READY,All snakes are ready!,¡Todas las serpientes están listas!,所有蛇都准备好了！
+UPGRADES_REROLL,Press any Punchi key to roll new upgrades,Pulsa cualquier tecla Punchi para sacar nuevas mejoras,按任意 Punchi 键重新抽取强化
+UPGRADES_NONE_LEFT,Every upgrade taken!,¡Ya tienes todas las mejoras!,所有强化都已获得！
+UPGRADES_MAXED,MAXED OUT,AL MÁXIMO,已满级
+UPGRADES_READY,READY!,¡LISTO!,准备就绪！
+UPGRADES_PICKING_ONLINE,Picking online,Eligiendo en línea,正在线上选择
+UPGRADES_CHOOSING,CHOOSING...,ELIGIENDO...,选择中...
+UPGRADE_ANY_SNAKE,ANY SNAKE,CUALQUIER SERPIENTE,任意蛇
+UPGRADE_ELEMENT_POWER,%s POWER,PODER DE %s,%s之力
+UPGRADE_CHOSEN,CHOSEN!,¡ELEGIDA!,已选择！
+WISDOM_QUOTE,“%s”,«%s»,“%s”
+WISDOM_SRC_MUSASHI,"after Miyamoto Musashi, The Book of Five Rings","según Miyamoto Musashi, El libro de los cinco anillos",化用自宫本武藏《五轮书》
+WISDOM_SRC_MOORE,"after Moore & Gillette, King, Warrior, Magician, Lover","según Moore y Gillette, Rey, guerrero, mago, amante",化用自摩尔与吉列特《国王、武士、魔法师、爱人》
+WISDOM_SRC_JUNG,after C. G. Jung,según C. G. Jung,化用自荣格
+WISDOM_SRC_ALCHEMY,alchemical maxim,máxima alquímica,炼金术格言
+WISDOM_SRC_PHOENIX,Phoenix legend,leyenda del fénix,凤凰传说
+WISDOM_SRC_LAO_TZU,"after Lao Tzu, Tao Te Ching","según Lao Tse, Tao Te King",化用自老子《道德经》
+WISDOM_SRC_HERMETIC,Hermetic maxim,máxima hermética,赫尔墨斯格言
+WISDOM_SRC_DELPHI,inscription at Delphi,inscripción de Delfos,德尔斐神庙铭文
+WISDOM_SRC_PUNE_LESSON,Pune lesson,lección de Pune,Pune 的教诲
+WISDOM_SRC_PUNE_PROVERB,Pune proverb,proverbio de Pune,Pune 谚语
+WISDOM_FIRE_1,Strike when the moment opens. Hesitation is the only wall.,Golpea cuando el momento se abre. La duda es el único muro.,时机一现，即刻出手。犹豫是唯一的墙。
+WISDOM_FIRE_2,"The Warrior serves something larger than himself, and burns only what must burn.","El Guerrero sirve a algo más grande que él mismo, y solo quema lo que debe arder.",武士侍奉比自身更伟大的事物，只焚烧必须焚烧之物。
+WISDOM_FIRE_3,What you do not bring to light rules you from the dark.,Lo que no sacas a la luz te gobierna desde la oscuridad.,你未带到光明中的，会在黑暗中支配你。
+WISDOM_FIRE_4,"Solve et coagula: dissolve, then make whole again.",Solve et coagula: disuelve y vuelve a unir.,Solve et coagula：先溶解，再重新凝合。
+WISDOM_FIRE_5,"From the ashes, the same bird, but wiser.","De las cenizas, el mismo pájaro, pero más sabio.",浴火重生，仍是那只鸟，却更加睿智。
+WISDOM_EARTH_1,Heavy is the root of light; stillness is the master of restlessness.,Lo pesado es la raíz de lo ligero; la quietud es señora de la inquietud.,重为轻根，静为躁君。
+WISDOM_EARTH_2,"Know the ground before you step on it, and let it fight for you.","Conoce el terreno antes de pisarlo, y deja que luche por ti.",踏足之前先知地利，让大地为你而战。
+WISDOM_EARTH_3,The King orders the realm so that everything in it may grow.,El Rey ordena el reino para que todo en él pueda crecer.,国王治理国度，使其中万物得以生长。
+WISDOM_EARTH_4,"As above, so below.","Como es arriba, es abajo.",如其在上，如其在下。
+WISDOM_EARTH_5,A tree as wide as your arms grows from a tiny sprout.,Un árbol tan ancho como tus brazos nace de un brote diminuto.,合抱之木，生于毫末。
+WISDOM_AIR_1,The way is in training: see what cannot be seen at a glance.,El camino está en el entrenamiento: ver lo que no se ve a simple vista.,道在修炼：见常人一眼看不见之物。
+WISDOM_AIR_2,"The Magician knows the hidden rules, and moves through what others think is solid.",El Mago conoce las reglas ocultas y atraviesa lo que otros creen sólido.,魔法师通晓隐秘的法则，穿行于他人眼中的坚固之物。
+WISDOM_AIR_3,The space between the spokes is what makes the wheel useful.,El espacio entre los radios es lo que hace útil a la rueda.,当其无，有车之用。
+WISDOM_AIR_4,"Who looks outside, dreams; who looks inside, awakes.","Quien mira hacia fuera, sueña; quien mira hacia dentro, despierta.",向外看的人在做梦，向内看的人才清醒。
+WISDOM_AIR_5,Know thyself.,Conócete a ti mismo.,认识你自己。
+WISDOM_WATER_1,"Nothing is softer than water, yet nothing is better at wearing down the hard.","Nada es más blando que el agua, pero nada la supera desgastando lo duro.",天下莫柔弱于水，而攻坚强者莫之能胜。
+WISDOM_WATER_2,Become like water: take the shape of whatever holds you.,Sé como el agua: toma la forma de lo que te contiene.,如水一般：随容器而成形。
+WISDOM_WATER_3,The Lover feels the whole world as one living thing.,El Amante siente el mundo entero como un solo ser vivo.,爱人将整个世界感受为一个生命。
+WISDOM_WATER_4,The meeting of two people is like two substances touching: both are changed.,El encuentro de dos personas es como el contacto de dos sustancias: ambas se transforman.,两个人的相遇如同两种物质的接触：双方都会改变。
+WISDOM_WATER_5,Anyone knows the drop is in the sea; the wise know the sea is in the drop.,Cualquiera sabe que la gota está en el mar; el sabio sabe que el mar está en la gota.,人人都知道水滴在大海中；智者知道大海也在水滴中。
+WISDOM_ANY_1,"When nobody wins, the board teaches everyone.","Cuando nadie gana, el tablero enseña a todos.",无人获胜时，棋盘教导所有人。
+WISDOM_ANY_2,Do nothing that is of no use.,No hagas nada que no sirva.,不做无用之事。
+WISDOM_ANY_3,The journey of a thousand miles begins beneath one's feet.,El viaje de mil millas comienza bajo los propios pies.,千里之行，始于足下。
+STATS_TITLE,MATCH STATS,ESTADÍSTICAS DE LA PARTIDA,比赛数据
+STATS_WINNER,WINNER,GANADOR,胜者
+STATS_REMATCH,REMATCH,REVANCHA,再来一局
+STATS_QUIT,QUIT,SALIR,退出
+STATS_AI_CHOICE,AI: always up for more,IA: siempre quiere más,AI：随时奉陪
+STATS_HOW_CHOOSE,Left / Right to choose,Izquierda / Derecha para elegir,左 / 右 选择
+STATS_REMOTE_CHOICE,Choosing on their machine,Eligiendo en su equipo,正在对方设备上选择
+STATS_WAITING,WAITING FOR THE OTHER PLAYERS...,ESPERANDO A LOS DEMÁS JUGADORES...,等待其他玩家...
+METERS_N,%d m,%d m,%d 米
+SECONDS_DECIMAL,%.1f s,%.1f s,%.1f 秒
+STAT_KILLS,Kills,Muertes causadas,击杀
+STAT_LENGTH,Trail length,Longitud de estela,尾迹长度
+STAT_DEAD_TIME,Time dead,Tiempo muerto,死亡时长
+STAT_POWERS,Powers used,Poderes usados,能力使用次数
+STAT_FIRE_KILLS,Fireball kills,Muertes con bola de fuego,火球击杀
+STAT_FIRE_REVIVES,Times revived,Veces renacido,重生次数
+STAT_EARTH_BLOCKED,Fireballs & twins blocked,Bolas de fuego y gemelos bloqueados,挡下的火球与分身
+STAT_EARTH_OWN_TRAIL,Own trail crossed,Estela propia atravesada,穿越自身尾迹
+STAT_AIR_WARPS,Warps through the edge,Saltos por el borde,穿越边界次数
+STAT_AIR_SHOCKS,Enemies electrocuted,Enemigos electrocutados,电击敌人
+STAT_AIR_SCRAMBLE_KILLS,Kills on scrambled foes,Muertes de rivales revueltos,击杀错乱的对手
+STAT_WATER_TWINS,Twins summoned,Gemelos invocados,召唤分身
+STAT_WATER_SAVES,Lives saved by a twin,Vidas salvadas por un gemelo,分身救命次数
+AWARD_HUNTER,HUNTER,CAZADOR,猎手
+AWARD_HUNTER_DESC,Most kills,Más muertes causadas,击杀最多
+AWARD_SURVIVOR,SURVIVOR,SUPERVIVIENTE,幸存者
+AWARD_SURVIVOR_DESC,Most rounds survived to the end,Más rondas sobrevividas hasta el final,坚持到最后的回合最多
+AWARD_LONGEST_TRAIL,LONGEST TRAIL,ESTELA MÁS LARGA,最长尾迹
+AWARD_LONGEST_TRAIL_DESC,Longest trail in the match,La estela más larga de la partida,本场比赛最长的尾迹
+AWARD_UNTOUCHABLE,UNTOUCHABLE,INTOCABLE,不可触碰
+AWARD_UNTOUCHABLE_DESC,Least time dead,Menos tiempo muerto,死亡时长最短
+AWARD_MARATHON,MARATHON,MARATÓN,马拉松
+AWARD_MARATHON_DESC,Longest single life,La vida más larga,单次存活最久
+AWARD_POWER_HUNGRY,POWER HUNGRY,ANSIA DE PODER,能力狂人
+AWARD_POWER_HUNGRY_DESC,Most powers used,Más poderes usados,使用能力最多
+AWARD_GHOST,GHOST,FANTASMA,幽灵
+AWARD_GHOST_DESC,Most time dead,Más tiempo muerto,死亡时长最长
+AWARD_FIRST_OUT,FIRST OUT,PRIMERO FUERA,最先出局
+AWARD_FIRST_OUT_DESC,"First to crash, most often",El que más veces cae primero,最常第一个撞毁
+GALLERY_TITLE,POWER GALLERY,GALERÍA DE PODERES,能力图鉴
+GALLERY_BASE,BASE,BASE,基础
+GALLERY_ALWAYS_ON,Always on,Siempre activo,始终生效
+GALLERY_EVERY_SNAKE,"Every snake: turn with Left/Right, power on Up","Todas las serpientes: giran con Izquierda/Derecha, poder con Arriba",所有蛇：左/右转向，上键使用能力
+GALLERY_BASE_FIRE,Shoots a fireball that burns through the trails it hits.,Dispara una bola de fuego que quema las estelas que toca.,发射火球，烧穿所击中的尾迹。
+GALLERY_BASE_EARTH,"Rock armor: passes through trails for a moment, leaving a path of stone behind.",Armadura de roca: atraviesa estelas un momento y deja un camino de piedra detrás.,岩石护甲：短时间内穿过尾迹，并在身后留下石路。
+GALLERY_BASE_AIR,Jumps to the marker ahead of it.,Salta a la marca que tiene delante.,跳跃到前方的标记点。
+GALLERY_BASE_WATER,"Splits off a mirrored twin. If the head dies while the twin lives, you take over the twin.","Se separa un gemelo reflejado. Si la cabeza muere mientras el gemelo vive, pasas a controlarlo.",分裂出一个镜像分身。若本体死亡而分身存活，你将接管分身。
+GALLERY_PERCENT_ROLLS,%d%% of rolls,%d%% de las tiradas,出现率 %d%%
+GALLERY_OPEN_SLOT,Open slot,Hueco libre,空位
+GALLERY_TOTAL,TOTAL,TOTAL,合计
+GALLERY_UPGRADES,Upgrades,Mejoras,强化
+GALLERY_STACKS,Stacks x%d,Acumulable x%d,可叠加 x%d
+GALLERY_NEEDS,Needs %s,Requiere %s,需要 %s
+GALLERY_DISABLED,OFF (not in the rolls),DESACTIVADA (no sale en las tiradas),关闭（不会出现）
+GALLERY_ONE_UPGRADE,1 upgrade,1 mejora,1 个强化
+GALLERY_N_UPGRADES,%d upgrades,%d mejoras,%d 个强化
+GALLERY_ONE_PICK,1 pick,1 elección,1 次选择
+GALLERY_N_PICKS,%d picks,%d elecciones,%d 次选择
+REPLAY_TITLE,PLAY OF THE GAME,JUGADA DE LA PARTIDA,全场最佳
+REPLAY_SKIP,PRESS PUNCHI TO SKIP,PULSA PUNCHI PARA SALTAR,按 PUNCHI 跳过
+REPLAY_TAG,REPLAY,REPETICIÓN,回放
+REPLAY_TAKEDOWN,TAKEDOWN,DERRIBO,击杀
+REPLAY_PHOENIX,RISEN FROM THE ASHES,RENACIDO DE LAS CENIZAS,浴火重生
+REPLAY_SAVE,SAVED BY THE TWIN,SALVADO POR EL GEMELO,分身救驾
+REPLAY_BLOCK,ROCK SOLID,FIRME COMO UNA ROCA,坚如磐石
+REPLAY_SHOCK,SHOCKING,ELECTRIZANTE,电光石火
+REPLAY_LAST_STANDING,LAST ONE STANDING,EL ÚLTIMO EN PIE,最后的幸存者
+REPLAY_WIPEOUT,WIPEOUT,BATACAZO,惨烈翻车
+REPLAY_DOUBLE_KILL,DOUBLE KILL,DOBLE MUERTE,双杀
+REPLAY_TRIPLE_KILL,TRIPLE KILL,TRIPLE MUERTE,三杀
+REPLAY_QUAD_KILL,QUAD KILL,CUÁDRUPLE MUERTE,四杀
+REPLAY_UNSTOPPABLE,UNSTOPPABLE,IMPARABLE,势不可挡
+REPLAY_WHAT_A_MOMENT,WHAT A MOMENT,¡QUÉ MOMENTO!,精彩瞬间
+REPLAY_FINAL_MOMENTS,THE FINAL MOMENTS,LOS ÚLTIMOS MOMENTOS,最后时刻
+ARENAS_TITLE,ARENA ROTATION,ROTACIÓN DE ARENAS,竞技场轮换
+ARENAS_SUBTITLE,Every round plays a random arena from the ones checked.,Cada ronda se juega en una arena al azar de las marcadas.,每回合从勾选的竞技场中随机选择一个。
+ARENAS_ALL_BUTTON,ALL,TODAS,全选
+ARENAS_CLASSIC_ONLY,CLASSIC ONLY,SOLO CLÁSICA,仅经典
+ARENAS_DONE,DONE,LISTO,完成
+ARENAS_IN_ROTATION,In rotation: %s,En rotación: %s,轮换中：%s
+LEVEL_PILLARS,Pillars,Pilares,石柱
+LEVEL_WINDMILL,Windmill,Molino,风车
+LOBBY_TITLE,ONLINE,EN LÍNEA,在线
+LOBBY_OPEN,Open,Libre,空位
+LOBBY_YOU,(you),(tú),（你）
+LOBBY_AI_HERE,"AI, runs on this machine","IA, se ejecuta en este equipo",AI，运行在本机
+LOBBY_AI_THERE,"AI, runs on its owner's machine","IA, se ejecuta en el equipo de su dueño",AI，运行在其主人的设备上
+LOBBY_PLAYS_THERE,Plays on their machine,Juega en su equipo,在对方设备上游玩
+LOBBY_CODE_LABEL,Code: %s,Código: %s,代码：%s
+LOBBY_PRIVACY,Lobby: %s,Sala: %s,大厅：%s
+LOBBY_PRIVATE,Private,Privada,私密
+LOBBY_PUBLIC,Public,Pública,公开
+LOBBY_PRIVATE_TIP,Private lobbies aren't listed: friends join with an invite or the lobby code,Las salas privadas no aparecen en la lista: los amigos entran con una invitación o el código de la sala,私密大厅不会被列出：好友需通过邀请或大厅代码加入
+LOBBY_TAKE_SLOT,Take slot: move %s (%s),Ocupar puesto: mover a %s (%s),占用此位：移动 %s（%s）
+LOBBY_ADD_PLAYER_HERE,Add player here (this keyboard),Añadir jugador aquí (este teclado),在此添加玩家（本键盘）
+LOBBY_ADD_AI_HERE,Add my AI here,Añadir mi IA aquí,在此添加我的 AI
+LOBBY_PRESS_KEY,Press the key for %s...,Pulsa la tecla para %s...,请按下%s键...
+LOBBY_NONE_FOUND,No lobbies found,No se encontraron salas,未找到大厅
+LOBBY_FAKE_LATENCY,Fake latency: %d ms,Latencia simulada: %d ms,模拟延迟：%d 毫秒
+LOBBY_HOST,Host lobby,Crear sala,创建大厅
+LOBBY_INVITE,Invite friends,Invitar amigos,邀请好友
+LOBBY_ADD_PLAYER,Add player (this keyboard),Añadir jugador (este teclado),添加玩家（本键盘）
+LOBBY_ADD_AI,Add AI player,Añadir jugador IA,添加 AI 玩家
+LOBBY_START,Start match,Empezar partida,开始比赛
+LOBBY_PLAYERS,Players,Jugadores,玩家
+LOBBY_COPY_CODE,Copy code,Copiar código,复制代码
+LOBBY_CODE_COPIED,Lobby code copied: %s,Código de sala copiado: %s,已复制大厅代码：%s
+LOBBY_YOUR_NAME,Your name,Tu nombre,你的名字
+LOBBY_OPEN_CHOOSE,Open  -  choose...,Libre  -  elegir...,空位  -  选择...
+LOBBY_REMOVE,Remove,Quitar,移除
+LOBBY_LOBBIES,Lobbies,Salas,大厅
+LOBBY_CODE_PLACEHOLDER,Lobby code,Código de sala,大厅代码
+LOBBY_JOIN,Join,Unirse,加入
+LOBBY_FIND,Find lobbies,Buscar salas,查找大厅
+LOBBY_DEBUG,Debug,Depuración,调试
+LOBBY_LAN_HOST,LAN host,Crear en LAN,局域网主机
+LOBBY_LAN_JOIN,LAN join (this PC),Unirse en LAN (este PC),加入局域网（本机）
+NET_STEAM_NOT_STARTED,Steam not started,Steam no iniciado,Steam 未启动
+NET_COULD_NOT_CONNECT,Could not connect,No se pudo conectar,无法连接
+NET_HOST_LEFT,The host left,El anfitrión se fue,主机已离开
+NET_NO_STEAM,This build has no Steam support (use the GodotSteam editor),Esta versión no tiene soporte de Steam (usa el editor de GodotSteam),此版本不支持 Steam（请使用 GodotSteam 编辑器）
+NET_STEAM_FAILED,Steam failed to start: %s,Steam no pudo iniciarse: %s,Steam 启动失败：%s
+NET_STEAM_READY,Steam ready - %s,Steam listo - %s,Steam 已就绪 - %s
+NET_CREATING_LOBBY,Creating lobby...,Creando sala...,正在创建大厅...
+NET_CODE_LENGTH,Lobby codes have %d letters and numbers,Los códigos de sala tienen %d letras y números,大厅代码由 %d 个字母和数字组成
+NET_LOOKING_FOR_LOBBY,Looking for lobby %s...,Buscando la sala %s...,正在查找大厅 %s...
+NET_CREATE_FAILED,Could not create lobby (%s),No se pudo crear la sala (%s),无法创建大厅（%s）
+NET_LOBBY_NAME,%s's Pune,Pune de %s,%s 的 Pune
+NET_HOST_FAILED,Could not host (%s),No se pudo crear la partida (%s),无法创建主机（%s）
+NET_LOBBY_READY,Lobby ready - invite your friends,Sala lista - invita a tus amigos,大厅已就绪 - 邀请你的好友吧
+NET_JOINING,Joining lobby...,Entrando en la sala...,正在加入大厅...
+NET_JOIN_FAILED,Could not join lobby (%s),No se pudo entrar en la sala (%s),无法加入大厅（%s）
+NET_CONNECT_FAILED,Could not connect to lobby (%s),No se pudo conectar con la sala (%s),无法连接到大厅（%s）
+NET_CONNECTING_HOST,Connecting to host...,Conectando con el anfitrión...,正在连接主机...
+NET_SEARCHING,Searching lobbies...,Buscando salas...,正在搜索大厅...
+NET_NO_CODE,No lobby with code %s,No hay ninguna sala con el código %s,没有代码为 %s 的大厅
+NET_FOUND,Found %d lobbies,Se encontraron %d salas,找到 %d 个大厅
+NET_LAN_HOST_FAILED,LAN host failed (%s),Falló el anfitrión LAN (%s),局域网主机创建失败（%s）
+NET_LAN_HOSTING,LAN host on port %d,Anfitrión LAN en el puerto %d,局域网主机端口 %d
+NET_LAN_JOIN_FAILED,LAN join failed (%s),Falló la conexión LAN (%s),加入局域网失败（%s）
+NET_CONNECTING_TO,Connecting to %s...,Conectando con %s...,正在连接 %s...
+NET_CONNECTED,Connected,Conectado,已连接
+NET_AI_OF,AI (%s),IA (%s),AI（%s）

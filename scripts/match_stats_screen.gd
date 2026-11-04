@@ -15,6 +15,7 @@ const HOLD_TIME = 2.0
 # Each element's symbol, as on the scoreboard (tinted with the snake's color)
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = ["", "Fire-Water symbol.png", "Air-Earth symbol rot.png", "Air-Earth symbol.png", "Fire-Water symbol rot.png"]
+## [stat, its name in English]; shown translated by the key STAT_<STAT> (translations/strings.csv)
 const GENERIC_STATS = [["kills", "Kills"], ["length", "Trail length"], ["dead_time", "Time dead"], ["powers", "Powers used"]]
 const ELEMENT_STATS = {
 	1: [["fire_kills", "Fireball kills"], ["fire_revives", "Times revived"]],
@@ -24,7 +25,8 @@ const ELEMENT_STATS = {
 }
 ## Shown only when it happened at all (Air without Wall Warp never warps)
 const HIDE_WHEN_ZERO = ["air_warps"]
-## Awards: [title, stat, "max" or "min", what it's for]. A snake gets it for the most (or
+## Awards: [title, stat, "max" or "min", what it's for]. Shown translated by the keys
+## AWARD_<TITLE> and AWARD_<TITLE>_DESC (spaces as underscores: AWARD_FIRST_OUT). A snake gets it for the most (or
 ## least) of the stat in the match; ties share it; nobody gets it if everyone is level, or
 ## if the most is zero. A column shows its first MAX_AWARDS.
 const AWARDS = [
@@ -69,7 +71,7 @@ func setup(column_ids: Array, winners: Array, totals: Dictionary, player_info: D
 	layout.offset_bottom = -40
 	layout.add_theme_constant_override("separation", 30)
 	add_child(layout)
-	layout.add_child(_label("MATCH STATS", 64, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
+	layout.add_child(_label(tr("STATS_TITLE"), 64, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
 
 	var row = HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -110,7 +112,7 @@ func _column(id, winner):
 	box.add_theme_constant_override("separation", 6)
 	panel.add_child(box)
 
-	box.add_child(_label("WINNER" if winner else " ", 26, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
+	box.add_child(_label(tr("STATS_WINNER") if winner else " ", 26, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
 	var symbol = TextureRect.new()
 	symbol.texture = load(SYMBOLS_PATH + SYMBOLS[id])
 	symbol.modulate = color
@@ -130,7 +132,7 @@ func _column(id, winner):
 	box.add_child(name_label)
 	if Global.teams_enabled():
 		var team = Global.team_of(id)
-		box.add_child(_label(Global.TEAM_NAMES[team], 22, Global.TEAM_COLORS[team], HORIZONTAL_ALIGNMENT_CENTER))
+		box.add_child(_label(Global.team_name(team), 22, Global.TEAM_COLORS[team], HORIZONTAL_ALIGNMENT_CENTER))
 	box.add_child(_label(str(Global.get("player%dScore" % id)), 72, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
 	box.add_child(_separator(color))
 
@@ -140,7 +142,7 @@ func _column(id, winner):
 			box.add_child(_separator(color))
 			continue
 		var line = HBoxContainer.new()
-		line.add_child(_label(stat[1], 22, DIM))
+		line.add_child(_label(tr("STAT_" + stat[0].to_upper()), 22, DIM))
 		var spacer = Control.new()
 		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_child(spacer)
@@ -165,11 +167,11 @@ func _column(id, winner):
 	var pick = HBoxContainer.new()
 	pick.add_theme_constant_override("separation", 12)
 	box.add_child(pick)
-	var rematch = _choice_button("REMATCH", id, true)
-	var quit = _choice_button("QUIT", id, false)
+	var rematch = _choice_button(tr("STATS_REMATCH"), id, true)
+	var quit = _choice_button(tr("STATS_QUIT"), id, false)
 	pick.add_child(rematch)
 	pick.add_child(quit)
-	var how = "AI: always up for more" if info[id].ai else ("Left / Right to choose" if _can_choose(id) else "Choosing on their machine")
+	var how = tr("STATS_AI_CHOICE") if info[id].ai else (tr("STATS_HOW_CHOOSE") if _can_choose(id) else tr("STATS_REMOTE_CHOICE"))
 	box.add_child(_label(how, 20, DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	columns[id] = {"values": values, "rematch": rematch, "quit": quit, "color": color, "awards": awards}
 	return panel
@@ -266,7 +268,7 @@ func _show_awards(totals):
 
 func _award_chip(award) -> Control:
 	var chip = PanelContainer.new()
-	chip.tooltip_text = award[3]
+	chip.tooltip_text = tr(_award_key(award) + "_DESC")
 	var style = StyleBoxFlat.new()
 	style.bg_color = GOLD
 	style.border_color = GOLD.lightened(0.4)
@@ -285,17 +287,21 @@ func _award_chip(award) -> Control:
 	icon.custom_minimum_size = Vector2(24, 24)
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(icon)
-	row.add_child(_label(award[0], 18, AWARD_INK, HORIZONTAL_ALIGNMENT_CENTER))
+	row.add_child(_label(tr(_award_key(award)), 18, AWARD_INK, HORIZONTAL_ALIGNMENT_CENTER))
 	return chip
+
+# AWARD_LONGEST_TRAIL...
+func _award_key(award) -> String:
+	return "AWARD_" + award[0].replace(" ", "_")
 
 func _format(stat, amount) -> String:
 	match stat:
 		"length":
-			return "%d m" % roundi(amount / PIXELS_PER_METER)
+			return tr("METERS_N") % roundi(amount / PIXELS_PER_METER)
 		"dead_time":
 			if amount >= 60:
 				return "%d:%02d" % [int(amount) / 60, int(amount) % 60]
-			return "%.1f s" % amount
+			return tr("SECONDS_DECIMAL") % amount
 	return str(int(amount))
 
 # Online: this machine confirmed, the host waits for the others
@@ -307,10 +313,10 @@ func show_waiting():
 
 func _refresh_hint():
 	if waiting:
-		hint.text = "WAITING FOR THE OTHER PLAYERS..."
+		hint.text = tr("STATS_WAITING")
 		hold_ring.hide()
 	else:
-		hint.text = "HOLD PUNCHI TO CONTINUE"
+		hint.text = tr("HINT_HOLD_PUNCHI")
 
 func _input(event):
 	if waiting:

@@ -5,8 +5,7 @@ var actionsToRedefine = []
 @onready var keyToPress = $PanelContainer/HBoxContainer/Key as Label
 var currentPlayerId
 signal recalculateLabels
-const ACTION_NAMES = ["LEFT", "RIGHT", "PUNCHI"]
-const ELEMENT_NAMES = {1: "FIRE", 2: "EARTH", 3: "AIR", 4: "WATER"}
+const ACTION_NAMES = ["KEY_LEFT_UPPER", "KEY_RIGHT_UPPER", "KEY_PUNCHI_UPPER"] # Translation keys
 func _ready():
 	set_process_input(false)
 	
@@ -15,7 +14,7 @@ func redefinePlayer(playerId):
 	set_process_input(true)
 	currentPlayerId = playerId
 	actionsToRedefine = ["Player"+stringId+"Left", "Player"+stringId+"Right", "Player"+stringId+"Up"]
-	$PanelContainer/HBoxContainer/PlayerName.set_text("Player %d (%s)" % [playerId, ELEMENT_NAMES.get(playerId, "")])
+	$PanelContainer/HBoxContainer/PlayerName.set_text("%s (%s)" % [tr("PLAYER_N") % playerId, tr(Global.ELEMENT_KEYS[playerId] + "_UPPER")])
 	keyToPress.set_text(ACTION_NAMES[keyNumber])
 
 func _input(event):

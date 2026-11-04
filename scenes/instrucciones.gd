@@ -3,7 +3,7 @@ extends Control
 func _ready() -> void:
 	# Power gallery: every power and upgrade by snake and rarity
 	var gallery_button = Button.new()
-	gallery_button.text = "POWER GALLERY"
+	gallery_button.text = "GALLERY_TITLE"
 	gallery_button.position = Vector2(1050, 587)
 	gallery_button.size = Vector2(220, 43)
 	gallery_button.pressed.connect(_open_gallery)

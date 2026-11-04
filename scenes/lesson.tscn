@@ -51,7 +51,7 @@ theme_override_constants/margin_bottom = 30
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 33
-text = "Cualquiera sabe que la gota está en el mar, el sabio sabe que también el mar está en la gota."
+text = "LESSON_WATER_DROP"
 autowrap_mode = 2
 
 [node name="LessonTextBox" type="RichTextLabel" parent="PanelContainer/MarginContainer"]
@@ -61,7 +61,7 @@ size_flags_vertical = 4
 focus_mode = 2
 theme_override_colors/default_color = Color(0, 0.854902, 0, 1)
 theme_override_font_sizes/normal_font_size = 33
-text = "Cualquiera sabe que la gota está en el mar, el sabio sabe que también el mar está en la gota."
+text = "LESSON_WATER_DROP"
 fit_content = true
 scroll_active = false
 autowrap_mode = 2
@@ -84,7 +84,7 @@ offset_top = 311.0
 offset_right = 798.0
 offset_bottom = 521.0
 theme_override_font_sizes/font_size = 66
-text = "IT IS NOW YOUR DOPAMINE."
+text = "WIN_DOPAMINE"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2

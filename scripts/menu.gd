@@ -21,7 +21,7 @@ func _ready():
 	version_button.text = PatchNotes.version_label()
 	# The menu's display font has no digits (demo font), so the version uses Odin
 	version_button.add_theme_font_override("font", preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf"))
-	version_button.tooltip_text = "Patch notes"
+	version_button.tooltip_text = "MENU_PATCH_NOTES"
 	shrooms_button.button_pressed = Global.shrooms
 	upgrades_button.button_pressed = Global.upgrades
 	# Only when the game starts: afterwards the mode chosen in Options stays
@@ -33,6 +33,11 @@ func _ready():
 	if Global.open_player_setup:
 		Global.open_player_setup = false
 		_on_play_pressed()
+
+# A new language (Options): the version label is built in code
+func _notification(what):
+	if what == NOTIFICATION_TRANSLATION_CHANGED and version_button != null:
+		version_button.text = PatchNotes.version_label()
 
 func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()

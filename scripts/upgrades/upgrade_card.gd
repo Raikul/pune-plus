@@ -48,22 +48,25 @@ func setup(upgrade_data, color):
 	text_box.add_theme_constant_override("separation", 4)
 	content.add_child(text_box)
 
-	text_box.add_child(_label(upgrade.name, 28, Color.WHITE))
+	text_box.add_child(_label(tr(upgrade.name), 28, Color.WHITE))
 	var tags = HBoxContainer.new()
 	tags.add_theme_constant_override("separation", 8)
 	text_box.add_child(tags)
-	var rarity_tag = _label(rarity.name.to_upper(), 16, rarity_color)
+	var rarity_tag = _label(tr(rarity.name).to_upper(), 16, rarity_color)
 	rarity_tag.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tags.add_child(rarity_tag)
 	if upgrade.element == "generic":
-		tag_label = _label("ANY SNAKE", 16, Color(0.6, 0.6, 0.6))
+		tag_label = _label(tr("UPGRADE_ANY_SNAKE"), 16, Color(0.6, 0.6, 0.6))
 	else:
-		tag_label = _label(upgrade.element.to_upper() + " POWER", 16, player_color)
+		tag_label = _label(tr("UPGRADE_ELEMENT_POWER") % tr("ELEMENT_" + upgrade.element.to_upper() + "_UPPER"), 16, player_color)
 	tag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tags.add_child(tag_label)
 	# Long descriptions get a smaller font so they stay inside the card
-	var description_size = 19 if upgrade.description.length() <= 90 else 16
-	text_box.add_child(_label(upgrade.description, description_size, Color(0.82, 0.82, 0.82)))
+	var description = tr(upgrade.description)
+	# Chinese packs a lot more in fewer characters
+	var description_length = description.length() * (2 if TranslationServer.get_locale().begins_with("zh") else 1)
+	var description_size = 19 if description_length <= 90 else 16
+	text_box.add_child(_label(description, description_size, Color(0.82, 0.82, 0.82)))
 
 	# White overlay flashed when the card is chosen
 	flash = Panel.new()
@@ -99,7 +102,7 @@ func play_chosen(show_text = true):
 	style.border_color = player_color.lightened(0.3)
 	style.shadow_color = Color(player_color, 0.75)
 	style.shadow_size = 26
-	tag_label.text = "CHOSEN!"
+	tag_label.text = tr("UPGRADE_CHOSEN")
 	tag_label.add_theme_color_override("font_color", Color.WHITE)
 
 	flash.modulate.a = 0.85
@@ -107,7 +110,7 @@ func play_chosen(show_text = true):
 	scale = Vector2(1.2, 1.2)
 	_tween_scale(FOCUS_SCALE, 0.6).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	if show_text:
-		_float_text("+ " + upgrade.name)
+		_float_text("+ " + tr(upgrade.name))
 
 # Text that rises from the card and fades out as pick confirmation
 func _float_text(text):

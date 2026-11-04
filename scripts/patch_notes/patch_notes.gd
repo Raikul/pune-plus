@@ -13,6 +13,16 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.6.2",
+		"name": "Languages",
+		"date": "2026-11-04",
+		"sections": [
+			["Menus", [
+				"New Language option (Options > Gameplay): English, Español and 简体中文 (Simplified Chinese). Every menu, screen, upgrade and quote is translated; the patch notes stay in English.",
+			]],
+		],
+	},
+	{
 		"version": "0.6.1",
 		"name": "Faces & Arenas",
 		"date": "2026-11-03",
@@ -387,7 +397,7 @@ static func current_version() -> String:
 
 # "Version 0.4.1 (Alpha)"
 static func version_label() -> String:
-	return "Version %s (%s)" % [current_version(), STAGE]
+	return TranslationServer.translate("VERSION_LABEL") % [current_version(), TranslationServer.translate("STAGE_" + STAGE.to_upper())]
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 

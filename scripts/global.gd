@@ -177,7 +177,7 @@ var player_team = {1: 0, 2: 1, 3: 0, 4: 1} # 0 = Team A, 1 = Team B
 ## 0 = automatic: (players - 1) x 10 in free for all, 10 with teams
 var points_to_win = 0
 const POINTS_TO_WIN_OPTIONS = [0, 5, 10, 15, 20, 30, 50]
-const TEAM_NAMES = ["Team A", "Team B"]
+const TEAM_NAMES = ["TEAM_A", "TEAM_B"] # Translation keys (team_name)
 const TEAM_COLORS = [Color(1.0, 0.55, 0.15), Color(0.45, 0.6, 1.0)]
 var online_teams = false
 var online_player_team = {1: 0, 2: 1, 3: 0, 4: 1}
@@ -231,8 +231,8 @@ func level_rotation_text(rotation: Array) -> String:
 	if rotation.size() == 1:
 		return level_name(rotation[0])
 	if rotation.size() == level_paths().size() + 1:
-		return "All %d arenas" % rotation.size()
-	return "%d arenas" % rotation.size()
+		return tr("ARENAS_ALL") % rotation.size()
+	return tr("ARENAS_COUNT") % rotation.size()
 
 # Every level scene in LEVELS_DIR (exports list them too)
 func level_paths() -> Array:
@@ -244,14 +244,23 @@ func level_paths() -> Array:
 	paths.sort()
 	return paths
 
+# Translated: key LEVEL_<FILE NAME> (e.g. LEVEL_TWIN_BLOCKS); a level without one in
+# translations/strings.csv shows its file name
 func level_name(path) -> String:
 	if path == "":
-		return "Classic"
-	return path.get_file().get_basename().capitalize()
+		return tr("LEVEL_CLASSIC")
+	var base = path.get_file().get_basename()
+	var key = "LEVEL_" + base.to_upper()
+	var name = tr(key)
+	return base.capitalize() if name == key else name
 
 # Names of the people at the keyboard, by the element they play (player setup). They move
 # with their keys when they drag their name to another element.
-var player_names = {1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4"}
+# "" = the default "Player N", in the current language
+var player_names = {1: "", 2: "", 3: "", 4: ""}
+
+func team_name(team) -> String:
+	return tr(TEAM_NAMES[team])
 
 func player_name(player_id) -> String:
 	if isMultiplayerActive:
@@ -259,16 +268,19 @@ func player_name(player_id) -> String:
 		if not entry.is_empty():
 			return entry.name
 	if AI_Enabled.get(player_id, false):
-		return ai_match_names.get(player_id, ["", "Fire", "Earth", "Air", "Water"][player_id] + " AI")
+		return ai_match_names.get(player_id, tr("AI_FALLBACK_NAME") % tr(ELEMENT_KEYS[player_id]))
 	var name = str(player_names.get(player_id, ""))
-	return name if name.strip_edges() != "" else "Player %d" % player_id
+	return name if name.strip_edges() != "" else tr("PLAYER_N") % player_id
 
-## AI snakes' names: every match each AI gets a random one of its element's
+## Translation keys of the elements' names (Title case: "Fire"; ELEMENT_*_UPPER: "FIRE")
+const ELEMENT_KEYS = ["", "ELEMENT_FIRE", "ELEMENT_EARTH", "ELEMENT_AIR", "ELEMENT_WATER"]
+
+## AI snakes' names (translation keys): every match each AI gets a random one of its element's
 const AI_NAMES = {
-	1: ["Blaze", "Cinder", "Scorch", "Ember", "Inferno"],
-	2: ["Boulder", "Granite", "Tremor", "Pebble", "Quake"],
-	3: ["Gale", "Zephyr", "Cyclone", "Breeze", "Tempest"],
-	4: ["Tide", "Ripple", "Torrent", "Drizzle", "Riptide"],
+	1: ["AI_BLAZE", "AI_CINDER", "AI_SCORCH", "AI_EMBER", "AI_INFERNO"],
+	2: ["AI_BOULDER", "AI_GRANITE", "AI_TREMOR", "AI_PEBBLE", "AI_QUAKE"],
+	3: ["AI_GALE", "AI_ZEPHYR", "AI_CYCLONE", "AI_BREEZE", "AI_TEMPEST"],
+	4: ["AI_TIDE", "AI_RIPPLE", "AI_TORRENT", "AI_DRIZZLE", "AI_RIPTIDE"],
 }
 var ai_match_names = {}
 
@@ -278,14 +290,14 @@ func roll_ai_names() -> void:
 		ai_match_names[id] = random_ai_name(id)
 
 static func random_ai_name(element) -> String:
-	return AI_NAMES[element].pick_random()
+	return TranslationServer.translate(AI_NAMES[element].pick_random())
 
 ## The names this machine's players go by online, by key set (Player{N} keys: 1 is the
 ## first person at the keyboard). Empty = the Steam name (and "#2"... for the others).
 var online_names = {}
 
-# What each element's power does, in two words (player setup and online lobby)
-const POWER_TAGLINES = ["", "Burning Shot", "Rock Armor", "Lightning Jump", "Twin Split"]
+# What each element's power does, in two words (player setup and online lobby; translation keys)
+const POWER_TAGLINES = ["", "POWER_FIRE", "POWER_EARTH", "POWER_AIR", "POWER_WATER"]
 
 # --- Accessibility (Options), off by default ---
 var nameplates = false   # Each snake's name under its head
@@ -305,7 +317,11 @@ func points_to_win_setting() -> int:
 	return online_points_to_win if isMultiplayerActive else points_to_win
 
 func points_to_win_text(points) -> String:
-	return "Auto" if points <= 0 else str(points)
+	return tr("VALUE_AUTO") if points <= 0 else str(points)
+
+## On / Off in the current language
+func on_off(on) -> String:
+	return tr("VALUE_ON") if on else tr("VALUE_OFF")
 
 # The options a host plays an online match with
 func match_options() -> Dictionary:
@@ -333,12 +349,12 @@ func input_event_name(event) -> String:
 		text = OS.get_keycode_string(code)
 	elif event is InputEventJoypadButton:
 		var index = event.button_index
-		text = "Pad " + (PAD_BUTTON_NAMES[index] if index >= 0 and index < PAD_BUTTON_NAMES.size() else str(index))
+		text = tr("KEY_PAD") + " " + (PAD_BUTTON_NAMES[index] if index >= 0 and index < PAD_BUTTON_NAMES.size() else str(index))
 	elif event is InputEventJoypadMotion:
 		var axis = event.axis
-		text = "Pad " + (PAD_AXIS_NAMES[axis] if axis >= 0 and axis < PAD_AXIS_NAMES.size() else str(axis)) 			+ ("+" if event.axis_value > 0 else "-")
+		text = tr("KEY_PAD") + " " + (PAD_AXIS_NAMES[axis] if axis >= 0 and axis < PAD_AXIS_NAMES.size() else str(axis)) 			+ ("+" if event.axis_value > 0 else "-")
 	elif event is InputEventMouseButton:
-		text = "Mouse " + str(event.button_index)
+		text = tr("KEY_MOUSE") + " " + str(event.button_index)
 	else:
 		text = event.as_text()
 	return text if text.length() <= MAX_KEY_NAME else text.substr(0, MAX_KEY_NAME - 1) + "."
@@ -353,6 +369,7 @@ const SETTINGS_PATH = "user://settings.cfg"
 
 func _ready():
 	load_settings()
+	apply_language()
 	apply_volumes()
 	apply_video_settings()
 	_set_cursors()
@@ -389,6 +406,11 @@ func load_settings() -> void:
 	if level_rotation.is_empty():
 		level_rotation = [""]
 	player_names = config.get_value("game", "player_names", player_names)
+	# Names saved before translations: the old defaults go back to "" (translated "Player N")
+	for id in player_names:
+		if str(player_names[id]) == "Player %d" % id:
+			player_names[id] = ""
+	language = config.get_value("game", "language", language)
 	online_names = config.get_value("game", "online_names", online_names)
 	nameplates = config.get_value("accessibility", "nameplates", nameplates)
 	snake_eyes = config.get_value("accessibility", "snake_eyes", snake_eyes)
@@ -418,6 +440,7 @@ func save_settings() -> void:
 	config.set_value("match", "level", level)
 	config.set_value("match", "level_rotation", level_rotation)
 	config.set_value("game", "player_names", player_names)
+	config.set_value("game", "language", language)
 	config.set_value("game", "online_names", online_names)
 	config.set_value("accessibility", "nameplates", nameplates)
 	config.set_value("accessibility", "snake_eyes", snake_eyes)
@@ -448,7 +471,17 @@ var online_upgrade_time = 10.0
 const ONLINE_UPGRADE_TIME_OPTIONS = [5.0, 10.0, 15.0, 20.0, 30.0]
 
 func upgrade_time_text(seconds) -> String:
-	return "Off" if seconds <= 0 else "%d s" % seconds
+	return tr("UPGRADE_TIME_OFF") if seconds <= 0 else tr("SECONDS_N") % seconds
+
+# --- Language (Options > Gameplay). Texts are translation keys (translations/strings.csv);
+# English is the default and the fallback for anything missing
+const LANGUAGES = [["en", "English"], ["es", "Español"], ["zh_CN", "简体中文"]]
+var language = "en"
+
+func apply_language() -> void:
+	if not LANGUAGES.any(func(entry): return entry[0] == language):
+		language = "en"
+	TranslationServer.set_locale(language)
 # Wise quote at the top of the upgrade screen
 var show_quotes = true
 var fps_label: Label
