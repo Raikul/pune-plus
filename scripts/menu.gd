@@ -10,9 +10,13 @@ var patch_notes_scene = preload("res://scenes/patch_notes.tscn")
 func _ready():
 	Options = $CanvasLayer/Options
 	Options.hide()
+	# Shrooms and upgrades moved to player setup's match settings
+	$CanvasLayer/Modifiers.hide()
 	# Back from an online match
 	if SteamNet.is_online():
 		SteamNet.leave()
+	# Local play: Steam stops, so friends don't see the game as running
+	SteamNet.stop_steam()
 	# The version (Project Settings > Application > Config > Version) opens the patch notes
 	version_button.text = PatchNotes.version_label()
 	# The menu's display font has no digits (demo font), so the version uses Odin
@@ -25,20 +29,22 @@ func _ready():
 		Global.apply_window_mode()
 	get_tree().paused = false
 	play_button.grab_focus.call_deferred()
-	pass
+	# "Quit" on a match's end screen: back to player setup, ready for another one
+	if Global.open_player_setup:
+		Global.open_player_setup = false
+		_on_play_pressed()
 
 func _on_play_pressed():
 	$CanvasLayer/PlayerSetup.show()
 	$CanvasLayer/TopMenu.hide()
 	$CanvasLayer/ChangeLog.hide()
-	$CanvasLayer/Modifiers.show()
 	$CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup.recalculate_all_labels()
 
 func _on_options_pressed():
 	Options.show()
 	$CanvasLayer/TopMenu.hide()
 	$CanvasLayer/ChangeLog.hide()
-	$CanvasLayer/Options/CenterContainer/PanelContainer/MarginContainer/TabContainer/Video/WindowMode/OptionButton.grab_focus.call_deferred()
+	Options.focus_first()
 
 func _on_quit_pressed():
 	get_tree().quit()

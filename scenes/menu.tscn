@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://d1fq163d2v530" path="res://assets/jorge-resources/Starting Screen/Logo-Punchis.png" id="8_kslgp"]
 [ext_resource type="PackedScene" uid="uid://cua7mokcq7oa" path="res://scenes/instrucciones.tscn" id="10_70i5f"]
 [ext_resource type="PackedScene" uid="uid://rr63k4v7eon5" path="res://scenes/new_player_setup.tscn" id="10_n56o5"]
+[ext_resource type="FontVariation" path="res://assets/fonts/aristotelica_button.tres" id="ari_button"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1dagr"]
 bg_color = Color(0.815686, 0.415686, 0.858824, 1)
@@ -37,7 +38,7 @@ bg_color = Color(0.0431373, 0.164706, 0.831373, 1)
 [sub_resource type="Theme" id="Theme_7avap"]
 Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
 Button/font_sizes/font_size = 66
-Button/fonts/font = ExtResource("6_plbqb")
+Button/fonts/font = ExtResource("ari_button")
 Label/font_sizes/font_size = 66
 Label/fonts/font = ExtResource("6_plbqb")
 
@@ -361,4 +362,3 @@ offset_bottom = -221.0
 [connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
 [connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]
 
-[editable path="CanvasLayer/Options"]

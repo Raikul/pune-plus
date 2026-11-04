@@ -2,12 +2,12 @@ extends HBoxContainer
 class_name UpgradeRow
 
 # One snake's row in the upgrade screen: its element and keys, its upgrade cards
-# and its pick status. Only that snake's own Left/Right/Punchy keys drive it.
+# and its pick status. Only that snake's own Left/Right/Punchi keys drive it.
 
 signal chosen(player_id, upgrade_id)
 
 const DIRECTION_ICON = preload("res://assets/jorge-resources/Game Selection/direction icon.png")
-const PUNCHY_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
+const PUNCHI_ICON = preload("res://assets/jorge-resources/Game Selection/punchi icon.png")
 const MOVE_SOUND = preload("res://assets/sounds/Button.ogg")
 const CONFIRM_SOUND = preload("res://assets/sounds/ShroomEaten.ogg")
 const AI_STEP_TIME = 0.3
@@ -46,14 +46,25 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 
 	card_box = HBoxContainer.new()
 	card_box.add_theme_constant_override("separation", 20)
+	# Room for three cards even with fewer left, so every row's status lines up
+	card_box.custom_minimum_size.x = 390 * 3 + 20 * 2
 	add_child(card_box)
 	if is_hidden:
 		card_box.modulate.a = 0.0 # Keeps the layout, shows nothing
+	# Fewer than three left: a Skip card too, to pass on what's left
+	if not options.is_empty() and options.size() < 3:
+		options = options + [UpgradeCatalog.SKIP]
 	for upgrade in options:
 		var card = UpgradeCard.new()
 		card.setup(upgrade, player_color)
 		card_box.add_child(card)
 		cards.append(card)
+	if options.is_empty():
+		var none_label = _label("Every upgrade taken!", 30, Color(0.6, 0.6, 0.6))
+		none_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		none_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		none_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card_box.add_child(none_label)
 
 	add_child(_build_status())
 
@@ -61,7 +72,10 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 	confirm_sound_player = _sound_player(CONFIRM_SOUND, -4.0)
 
 	_focus(0, false)
-	if is_ai:
+	if cards.is_empty():
+		# Nothing left to pick: done right away, on every machine (the screen hears it next frame)
+		_confirm.call_deferred()
+	elif is_ai:
 		_ai_pick()
 
 func _process(delta):
@@ -84,6 +98,8 @@ func _unhandled_input(event):
 	get_viewport().set_input_as_handled()
 
 func _focus(index, play_sound = true):
+	if cards.is_empty():
+		return
 	focus_index = posmod(index, cards.size())
 	for i in cards.size():
 		cards[i].set_focused(i == focus_index)
@@ -107,17 +123,23 @@ func pick(upgrade_id):
 
 # The card that would be picked now (the host uses it for players who left)
 func highlighted_id():
-	return cards[focus_index].upgrade.id
+	return cards[focus_index].upgrade.id if not cards.is_empty() else &""
 
 func _confirm():
 	if has_chosen:
 		return
 	has_chosen = true
+	if cards.is_empty():
+		status_label.text = "MAXED OUT"
+		status_label.modulate.a = 1.0
+		chosen.emit(player_id, &"")
+		return
 	var card = cards[focus_index]
 	for other in cards:
 		if other != card:
 			other.set_dimmed(true)
-	card.play_chosen()
+	# A rival's hidden row doesn't show which card it took
+	card.play_chosen(not is_hidden)
 	confirm_sound_player.play()
 	status_label.text = "READY!"
 	status_label.modulate.a = 1.0
@@ -132,6 +154,10 @@ func _ai_pick():
 	for i in steps:
 		if has_chosen:
 			return
+		_focus(focus_index + 1)
+		await _wait(AI_STEP_TIME)
+	# The AI always takes an upgrade if there is one
+	if cards[focus_index].upgrade.id == UpgradeCatalog.SKIP.id and cards.size() > 1:
 		_focus(focus_index + 1)
 		await _wait(AI_STEP_TIME)
 	await _wait(0.4)
@@ -180,22 +206,34 @@ func _build_header():
 	info.add_theme_constant_override("separation", 6)
 	box.add_child(info)
 	info.add_child(_label(element.to_upper(), 40, player_color))
-	info.add_child(_label("Player " + str(player_id) + ("  (AI)" if is_ai else ""), 22, Color(0.7, 0.7, 0.7)))
+	var name_label = _label(Global.player_name(player_id), 22, Color(0.7, 0.7, 0.7))
+	name_label.custom_minimum_size.x = KEY_HINTS_WIDTH
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.clip_text = true
+	info.add_child(name_label)
 	info.add_child(_build_key_hints())
 	# What this snake already has (only a count for online rivals)
+	# Small and in one row (a snake has at most 7 different upgrades), so the header keeps
+	# its width and every row's cards line up
 	var badges = UpgradeBadges.new()
+	badges.icon_size = 30.0
 	info.add_child(badges)
 	badges.refresh(player_id, is_hidden)
 	return panel
 
+# The header keeps one width whatever the keys are called (gamepad names are long)
+const KEY_HINTS_WIDTH = 250
+const KEY_NAME_WIDTH = 56
+
 func _build_key_hints():
 	var hints = HBoxContainer.new()
+	hints.custom_minimum_size.x = KEY_HINTS_WIDTH
 	hints.add_theme_constant_override("separation", 6)
 	if is_remote:
 		hints.add_child(_label("Picking online", 20, Color(0.75, 0.75, 0.75)))
 		return hints
 	var prefix = "Player" + str(input_id)
-	for hint in [["Left", DIRECTION_ICON, true], ["Right", DIRECTION_ICON, false], ["Up", PUNCHY_ICON, false]]:
+	for hint in [["Left", DIRECTION_ICON, true], ["Right", DIRECTION_ICON, false], ["Up", PUNCHI_ICON, false]]:
 		var hint_icon = TextureRect.new()
 		hint_icon.texture = hint[1]
 		hint_icon.flip_h = hint[2]
@@ -203,7 +241,12 @@ func _build_key_hints():
 		hint_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hint_icon.custom_minimum_size = Vector2(20, 22)
 		hints.add_child(hint_icon)
-		hints.add_child(_label(Global.action_key_name(prefix + hint[0]) + " ", 20, Color.WHITE))
+		# "Pad" goes: the icons already say which key it is
+		var key_label = _label(Global.action_key_name(prefix + hint[0]).trim_prefix("Pad "), 20, Color.WHITE)
+		key_label.custom_minimum_size.x = KEY_NAME_WIDTH
+		key_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		key_label.clip_text = true
+		hints.add_child(key_label)
 	return hints
 
 func _build_status():

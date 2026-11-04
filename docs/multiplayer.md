@@ -13,7 +13,8 @@ Branch: `ten_multiplayer`. Status: **draft**. Lobbies, round flow and snake move
 
 - GodotSteam 4.17 (the `T:\GodotSteam\4.6` build) ships `SteamMultiplayerPeer`. It plugs Steam Networking Sockets into Godot's high-level multiplayer API, so plain `@rpc` functions work.
 - Traffic goes over **Steam Datagram Relay (SDR)**. That's Valve's backbone, which is often a *shorter* route than the public internet, with free NAT traversal and IPs never exposed to other players.
-- Steam Lobbies handle matchmaking: create (friends-only/public), browse, invite through the overlay, and "Join game" from the friends list (`join_requested`). The host creates the lobby and runs `host_with_lobby`; members run `connect_to_lobby`.
+- Steam Lobbies handle matchmaking: create, browse, invite through the overlay, and "Join game" from the friends list (`join_requested`). The host creates the lobby and runs `host_with_lobby`; members run `connect_to_lobby`.
+- Lobbies are **public** by default (listed). **Private** ones use Steam's *invisible* type: not in friends lists, and tagged `private=1` so Find lobbies skips them, but searches still reach them. Every lobby gets a 6-character **code** (lobby data `code`, no 0/O/1/I); *Join* searches for it, so a code finds a private lobby or one lost in a long list. The host can switch public/private while in the lobby.
 - `no_delay` and `no_nagle` are on, so packets aren't batched up.
 - Topology is host plus clients. Godot relays client-to-client RPCs through the host.
 
@@ -24,7 +25,7 @@ Branch: `ten_multiplayer`. Status: **draft**. Lobbies, round flow and snake move
 - Every machine joins with one snake in the lowest free element. Clicking an **Open** slot opens a menu: *Take slot* moves one of your snakes to that element, and *Add player here* / *Add my AI here* add one there.
 - Besides that menu, the **Add player (this keyboard)** button gives a machine another one for a second person on the same keyboard, and **Add AI player** adds an AI snake simulated on that machine (handy for testing with only two clients).
 - `keys` is the `Player{N}` input set that steers the snake *on its machine*. Each machine numbers its own people from 1, so the first person anywhere uses the Player 1 keys. AI snakes have `keys = 0`.
-- The lobby shows every local snake's keys and has a **Keys** button to rebind them (Left, Right, Punchy). Rebinding only changes this machine's `InputMap`, like the offline player setup, and isn't saved yet.
+- The lobby shows every local snake's keys and has a **Keys** button to rebind them (Left, Right, Punchi). Rebinding only changes this machine's `InputMap`, like the offline player setup, and isn't saved yet.
 - Owners can remove their extra snakes (never their last human one); the host can remove any AI. A peer that disconnects loses all its snakes, and mid-match the host counts them as dead.
 
 ## Netcode model: owner-authoritative heads + dead reckoning
@@ -39,6 +40,8 @@ The snake game is unusual: a snake's whole future is determined by its position,
 | Own death | **its owner** | The owner tests its head against the trails it sees (exact copies of everyone's trails, only the newest few cm may be a few ms behind), then reports to the host (reliable) |
 | Round start/spawns, deaths → scores, round end, match end | **host** | Reliable RPCs. The host rolls spawn positions and broadcasts them so everyone spawns identically |
 | Power use | owner | Reliable event, replayed on the remote copy of that snake |
+| Phoenix (Fire) | owner | `phoenix_event`: when the owner's snake turns to ash every machine freezes and hides it; when it rises they show the burst (clearing trails locally) and predict it again from there |
+| Static Shock (Air) | the victim's machine | Air's jump is replayed everywhere, so each machine checks its own snakes against it and applies the shock; others only show the sparks |
 | Water twin | **the water snake's machine** | Streamed like a snake (`twin_state`: state + trail segments + alive/dead/absorbed; an absorbed twin loses its head but keeps its trail) and dead-reckoned elsewhere. The twin is AI-steered after a short forced split, so it never reads anyone's keys. A water snake can have several twins at once; each one is streamed separately |
 
 Why not the alternatives:
@@ -77,7 +80,7 @@ Match options (Upgrades, 2v2 teams, points to win) are the host's. `SteamNet.pus
 
 ## Running / testing
 
-- **Steam:** Steam must be running. App id **480** (Spacewar) is used until Pune has its own app id. Run the project with the GodotSteam editor `T:\GodotSteam\4.6\godotsteam.461.editor.win64.exe`. Testing a real Steam match needs two machines/accounts.
+- **Steam:** Steam must be running. App id **480** (Spacewar) is used until Pune has its own app id. The game only starts the Steam API on the Multiplayer screen (and keeps it through online matches); the main menu shuts it down, so friends only see "Playing Spacewar" during online play. A `+connect_lobby` invite at launch goes straight to the Multiplayer screen. Run the project with the GodotSteam editor `T:\GodotSteam\4.6\godotsteam.461.editor.win64.exe`. Testing a real Steam match needs two machines/accounts.
 - **Local netcode test:** start two instances, then click *LAN Host* in one and *LAN Join* in the other. Set *Fake latency* to check how dead reckoning behaves at 100–200 ms.
 - **Exports** must use the GodotSteam export templates (`T:\GodotSteam\4.6\godotsteam-g461-s163-gs4171-templates.tar`) and ship `steam_api64.dll`.
 

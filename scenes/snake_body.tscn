@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://wgnhwklhhik8"]
+[gd_scene load_steps=3 format=3 uid="uid://wgnhwklhhik8"]
+
+[ext_resource type="Script" path="res://scripts/trail_segment.gd" id="1_trail"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wntae"]
 radius = 66.7083
@@ -6,6 +8,7 @@ radius = 66.7083
 [node name="SnakeBody" type="Area2D"]
 collision_mask = 0
 input_pickable = false
+script = ExtResource("1_trail")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 scale = Vector2(0.461538, 0.48)

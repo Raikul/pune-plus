@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-var menu_font = preload("res://assets/fonts/Flat Earth Scribe.ttf")
 
 var label1: Label
 var label2: Label
@@ -33,11 +32,8 @@ func _ready():
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
 	
 
-	label1.add_theme_font_override("font", menu_font)
-	label2.add_theme_font_override("font", menu_font)
-	label3.add_theme_font_override("font", menu_font)
-	label4.add_theme_font_override("font", menu_font)
-	
+	_restyle()
+
 	for id in [1, 2, 3, 4]:
 		dead_marks[id] = _make_dead_mark(_cooldown_bar(id))
 		var row = _cooldown_bar(id).get_parent()
@@ -49,12 +45,77 @@ func _ready():
 		row.add_child(tag)
 		row.move_child(tag, 0)
 		team_tags[id] = tag
+		# Two rows of small icons, no taller than the symbol, so a pile of upgrades
+		# never stretches the scoreboard off screen
 		var badges = UpgradeBadges.new()
+		badges.icon_size = 29.0
+		badges.columns = 4
 		badges.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(badges)
 		upgrade_badges[id] = badges
 
 	add_to_group("HUD")
+
+# Dark bar with one rounded card per snake, the score in its element's color
+const BAR_COLOR = Color(0.07, 0.07, 0.08, 0.94)
+const CARD_COLOR = Color(0.13, 0.13, 0.15)
+var target_label: Label
+
+func _restyle():
+	$PanelContainer/ColorRect.color = BAR_COLOR
+	var accent = ColorRect.new()
+	accent.color = Color(1, 1, 1, 0.07)
+	accent.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	accent.offset_top = -2
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(accent)
+	var margin = $PanelContainer/MarginContainer
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 22)
+	for id in [1, 2, 3, 4]:
+		var label = [null, label1, label2, label3, label4][id]
+		var color = Color(Global.playerColors[id])
+		label.self_modulate = Color.WHITE
+		label.add_theme_font_override("font", ODIN_FONT)
+		label.add_theme_font_size_override("font_size", 56)
+		label.add_theme_color_override("font_color", color.lightened(0.15))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+		label.add_theme_constant_override("outline_size", 6)
+		label.custom_minimum_size.x = 64
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var row = label.get_parent()
+		row.add_theme_constant_override("separation", 16)
+		var card = row.get_parent()
+		card.self_modulate = Color.WHITE
+		var style = StyleBoxFlat.new()
+		style.bg_color = CARD_COLOR
+		style.set_corner_radius_all(16)
+		style.content_margin_left = 18
+		style.content_margin_right = 22
+		style.content_margin_top = 8
+		style.content_margin_bottom = 8
+		style.border_color = color
+		style.border_width_bottom = 4
+		card.add_theme_stylebox_override("panel", style)
+		_cooldown_bar(id).custom_minimum_size = Vector2(64, 64)
+	# "FIRST TO 10" under the middle of the bar
+	target_label = Label.new()
+	target_label.add_theme_font_override("font", ODIN_FONT)
+	target_label.add_theme_font_size_override("font_size", 18)
+	target_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	target_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	target_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	target_label.offset_left = -150
+	target_label.offset_right = 150
+	# Lifted off the bar's bottom edge, so it has some room above the arena border
+	target_label.offset_top = -34
+	target_label.offset_bottom = -12
+	target_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(target_label)
+
+func set_target(points):
+	target_label.text = "FIRST TO %d" % points
 
 # total: the cooldown's full length (upgrades can shorten it), so the bar starts full
 func set_cooldown(player_id, time_left, total = 0.0):
@@ -79,6 +140,45 @@ func setup_teams(enabled):
 		team_tags[id].visible = enabled
 		team_tags[id].text = Global.TEAM_NAMES[team].right(1)
 		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+	if enabled:
+		_group_by_team()
+
+# 2v2: one card per team, its snakes' symbols side by side and one shared score (teammates
+# always have the same score). Each snake's upgrades sit on its own side of the card.
+func _group_by_team():
+	var cards_row = $PanelContainer/MarginContainer/HBoxContainer
+	var position_in_bar = 0
+	for team in [0, 1]:
+		var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+		if members.is_empty():
+			continue
+		var lead = members[0]
+		var card = _card(lead)
+		cards_row.move_child(card, position_in_bar)
+		position_in_bar += 1
+		var team_color = Global.TEAM_COLORS[team]
+		card.get_theme_stylebox("panel").border_color = team_color
+		var row = _cooldown_bar(lead).get_parent()
+		var score = _score_label(lead)
+		score.add_theme_color_override("font_color", team_color.lightened(0.15))
+		# The lead's upgrades go before its symbol
+		row.move_child(upgrade_badges[lead], team_tags[lead].get_index() + 1)
+		for mate in members.slice(1):
+			_cooldown_bar(mate).reparent(row, false)
+			row.move_child(_cooldown_bar(mate), score.get_index())
+			upgrade_badges[mate].reparent(row, false)
+			_card(mate).hide()
+	# Inactive snakes have no team card
+	for id in [1, 2, 3, 4]:
+		if not Global.get("player%dActive" % id):
+			_card(id).hide()
+
+func _score_label(player_id):
+	return [null, label1, label2, label3, label4][player_id]
+
+# The rounded card a snake starts in
+func _card(player_id):
+	return _score_label(player_id).get_parent().get_parent()
 
 # can_see(player_id) -> bool: false shows only how many upgrades a rival has
 func refresh_upgrades(can_see: Callable):

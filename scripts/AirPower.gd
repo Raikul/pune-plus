@@ -9,7 +9,7 @@ func setup(p: Node2D) -> void:
 	super.setup(p)
 	var reticle = player.get_node_or_null("DynamicTeleportNode")
 	if reticle:
-		reticle.show()
+		reticle.visible = not player.net_remote
 
 func is_recast_ready() -> bool:
 	return recast_active
@@ -38,12 +38,20 @@ func realizar_salto() -> void:
 
 	player.gap = true
 	player.gap_delta_sum = 0.0
+	player.teleport_grace = player.TELEPORT_GRACE
+	# The hole the jump leaves in the trail isn't one of its gaps (Storm Fence)
+	player.skip_next_gap = true
 
 	var start = player.global_position
 	var reticle = player.get_node_or_null("DynamicTeleportNode")
 	if reticle:
 		player.global_position = reticle.global_position
-	_lightning(start, player.global_position)
+	var parts = _jump_parts(start, player.global_position)
+	if player.teleport_wrapped and not player.net_remote:
+		Global.add_stat(player.playerId, "air_warps")
+	PowerFx.lightning(player.get_parent(), parts, Color(Global.playerColors[player.playerId]))
+	_shock_heads(parts)
+	_storm_gaps()
 
 	if dash_sound:
 		dash_sound.play()
@@ -55,14 +63,56 @@ func realizar_salto() -> void:
 	
 	activated.emit()
 
-# Placeholder bolt from where the jump starts to where it lands (scripts/fx/power_fx.gd)
-func _lightning(start: Vector2, landing: Vector2) -> void:
-	var parts = [[start, landing]]
+# The straight parts of a jump, for the bolt (scripts/fx/power_fx.gd) and Static Shock
+func _jump_parts(start: Vector2, landing: Vector2) -> Array:
 	if player.teleport_wrapped:
 		# Through the wall: one bolt out of the arena, one coming in on the other side
 		var jump = player.teleport_target_unwrapped - start
-		parts = [[start, player.teleport_target_unwrapped], [landing - jump, landing]]
-	PowerFx.lightning(player.get_parent(), parts, Color(Global.playerColors[player.playerId]))
+		return [[start, player.teleport_target_unwrapped], [landing - jump, landing]]
+	return [[start, landing]]
+
+# Static Shock (and Scrambler): snakes whose heads the jump went through lose their
+# power for a while (and get left/right swapped). Runs on every machine's copy of the
+# jump, so each machine shocks its own snakes.
+const SHOCK_TIME = 5.0
+const SCRAMBLE_TIME = 3.0 # Scrambler: swapped left/right, shorter than the power lock
+const SHOCK_REACH = 24.0
+
+func _shock_heads(parts: Array) -> void:
+	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+		return
+	var scramble = SCRAMBLE_TIME if player.stats.get_stat("air.scramble") >= 1.0 else 0.0
+	for other in get_tree().get_nodes_in_group("alivePlayers"):
+		if other == player or not other.has_method("shock"):
+			continue
+		for part in parts:
+			var closest = Geometry2D.get_closest_point_to_segment(other.global_position, part[0], part[1])
+			if closest.distance_to(other.global_position) <= SHOCK_REACH:
+				PowerFx.lightning(player.get_parent(), [[closest, other.global_position]], player.SHOCK_COLOR)
+				# Only the snake's own machine decides (remote copies just show it)
+				if not other.net_remote:
+					other.shock(SHOCK_TIME, scramble, player.playerId)
+					Global.add_stat(player.playerId, "air_shocks")
+				else:
+					other.shock_visual(SHOCK_TIME)
+				break
+
+# Storm Fence: lightning across every gap of the trail that is still whole for
+# StormArc.LIFETIME. Other snakes caught in it are shocked like by Static Shock (no power
+# for SHOCK_TIME, and with Scrambler left/right swapped for SCRAMBLE_TIME). Runs on every
+# machine's copy of the jump; each machine shocks its own snakes.
+func _storm_gaps() -> void:
+	if not has_storm():
+		return
+	var arc_color = Color(Global.playerColors[player.playerId]).lerp(player.SHOCK_COLOR, 0.5)
+	var scramble = SCRAMBLE_TIME if player.stats.get_stat("air.scramble") >= 1.0 else 0.0
+	for gap in player.intact_gaps():
+		var arc = StormArc.spawn(player.get_parent(), gap[0].global_position, gap[1].global_position, player.playerId, arc_color)
+		arc.shock_time = SHOCK_TIME
+		arc.scramble_time = scramble
+
+func has_storm() -> bool:
+	return player.stats != null and player.stats.get_stat("air.storm") >= 1.0
 
 # --- AI ---
 # Teleport when something is about to be hit and the landing spot is free. Without
@@ -79,12 +129,60 @@ func ai_should_recast(_direction: int) -> bool:
 
 func _ai_wants_to_jump() -> bool:
 	var raycaster = player.get_node_or_null("Raycaster")
-	if raycaster == null or raycaster.collision_distance("Up") > AI_DANGER_DISTANCE:
+	if raycaster == null:
+		return false
+	var danger = raycaster.collision_distance("Up") <= AI_DANGER_DISTANCE
+	if not danger and not _ai_can_shock() and not _ai_can_storm():
+		return false
+	# 2v2: a jump through a teammate would shock it; only when it's that or crashing
+	if not danger and _ai_jump_hits_ally():
 		return false
 	player.actualizarPuntoDeTransporte()
 	if player.teleport_clamped:
 		return false # Would land right in front of a wall
 	return _landing_is_clear(player.get_node("DynamicTeleportNode").global_position)
+
+# Static Shock: an enemy head lies on the jump's path
+func _ai_can_shock() -> bool:
+	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+		return false
+	player.actualizarPuntoDeTransporte()
+	var parts = _jump_parts(player.global_position, player.get_node("DynamicTeleportNode").global_position)
+	for other in get_tree().get_nodes_in_group("alivePlayers"):
+		if other == player or other.shocked_time > 0 or player.is_ally(other):
+			continue
+		for part in parts:
+			if Geometry2D.get_closest_point_to_segment(other.global_position, part[0], part[1]).distance_to(other.global_position) <= SHOCK_REACH:
+				return true
+	return false
+
+# With Static Shock, the jump would go through a teammate's head
+func _ai_jump_hits_ally() -> bool:
+	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+		return false
+	var parts = _jump_parts(player.global_position, player.get_node("DynamicTeleportNode").global_position)
+	for ally in player.allies():
+		for part in parts:
+			if Geometry2D.get_closest_point_to_segment(ally.global_position, part[0], part[1]).distance_to(ally.global_position) <= SHOCK_REACH:
+				return true
+	return false
+
+# Storm Fence: an enemy head (not shocked yet) is about to go through one of the gaps
+const AI_STORM_REACH = 30.0
+func _ai_can_storm() -> bool:
+	if not has_storm():
+		return false
+	var gaps = player.intact_gaps()
+	if gaps.is_empty():
+		return false
+	for other in get_tree().get_nodes_in_group("alivePlayers"):
+		if other == player or other.shocked_time > 0 or player.is_ally(other):
+			continue
+		for gap in gaps:
+			var closest = Geometry2D.get_closest_point_to_segment(other.global_position, gap[0].global_position, gap[1].global_position)
+			if closest.distance_to(other.global_position) <= AI_STORM_REACH:
+				return true
+	return false
 
 func _landing_is_clear(at: Vector2) -> bool:
 	var shape = CircleShape2D.new()

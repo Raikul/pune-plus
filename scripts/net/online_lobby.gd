@@ -10,7 +10,7 @@ const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Roun
 const ELEMENT_NAMES = ["", "FIRE", "EARTH", "AIR", "WATER"]
 const FAKE_LATENCIES = [0.0, 0.1, 0.2]
 const KEY_ACTIONS = ["Left", "Right", "Up"]
-const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchy"}
+const KEY_NAMES = {"Left": "Left", "Right": "Right", "Up": "Punchi"}
 const HIGHLIGHT = Color(0.91, 0.61, 0.17)
 
 var status_label
@@ -25,10 +25,22 @@ var start_button
 var upgrades_button
 var mode_button
 var points_button
+var upgrade_time_button
+var spawns_button
+var countdown_button
+var arena_button
+var settings_toggle
+var settings_box
 var invite_button
 var latency_button
+var privacy_button
+var code_label
+var copy_code_button
+var code_input
 
 func _ready():
+	# Steam only runs on this screen and in online matches (SteamNet.stop_steam)
+	SteamNet.start_steam()
 	_build_layout()
 	SteamNet.status_changed.connect(_on_status_changed)
 	SteamNet.roster_changed.connect(_refresh_roster)
@@ -36,12 +48,24 @@ func _ready():
 	SteamNet.lobby_list_received.connect(_show_lobbies)
 	status_label.text = SteamNet.steam_status
 	_refresh_roster()
+	SteamNet.take_pending_invite()
 
 func _exit_tree():
 	SteamNet.status_changed.disconnect(_on_status_changed)
 	SteamNet.roster_changed.disconnect(_refresh_roster)
 	SteamNet.match_options_changed.disconnect(_refresh_roster)
 	SteamNet.lobby_list_received.disconnect(_show_lobbies)
+
+# A person who chose a name before gets it back when they join with those keys (asked
+# once per slot and name, so a refused rename doesn't loop)
+var asked_names = {}
+func _restore_name(slot, entry):
+	var saved = str(Global.online_names.get(entry.keys, "")).strip_edges()
+	var key = "%d:%s" % [slot, saved]
+	if saved == "" or saved == entry.name or asked_names.has(key):
+		return
+	asked_names[key] = true
+	SteamNet.rename_slot(slot, saved)
 
 func _on_status_changed(text):
 	status_label.text = text
@@ -56,6 +80,7 @@ func _refresh_roster():
 		# An open slot is a menu to move one of your snakes there or add one
 		row.open_button.visible = entry == null and SteamNet.is_online()
 		row.name.visible = not row.open_button.visible
+		row.name_edit.visible = false
 		if entry == null:
 			row.name.text = "Open"
 			row.name.modulate = Color(1, 1, 1, 0.4)
@@ -64,6 +89,13 @@ func _refresh_roster():
 		row.name.modulate = Color.WHITE
 		var local = entry.peer == me
 		row.name.text = entry.name + ("  (you)" if local and not entry.ai else "")
+		# Your own people: a name box instead (and the name they used last time comes back)
+		if local and not entry.ai:
+			row.name.visible = false
+			row.name_edit.visible = true
+			if not row.name_edit.has_focus():
+				row.name_edit.text = entry.name
+			_restore_name(slot, entry)
 		if entry.ai:
 			row.keys.text = "AI, runs on " + ("this machine" if local else "its owner's machine")
 		elif local:
@@ -83,12 +115,27 @@ func _refresh_roster():
 	# Match options: the host's (Global) on the host, the synced copy everywhere else
 	var options = Global.match_options() if SteamNet.is_host() or not SteamNet.is_online() else SteamNet.match_options
 	var host = SteamNet.is_host()
+	var in_steam_lobby = SteamNet.lobby_code != ""
+	code_label.text = ("Code: " + SteamNet.lobby_code) if in_steam_lobby else ""
+	copy_code_button.visible = in_steam_lobby
+	privacy_button.text = "Lobby: " + ("Private" if SteamNet.lobby_private else "Public")
+	# Before hosting it picks the new lobby's type; in a lobby only the host changes it
+	privacy_button.disabled = SteamNet.is_lan or (SteamNet.is_online() and not host)
 	upgrades_button.disabled = not host
 	upgrades_button.text = "Upgrades: " + ("ON" if options.get("upgrades", false) else "OFF")
 	mode_button.disabled = not host
 	mode_button.text = "Mode: " + ("2v2 Teams" if options.get("teams", false) else "Free for all")
 	points_button.disabled = not host
 	points_button.text = "Points to win: " + Global.points_to_win_text(options.get("points_to_win", 0))
+	# Seconds each snake has to pick its upgrade (only matters with upgrades on)
+	upgrade_time_button.disabled = not host or not options.get("upgrades", false)
+	upgrade_time_button.text = "Upgrade time: %d s" % int(options.get("upgrade_time", Global.online_upgrade_time))
+	spawns_button.disabled = not host
+	spawns_button.text = "Spawns: " + ("Random" if options.get("random_spawns", false) else "Fixed")
+	countdown_button.disabled = not host
+	countdown_button.text = "Countdown: " + ("ON" if options.get("round_countdown", true) else "OFF")
+	arena_button.disabled = not host
+	arena_button.text = "Arena rotation: " + Global.level_rotation_text(options.get("levels", [options.get("level", "")]))
 	var player_team = options.get("player_team", Global.player_team)
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
@@ -190,6 +237,27 @@ func _cycle_points():
 	Global.points_to_win = choices[(choices.find(Global.points_to_win) + 1) % choices.size()]
 	_match_options_edited()
 
+func _toggle_random_spawns():
+	Global.random_spawns = not Global.random_spawns
+	_match_options_edited()
+
+func _toggle_round_countdown():
+	Global.round_countdown = not Global.round_countdown
+	_match_options_edited()
+
+# The arenas the match picks from, one at random every round (only the host edits them)
+func _open_arena_rotation():
+	var menu = LevelRotationMenu.open(self, Global.level_rotation)
+	menu.changed.connect(func(rotation):
+		Global.level_rotation = rotation
+		_match_options_edited())
+	menu.closed.connect(arena_button.grab_focus)
+
+func _cycle_upgrade_time():
+	var choices = Global.ONLINE_UPGRADE_TIME_OPTIONS
+	Global.online_upgrade_time = choices[(choices.find(Global.online_upgrade_time) + 1) % choices.size()]
+	_match_options_edited()
+
 func _toggle_team(slot):
 	Global.player_team[slot] = 1 - Global.team_of(slot)
 	_match_options_edited()
@@ -254,33 +322,73 @@ func _build_layout():
 
 	var actions = VBoxContainer.new()
 	actions.custom_minimum_size.x = 420
-	actions.add_theme_constant_override("separation", 14)
+	actions.add_theme_constant_override("separation", 10)
 	columns.add_child(actions)
-	var host_button = _button("Host (friends)", func(): SteamNet.host_lobby(false))
+	var host_button = _button("Host lobby", SteamNet.host_lobby)
 	actions.add_child(host_button)
-	actions.add_child(_button("Host (public)", func(): SteamNet.host_lobby(true)))
-	actions.add_child(_button("Find lobbies", SteamNet.find_lobbies))
+	privacy_button = _button("Lobby: Public", func(): SteamNet.set_lobby_private(not SteamNet.lobby_private))
+	privacy_button.tooltip_text = "Private lobbies aren't listed: friends join with an invite or the lobby code"
+	actions.add_child(privacy_button)
 	invite_button = _button("Invite friends", SteamNet.invite_friends)
 	actions.add_child(invite_button)
 	add_player_button = _button("Add player (this keyboard)", func(): SteamNet.add_local_player(false))
 	actions.add_child(add_player_button)
 	add_ai_button = _button("Add AI player", func(): SteamNet.add_local_player(true))
 	actions.add_child(add_ai_button)
-	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
-	actions.add_child(upgrades_button)
+	# Mode and points always show; the rest of the match settings fold out
 	mode_button = _button("Mode: Free for all", _toggle_teams)
 	actions.add_child(mode_button)
 	points_button = _button("Points to win: Auto", _cycle_points)
 	actions.add_child(points_button)
+	settings_toggle = _button("Match settings  +", func():
+		settings_box.visible = not settings_box.visible
+		settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+"))
+	actions.add_child(settings_toggle)
+	settings_box = VBoxContainer.new()
+	settings_box.add_theme_constant_override("separation", 10)
+	settings_box.hide()
+	actions.add_child(settings_box)
+	arena_button = _button("Arena rotation: Classic", _open_arena_rotation)
+	settings_box.add_child(arena_button)
+	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
+	settings_box.add_child(upgrades_button)
+	upgrade_time_button = _button("Upgrade time: 10 s", _cycle_upgrade_time)
+	settings_box.add_child(upgrade_time_button)
+	spawns_button = _button("Spawns: Fixed", _toggle_random_spawns)
+	settings_box.add_child(spawns_button)
+	countdown_button = _button("Countdown: ON", _toggle_round_countdown)
+	settings_box.add_child(countdown_button)
 	start_button = _button("Start match", SteamNet.start_match)
 	actions.add_child(start_button)
 	actions.add_child(_button("Back", _on_back_pressed))
+	# Many buttons: a bit smaller than the rest so the column fits on screen
+	for button in actions.get_children() + settings_box.get_children():
+		if not button is Button:
+			continue
+		button.add_theme_font_size_override("font_size", 24)
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			var style = ui_theme.get_stylebox(state, "Button").duplicate()
+			style.content_margin_top = 7
+			style.content_margin_bottom = 7
+			button.add_theme_stylebox_override(state, style)
 
 	var players_box = VBoxContainer.new()
 	players_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	players_box.add_theme_constant_override("separation", 14)
 	columns.add_child(players_box)
-	players_box.add_child(_label("Players", 34, Color.WHITE))
+	var players_header = HBoxContainer.new()
+	players_header.add_theme_constant_override("separation", 20)
+	players_box.add_child(players_header)
+	var players_title = _label("Players", 34, Color.WHITE)
+	players_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	players_header.add_child(players_title)
+	code_label = _label("", 30, HIGHLIGHT)
+	code_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	players_header.add_child(code_label)
+	copy_code_button = _button("Copy code", func():
+		DisplayServer.clipboard_set(SteamNet.lobby_code)
+		status_label.text = "Lobby code copied: " + SteamNet.lobby_code)
+	players_header.add_child(copy_code_button)
 	for slot in range(1, 5):
 		var panel = PanelContainer.new()
 		var style = _box_style(Color(0.16, 0.16, 0.16))
@@ -290,14 +398,36 @@ func _build_layout():
 		var row = HBoxContainer.new()
 		row.add_theme_constant_override("separation", 30)
 		panel.add_child(row)
-		var element = _label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot]))
-		element.custom_minimum_size.x = 170
-		row.add_child(element)
+		var element_box = VBoxContainer.new()
+		element_box.custom_minimum_size.x = 190
+		element_box.alignment = BoxContainer.ALIGNMENT_CENTER
+		element_box.add_theme_constant_override("separation", 0)
+		element_box.add_child(_label(ELEMENT_NAMES[slot], 34, Color(Global.playerColors[slot])))
+		# What its power does, in two words
+		element_box.add_child(_label(Global.POWER_TAGLINES[slot], 20, Color(Global.playerColors[slot]).lightened(0.35)))
+		row.add_child(element_box)
 		var texts = VBoxContainer.new()
 		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(texts)
 		var name_label = _label("Open", 30, Color.WHITE)
+		# Long names and key lists shrink or wrap instead of pushing the buttons off screen
+		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		name_label.clip_text = true
 		texts.add_child(name_label)
+		# This machine's people type the name they go by
+		var name_edit = LineEdit.new()
+		name_edit.max_length = SteamNet.MAX_NAME_LENGTH
+		name_edit.placeholder_text = "Your name"
+		name_edit.add_theme_font_size_override("font_size", 28)
+		name_edit.custom_minimum_size = Vector2(320, 0)
+		name_edit.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		name_edit.select_all_on_focus = true
+		name_edit.text_submitted.connect(func(text):
+			SteamNet.rename_slot(slot, text)
+			name_edit.release_focus())
+		name_edit.focus_exited.connect(func(): SteamNet.rename_slot(slot, name_edit.text))
+		name_edit.hide()
+		texts.add_child(name_edit)
 		var open_button = MenuButton.new()
 		open_button.text = "Open  -  choose..."
 		open_button.flat = false
@@ -310,6 +440,7 @@ func _build_layout():
 		open_button.hide()
 		texts.add_child(open_button)
 		var keys_label = _label("", 22, Color(0.7, 0.7, 0.7))
+		keys_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		texts.add_child(keys_label)
 		var keys_button = _button("Keys", _start_rebind.bind(slot))
 		keys_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -321,7 +452,7 @@ func _build_layout():
 		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
 		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(remove_button)
-		slot_rows[slot] = {"name": name_label, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
+		slot_rows[slot] = {"name": name_label, "name_edit": name_edit, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
 		players_box.add_child(panel)
 
 	var lobbies_box = VBoxContainer.new()
@@ -329,10 +460,32 @@ func _build_layout():
 	lobbies_box.add_theme_constant_override("separation", 14)
 	columns.add_child(lobbies_box)
 	lobbies_box.add_child(_label("Lobbies", 34, Color.WHITE))
+	# Join by code: for private lobbies, or when the list is too long to find one
+	var code_row = HBoxContainer.new()
+	code_row.add_theme_constant_override("separation", 10)
+	lobbies_box.add_child(code_row)
+	code_input = LineEdit.new()
+	code_input.placeholder_text = "Lobby code"
+	code_input.max_length = SteamNet.LOBBY_CODE_LENGTH
+	code_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	code_input.add_theme_stylebox_override("normal", _box_style(Color(0.16, 0.16, 0.16)))
+	code_input.add_theme_stylebox_override("focus", _box_style(Color(0.16, 0.16, 0.16), HIGHLIGHT))
+	code_input.text_changed.connect(func(text):
+		var caret = code_input.caret_column
+		code_input.text = text.to_upper()
+		code_input.caret_column = caret)
+	code_input.text_submitted.connect(func(text): SteamNet.join_by_code(text))
+	code_row.add_child(code_input)
+	code_row.add_child(_button("Join", func(): SteamNet.join_by_code(code_input.text)))
+	lobbies_box.add_child(_button("Find lobbies", SteamNet.find_lobbies))
 	lobby_list = VBoxContainer.new()
 	lobby_list.add_theme_constant_override("separation", 10)
-	lobby_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	lobbies_box.add_child(lobby_list)
+	lobby_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var lobby_scroll = ScrollContainer.new()
+	lobby_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lobby_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	lobby_scroll.add_child(lobby_list)
+	lobbies_box.add_child(lobby_scroll)
 	if OS.is_debug_build():
 		lobbies_box.add_child(_label("Debug", 22, Color(0.5, 0.5, 0.5)))
 		lobbies_box.add_child(_button("LAN host", SteamNet.host_lan))

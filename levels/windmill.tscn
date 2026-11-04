@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_wall"]
+
+[node name="Windmill" type="Node2D"]
+script = ExtResource("1_level")
+display_name = "Windmill"
+
+[node name="Blades" type="Polygon2D" parent="."]
+position = Vector2(960, 605)
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(-14, -170, 14, -170, 14, -14, 170, -14, 170, 14, 14, 14, 14, 170, -14, 170, -14, 14, -170, 14, -170, -14, -14, -14)
+script = ExtResource("2_wall")
+rotation_speed = 22.0
+
+[node name="SliderTop" type="Polygon2D" parent="."]
+position = Vector2(560, 255)
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(-60, -14, 60, -14, 60, 14, -60, 14)
+script = ExtResource("2_wall")
+move_offset = Vector2(800, 0)
+move_time = 9.0
+
+[node name="SliderBottom" type="Polygon2D" parent="."]
+position = Vector2(1360, 955)
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(-60, -14, 60, -14, 60, 14, -60, 14)
+script = ExtResource("2_wall")
+move_offset = Vector2(-800, 0)
+move_time = 9.0
+
+[node name="Spawn1" type="Marker2D" parent="."]
+position = Vector2(220, 420)
+rotation = 1.5708
+
+[node name="Spawn2" type="Marker2D" parent="."]
+position = Vector2(220, 790)
+rotation = 1.5708
+
+[node name="Spawn3" type="Marker2D" parent="."]
+position = Vector2(1700, 790)
+rotation = -1.5708
+
+[node name="Spawn4" type="Marker2D" parent="."]
+position = Vector2(1700, 420)
+rotation = -1.5708

@@ -19,7 +19,7 @@ var net_remote = false
 # The water snake took this twin's place: the head is gone but its trail stays
 var absorbed = false
 ## Seconds before a twin trail segment sheds its aqua skin and blocks the water snake again
-const SHED_TIME = 5.0
+const SHED_TIME = 7.0
 ## How long one segment takes to fade into the water color
 const SHED_FADE = 0.4
 # False keeps the trail aqua and harmless to the water snake forever (upgrade placeholder, not connected yet)
@@ -35,8 +35,21 @@ signal body_laid(body_position, body_rotation)
 
 @export var snakeBodyScene : PackedScene
 
+# Ghostly look, so the twin can't be mistaken for the water snake itself: its usual aqua,
+# but see-through and shimmering (scripts/fx/twin_ghost.gdshader). (No particles behind the
+# head: during a gap they looked like real trail.)
+const GHOST_COLOR = Color.AQUA
+static var ghost_material: ShaderMaterial
+static func get_ghost_material() -> ShaderMaterial:
+	if ghost_material == null:
+		ghost_material = ShaderMaterial.new()
+		ghost_material.shader = preload("res://scripts/fx/twin_ghost.gdshader")
+	return ghost_material
+
 func _ready():
 	add_to_group("twinHeads")
+	# "twinHeads" is only the live ones; this group keeps every twin (alive, dead or absorbed)
+	add_to_group("twins")
 	collider = $CollisionShape2D
 	var gapTimer = $GapTimer
 	var bodyTimer = $BodyTimer
@@ -48,6 +61,11 @@ func _ready():
 	# Split away from wherever the original snake is turning (random if it goes straight)
 	var parent_direction = get_parent().steer_direction
 	split_direction = -parent_direction if parent_direction != 0 else [-1, 1].pick_random()
+	_add_ghost_fx()
+
+func _add_ghost_fx():
+	$BodySprite.modulate = GHOST_COLOR
+	$BodySprite.material = get_ghost_material()
 
 func _process(delta):
 	if net_remote:
@@ -77,13 +95,54 @@ func _physics_process(delta):
 		return
 	while not unshed_segments.is_empty() and trail_clock - unshed_segments[0][1] >= SHED_TIME:
 		_shed(unshed_segments.pop_front()[0])
+	_update_shed_marker(delta)
+
+# A soft glow that rides the point where the trail is turning solid, so players can
+# see which part of the ghost trail is about to block the water snake
+var shed_marker: Node2D
+var shed_marker_idle = 0.0
+func _update_shed_marker(delta):
+	if shed_marker == null:
+		return
+	shed_marker_idle += delta
+	shed_marker.visible = shed_marker_idle < 0.15
+	shed_marker.queue_redraw()
+
+func _place_shed_marker(at):
+	if shed_marker == null:
+		shed_marker = Node2D.new()
+		shed_marker.top_level = true
+		shed_marker.z_index = 20
+		var glow = CanvasItemMaterial.new()
+		glow.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		shed_marker.material = glow
+		shed_marker.draw.connect(_draw_shed_marker)
+		add_child(shed_marker)
+	shed_marker.global_position = at
+	shed_marker_idle = 0.0
+
+func _draw_shed_marker():
+	var water_color = Color(Global.playerColors[get_parent().playerId])
+	var pulse = 0.5 + 0.5 * sin(trail_clock * 14.0)
+	shed_marker.draw_circle(Vector2.ZERO, 16.0 + 4.0 * pulse, Color(water_color, 0.25))
+	shed_marker.draw_circle(Vector2.ZERO, 5.0, Color(1, 1, 1, 0.9))
 
 func _shed(segment):
 	if not is_instance_valid(segment):
 		return
 	var water_color = Color(Global.playerColors[get_parent().playerId])
+	segment.material = null
+	segment.round_joints = true
+	_place_shed_marker(segment.global_position)
+	# White flash and a small pop (the drawn line only, not the collider), then it settles
+	# into the water color
+	segment.modulate = Color(1.6, 1.6, 1.6)
+	segment.thickness = 1.6
 	var tween = segment.create_tween()
+	tween.set_parallel()
+	tween.tween_property(segment, "thickness", 1.0, SHED_FADE)
 	tween.tween_property(segment, "modulate", water_color, SHED_FADE)
+	tween.chain()
 	# Once it looks like the water snake's own trail, it blocks it like one
 	tween.tween_callback(segment.remove_from_group.bind("TwinBodies"))
 
@@ -91,17 +150,28 @@ func _on_gapTimer_timeout():
 	gap = not gap
 	
 func _on_bodyTimer_timeout():
-	if net_remote:
+	if net_remote or not alive:
 		return
-	if not gap:
+	if gap:
+		trail_tail = null
+	else:
 		var body = createBody(snakeBodyScene)
+		_extend_trail(body)
 		body_laid.emit(body.global_position, body.rotation)
+
+# The newest piece of the ghost trail (null at the start of a stroke)
+var trail_tail = null
+
+func _extend_trail(body):
+	body.link_to(trail_tail)
+	trail_tail = body
 
 # Online: lay a segment of a remote twin where its owner laid it
 func create_body_at(body_position, body_rotation):
 	var body = createBody(snakeBodyScene)
 	body.global_position = body_position
 	body.rotation = body_rotation
+	_extend_trail(body)
 	return body
 
 func createBody(scene):
@@ -110,18 +180,14 @@ func createBody(scene):
 	snakeBody.set_as_top_level(true)
 	snakeBody.global_position = global_position
 
-	var bodySprite = snakeBody.get_node("BodySprite")
-	bodySprite.set_texture(get_parent().get_node("HeadSprite").texture)
-#		if $HeadSprite != null:
-#	bodySprite.modulate = get_parent().get_node("HeadSprite").modulate
-
-#		snakeBody.transform.scaled(transform.get_scale())
 	snakeBody.apply_scale(transform.get_scale())
 	snakeBody.rotation = rotation
 
-#	$Sprite2D.set_offset(Vector2(100,100))}
 	snakeBody.add_to_group("TwinBodies")
-	snakeBody.modulate = Color.AQUA
+	# Drawn as a line (scripts/trail_segment.gd); see-through, so no overlapping joints
+	snakeBody.modulate = GHOST_COLOR
+	snakeBody.material = get_ghost_material()
+	snakeBody.round_joints = false
 	snakeBody.collision_layer = 0b100
 #	print (snakeBody.collision_layer)
 	add_child(snakeBody)
@@ -144,9 +210,19 @@ func absorb():
 	collider.set_deferred("disabled", true)
 	remove_from_group("twinHeads")
 	$BodySprite.hide()
+	_tell_twin_lost()
+
+# Its water snake can make a new twin now (WaterPower pulses if its power is ready)
+func _tell_twin_lost():
+	var water = get_parent()
+	if water and "main_power" in water and water.main_power is WaterPower:
+		water.main_power.twin_lost()
 
 func _on_area_entered(area):
 	if net_remote:
+		return
+	# Air's Storm Fence shocks snakes (no power to lock on a twin): harmless here
+	if area.is_in_group("storm_arcs"):
 		return
 	if area is Shroom:
 		get_parent().emit_signal("score")
@@ -155,10 +231,20 @@ func _on_area_entered(area):
 #	if area.playerId == null or area.playerId != 4:
 		if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
 	#		if area.is_in_group("activePlayers"):
+			# End-screen stats: crashed on Earth's rock
+			if area.is_in_group("Fissures"):
+				var earth = Fissure.owner_of(area)
+				if earth != null:
+					Global.add_stat(earth.playerId, "earth_blocked")
 			$CollisionShape2D.set_deferred("disabled", true)
 			remove_from_group("twinHeads")
 			alive = false
 			set_process(false)
+			_tell_twin_lost()
+			# Stop laying trail: it kept piling hidden segments under the dead head, which
+			# later flashed one by one as they shed
+			$BodyTimer.stop()
+			$GapTimer.stop()
 			if (!get_parent().is_in_group("alivePlayers")):
 				get_parent().emit_signal("dead")
 		pass # Replace with function body.

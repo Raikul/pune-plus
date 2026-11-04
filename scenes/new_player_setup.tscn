@@ -10,6 +10,7 @@
 [ext_resource type="Theme" uid="uid://buk604ocwocj3" path="res://jorge_theme.tres" id="7_tjh4d"]
 [ext_resource type="FontFile" uid="uid://cgb4gpxrb04bo" path="res://assets/jorge-resources/Starting Screen/Aristotelica Display DemiBold Trial.ttf" id="8_dik6d"]
 [ext_resource type="Texture2D" uid="uid://dkdrc52ib1fsv" path="res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png" id="8_lif5f"]
+[ext_resource type="FontVariation" path="res://assets/fonts/aristotelica_button.tres" id="ari_button"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uwhrc"]
 bg_color = Color(0, 0.254902, 0.294118, 1)
@@ -20,7 +21,7 @@ bg_color = Color(0.6, 0.6, 0.6, 0)
 [sub_resource type="Theme" id="Theme_7avap"]
 Button/colors/font_hover_color = Color(0.909804, 0.607843, 0.172549, 1)
 Button/font_sizes/font_size = 66
-Button/fonts/font = ExtResource("8_dik6d")
+Button/fonts/font = ExtResource("ari_button")
 Label/font_sizes/font_size = 66
 Label/fonts/font = ExtResource("8_dik6d")
 

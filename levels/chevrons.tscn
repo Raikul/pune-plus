@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_cvec6"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_uhomk"]
+
+[node name="Chevrons" type="Node2D" unique_id=2012633882]
+script = ExtResource("1_cvec6")
+display_name = "Chevrons"
+
+[node name="Wall1" type="Polygon2D" parent="." unique_id=93036878]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(716, 374, 719, 377, 721, 381, 721, 385, 718, 388, 716, 390, 312, 600, 716, 810, 719, 813, 721, 817, 721, 821, 718, 824, 715, 827, 710, 827, 708, 826, 288, 608, 285, 605, 283, 601, 283, 597, 286, 594, 288, 592, 708, 374, 712, 373)
+script = ExtResource("2_uhomk")
+
+[node name="Wall2" type="Polygon2D" parent="." unique_id=1869416165]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1212, 374, 1632, 592, 1635, 595, 1637, 599, 1637, 603, 1634, 606, 1632, 608, 1212, 826, 1208, 827, 1204, 826, 1201, 823, 1199, 819, 1199, 815, 1202, 812, 1204, 810, 1608, 600, 1204, 390, 1201, 387, 1199, 383, 1199, 379, 1202, 376, 1205, 373, 1210, 373)
+script = ExtResource("2_uhomk")

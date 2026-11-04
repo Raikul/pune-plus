@@ -126,7 +126,7 @@ size_flags_horizontal = 4
 text = "I"
 horizontal_alignment = 1
 
-[node name="PunchySprite" type="Sprite2D" parent="InputList/Up"]
+[node name="PunchiSprite" type="Sprite2D" parent="InputList/Up"]
 position = Vector2(47, 29)
 scale = Vector2(0.42848, 0.42848)
 texture = ExtResource("4_2ld1l")

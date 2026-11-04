@@ -5,15 +5,22 @@ signal stats_changed
 var base: Dictionary = {
 	"speed": 150.0,
 	"cooldown": 6.0,            # Igual que el CooldownTimer de player.tscn
-	"earth.duration": 2.0,
-	"earth.scale": 2.0,         # <--- 2.0x = el doble de tamaño de colisión
+	"earth.duration": 1.2,
+	"earth.scale": 1.0,         # Ancho del camino de rocas (1 = normal)
 	"earth.stone_walk": 0.0,    # 1 = atraviesa sus propias fisuras sin morir
+	"earth.border_pass": 0.0,   # 1 = con la armadura atraviesa paredes y sale del área de juego
 	"fire.radius": 1.0,
 	"fire.duration": 2.5,       # Segundos de vuelo; después se desvanece (0 = sin límite)
+	"fire.phoenix": 0.0,        # 1 = renace una vez por ronda
+	"fire.trail": 0.0,          # 1 = la bola de fuego deja llamas que queman a los demás
+	"air.shock": 0.0,           # 1 = electrocuta a quien atraviesa al teletransportarse
+	"air.scramble": 0.0,        # 1 = el choque eléctrico también invierte sus controles
+	"air.storm": 0.0,           # 1 = al teletransportarse electrifica los huecos de su estela
 	"gap.time": 0.6,
 	"air.recast_window": 0.0,   # Segundos para el segundo salto (0 = sin doble salto)
 	"air.wall_warp": 0.0,       # 1 = el teletransporte atraviesa las paredes
-	"water.copies": 1.0,        # Gemelos por poder
+	"water.max_twins": 1.0,     # Gemelos vivos a la vez
+	"water.twins_per_cast": 1.0, # Gemelos por cada uso del poder (hasta el máximo)
 	"water.lasting_twin": 0.0,  # 1 = la estela del gemelo nunca cambia de color
 }
 var active_buffs: Dictionary = {}

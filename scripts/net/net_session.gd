@@ -16,7 +16,7 @@ const MAX_EXTRAPOLATION = 0.5
 ## Corrections bigger than this (teleports) snap instead of sliding.
 const SNAP_DISTANCE = 120.0
 const CORRECTION_SPEED = 10.0
-const BRIDGE_WIDTH = 8.0
+const BRIDGE_WIDTH = TrailSegment.WIDTH
 # Water twin status in twin_state packets
 const TWIN_ALIVE = 0
 const TWIN_DEAD = 1 # Crashed: it stays where it died, with its trail
@@ -81,6 +81,7 @@ func register_player(player):
 		player.body_laid.connect(_on_local_body_laid.bind(player_id))
 		player.power_used.connect(_on_local_power_used.bind(player_id))
 		player.twin_spawned.connect(_on_local_twin_spawned.bind(player_id))
+		player.phoenix_changed.connect(_on_local_phoenix.bind(player_id))
 		return
 	remote_snakes[player_id] = _new_remote_snake(player, Color(Global.playerColors[player_id]))
 
@@ -89,7 +90,8 @@ func _new_remote_snake(node, color):
 	snake.player = node
 	snake.state_position = node.global_position
 	snake.state_rotation = node.rotation
-	snake.speed = node.speed
+	# Still until its owner reports it moving (the first round waits for a countdown)
+	snake.speed = 0.0
 	snake.angular_speed = node.angular_speed
 	snake.sent_at = SteamNet.net_time()
 	snake.bridge = Line2D.new()
@@ -125,7 +127,7 @@ func _send_state(local, final = false):
 	for segment in local_segments[player_id].slice(-SEGMENT_REDUNDANCY):
 		recent.append_array(segment)
 	snake_state.rpc(round_id, player_id, sequences[player_id], SteamNet.net_time(), local.global_position,
-		local.rotation, local.steer_direction, 0.0 if final else local.speed, local.gap, recent)
+		local.rotation, local.steer_direction, 0.0 if final or local.reviving else local.speed, local.gap, recent)
 
 func _on_local_body_laid(body_position, body_rotation, player_id):
 	var segments = local_segments[player_id]
@@ -173,6 +175,43 @@ func _on_local_power_used(recast, player_id):
 	if not _online():
 		return
 	power_event.rpc(round_id, player_id, recast)
+
+# Phoenix: our fire snake turned to ash (frozen and hidden everywhere) or rose again
+func _on_local_phoenix(rising, player_id):
+	if not _online():
+		return
+	var player = players.get(player_id)
+	if not rising:
+		_send_state(player, true)
+	phoenix_event.rpc(round_id, player_id, rising, player.global_position, player.rotation)
+
+@rpc("any_peer", "call_remote", "reliable")
+func phoenix_event(event_round, player_id, rising, point, heading):
+	if not _online():
+		return
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if event_round != round_id or SteamNet.peer_for_slot(player_id) != sender:
+		return
+	var player = players.get(player_id)
+	var snake = remote_snakes.get(player_id)
+	if player == null or not is_instance_valid(player) or snake == null or not player.main_power is FirePower:
+		return
+	if rising:
+		# Predict it again from where it rose
+		snake.dead = false
+		snake.state_position = point
+		snake.state_rotation = heading
+		snake.direction = 0
+		snake.speed = player.speed
+		snake.sent_at = SteamNet.net_time()
+		snake.position_offset = Vector2.ZERO
+		snake.rotation_offset = 0.0
+		snake.newest_segment_position = null
+	else:
+		_stop_snake(player_id)
+	player.main_power.remote_phoenix(rising, point, heading)
 
 # Our snake died on our screen: send its last trail and let the host decide what that means
 func report_death(player_id):
@@ -282,7 +321,7 @@ func twin_state(state_round, player_id, serial, state_sequence, sent_at, state_p
 		var twin = player.spawn_remote_twin()
 		twin.global_position = state_position
 		twin.rotation = state_rotation
-		snake = _new_remote_snake(twin, Color.AQUA)
+		snake = _new_remote_snake(twin, twin.GHOST_COLOR)
 		snake.serial = serial
 		remote_twins[key] = snake
 	if not is_instance_valid(snake.player):
@@ -423,15 +462,17 @@ func upgrade_pick(event_round, slot, upgrade_id):
 func host_start_round():
 	if not _online():
 		return
-	var spawns = {}
-	for slot in SteamNet.roster:
-		spawns[slot] = playground.roll_spawn(slot)
-	start_round.rpc(round_id + 1, spawns)
+	# This round's arena first: the spawns keep clear of its walls
+	var level_path = Global.pick_level(playground.level_path if round_id > 0 else null)
+	playground.use_level(level_path)
+	var spawns = playground.roll_spawns(SteamNet.roster.keys())
+	start_round.rpc(round_id + 1, spawns, level_path)
 
 @rpc("authority", "call_local", "reliable")
-func start_round(new_round_id, spawns):
+func start_round(new_round_id, spawns, level_path = ""):
 	if not await _arrived():
 		return
+	playground.use_level(level_path)
 	round_id = new_round_id
 	players.clear()
 	remote_snakes.clear()
@@ -529,6 +570,115 @@ func _on_peer_left(_peer_id, slots):
 		Global.set("player" + str(slot) + "Active", false)
 		if multiplayer.is_server():
 			_host_player_died(slot)
+	if multiplayer.is_server():
+		_host_check_end_votes()
+
+#endregion
+
+#region End of the match: stats and rematch
+# Each machine counted what it decided (Global.match_stats); at game over they all send
+# theirs and add up everyone's. On the stats screen each machine's players pick REMATCH or
+# QUIT; once every machine confirmed, the host starts a rematch if everybody wants one,
+# otherwise everyone goes back to the lobby.
+
+signal stats_received
+signal end_choice_received(slot, rematch)
+var peer_stats = {}   # peer id -> that machine's Global.match_stats
+var end_choices = {}  # slot -> rematch, picks made on other machines
+var end_votes = {}    # Host: peer id -> {slot: rematch}, once that machine confirmed
+
+func send_stats():
+	if _online():
+		stats_shared.rpc(Global.match_stats)
+
+@rpc("any_peer", "call_remote", "reliable")
+func stats_shared(stats):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	peer_stats[sender] = stats
+	stats_received.emit()
+
+func send_end_choice(slot, rematch):
+	if _online() and is_local(slot):
+		end_choice.rpc(slot, rematch)
+
+@rpc("any_peer", "call_remote", "reliable")
+func end_choice(slot, rematch):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if SteamNet.peer_for_slot(slot) != sender:
+		return
+	end_choices[slot] = rematch
+	end_choice_received.emit(slot, rematch)
+
+# This machine's players are done: their final picks go to the host
+func confirm_end(choices):
+	if not _online():
+		return
+	if multiplayer.is_server():
+		_host_end_confirmed(1, choices)
+	else:
+		end_confirmed.rpc_id(1, choices)
+
+@rpc("any_peer", "call_remote", "reliable")
+func end_confirmed(choices):
+	var sender = multiplayer.get_remote_sender_id()
+	if not await _arrived():
+		return
+	if multiplayer.is_server():
+		_host_end_confirmed(sender, choices)
+
+func _host_end_confirmed(peer_id, choices):
+	end_votes[peer_id] = choices
+	_host_check_end_votes()
+
+func _host_check_end_votes():
+	if end_votes.is_empty() or not _online():
+		return
+	var peers = SteamNet.roster_peers()
+	if not peers.all(func(peer_id): return end_votes.has(peer_id)):
+		return
+	var rematch = SteamNet.roster.size() >= 2
+	# Machines where every player picked QUIT leave; the others go back to the lobby
+	var leaving = []
+	for peer_id in peers:
+		var votes = end_votes[peer_id].values()
+		for wants_more in votes:
+			rematch = rematch and wants_more
+		if not votes.is_empty() and not votes.any(func(wants_more): return wants_more):
+			leaving.append(peer_id)
+	end_votes.clear()
+	if rematch:
+		SteamNet.start_match()
+		return
+	# The host keeps the lobby for whoever stays; it only leaves if everyone does
+	if leaving.size() == peers.size():
+		for peer_id in peers:
+			if peer_id != 1:
+				leave_match.rpc_id(peer_id)
+		leave_match()
+		return
+	for peer_id in peers:
+		if peer_id == 1:
+			continue
+		if peer_id in leaving:
+			leave_match.rpc_id(peer_id)
+		else:
+			back_to_lobby.rpc_id(peer_id)
+	back_to_lobby()
+
+# QUIT at the end of a match: out of the session, to the main menu
+@rpc("authority", "call_remote", "reliable")
+func leave_match():
+	SteamNet.leave()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+
+@rpc("authority", "call_local", "reliable")
+func back_to_lobby():
+	SteamNet.return_to_lobby()
 
 #endregion
 

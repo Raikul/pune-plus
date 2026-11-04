@@ -2,7 +2,7 @@ extends Control
 
 # Between-rounds upgrade screen. Every active snake picks one of its own upgrades
 # at the same time, browsing with its Left/Right keys and confirming with its
-# Punchy (Up) key. For now the picks are only reported through the signals below.
+# Punchi (Up) key. For now the picks are only reported through the signals below.
 
 signal upgrade_selected(player_id, upgrade_id)
 signal all_upgrades_selected(selections)
@@ -25,6 +25,10 @@ var rows_box
 var footer_label
 var signal_label
 var timer_label
+var subtitle_label
+var quote_box
+var quote_label
+var quote_source
 
 func _ready():
 	_build_layout()
@@ -68,8 +72,20 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 		row.modulate.a = 0
 		create_tween().tween_property(row, "modulate:a", 1.0, 0.3).set_delay(0.08 * i)
 
-	footer_label.text = "Left / Right to browse   |   Punchy to confirm"
+	footer_label.text = "Left / Right to browse   |   Punchi to confirm"
 	signal_label.text = ""
+
+# winner_id: the snake that won the last round (0 = nobody); its element picks the quote
+func show_wisdom(winner_id):
+	if not is_node_ready():
+		await ready
+	var quote = Wisdom.for_winner(winner_id)
+	quote_label.text = "“%s”" % quote.text
+	quote_label.add_theme_color_override("font_color",
+		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4] else Color(0.9, 0.9, 0.9))
+	quote_source.text = "— " + quote.source
+	quote_box.show()
+	subtitle_label.hide()
 
 # Online: another machine picked for this snake
 func remote_pick(player_id, upgrade_id):
@@ -133,7 +149,7 @@ func _finish():
 	finished.emit()
 	if get_tree().current_scene == self:
 		waiting_for_reroll = true
-		footer_label.text = "Press any Punchy key to roll new upgrades"
+		footer_label.text = "Press any Punchi key to roll new upgrades"
 
 func _unhandled_input(event):
 	if not waiting_for_reroll:
@@ -169,20 +185,39 @@ func _build_layout():
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
 
-	var margin = MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 40)
 	margin.add_theme_constant_override("margin_right", 40)
 	margin.add_theme_constant_override("margin_top", 24)
 	margin.add_theme_constant_override("margin_bottom", 24)
 	add_child(margin)
 
-	var layout = VBoxContainer.new()
+	layout = VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 10)
 	margin.add_child(layout)
+	# Too much to fit (four snakes, long quote, small window): shrink it all instead of
+	# pushing cards and status off screen
+	layout.minimum_size_changed.connect(_fit_to_screen)
+	resized.connect(_fit_to_screen)
+	_fit_to_screen.call_deferred()
 
-	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 60, Color.WHITE))
-	layout.add_child(_centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6)))
+	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 56, Color.WHITE))
+	subtitle_label = _centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6))
+	layout.add_child(subtitle_label)
+	# Wise words for the element that won the last round (show_wisdom)
+	quote_box = VBoxContainer.new()
+	quote_box.add_theme_constant_override("separation", 6)
+	quote_box.hide()
+	layout.add_child(quote_box)
+	quote_label = _centered_label("", 28, Color.WHITE)
+	quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	quote_box.add_child(quote_label)
+	quote_source = _centered_label("", 18, Color(0.55, 0.55, 0.55))
+	quote_box.add_child(quote_source)
+	# Breathing room between the quote and the cards
+	var quote_gap = Control.new()
+	quote_gap.custom_minimum_size = Vector2(0, 22)
+	quote_box.add_child(quote_gap)
 
 	rows_box = VBoxContainer.new()
 	rows_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -207,6 +242,19 @@ func _build_layout():
 	timer_label.pivot_offset = Vector2(70, 45)
 	timer_label.visible = false
 	add_child(timer_label)
+
+var margin
+var layout
+
+func _fit_to_screen():
+	if margin == null:
+		return
+	var padding = Vector2(80, 48)
+	var needed = layout.get_combined_minimum_size() + padding
+	var factor = min(1.0, size.x / needed.x, size.y / needed.y)
+	margin.scale = Vector2.ONE * factor
+	margin.position = Vector2.ZERO
+	margin.size = size / factor
 
 func _centered_label(text, font_size, font_color):
 	var label = Label.new()

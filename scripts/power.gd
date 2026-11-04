@@ -16,6 +16,10 @@ func activate() -> void:
 func is_active() -> bool:
 	return false
 
+# False blocks the cast before it starts, so it doesn't go on cooldown either
+func can_activate() -> bool:
+	return true
+
 # Lógica para que la IA decida si usarlo
 func ai_should_activate(_direction: int) -> bool:
 	return false
@@ -29,5 +33,10 @@ func try_prevent_death() -> bool:
 	return false
 func should_ignore_collision(_area: Area2D) -> bool:
 	return false
+# Whether the "power ready" pulse makes sense when the cooldown ends (Water: not with
+# every twin already out, since the power can't make another)
+func should_pulse_ready() -> bool:
+	return true
+
 func cleanup() -> void:
 	pass

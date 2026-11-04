@@ -4,6 +4,11 @@ extends Node
 # plays which element. GodotSteam is only reached through Engine.get_singleton /
 # ClassDB, so the project still runs in a plain Godot editor without Steam.
 # See docs/multiplayer.md.
+#
+# Steam only runs while the player is online: the Multiplayer screen starts it
+# (start_steam) and the main menu shuts it down (stop_steam). Friends only see the
+# game in their Steam list ("Playing Spacewar" with the test app id) during online play,
+# not while playing locally.
 
 signal status_changed(text)
 signal roster_changed
@@ -19,8 +24,14 @@ const MAX_PLAYERS = 4
 const LOBBY_GAME_KEY = "game"
 const LOBBY_GAME_VALUE = "pune_plus"
 const LAN_PORT = 7531
-const LOBBY_TYPE_FRIENDS_ONLY = 1
 const LOBBY_TYPE_PUBLIC = 2
+# Invisible lobbies don't show in friends lists but searches still find them: private
+# lobbies use it so they can be joined by code (the public list filters them out)
+const LOBBY_TYPE_INVISIBLE = 3
+const LOBBY_CODE_KEY = "code"
+const LOBBY_PRIVATE_KEY = "private"
+const LOBBY_CODE_LENGTH = 6
+const LOBBY_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" # No 0/O or 1/I
 const LOBBY_COMPARISON_EQUAL = 0
 const LOBBY_DISTANCE_WORLDWIDE = 3
 const STEAM_RESULT_OK = 1
@@ -30,9 +41,16 @@ const CLOCK_SAMPLES = 8
 
 var steam = null
 var steam_ready = false
-var steam_status = "Steam not available"
+var steam_status = "Steam not started"
+var steam_signals_connected = false
 var persona_name = "Player"
 var lobby_id = 0
+# The lobby's join code ("" when not in a Steam lobby)
+var lobby_code = ""
+# Private lobbies aren't listed; hosting uses this, and the host can change it later
+var lobby_private = false
+# Code being searched for by join_by_code ("" for a normal lobby list)
+var searching_code = ""
 var is_lan = false
 # slot (element 1-4) -> {"peer": peer id that runs the snake, "name": String,
 # "ai": bool, "keys": which Player{N} input actions steer it on its machine (0 = AI)}.
@@ -53,7 +71,6 @@ var offline_ai = null
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_init_steam()
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -106,29 +123,53 @@ func fake_delay():
 	if fake_latency > 0:
 		await get_tree().create_timer(fake_latency).timeout
 
-func _init_steam():
+# The Multiplayer screen calls it; true once Steam runs (again after stop_steam)
+func start_steam() -> bool:
+	if steam_ready:
+		return true
 	if not Engine.has_singleton("Steam") or not ClassDB.class_exists("SteamMultiplayerPeer"):
 		steam_status = "This build has no Steam support (use the GodotSteam editor)"
-		return
+		return false
 	steam = Engine.get_singleton("Steam")
 	var result = steam.steamInitEx(APP_ID, true)
 	if result.status != 0:
 		steam_status = "Steam failed to start: " + str(result.verbal)
-		return
+		return false
 	steam_ready = true
 	persona_name = steam.getPersonaName()
 	steam_status = "Steam ready - " + persona_name
-	steam.lobby_created.connect(_on_lobby_created)
-	steam.lobby_joined.connect(_on_lobby_joined)
-	steam.lobby_match_list.connect(_on_lobby_match_list)
-	steam.join_requested.connect(func(lobby, _friend): join_lobby(lobby))
+	if not steam_signals_connected:
+		steam_signals_connected = true
+		steam.lobby_created.connect(_on_lobby_created)
+		steam.lobby_joined.connect(_on_lobby_joined)
+		steam.lobby_match_list.connect(_on_lobby_match_list)
+		steam.join_requested.connect(func(lobby, _friend): join_lobby(lobby))
+	return true
 
-# A friend's invite can also start the game with "+connect_lobby <id>"
+# Back to local play (the main menu calls it): Steam stops, and with it the game's entry
+# in the friends list. Nothing happens while still in a lobby or a match.
+func stop_steam():
+	if not steam_ready or is_online() or lobby_id != 0:
+		return
+	steam.steamShutdown()
+	steam_ready = false
+	steam_status = "Steam not started"
+
+# A friend's invite can also start the game with "+connect_lobby <id>": the game goes
+# straight to the Multiplayer screen, which starts Steam and joins (take_pending_invite).
+# Deferred, so the main menu still sets up the window first.
+var pending_invite = 0
 func _check_launch_invite():
 	var args = OS.get_cmdline_args()
 	var index = args.find("+connect_lobby")
-	if steam_ready and index != -1 and index + 1 < args.size():
-		join_lobby.call_deferred(int(args[index + 1]))
+	if index != -1 and index + 1 < args.size():
+		pending_invite = int(args[index + 1])
+		get_tree().change_scene_to_file.call_deferred("res://scenes/net/online_lobby.tscn")
+
+func take_pending_invite():
+	if pending_invite != 0 and steam_ready:
+		join_lobby(pending_invite)
+	pending_invite = 0
 
 func is_online():
 	return multiplayer.has_multiplayer_peer() and not multiplayer.multiplayer_peer is OfflineMultiplayerPeer
@@ -158,13 +199,47 @@ func roster_peers():
 
 #region Hosting and joining
 
-func host_lobby(public = false):
+func host_lobby():
 	if not steam_ready:
 		_set_status(steam_status)
 		return
+	var make_private = lobby_private
 	leave()
+	lobby_private = make_private
 	_set_status("Creating lobby...")
-	steam.createLobby(LOBBY_TYPE_PUBLIC if public else LOBBY_TYPE_FRIENDS_ONLY, MAX_PLAYERS)
+	steam.createLobby(_lobby_type(), MAX_PLAYERS)
+
+func _lobby_type():
+	return LOBBY_TYPE_INVISIBLE if lobby_private else LOBBY_TYPE_PUBLIC
+
+# Before hosting it picks the type of the next lobby; the host can also change it live
+func set_lobby_private(make_private):
+	lobby_private = make_private
+	if steam_ready and lobby_id != 0 and is_host():
+		steam.setLobbyType(lobby_id, _lobby_type())
+		steam.setLobbyData(lobby_id, LOBBY_PRIVATE_KEY, "1" if lobby_private else "0")
+	roster_changed.emit()
+
+func _new_lobby_code():
+	var code = ""
+	for i in LOBBY_CODE_LENGTH:
+		code += LOBBY_CODE_CHARS[randi() % LOBBY_CODE_CHARS.length()]
+	return code
+
+func join_by_code(code):
+	code = code.strip_edges().to_upper()
+	if code.length() != LOBBY_CODE_LENGTH:
+		_set_status("Lobby codes have %d letters and numbers" % LOBBY_CODE_LENGTH)
+		return
+	if not steam_ready:
+		_set_status(steam_status)
+		return
+	searching_code = code
+	_set_status("Looking for lobby " + code + "...")
+	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListStringFilter(LOBBY_CODE_KEY, code, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
+	steam.requestLobbyList()
 
 func _on_lobby_created(result, new_lobby_id):
 	if result != STEAM_RESULT_OK:
@@ -173,6 +248,9 @@ func _on_lobby_created(result, new_lobby_id):
 	lobby_id = new_lobby_id
 	steam.setLobbyData(lobby_id, LOBBY_GAME_KEY, LOBBY_GAME_VALUE)
 	steam.setLobbyData(lobby_id, "name", persona_name + "'s Pune")
+	lobby_code = _new_lobby_code()
+	steam.setLobbyData(lobby_id, LOBBY_CODE_KEY, lobby_code)
+	steam.setLobbyData(lobby_id, LOBBY_PRIVATE_KEY, "1" if lobby_private else "0")
 	var peer = _new_steam_peer()
 	var error = peer.host_with_lobby(lobby_id)
 	if error != OK:
@@ -195,6 +273,8 @@ func _on_lobby_joined(joined_lobby, _permissions, _locked, response):
 		_set_status("Could not join lobby (" + str(response) + ")")
 		return
 	lobby_id = joined_lobby
+	lobby_code = steam.getLobbyData(lobby_id, LOBBY_CODE_KEY)
+	lobby_private = steam.getLobbyData(lobby_id, LOBBY_PRIVATE_KEY) == "1"
 	# The owner already hosts through _on_lobby_created
 	if steam.getLobbyOwner(lobby_id) == steam.getSteamID():
 		return
@@ -217,12 +297,22 @@ func find_lobbies():
 	if not steam_ready:
 		_set_status(steam_status)
 		return
+	searching_code = ""
 	_set_status("Searching lobbies...")
 	steam.addRequestLobbyListStringFilter(LOBBY_GAME_KEY, LOBBY_GAME_VALUE, LOBBY_COMPARISON_EQUAL)
+	steam.addRequestLobbyListStringFilter(LOBBY_PRIVATE_KEY, "0", LOBBY_COMPARISON_EQUAL)
 	steam.addRequestLobbyListDistanceFilter(LOBBY_DISTANCE_WORLDWIDE)
 	steam.requestLobbyList()
 
 func _on_lobby_match_list(lobbies):
+	if searching_code != "":
+		var code = searching_code
+		searching_code = ""
+		if lobbies.is_empty():
+			_set_status("No lobby with code " + code)
+		else:
+			join_lobby(lobbies[0])
+		return
 	var found = []
 	for id in lobbies:
 		found.append({
@@ -268,6 +358,8 @@ func leave():
 	if steam_ready and lobby_id != 0:
 		steam.leaveLobby(lobby_id)
 	lobby_id = 0
+	lobby_code = ""
+	lobby_private = false
 	is_lan = false
 	clock_offset = 0.0
 	clock_samples.clear()
@@ -299,6 +391,9 @@ func _start_roster():
 	roster_changed.emit()
 
 func _local_name():
+	var chosen = str(Global.online_names.get(1, "")).strip_edges()
+	if chosen != "":
+		return chosen
 	return persona_name if steam_ready and not is_lan else "Player " + str(multiplayer.get_unique_id() % 1000)
 
 func _on_connected_to_server():
@@ -361,8 +456,36 @@ func _host_add_extra(peer_id, ai, slot = 0):
 		return
 	var owner_name = roster[owner_slots[0]].name
 	var player_name = "AI (" + owner_name + ")" if ai else owner_name + " #" + str(owner_slots.size() + 1)
-	if _add_slot(peer_id, player_name, ai, slot) != 0:
+	var added = _add_slot(peer_id, player_name, ai, slot)
+	if added != 0:
+		# A person who named themselves on that machine before (the name comes with the
+		# keys: the owner asks for it with rename_slot once the slot is theirs)
 		_roster_updated()
+
+# One of this machine's people picks the name they go by (the lobby's name box). Saved
+# by key set, so the same person gets it next time.
+const MAX_NAME_LENGTH = 16
+func rename_slot(slot, new_name):
+	new_name = str(new_name).strip_edges().left(MAX_NAME_LENGTH)
+	if not is_online() or not roster.has(slot) or new_name == "" or roster[slot].ai:
+		return
+	Global.online_names[roster[slot].keys] = new_name
+	Global.save_settings()
+	if multiplayer.is_server():
+		_host_rename_slot(1, slot, new_name)
+	else:
+		request_rename_slot.rpc_id(1, slot, new_name)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_rename_slot(slot, new_name):
+	if multiplayer.is_server() and not Global.isMultiplayerActive:
+		_host_rename_slot(multiplayer.get_remote_sender_id(), slot, str(new_name).strip_edges().left(MAX_NAME_LENGTH))
+
+func _host_rename_slot(peer_id, slot, new_name):
+	if peer_for_slot(slot) != peer_id or roster[slot].ai or new_name == "":
+		return
+	roster[slot].name = new_name
+	_roster_updated()
 
 # Move one of this machine's snakes to a free element
 func move_slot(from_slot, to_slot):
@@ -456,6 +579,10 @@ func start_match():
 		return
 	if steam_ready and lobby_id != 0:
 		steam.setLobbyJoinable(lobby_id, false)
+	# Every AI gets a random name of its element for this match
+	for slot in roster:
+		if roster[slot].ai:
+			roster[slot].name = Global.random_ai_name(slot)
 	# The host's own toggles decide the match options
 	begin_match.rpc(roster, Global.match_options())
 
@@ -477,7 +604,27 @@ func begin_match(final_roster, options = {}):
 	Global.online_teams = options.get("teams", false)
 	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1})
 	Global.online_points_to_win = options.get("points_to_win", 0)
+	Global.online_random_spawns = options.get("random_spawns", false)
+	Global.online_round_countdown = options.get("round_countdown", true)
+	Global.online_level = options.get("level", "")
+	if Global.online_level != "" and not ResourceLoader.exists(Global.online_level):
+		Global.online_level = "" # A level this build doesn't have
+	# The host's arena rotation (levels this build doesn't have are skipped when picking)
+	Global.online_level_rotation = options.get("levels", [Global.online_level])
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
+
+# End of a match without a rematch: everyone stays connected and goes back to the lobby
+# screen, where the roster and options can change before the next one
+func return_to_lobby():
+	Global.isMultiplayerActive = false
+	if offline_ai != null:
+		Global.AI_Enabled = offline_ai
+		offline_ai = null
+	ready_peers.clear()
+	if steam_ready and lobby_id != 0 and multiplayer.is_server():
+		steam.setLobbyJoinable(lobby_id, true)
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/net/online_lobby.tscn")
 
 # Every peer calls this once its Playground is loaded. The host starts the first round when all are in.
 func report_scene_ready():
