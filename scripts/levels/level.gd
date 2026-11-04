@@ -48,6 +48,17 @@ func _playtest():
 	Global.reset_score()
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
+# Where score shrooms may appear (Shroom mode): the Marker2D children of a "ShroomSpots"
+# node. Empty = anywhere clear of the walls.
+func shroom_spots() -> Array:
+	var spots = []
+	var holder = get_node_or_null("ShroomSpots")
+	if holder:
+		for marker in holder.get_children():
+			if marker is Node2D:
+				spots.append(marker.global_position)
+	return spots
+
 func walls() -> Array:
 	return find_children("*", "LevelWall", true, false)
 

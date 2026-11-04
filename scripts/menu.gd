@@ -15,6 +15,8 @@ func _ready():
 	# Back from an online match
 	if SteamNet.is_online():
 		SteamNet.leave()
+	# Local play: Steam stops, so friends don't see the game as running
+	SteamNet.stop_steam()
 	# The version (Project Settings > Application > Config > Version) opens the patch notes
 	version_button.text = PatchNotes.version_label()
 	# The menu's display font has no digits (demo font), so the version uses Odin

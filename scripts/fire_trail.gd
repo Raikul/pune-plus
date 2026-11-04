@@ -17,6 +17,7 @@ var seed_offset = 0.0
 
 func _ready():
 	add_to_group("fire_trail")
+	add_to_group("hazards") # Owned dangers: their owner goes through (Player), fireballs too
 	top_level = true
 	z_index = 4
 	collision_layer = 1

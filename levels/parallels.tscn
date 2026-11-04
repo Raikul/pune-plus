@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_1m68m"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_vnwr0"]
+
+[node name="Parallels" type="Node2D" unique_id=1744310073]
+script = ExtResource("1_1m68m")
+display_name = "Parallels"
+
+[node name="Wall1" type="Polygon2D" parent="." unique_id=1347629702]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1339, 360, 1342, 363, 1344, 367, 1344, 371, 1341, 374, 1338, 377, 1335, 377, 585, 377, 581, 376, 578, 373, 576, 369, 576, 365, 579, 362, 582, 359, 585, 359, 1335, 359)
+script = ExtResource("2_vnwr0")
+
+[node name="Wall2" type="Polygon2D" parent="." unique_id=1080012437]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1339, 834, 1342, 837, 1344, 841, 1344, 845, 1341, 848, 1338, 851, 1335, 851, 585, 851, 581, 850, 578, 847, 576, 843, 576, 839, 579, 836, 582, 833, 585, 833, 1335, 833)
+script = ExtResource("2_vnwr0")
+
+[node name="ShroomSpots" type="Node2D" parent="." unique_id=1267662009]
+
+[node name="Shroom1" type="Marker2D" parent="ShroomSpots" unique_id=736932156]
+position = Vector2(311, 225)
+
+[node name="Shroom2" type="Marker2D" parent="ShroomSpots" unique_id=549773592]
+position = Vector2(984, 213)
+
+[node name="Shroom3" type="Marker2D" parent="ShroomSpots" unique_id=845574013]
+position = Vector2(1752, 222)
+
+[node name="Shroom4" type="Marker2D" parent="ShroomSpots" unique_id=2023296462]
+position = Vector2(308, 543)
+
+[node name="Shroom5" type="Marker2D" parent="ShroomSpots" unique_id=1258616725]
+position = Vector2(945, 548)
+
+[node name="Shroom6" type="Marker2D" parent="ShroomSpots" unique_id=518501935]
+position = Vector2(1733, 537)
+
+[node name="Shroom7" type="Marker2D" parent="ShroomSpots" unique_id=2070276363]
+position = Vector2(290, 911)
+
+[node name="Shroom8" type="Marker2D" parent="ShroomSpots" unique_id=331877965]
+position = Vector2(981, 960)
+
+[node name="Shroom9" type="Marker2D" parent="ShroomSpots" unique_id=415632188]
+position = Vector2(1731, 968)

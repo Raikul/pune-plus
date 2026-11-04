@@ -83,6 +83,29 @@ func add_stat(player_id, stat, amount = 1) -> void:
 	if not match_stats.has(player_id):
 		match_stats[player_id] = {}
 	match_stats[player_id][stat] = match_stats[player_id].get(stat, 0) + amount
+	if HIGHLIGHT_STATS.has(stat):
+		note_highlight(player_id, HIGHLIGHT_STATS[stat][0], HIGHLIGHT_STATS[stat][1])
+
+# For stats that only count the best (the longest single life)
+func max_stat(player_id, stat, amount) -> void:
+	if not match_stats.has(player_id):
+		match_stats[player_id] = {}
+	match_stats[player_id][stat] = max(match_stats[player_id].get(stat, 0), amount)
+
+## Something worth a replay happened (the play of the game, scripts/replay/replay_recorder.gd).
+## player_id: whose moment it is; kind: what (its caption); weight: how good;
+## victim_id: who it happened to (a kill's victim)
+signal highlight(player_id, kind, weight, victim_id)
+## Stats that are a moment of their own: [kind, weight]
+const HIGHLIGHT_STATS = {
+	"fire_revives": ["phoenix", 3.0],
+	"water_saves": ["save", 3.0],
+	"earth_blocked": ["block", 2.0],
+	"air_shocks": ["shock", 1.5],
+}
+
+func note_highlight(player_id, kind, weight, victim_id = 0) -> void:
+	highlight.emit(player_id, kind, weight, victim_id)
 
 # Several machines' match_stats added up
 static func sum_stats(sources: Array) -> Dictionary:
@@ -183,6 +206,34 @@ func level_path() -> String:
 		return test_level
 	return online_level if isMultiplayerActive else level
 
+## Arena rotation: the levels a match picks from, a random one every round ("" = the empty
+## classic arena). Chosen in Match settings > Arena rotation (scripts/level_rotation_menu.gd).
+var level_rotation = [""]
+var online_level_rotation = [""]
+
+# The rotation this match plays (only levels this build has; never empty)
+func level_rotation_setting() -> Array:
+	if test_level != "":
+		return [test_level]
+	var rotation = online_level_rotation if isMultiplayerActive else level_rotation
+	rotation = rotation.filter(func(path): return path == "" or ResourceLoader.exists(path))
+	return rotation if not rotation.is_empty() else [""]
+
+# A random level of the rotation, a different one than `previous` when there's a choice
+func pick_level(previous = null) -> String:
+	var choices = level_rotation_setting()
+	if choices.size() > 1 and previous != null:
+		choices = choices.filter(func(path): return path != previous)
+	return choices[randi() % choices.size()]
+
+# "Classic", "Lens", "3 arenas", "All 10 arenas"
+func level_rotation_text(rotation: Array) -> String:
+	if rotation.size() == 1:
+		return level_name(rotation[0])
+	if rotation.size() == level_paths().size() + 1:
+		return "All %d arenas" % rotation.size()
+	return "%d arenas" % rotation.size()
+
 # Every level scene in LEVELS_DIR (exports list them too)
 func level_paths() -> Array:
 	var paths = []
@@ -208,9 +259,30 @@ func player_name(player_id) -> String:
 		if not entry.is_empty():
 			return entry.name
 	if AI_Enabled.get(player_id, false):
-		return ["", "Fire", "Earth", "Air", "Water"][player_id] + " AI"
+		return ai_match_names.get(player_id, ["", "Fire", "Earth", "Air", "Water"][player_id] + " AI")
 	var name = str(player_names.get(player_id, ""))
 	return name if name.strip_edges() != "" else "Player %d" % player_id
+
+## AI snakes' names: every match each AI gets a random one of its element's
+const AI_NAMES = {
+	1: ["Blaze", "Cinder", "Scorch", "Ember", "Inferno"],
+	2: ["Boulder", "Granite", "Tremor", "Pebble", "Quake"],
+	3: ["Gale", "Zephyr", "Cyclone", "Breeze", "Tempest"],
+	4: ["Tide", "Ripple", "Torrent", "Drizzle", "Riptide"],
+}
+var ai_match_names = {}
+
+# New names for the AIs, at the start of a match
+func roll_ai_names() -> void:
+	for id in AI_NAMES:
+		ai_match_names[id] = random_ai_name(id)
+
+static func random_ai_name(element) -> String:
+	return AI_NAMES[element].pick_random()
+
+## The names this machine's players go by online, by key set (Player{N} keys: 1 is the
+## first person at the keyboard). Empty = the Steam name (and "#2"... for the others).
+var online_names = {}
 
 # What each element's power does, in two words (player setup and online lobby)
 const POWER_TAGLINES = ["", "Burning Shot", "Rock Armor", "Lightning Jump", "Twin Split"]
@@ -239,7 +311,7 @@ func points_to_win_text(points) -> String:
 func match_options() -> Dictionary:
 	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win,
 		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns, "round_countdown": round_countdown,
-		"level": level}
+		"levels": level_rotation.duplicate()}
 
 func shrooms_enabled() -> bool:
 	return shrooms and not isMultiplayerActive
@@ -311,7 +383,13 @@ func load_settings() -> void:
 	level = config.get_value("match", "level", level)
 	if level != "" and not ResourceLoader.exists(level):
 		level = ""
+	# Before rotations there was a single arena setting: it becomes a rotation of one
+	level_rotation = config.get_value("match", "level_rotation", [level])
+	level_rotation = level_rotation.filter(func(path): return path == "" or ResourceLoader.exists(path))
+	if level_rotation.is_empty():
+		level_rotation = [""]
 	player_names = config.get_value("game", "player_names", player_names)
+	online_names = config.get_value("game", "online_names", online_names)
 	nameplates = config.get_value("accessibility", "nameplates", nameplates)
 	snake_eyes = config.get_value("accessibility", "snake_eyes", snake_eyes)
 	direction_arrow = config.get_value("accessibility", "direction_arrow", direction_arrow)
@@ -338,7 +416,9 @@ func save_settings() -> void:
 	config.set_value("match", "random_spawns", random_spawns)
 	config.set_value("match", "round_countdown", round_countdown)
 	config.set_value("match", "level", level)
+	config.set_value("match", "level_rotation", level_rotation)
 	config.set_value("game", "player_names", player_names)
+	config.set_value("game", "online_names", online_names)
 	config.set_value("accessibility", "nameplates", nameplates)
 	config.set_value("accessibility", "snake_eyes", snake_eyes)
 	config.set_value("accessibility", "direction_arrow", direction_arrow)

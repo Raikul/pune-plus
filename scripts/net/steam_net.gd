@@ -4,6 +4,11 @@ extends Node
 # plays which element. GodotSteam is only reached through Engine.get_singleton /
 # ClassDB, so the project still runs in a plain Godot editor without Steam.
 # See docs/multiplayer.md.
+#
+# Steam only runs while the player is online: the Multiplayer screen starts it
+# (start_steam) and the main menu shuts it down (stop_steam). Friends only see the
+# game in their Steam list ("Playing Spacewar" with the test app id) during online play,
+# not while playing locally.
 
 signal status_changed(text)
 signal roster_changed
@@ -36,7 +41,8 @@ const CLOCK_SAMPLES = 8
 
 var steam = null
 var steam_ready = false
-var steam_status = "Steam not available"
+var steam_status = "Steam not started"
+var steam_signals_connected = false
 var persona_name = "Player"
 var lobby_id = 0
 # The lobby's join code ("" when not in a Steam lobby)
@@ -65,7 +71,6 @@ var offline_ai = null
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_init_steam()
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -118,29 +123,53 @@ func fake_delay():
 	if fake_latency > 0:
 		await get_tree().create_timer(fake_latency).timeout
 
-func _init_steam():
+# The Multiplayer screen calls it; true once Steam runs (again after stop_steam)
+func start_steam() -> bool:
+	if steam_ready:
+		return true
 	if not Engine.has_singleton("Steam") or not ClassDB.class_exists("SteamMultiplayerPeer"):
 		steam_status = "This build has no Steam support (use the GodotSteam editor)"
-		return
+		return false
 	steam = Engine.get_singleton("Steam")
 	var result = steam.steamInitEx(APP_ID, true)
 	if result.status != 0:
 		steam_status = "Steam failed to start: " + str(result.verbal)
-		return
+		return false
 	steam_ready = true
 	persona_name = steam.getPersonaName()
 	steam_status = "Steam ready - " + persona_name
-	steam.lobby_created.connect(_on_lobby_created)
-	steam.lobby_joined.connect(_on_lobby_joined)
-	steam.lobby_match_list.connect(_on_lobby_match_list)
-	steam.join_requested.connect(func(lobby, _friend): join_lobby(lobby))
+	if not steam_signals_connected:
+		steam_signals_connected = true
+		steam.lobby_created.connect(_on_lobby_created)
+		steam.lobby_joined.connect(_on_lobby_joined)
+		steam.lobby_match_list.connect(_on_lobby_match_list)
+		steam.join_requested.connect(func(lobby, _friend): join_lobby(lobby))
+	return true
 
-# A friend's invite can also start the game with "+connect_lobby <id>"
+# Back to local play (the main menu calls it): Steam stops, and with it the game's entry
+# in the friends list. Nothing happens while still in a lobby or a match.
+func stop_steam():
+	if not steam_ready or is_online() or lobby_id != 0:
+		return
+	steam.steamShutdown()
+	steam_ready = false
+	steam_status = "Steam not started"
+
+# A friend's invite can also start the game with "+connect_lobby <id>": the game goes
+# straight to the Multiplayer screen, which starts Steam and joins (take_pending_invite).
+# Deferred, so the main menu still sets up the window first.
+var pending_invite = 0
 func _check_launch_invite():
 	var args = OS.get_cmdline_args()
 	var index = args.find("+connect_lobby")
-	if steam_ready and index != -1 and index + 1 < args.size():
-		join_lobby.call_deferred(int(args[index + 1]))
+	if index != -1 and index + 1 < args.size():
+		pending_invite = int(args[index + 1])
+		get_tree().change_scene_to_file.call_deferred("res://scenes/net/online_lobby.tscn")
+
+func take_pending_invite():
+	if pending_invite != 0 and steam_ready:
+		join_lobby(pending_invite)
+	pending_invite = 0
 
 func is_online():
 	return multiplayer.has_multiplayer_peer() and not multiplayer.multiplayer_peer is OfflineMultiplayerPeer
@@ -362,6 +391,9 @@ func _start_roster():
 	roster_changed.emit()
 
 func _local_name():
+	var chosen = str(Global.online_names.get(1, "")).strip_edges()
+	if chosen != "":
+		return chosen
 	return persona_name if steam_ready and not is_lan else "Player " + str(multiplayer.get_unique_id() % 1000)
 
 func _on_connected_to_server():
@@ -424,8 +456,36 @@ func _host_add_extra(peer_id, ai, slot = 0):
 		return
 	var owner_name = roster[owner_slots[0]].name
 	var player_name = "AI (" + owner_name + ")" if ai else owner_name + " #" + str(owner_slots.size() + 1)
-	if _add_slot(peer_id, player_name, ai, slot) != 0:
+	var added = _add_slot(peer_id, player_name, ai, slot)
+	if added != 0:
+		# A person who named themselves on that machine before (the name comes with the
+		# keys: the owner asks for it with rename_slot once the slot is theirs)
 		_roster_updated()
+
+# One of this machine's people picks the name they go by (the lobby's name box). Saved
+# by key set, so the same person gets it next time.
+const MAX_NAME_LENGTH = 16
+func rename_slot(slot, new_name):
+	new_name = str(new_name).strip_edges().left(MAX_NAME_LENGTH)
+	if not is_online() or not roster.has(slot) or new_name == "" or roster[slot].ai:
+		return
+	Global.online_names[roster[slot].keys] = new_name
+	Global.save_settings()
+	if multiplayer.is_server():
+		_host_rename_slot(1, slot, new_name)
+	else:
+		request_rename_slot.rpc_id(1, slot, new_name)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_rename_slot(slot, new_name):
+	if multiplayer.is_server() and not Global.isMultiplayerActive:
+		_host_rename_slot(multiplayer.get_remote_sender_id(), slot, str(new_name).strip_edges().left(MAX_NAME_LENGTH))
+
+func _host_rename_slot(peer_id, slot, new_name):
+	if peer_for_slot(slot) != peer_id or roster[slot].ai or new_name == "":
+		return
+	roster[slot].name = new_name
+	_roster_updated()
 
 # Move one of this machine's snakes to a free element
 func move_slot(from_slot, to_slot):
@@ -519,6 +579,10 @@ func start_match():
 		return
 	if steam_ready and lobby_id != 0:
 		steam.setLobbyJoinable(lobby_id, false)
+	# Every AI gets a random name of its element for this match
+	for slot in roster:
+		if roster[slot].ai:
+			roster[slot].name = Global.random_ai_name(slot)
 	# The host's own toggles decide the match options
 	begin_match.rpc(roster, Global.match_options())
 
@@ -545,6 +609,8 @@ func begin_match(final_roster, options = {}):
 	Global.online_level = options.get("level", "")
 	if Global.online_level != "" and not ResourceLoader.exists(Global.online_level):
 		Global.online_level = "" # A level this build doesn't have
+	# The host's arena rotation (levels this build doesn't have are skipped when picking)
+	Global.online_level_rotation = options.get("levels", [Global.online_level])
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 
 # End of a match without a rematch: everyone stays connected and goes back to the lobby

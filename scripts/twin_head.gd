@@ -210,9 +210,19 @@ func absorb():
 	collider.set_deferred("disabled", true)
 	remove_from_group("twinHeads")
 	$BodySprite.hide()
+	_tell_twin_lost()
+
+# Its water snake can make a new twin now (WaterPower pulses if its power is ready)
+func _tell_twin_lost():
+	var water = get_parent()
+	if water and "main_power" in water and water.main_power is WaterPower:
+		water.main_power.twin_lost()
 
 func _on_area_entered(area):
 	if net_remote:
+		return
+	# Air's Storm Fence shocks snakes (no power to lock on a twin): harmless here
+	if area.is_in_group("storm_arcs"):
 		return
 	if area is Shroom:
 		get_parent().emit_signal("score")
@@ -230,6 +240,7 @@ func _on_area_entered(area):
 			remove_from_group("twinHeads")
 			alive = false
 			set_process(false)
+			_tell_twin_lost()
 			# Stop laying trail: it kept piling hidden segments under the dead head, which
 			# later flashed one by one as they shed
 			$BodyTimer.stop()

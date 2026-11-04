@@ -18,6 +18,9 @@ const RELEASES = [
 		"date": "2026-11-03",
 		"sections": [
 			["Snakes", [
+				"AI snakes get a name of their element every match, picked at random from five each (Fire: Blaze, Cinder, Scorch, Ember, Inferno; Earth: Boulder, Granite, Tremor, Pebble, Quake; Air: Gale, Zephyr, Cyclone, Breeze, Tempest; Water: Tide, Ripple, Torrent, Drizzle, Riptide). Online too.",
+				"Water's \"power ready\" pulse only shows when the power will really make a twin: not while every twin is out, and it comes as soon as a twin is lost if the power was already recharged.",
+				"In 2v2 the AI never fires at its teammate (Fire), doesn't jump through it with Static Shock unless it's that or crashing, doesn't aim Static Shock or Storm Fence at it, and drifts away from a teammate up ahead so they don't run into each other.",
 "Water's power no longer pulls the snake to the side: only the twins veer off, and you keep steering.",
 				"A soft pulse in the snake's color when its power finishes recharging.",
 				"Water casting its power makes a small ripple. Crashing makes a burst of shards, and every point gained pops a +1 over the snake.",
@@ -27,6 +30,7 @@ const RELEASES = [
 				"Phoenix no longer triggers in a duel: with a single rival left, the round just ends.",
 				"New epic upgrade, Wildfire: the fireball leaves a trail of flames that burns for 2 seconds. It kills other snakes, never you.",
 				"Big Fireball now stacks twice instead of three times.",
+				"A fireball that hits something bursts into sparks; one whose flight runs out slows down and fizzles away instead, so it no longer looks like it crashed into nothing.",
 			]],
 			["Earth", [
 				"New rare upgrade, Burrower: while the armor lasts, Earth digs through every wall, the level's obstacles and the arena's edges. Be out in the open when it wears off, or you're crushed. An arrow on the edge of the screen shows where you are while you're off the map.",
@@ -35,6 +39,7 @@ const RELEASES = [
 			]],
 			["Air", [
 				"Static Shock is now Epic and Scrambler Legendary.",
+				"New legendary upgrade, Storm Fence: when Air teleports, lightning crackles across every gap in its trail for 1 second (gaps a fireball burnt open don't count). Snakes caught in a gap are electrocuted like by Static Shock: no power for 5 seconds, and with Scrambler their left and right swap for 3 seconds. The AI jumps when an enemy is about to cross one.",
 			]],
 			["Upgrades", [
 				"With fewer than three upgrades left to offer, a Skip card lets you take nothing that round.",
@@ -63,9 +68,30 @@ const RELEASES = [
 				"The win and stats screens use the players' names.",
 				"New stats: Fire's times revived and Earth's crossings of its own trail.",
 			]],
+			["Play of the game", [
+				"The game keeps a short video of the last 10 seconds of play and picks the best moment of the match: kills (more for fireballs and flames), double and triple kills, a Phoenix rising, a twin saving the water snake, Earth's rock stopping a fireball...",
+				"After the win screen the play of the game loops, with a ring on the snake it's about, until someone presses PUNCHI (or Enter or a click). Then the match stats.",
+			]],
+			["Match stats", [
+				"Awards: Hunter (most kills), Survivor (most rounds lasted to the end), Longest Trail, Untouchable (least time dead), Marathon (longest single life), Power Hungry, Ghost (most time dead) and First Out. Ties share them.",
+				"New Kills line for every snake: crashes into your trail, rocks, fireballs or flames, and kills on snakes you scrambled.",
+				"The winner's column gets golden laurels around the corners of its border and two dragons around its symbol.",
+				"Each award ribbon has its own symbol (crosshair, shield, trail, sparkle, stopwatch, bolt, ghost, skull), with more room between them.",
+			]],
 			["Arenas", [
+				"Arena rotation: in Match settings, pick which arenas are in the match (a card with a small map of each, click to check it in or out; All and Classic only buttons). Every round plays a random arena from the rotation, never the same one twice in a row, and the countdown names it. Online the host's rotation is used.",
+				"Eight new arenas from Jorge's sketches: Crossroads, Twin Blocks, Zigzag, Serpent, Chevrons, Lens, Funnels and Parallels.",
+				"Arenas can have shroom spots: in Shroom mode the shrooms only appear there (the new arenas have them). On arenas without spots, shrooms no longer appear inside walls.",
+				"Level walls are drawn over the snakes and their trails, so an obstacle always looks solid (Burrower's Earth disappears under them).",
 				"New Arena setting with two layouts besides the classic empty arena: Pillars and Windmill, whose walls spin and slide.",
 				"Levels are made in the Godot editor: draw walls as polygons, give them a slide or a spin, place starting spots and playtest with F6 (docs/levels.md).",
+			]],
+			["Menus", [
+				"The main menu buttons have the same space above and below their text.",
+			]],
+			["Online", [
+				"Steam only starts when you open Multiplayer and stops when you're back in the main menu, so your friends only see you in-game on Steam while you're playing online.",
+				"In the lobby, each of your players has a name box: type the name you go by (up to 16 characters). It's remembered for next time, per key set.",
 			]],
 			["Accessibility", [
 				"New Accessibility tab in Options, all off by default: nameplates under the snakes, a small arrow showing where each snake is heading, and snake eyes that look at the nearest snake (with a forked tongue now and then).",

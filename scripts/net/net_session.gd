@@ -462,13 +462,17 @@ func upgrade_pick(event_round, slot, upgrade_id):
 func host_start_round():
 	if not _online():
 		return
+	# This round's arena first: the spawns keep clear of its walls
+	var level_path = Global.pick_level(playground.level_path if round_id > 0 else null)
+	playground.use_level(level_path)
 	var spawns = playground.roll_spawns(SteamNet.roster.keys())
-	start_round.rpc(round_id + 1, spawns)
+	start_round.rpc(round_id + 1, spawns, level_path)
 
 @rpc("authority", "call_local", "reliable")
-func start_round(new_round_id, spawns):
+func start_round(new_round_id, spawns, level_path = ""):
 	if not await _arrived():
 		return
+	playground.use_level(level_path)
 	round_id = new_round_id
 	players.clear()
 	remote_snakes.clear()

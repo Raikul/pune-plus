@@ -33,5 +33,10 @@ func try_prevent_death() -> bool:
 	return false
 func should_ignore_collision(_area: Area2D) -> bool:
 	return false
+# Whether the "power ready" pulse makes sense when the cooldown ends (Water: not with
+# every twin already out, since the power can't make another)
+func should_pulse_ready() -> bool:
+	return true
+
 func cleanup() -> void:
 	pass

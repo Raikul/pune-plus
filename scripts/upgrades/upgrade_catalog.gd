@@ -148,6 +148,16 @@ const UPGRADES = [
 		"requires": &"air_shock",
 	},
 	{
+		"id": &"air_storm_fence",
+		"rarity": "legendary",
+		"name": "Storm Fence",
+		"description": "When you teleport, lightning crackles across every gap in your trail for 1 s. Snakes caught in a gap are electrocuted: no power for 5 s (and with Scrambler, left and right swapped for 3 s).",
+		"element": "air",
+		"icon": "storm_fence",
+		"stat_mods": {"air.storm": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
 		"id": &"earth_wide_body",
 		"rarity": "epic",
 		"name": "Tectonic Bulk",

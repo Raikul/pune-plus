@@ -39,6 +39,8 @@ var copy_code_button
 var code_input
 
 func _ready():
+	# Steam only runs on this screen and in online matches (SteamNet.stop_steam)
+	SteamNet.start_steam()
 	_build_layout()
 	SteamNet.status_changed.connect(_on_status_changed)
 	SteamNet.roster_changed.connect(_refresh_roster)
@@ -46,12 +48,24 @@ func _ready():
 	SteamNet.lobby_list_received.connect(_show_lobbies)
 	status_label.text = SteamNet.steam_status
 	_refresh_roster()
+	SteamNet.take_pending_invite()
 
 func _exit_tree():
 	SteamNet.status_changed.disconnect(_on_status_changed)
 	SteamNet.roster_changed.disconnect(_refresh_roster)
 	SteamNet.match_options_changed.disconnect(_refresh_roster)
 	SteamNet.lobby_list_received.disconnect(_show_lobbies)
+
+# A person who chose a name before gets it back when they join with those keys (asked
+# once per slot and name, so a refused rename doesn't loop)
+var asked_names = {}
+func _restore_name(slot, entry):
+	var saved = str(Global.online_names.get(entry.keys, "")).strip_edges()
+	var key = "%d:%s" % [slot, saved]
+	if saved == "" or saved == entry.name or asked_names.has(key):
+		return
+	asked_names[key] = true
+	SteamNet.rename_slot(slot, saved)
 
 func _on_status_changed(text):
 	status_label.text = text
@@ -66,6 +80,7 @@ func _refresh_roster():
 		# An open slot is a menu to move one of your snakes there or add one
 		row.open_button.visible = entry == null and SteamNet.is_online()
 		row.name.visible = not row.open_button.visible
+		row.name_edit.visible = false
 		if entry == null:
 			row.name.text = "Open"
 			row.name.modulate = Color(1, 1, 1, 0.4)
@@ -74,6 +89,13 @@ func _refresh_roster():
 		row.name.modulate = Color.WHITE
 		var local = entry.peer == me
 		row.name.text = entry.name + ("  (you)" if local and not entry.ai else "")
+		# Your own people: a name box instead (and the name they used last time comes back)
+		if local and not entry.ai:
+			row.name.visible = false
+			row.name_edit.visible = true
+			if not row.name_edit.has_focus():
+				row.name_edit.text = entry.name
+			_restore_name(slot, entry)
 		if entry.ai:
 			row.keys.text = "AI, runs on " + ("this machine" if local else "its owner's machine")
 		elif local:
@@ -113,7 +135,7 @@ func _refresh_roster():
 	countdown_button.disabled = not host
 	countdown_button.text = "Countdown: " + ("ON" if options.get("round_countdown", true) else "OFF")
 	arena_button.disabled = not host
-	arena_button.text = "Arena: " + Global.level_name(options.get("level", ""))
+	arena_button.text = "Arena rotation: " + Global.level_rotation_text(options.get("levels", [options.get("level", "")]))
 	var player_team = options.get("player_team", Global.player_team)
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
@@ -223,10 +245,13 @@ func _toggle_round_countdown():
 	Global.round_countdown = not Global.round_countdown
 	_match_options_edited()
 
-func _cycle_arena():
-	var choices = [""] + Global.level_paths()
-	Global.level = choices[(max(choices.find(Global.level), 0) + 1) % choices.size()]
-	_match_options_edited()
+# The arenas the match picks from, one at random every round (only the host edits them)
+func _open_arena_rotation():
+	var menu = LevelRotationMenu.open(self, Global.level_rotation)
+	menu.changed.connect(func(rotation):
+		Global.level_rotation = rotation
+		_match_options_edited())
+	menu.closed.connect(arena_button.grab_focus)
 
 func _cycle_upgrade_time():
 	var choices = Global.ONLINE_UPGRADE_TIME_OPTIONS
@@ -323,7 +348,7 @@ func _build_layout():
 	settings_box.add_theme_constant_override("separation", 10)
 	settings_box.hide()
 	actions.add_child(settings_box)
-	arena_button = _button("Arena: Classic", _cycle_arena)
+	arena_button = _button("Arena rotation: Classic", _open_arena_rotation)
 	settings_box.add_child(arena_button)
 	upgrades_button = _button("Upgrades: OFF", _toggle_upgrades)
 	settings_box.add_child(upgrades_button)
@@ -389,6 +414,20 @@ func _build_layout():
 		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		name_label.clip_text = true
 		texts.add_child(name_label)
+		# This machine's people type the name they go by
+		var name_edit = LineEdit.new()
+		name_edit.max_length = SteamNet.MAX_NAME_LENGTH
+		name_edit.placeholder_text = "Your name"
+		name_edit.add_theme_font_size_override("font_size", 28)
+		name_edit.custom_minimum_size = Vector2(320, 0)
+		name_edit.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		name_edit.select_all_on_focus = true
+		name_edit.text_submitted.connect(func(text):
+			SteamNet.rename_slot(slot, text)
+			name_edit.release_focus())
+		name_edit.focus_exited.connect(func(): SteamNet.rename_slot(slot, name_edit.text))
+		name_edit.hide()
+		texts.add_child(name_edit)
 		var open_button = MenuButton.new()
 		open_button.text = "Open  -  choose..."
 		open_button.flat = false
@@ -413,7 +452,7 @@ func _build_layout():
 		var remove_button = _button("Remove", func(): SteamNet.remove_slot(slot))
 		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(remove_button)
-		slot_rows[slot] = {"name": name_label, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
+		slot_rows[slot] = {"name": name_label, "name_edit": name_edit, "open_button": open_button, "keys": keys_label, "keys_button": keys_button, "remove_button": remove_button, "team_button": team_button}
 		players_box.add_child(panel)
 
 	var lobbies_box = VBoxContainer.new()

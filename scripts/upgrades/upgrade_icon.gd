@@ -72,6 +72,8 @@ func _draw():
 			_draw_shock(center, false)
 		"scramble":
 			_draw_shock(center, true)
+		"storm_fence":
+			_draw_storm_fence(center)
 		"extra_copy":
 			_draw_twins(center, "2 MAX")
 		"twin_burst":
@@ -304,6 +306,39 @@ func _draw_shock(center, scramble):
 		draw_colored_polygon(PackedVector2Array([Vector2(right + 8, y), Vector2(right - 6, y - 9), Vector2(right - 6, y + 9)]), Color.WHITE)
 	else:
 		_draw_text("5s", size.y * 0.95, 24)
+
+# A trail with gaps; every so often lightning fills the gaps
+func _draw_storm_fence(center):
+	var y = center.y + size.y * 0.08
+	var left = 6.0
+	var right = size.x - 6.0
+	var gap = size.x * 0.13
+	var stroke = (right - left - 2 * gap) / 3.0
+	var cycle = fmod(time, 1.6)
+	var lit = cycle < 0.7
+	var flash = 0.6 + 0.4 * sin(time * 45.0)
+	var trail_color = color
+	for i in 3:
+		var a = left + i * (stroke + gap)
+		draw_line(Vector2(a, y), Vector2(a + stroke, y), trail_color, 7.0, true)
+		draw_circle(Vector2(a, y), 3.5, trail_color)
+		draw_circle(Vector2(a + stroke, y), 3.5, trail_color)
+	for i in 2:
+		var a = Vector2(left + stroke + i * (stroke + gap), y)
+		var b = a + Vector2(gap, 0)
+		if lit:
+			var points = PackedVector2Array([a])
+			for k in range(1, 4):
+				points.append(a.lerp(b, k / 4.0) + Vector2(0, randf_range(-7, 7)))
+			points.append(b)
+			draw_polyline(points, Color(0.55, 0.85, 1.0, 0.55 * flash), 7.0, true)
+			draw_polyline(points, Color(1, 1, 1, flash), 2.2, true)
+			draw_circle(a, 5.0, Color(1, 1, 1, 0.8 * flash))
+			draw_circle(b, 5.0, Color(1, 1, 1, 0.8 * flash))
+	# A snake head about to cross the second gap from below
+	var head_x = left + 2 * stroke + gap * 1.5
+	var head_y = lerp(size.y * 0.95, y + 16.0, clamp(cycle / 0.7, 0.0, 1.0))
+	draw_circle(Vector2(head_x, head_y), 7.0, Color(1, 1, 1, 0.9) if not lit else Color(1, 0.4, 0.3, 0.9))
 
 func _draw_symbol(texture, pos, width, flipped, alpha = 1.0, stretch = Vector2.ONE):
 	var height = width * texture.get_height() / float(texture.get_width())

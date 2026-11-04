@@ -40,6 +40,12 @@ func ai_should_activate(_direction: int) -> bool:
 	if raycaster:
 		var up_player = raycaster.get_node_or_null("UpPlayer")
 		var is_colliding = up_player.is_colliding() if up_player else false
+		# 2v2: never at a teammate in the line of fire (one closer than any wall ahead)
+		if is_colliding and player.is_ally(up_player.get_collider()):
+			var ally_distance = up_player.get_collision_point().distance_to(raycaster.global_position)
+			if ally_distance < raycaster.collision_distance("Up"):
+				return false
+			is_colliding = false
 		var close_distance = raycaster.collision_distance("Up") < 75
 		return is_colliding or close_distance
 	return false

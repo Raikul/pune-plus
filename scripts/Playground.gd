@@ -23,6 +23,9 @@ var teams_mode = false
 func _ready():
 	# Every match starts without upgrades; they build up round after round
 	Global.reset_all_player_stats()
+	# The AIs get this match's names (online the host names them in the roster)
+	if not Global.isMultiplayerActive:
+		Global.roll_ai_names()
 	Global.reset_match_stats()
 	RNG = RandomNumberGenerator.new()
 	player_scene = preload("res://scenes/player.tscn")
@@ -50,6 +53,11 @@ func _ready():
 		add_child(takeover)
 	#debug
 #	Global.scoreToReach = 1
+	# The play of the game, shown after the win screen (scripts/replay/)
+	replay_recorder = ReplayRecorder.new()
+	replay_recorder.name = "ReplayRecorder"
+	replay_recorder.playground = self
+	add_child(replay_recorder)
 	$HUD/Centerfold/HBoxContainer/ScoreToReach.set_text(str(Global.scoreToReach))
 	$HUD.set_target(Global.scoreToReach)
 	_load_level()
@@ -105,7 +113,9 @@ func _pop_scores():
 				PowerFx.score(self, snake.global_position, Color(Global.playerColors[id]), "+%d" % (score - before))
 
 # End-screen stats: seconds each snake spends dead (or as a Phoenix ember) while the
-# round goes on. Online each machine counts its own snakes.
+# round goes on, and its longest life in one round. Online each machine counts its own
+# snakes.
+var life_time = {} # player_id -> seconds alive this round
 func _count_dead_time(delta):
 	if not time_flowing:
 		return
@@ -114,6 +124,9 @@ func _count_dead_time(delta):
 			continue
 		if not player.is_in_group("alivePlayers") or player.reviving:
 			Global.add_stat(player.playerId, "dead_time", delta)
+		else:
+			life_time[player.playerId] = life_time.get(player.playerId, 0.0) + delta
+			Global.max_stat(player.playerId, "best_life", life_time[player.playerId])
 
 func set_cooldowns_ui():
 	if is_instance_valid(get_tree()):
@@ -195,18 +208,32 @@ func setupPlayers(spawns = {}):
 		player.show()
 	get_tree().get_first_node_in_group("HUD").set_process(true)
 	refresh_upgrade_badges()
+	round_deaths = 0
+	life_time = {}
 	# 3 s before the first round, with the match's goal; 2 s before every other round unless
 	# the Countdown match setting is off
 	var first = not counted_down
 	var countdown = 3 if first else (2 if Global.round_countdown_enabled() else 0)
 	counted_down = true
 	if countdown > 0:
-		await _start_countdown(countdown, _quest_text() if first else "")
+		await _start_countdown(countdown, _countdown_text(first))
 		if not is_inside_tree():
 			return
 	time_flowing = true
 
 var counted_down = false
+var round_deaths = 0
+
+# Under the countdown: the match's goal (first round) and, with an arena rotation, the
+# arena this round is played on
+func _countdown_text(first) -> String:
+	var lines = []
+	if first:
+		lines.append(_quest_text())
+	if Global.level_rotation_setting().size() > 1:
+		lines.append("ARENA: " + Global.level_name(level_path).to_upper())
+	return "
+".join(lines)
 
 # The match's goal, shown under the first countdown
 func _quest_text() -> String:
@@ -247,7 +274,8 @@ func _start_countdown(seconds, quest = ""):
 		line.anchor_top = 0.5
 		line.anchor_bottom = 0.5
 		line.offset_top = 150
-		line.offset_bottom = 220
+		line.offset_bottom = 150 + 70 * quest.count("
+") + 70
 		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		layer.add_child(line)
 		# Fades out with the GO!
@@ -278,17 +306,39 @@ func _start_countdown(seconds, quest = ""):
 		if not is_inside_tree():
 			return
 
-# The chosen arena layout (Global.level_path(), scripts/levels/level.gd), if any
+# This round's arena layout (scripts/levels/level.gd), if any. Every round plays a random
+# level of the arena rotation (Global.pick_level); online the host picks and sends it with
+# the round (NetSession.start_round).
 var level: Level
+var level_path = ""
 
+const LEVEL_Z_INDEX = 12
 func _load_level():
-	var path = Global.level_path()
-	if path == "" or not ResourceLoader.exists(path):
+	# Online the first round's level comes with the round
+	if not Global.isMultiplayerActive:
+		use_level(Global.pick_level())
+
+# Swaps the arena for this level ("" = the empty classic one), between rounds
+func use_level(path):
+	if path != "" and not ResourceLoader.exists(path):
+		path = "" # A level this build doesn't have
+	if path == level_path and (path == "") == (level == null):
+		return
+	if is_instance_valid(level):
+		# Out of the tree right away, so its walls don't count for this round's spawns
+		remove_child(level)
+		level.queue_free()
+	level = null
+	level_path = path
+	if path == "":
 		return
 	level = load(path).instantiate()
 	add_child(level)
-	# Over the floor and outer walls, under the snakes (added later)
 	move_child(level, $Colliders.get_index() + 1)
+	# Drawn over the snakes, their trails, Earth's rocks and fireballs (heads and symbols go
+	# up to z 11), under the effects and edge markers (20 and up): an obstacle always reads
+	# as solid, and Earth burrowing through one (Burrower) disappears under it
+	level.z_index = LEVEL_Z_INDEX
 
 ## How far from a level's walls a snake can start
 const SPAWN_LEVEL_MARGIN = 110.0
@@ -461,6 +511,10 @@ func playerDead(player):
 	if player.is_in_group("alivePlayers") :
 		_death_fx(player)
 		player.remove_from_group("alivePlayers")
+		# End-screen stats: the first snake out of the round
+		if round_deaths == 0:
+			Global.add_stat(player.playerId, "first_out")
+		round_deaths += 1
 		if teams_mode:
 			# One point for the other team, if it still has a snake alive
 			var enemy_team = 1 - Global.team_of(player.playerId)
@@ -542,13 +596,14 @@ func finishGame(playerId):
 	$Victory.play()
 	winners = _winners(playerId)
 	_start_celebration()
-	$Lesson.closed.connect(_show_match_stats, CONNECT_ONE_SHOT)
+	$Lesson.closed.connect(_show_replay, CONNECT_ONE_SHOT)
 
 # --- End of the match: victory lap, stats, rematch ---
 
 var winners = []
 var celebration: Celebration
 var stats_screen: MatchStatsScreen
+var replay_recorder: ReplayRecorder
 
 func _active_ids():
 	return [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id))
@@ -581,10 +636,30 @@ func _start_celebration():
 	backdrop.move_child(celebration, 0) # Under the text
 	celebration.setup(winners.map(func(id): return {"id": id, "input_id": _end_info(id).input_id}))
 
-func _show_match_stats():
+func _close_win_screen():
 	$Lesson.hide()
 	if is_instance_valid(celebration):
 		celebration.queue_free()
+
+# The play of the game, looping until someone skips it; then the stats
+func _show_replay():
+	_close_win_screen()
+	var play = replay_recorder.play_of_the_game() if is_instance_valid(replay_recorder) else {}
+	if play.is_empty():
+		_show_match_stats()
+		return
+	var layer = CanvasLayer.new()
+	layer.layer = 6 # Like the stats screen: above the HUD, below the pause menu
+	add_child(layer)
+	var replay = ReplayScreen.new()
+	layer.add_child(replay)
+	replay.setup(play)
+	replay.finished.connect(func():
+		layer.queue_free()
+		_show_match_stats())
+
+func _show_match_stats():
+	_close_win_screen()
 	var layer = CanvasLayer.new()
 	layer.layer = 6 # Above the HUD and upgrade screen, below the pause menu
 	add_child(layer)
@@ -658,6 +733,11 @@ func restart(delay = 2):
 	if alive_players.size() == 1 or (teams_mode and alive_players.size() > 0):
 		var id = alive_players[0].playerId
 		last_round_winner = id
+		for survivor in alive_players:
+			Global.note_highlight(survivor.playerId, "round", 1.0)
+			# End-screen stats (online the host counts them)
+			if not net_session or multiplayer.is_server():
+				Global.add_stat(survivor.playerId, "round_wins")
 		animation_player.play("player_"+str(id)+"_win")
 	
 	# Online clients wait for the host's next round instead (NetSession.start_round)
@@ -674,6 +754,7 @@ func restart(delay = 2):
 	if net_session:
 		net_session.host_start_round()
 	else:
+		use_level(Global.pick_level(level_path))
 		call_deferred("setupPlayers")
 
 func clear_round():

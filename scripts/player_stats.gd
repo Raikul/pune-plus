@@ -15,6 +15,7 @@ var base: Dictionary = {
 	"fire.trail": 0.0,          # 1 = la bola de fuego deja llamas que queman a los demás
 	"air.shock": 0.0,           # 1 = electrocuta a quien atraviesa al teletransportarse
 	"air.scramble": 0.0,        # 1 = el choque eléctrico también invierte sus controles
+	"air.storm": 0.0,           # 1 = al teletransportarse electrifica los huecos de su estela
 	"gap.time": 0.6,
 	"air.recast_window": 0.0,   # Segundos para el segundo salto (0 = sin doble salto)
 	"air.wall_warp": 0.0,       # 1 = el teletransporte atraviesa las paredes

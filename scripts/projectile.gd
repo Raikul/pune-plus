@@ -52,27 +52,41 @@ func _drop_flame():
 	# On the playground, so the flames outlive the fireball (and the snake)
 	shooter.get_parent().add_child(flame)
 
-# End of the flight: it stops burning and fades away.
-# Placeholder look: shrinks and fades. For a custom effect, add an "expire" animation
-# (about EXPIRE_TIME long) to the AnimationPlayer and it is played instead.
-func expire():
+# It stops burning and fades away. crashed: it hit something and stopped there (a burst
+# of sparks shows what it hit); otherwise its flight ran out: it slows down and fizzles
+# out in the air, so the two never look alike.
+# Placeholder look. For a custom effect, add an "expire" animation (about EXPIRE_TIME
+# long) to the AnimationPlayer and it is played instead.
+func expire(crashed = false):
 	if expiring:
 		return
 	expiring = true
 	set_deferred("monitoring", false)
 	var tween = create_tween()
+	if crashed:
+		var shooter = get_parent()
+		var playground = shooter.get_parent() if shooter else null
+		if playground:
+			PowerFx.explosion(playground, global_position, Color(1.0, 0.55, 0.15), 34.0 * scale.x)
 	if $AnimationPlayer.has_animation("expire"):
 		$AnimationPlayer.play("expire")
 		tween.tween_interval(EXPIRE_TIME)
+	elif crashed:
+		tween.set_parallel()
+		tween.tween_property(self, "scale", scale * 0.1, EXPIRE_TIME * 0.5).set_ease(Tween.EASE_IN)
+		tween.tween_property(self, "modulate:a", 0.0, EXPIRE_TIME * 0.5)
+		tween.chain()
 	else:
 		tween.set_parallel()
-		tween.tween_property(self, "scale", scale * 0.1, EXPIRE_TIME).set_ease(Tween.EASE_IN)
-		tween.tween_property(self, "modulate:a", 0.0, EXPIRE_TIME)
+		tween.tween_property(self, "speed", speed * 0.15, EXPIRE_TIME).set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "scale", scale * 0.6, EXPIRE_TIME)
+		tween.tween_property(self, "modulate", Color(0.6, 0.6, 0.6, 0.0), EXPIRE_TIME).set_ease(Tween.EASE_IN)
 		tween.chain()
 	tween.tween_callback(queue_free)
 
 func _on_area_entered(area):
-	if area == get_parent() or expiring or area.is_in_group("fire_trail"):
+	# Flames and Storm Fence lightning don't stop it
+	if area == get_parent() or expiring or area.is_in_group("hazards"):
 		return
 	# Walls, snakes (and Water's twin heads) and Earth's stone stop it: it crashes and fades
 	# away. Freeing a twin head would also free its whole trail (the segments are its children);
@@ -85,6 +99,6 @@ func _on_area_entered(area):
 			if earth != null:
 				Global.add_stat(earth.playerId, "earth_blocked")
 		set_process(false)
-		expire()
+		expire(true)
 	else:
 		area.queue_free()

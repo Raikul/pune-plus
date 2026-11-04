@@ -143,6 +143,7 @@ func _process(delta):
 		elif (ai_enabled and $Raycaster.return_steering() == "Left"): direction = -1
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 		if ai_enabled and not _human_steering():
+			direction = _ai_keep_from_ally(direction)
 			direction = _ai_dodge_moving_walls(direction)
 			if invincible and has_border_pass():
 				# Burrower: back towards the middle from off the map; straight through a wall
@@ -337,10 +338,46 @@ const TRAIL_SPACING = 7.5
 var trail_tail = null
 
 func _extend_trail(body):
+	if main_power is AirPower:
+		_note_gap(body)
 	body.link_to(trail_tail)
 	trail_tail = body
+	last_laid = body
+
+# Air's Storm Fence: every gap in its trail, as [end of a stroke, start of the next]. A new
+# stroke after a teleport isn't a gap (skip_next_gap), nor are pieces too far apart.
+var gaps = []
+var last_laid = null
+var skip_next_gap = false
+const MAX_GAPS = 400
+const MAX_GAP_LENGTH = 400.0
+
+func _note_gap(body):
+	if last_laid == null or not is_instance_valid(last_laid):
+		return
+	var length = last_laid.global_position.distance_to(body.global_position)
+	if trail_tail != null and length <= TrailSegment.MAX_LINK:
+		return # Same stroke
+	if skip_next_gap:
+		skip_next_gap = false
+		return
+	if length > MAX_GAP_LENGTH:
+		return
+	gaps.append([last_laid, body])
+	if gaps.size() > MAX_GAPS:
+		gaps.pop_front()
+
+# The gaps whose both ends are still there (a fireball may have burnt one)
+func intact_gaps() -> Array:
+	gaps = gaps.filter(func(gap): return gap.all(func(end): return is_instance_valid(end) and not end.is_queued_for_deletion()))
+	return gaps
 
 func _on_area_entered(area):
+	# Air's Storm Fence: lightning in a gap of Air's trail shocks, it never kills
+	if area.is_in_group("storm_arcs"):
+		if area.owner_id != playerId:
+			_storm_shock(area)
+		return
 	# A remote snake's owner decides its deaths and pickups
 	if net_remote:
 		return
@@ -368,8 +405,8 @@ func _on_area_entered(area):
 	# the level's obstacles.
 	if invincible and has_border_pass() and area.is_in_group("limits"):
 		return
-	# Fire's Wildfire: its own flames never burn it
-	if area.is_in_group("fire_trail") and area.owner_id == playerId:
+	# Its own hazards never hurt it (Fire's Wildfire flames, Air's Storm Fence)
+	if area.is_in_group("hazards") and area.owner_id == playerId:
 		return
 	if invincible and area is TrailSegment and area.get_parent() == self and listOfNodes.find(area) == -1:
 		_count_own_trail_pass()
@@ -401,14 +438,60 @@ func _count_own_trail_pass():
 
 # End-screen stats: a rival's fireball, or dying while a rival Air had it scrambled
 func _credit_death(cause):
-	if cause.is_in_group("fire_trail") and cause.owner_id != playerId:
-		Global.add_stat(cause.owner_id, "fire_kills")
-	if cause.is_in_group("fireballs"):
-		var shooter = cause.get_parent()
-		if shooter != self and "playerId" in shooter:
-			Global.add_stat(shooter.playerId, "fire_kills")
+	var killer = killer_of(cause)
+	if cause.is_in_group("fire_trail") and killer != 0:
+		Global.add_stat(killer, "fire_kills")
+	if cause.is_in_group("fireballs") and killer != 0:
+		Global.add_stat(killer, "fire_kills")
 	if scrambled_time > 0 and scrambled_by != 0 and scrambled_by != playerId:
 		Global.add_stat(scrambled_by, "air_scramble_kills")
+		if killer == 0:
+			killer = scrambled_by
+	if killer != 0:
+		Global.add_stat(killer, "kills")
+	# The play of the game (scripts/replay/replay_recorder.gd): a kill, flashier with powers
+	if killer != 0:
+		var weight = 4.0 if cause.is_in_group("fireballs") or cause.is_in_group("hazards") else 3.0
+		Global.note_highlight(killer, "kill", weight, playerId)
+	else:
+		Global.note_highlight(playerId, "crash", 0.5, playerId)
+
+# Caught in Storm Fence lightning: no power for a while, and left/right swapped if the Air
+# snake has Scrambler (like Static Shock). Only the snake's own machine applies it; the
+# other machines just show it.
+func _storm_shock(arc):
+	if net_remote:
+		shock_visual(arc.shock_time)
+		return
+	var fresh = shocked_time <= 0 and is_in_group("alivePlayers") and not reviving
+	shock(arc.shock_time, arc.scramble_time, arc.owner_id)
+	if fresh:
+		Global.add_stat(arc.owner_id, "air_shocks")
+
+# The other snake that killed this one (its trail, rocks, fireball, flames, head), 0 = none
+func killer_of(cause) -> int:
+	if cause == null or not is_instance_valid(cause):
+		return 0
+	var id = 0
+	if cause.is_in_group("hazards"):
+		id = cause.owner_id
+	elif cause.is_in_group("fireballs"):
+		var shooter = cause.get_parent()
+		id = shooter.playerId if "playerId" in shooter else 0
+	elif cause.is_in_group("Fissures"):
+		var earth = Fissure.owner_of(cause)
+		id = earth.playerId if earth != null else 0
+	else:
+		# A trail piece (its snake, or the twin whose snake it is), a head or a twin head
+		var node = cause
+		for i in 3:
+			if node == null:
+				break
+			if "playerId" in node and node.playerId != null and node.get_script() == get_script():
+				id = node.playerId
+				break
+			node = node.get_parent()
+	return id if id != playerId else 0
 
 # Online: lay a segment of a remote snake where its owner laid it
 func create_body_at(body_position, body_rotation):
@@ -585,6 +668,33 @@ func use_power():
 	if main_power != null:
 		main_power.activate()
 	set_face("effort", 0.5)
+# 2v2: the snake's teammate (a snake of the same team, not itself)
+func is_ally(other) -> bool:
+	var playground = get_parent()
+	if other == null or other == self or not is_instance_valid(other) or not ("playerId" in other) or other.playerId == null:
+		return false
+	if playground == null or not playground.get("teams_mode"):
+		return false
+	return Global.team_of(other.playerId) == Global.team_of(playerId)
+
+func allies() -> Array:
+	return get_tree().get_nodes_in_group("alivePlayers").filter(is_ally)
+
+# 2v2 AI: with nothing to dodge, it drifts away from a teammate up ahead, so the two
+# don't run into each other by accident
+const AI_ALLY_SPACE = 240.0
+func _ai_keep_from_ally(direction):
+	if direction != 0:
+		return direction
+	var forward = Vector2.UP.rotated(rotation)
+	for ally in allies():
+		var to_ally = ally.global_position - global_position
+		if to_ally.length() > AI_ALLY_SPACE or forward.dot(to_ally.normalized()) < 0.2:
+			continue
+		# Ally on the right (screen y goes down): turn left, and the other way round
+		return -1 if forward.cross(to_ally) > 0 else 1
+	return direction
+
 func ai_punchi(direction):
 	if powerAvailable and main_power and main_power.ai_should_activate(direction):
 		try_use_power()
@@ -611,6 +721,11 @@ func powerReady(_prevColor = null):
 		return
 	powerAvailable = true
 	update_power_indicator()
+	if main_power == null or main_power.should_pulse_ready():
+		pulse_power_ready()
+
+# A soft ring around the head: the power can be used now
+func pulse_power_ready():
 	if get_parent() and is_processing():
 		PowerFx.pulse(get_parent(), self, Color(Global.playerColors[playerId]))
 

@@ -80,7 +80,7 @@ Match options (Upgrades, 2v2 teams, points to win) are the host's. `SteamNet.pus
 
 ## Running / testing
 
-- **Steam:** Steam must be running. App id **480** (Spacewar) is used until Pune has its own app id. Run the project with the GodotSteam editor `T:\GodotSteam\4.6\godotsteam.461.editor.win64.exe`. Testing a real Steam match needs two machines/accounts.
+- **Steam:** Steam must be running. App id **480** (Spacewar) is used until Pune has its own app id. The game only starts the Steam API on the Multiplayer screen (and keeps it through online matches); the main menu shuts it down, so friends only see "Playing Spacewar" during online play. A `+connect_lobby` invite at launch goes straight to the Multiplayer screen. Run the project with the GodotSteam editor `T:\GodotSteam\4.6\godotsteam.461.editor.win64.exe`. Testing a real Steam match needs two machines/accounts.
 - **Local netcode test:** start two instances, then click *LAN Host* in one and *LAN Join* in the other. Set *Fake latency* to check how dead reckoning behaves at 100–200 ms.
 - **Exports** must use the GodotSteam export templates (`T:\GodotSteam\4.6\godotsteam-g461-s163-gs4171-templates.tar`) and ship `steam_api64.dll`.
 

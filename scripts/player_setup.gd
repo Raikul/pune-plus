@@ -315,7 +315,7 @@ func _build_match_options():
 	settings_box.add_theme_constant_override("separation", 10)
 	settings_box.hide()
 	panel.add_child(settings_box)
-	arena_button = _match_button(settings_box, _cycle_arena)
+	arena_button = _match_button(settings_box, _open_arena_rotation)
 	upgrades_button = _match_button(settings_box, func():
 		Global.upgrades = not Global.upgrades
 		_options_changed())
@@ -358,10 +358,13 @@ func _options_changed():
 	Global.save_settings()
 	_refresh_match_options()
 
-func _cycle_arena():
-	var choices = [""] + Global.level_paths()
-	Global.level = choices[(max(choices.find(Global.level), 0) + 1) % choices.size()]
-	_options_changed()
+# The arenas the match picks from, one at random every round
+func _open_arena_rotation():
+	var menu = LevelRotationMenu.open(self, Global.level_rotation)
+	menu.changed.connect(func(rotation):
+		Global.level_rotation = rotation
+		_options_changed())
+	menu.closed.connect(arena_button.grab_focus)
 
 func _toggle_teams():
 	Global.teams = not Global.teams
@@ -389,7 +392,7 @@ func _refresh_match_options():
 	points_button.text = "Points to win: " + Global.points_to_win_text(Global.points_to_win)
 	spawns_button.text = "Spawns: " + ("Random" if Global.random_spawns else "Fixed")
 	settings_toggle.text = "Match settings  " + ("-" if settings_box.visible else "+")
-	arena_button.text = "Arena: " + Global.level_name(Global.level)
+	arena_button.text = "Arena rotation: " + Global.level_rotation_text(Global.level_rotation)
 	upgrades_button.text = "Upgrades: " + ("On" if Global.upgrades else "Off")
 	upgrade_time_button.text = "Upgrade pick time: " + Global.upgrade_time_text(Global.upgrade_time)
 	upgrade_time_button.disabled = not Global.upgrades

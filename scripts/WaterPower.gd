@@ -55,6 +55,17 @@ func activate() -> void:
 
 	activated.emit()
 
+# The ready pulse means "a twin is coming if you press": not with every twin already out.
+# When a twin is lost and the power was ready all along, the pulse comes then (twin_lost).
+func should_pulse_ready() -> bool:
+	return can_activate()
+
+# A twin died or the water snake jumped into it: room for a new one. If the power is
+# already recharged, pulse now, so the player knows pressing it will make a twin.
+func twin_lost() -> void:
+	if player.powerAvailable and player.is_in_group("alivePlayers") and not player.net_remote and alive_twins() == max_twins() - 1:
+		player.pulse_power_ready()
+
 func is_active() -> bool:
 	return alive_twins() > 0
 

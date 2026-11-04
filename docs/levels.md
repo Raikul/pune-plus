@@ -1,8 +1,10 @@
 # Making levels
 
-A level is a scene in `res://levels/` that adds walls inside the arena. Players pick it
-with **Arena** in player setup's *Match settings* (or the online lobby); every `.tscn` in
-that folder shows up there by its file name (files starting with `_` are skipped).
+A level is a scene in `res://levels/` that adds walls inside the arena. Players choose
+which levels are in the match's rotation with **Arena rotation** in player setup's *Match
+settings* (or the online lobby; the host's rotation counts): every round plays a random
+one of them, not the same one twice in a row when there's a choice. Every `.tscn` in that
+folder shows up there by its file name (files starting with `_` are skipped).
 
 ## Quick start
 
@@ -26,7 +28,10 @@ that folder shows up there by its file name (files starting with `_` are skipped
    (moving walls included, as they'll be during the countdown), and snakes start at least
    `SPAWN_MIN_DISTANCE` apart. These rules are constants at the top of the spawn section
    of `scripts/Playground.gd` (`SPAWN_*`).
-5. Save it in `res://levels/` and press **F6** (Run Current Scene) to playtest: you play
+5. Optional shroom spots (Shroom mode): a **Node2D** child named `ShroomSpots` with
+   **Marker2D** children where shrooms may appear. A new shroom takes a random free spot
+   (none if they're all taken). Without spots, shrooms appear anywhere away from the walls.
+6. Save it in `res://levels/` and press **F6** (Run Current Scene) to playtest: you play
    Fire with its usual keys against three AIs on your level.
 
 ## How walls behave
@@ -37,4 +42,9 @@ teleport onto them. Moving walls follow a clock shared by every machine online, 
 are in the same place for everyone.
 
 Examples: `levels/pillars.tscn` (static), `levels/windmill.tscn` (spinning cross, two
-sliders and spawn markers).
+sliders and spawn markers), `levels/crossroads.tscn` (line walls and shroom spots).
+
+The layouts Crossroads, Twin Blocks, Zigzag, Serpent, Chevrons, Lens, Funnels and
+Parallels come from the sketches in `assets/images/level_design/` (same names): purple
+lines are walls (a line is a wall about 18 px thick with round ends), purple shrooms are
+shroom spots, and the starting spots are the usual ones.
