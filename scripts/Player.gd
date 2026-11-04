@@ -144,8 +144,12 @@ func _process(delta):
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 		if ai_enabled and not _human_steering():
 			direction = _ai_dodge_moving_walls(direction)
-			if invincible and has_border_pass() and _beyond_border():
-				direction = _ai_steer_home()
+			if invincible and has_border_pass():
+				# Burrower: back towards the middle from off the map; straight through a wall
+				if _beyond_border(false):
+					direction = _ai_steer_home()
+				elif _beyond_border():
+					direction = 0
 
 	if ai_enabled and powerAvailable: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
@@ -360,9 +364,12 @@ func _on_area_entered(area):
 		return
 
 	# Earth's power makes it pass through trails, not walls (it used to slip out of the arena
-	# and stay alive off screen). Off the Map lets it through the arena's border, not through
-	# the level's walls.
-	if invincible and has_border_pass() and area.is_in_group("border"):
+	# and stay alive off screen). Burrower lets it through every wall: the arena's border and
+	# the level's obstacles.
+	if invincible and has_border_pass() and area.is_in_group("limits"):
+		return
+	# Fire's Wildfire: its own flames never burn it
+	if area.is_in_group("fire_trail") and area.owner_id == playerId:
 		return
 	if invincible and area is TrailSegment and area.get_parent() == self and listOfNodes.find(area) == -1:
 		_count_own_trail_pass()
@@ -394,6 +401,8 @@ func _count_own_trail_pass():
 
 # End-screen stats: a rival's fireball, or dying while a rival Air had it scrambled
 func _credit_death(cause):
+	if cause.is_in_group("fire_trail") and cause.owner_id != playerId:
+		Global.add_stat(cause.owner_id, "fire_kills")
 	if cause.is_in_group("fireballs"):
 		var shooter = cause.get_parent()
 		if shooter != self and "playerId" in shooter:
@@ -505,7 +514,7 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 	
 func set_invincible(state: bool) -> void:
 	invincible = state
-	# Off the Map: the armor wore off with the snake outside the arena, or still in its border
+	# Burrower: the armor wore off with the snake outside the arena or inside a wall
 	if not state and has_border_pass() and is_processing() and not net_remote and _beyond_border():
 		_crash(self)
 
@@ -755,16 +764,17 @@ func _on_own_rock() -> bool:
 			return true
 	return false
 
-# Past the arena's border lines, or touching one of them
-func _beyond_border() -> bool:
+# Past the arena's border lines, or (with walls) touching a border or a level wall
+func _beyond_border(walls = true) -> bool:
 	if left_limit_x == null or right_limit_x == null or top_limit_y == null or bottom_limit_y == null:
 		return false
 	var p = global_position
 	if p.x < left_limit_x or p.x > right_limit_x or p.y < top_limit_y or p.y > bottom_limit_y:
 		return true
-	for area in get_overlapping_areas():
-		if area.is_in_group("border"):
-			return true
+	if walls:
+		for area in get_overlapping_areas():
+			if area.is_in_group("limits"):
+				return true
 	return false
 
 func has_border_pass() -> bool:

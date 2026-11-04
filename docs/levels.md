@@ -22,13 +22,17 @@ that folder shows up there by its file name (files starting with `_` are skipped
    Air, Water). Their rotation is the heading (0 = facing up). Without them the usual
    corners are used, and a snake whose corner lands on a wall gets a random spot.
    With *Spawns: Random* the markers are ignored and snakes start away from the walls.
+   Except at markers, a snake's heading is turned until the way ahead is clear of walls
+   (moving walls included, as they'll be during the countdown), and snakes start at least
+   `SPAWN_MIN_DISTANCE` apart. These rules are constants at the top of the spawn section
+   of `scripts/Playground.gd` (`SPAWN_*`).
 5. Save it in `res://levels/` and press **F6** (Run Current Scene) to playtest: you play
    Fire with its usual keys against three AIs on your level.
 
 ## How walls behave
 
 Walls are deadly like the outer border: snakes crash on them, fireballs stop on them and
-Earth's armor doesn't get through. The AI sees them with its raycasts, and Air's AI won't
+Earth's armor doesn't get through (except with the Burrower upgrade). The AI sees them with its raycasts, and Air's AI won't
 teleport onto them. Moving walls follow a clock shared by every machine online, so they
 are in the same place for everyone.
 

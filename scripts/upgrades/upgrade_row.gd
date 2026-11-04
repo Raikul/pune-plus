@@ -51,6 +51,9 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 	add_child(card_box)
 	if is_hidden:
 		card_box.modulate.a = 0.0 # Keeps the layout, shows nothing
+	# Fewer than three left: a Skip card too, to pass on what's left
+	if not options.is_empty() and options.size() < 3:
+		options = options + [UpgradeCatalog.SKIP]
 	for upgrade in options:
 		var card = UpgradeCard.new()
 		card.setup(upgrade, player_color)
@@ -151,6 +154,10 @@ func _ai_pick():
 	for i in steps:
 		if has_chosen:
 			return
+		_focus(focus_index + 1)
+		await _wait(AI_STEP_TIME)
+	# The AI always takes an upgrade if there is one
+	if cards[focus_index].upgrade.id == UpgradeCatalog.SKIP.id and cards.size() > 1:
 		_focus(focus_index + 1)
 		await _wait(AI_STEP_TIME)
 	await _wait(0.4)

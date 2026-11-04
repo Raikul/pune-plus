@@ -25,12 +25,23 @@ const RELEASES = [
 			["Fire", [
 				"Phoenix is untouchable for a moment after rising, so it can't die on the spot next to a wall, and it never rises inside a level's wall.",
 				"Phoenix no longer triggers in a duel: with a single rival left, the round just ends.",
+				"New epic upgrade, Wildfire: the fireball leaves a trail of flames that burns for 2 seconds. It kills other snakes, never you.",
+				"Big Fireball now stacks twice instead of three times.",
 			]],
 			["Earth", [
-				"New epic upgrade, Off the Map: while the armor lasts, Earth can leave the arena through its edges. Be back inside when it wears off, or you're crushed. An arrow on the edge of the screen shows where you are while you're out.",
+				"New rare upgrade, Burrower: while the armor lasts, Earth digs through every wall, the level's obstacles and the arena's edges. Be out in the open when it wears off, or you're crushed. An arrow on the edge of the screen shows where you are while you're off the map.",
+				"New rare upgrade, Bedrock: the armor and rocky path last 0.25 seconds longer (stacks twice).",
+				"Tectonic Bulk is now Epic and Stone Walker Legendary.",
+			]],
+			["Air", [
+				"Static Shock is now Epic and Scrambler Legendary.",
+			]],
+			["Upgrades", [
+				"With fewer than three upgrades left to offer, a Skip card lets you take nothing that round.",
+				"The upgrade badges on the scoreboard are sorted by rarity, rarest first, each framed in its rarity's color.",
 			]],
 			["Instructions", [
-				"Power gallery: every base power and upgrade on one screen, a column per element and a row per rarity, with open slots and totals to see where each element stands.",
+				"Power gallery: every base power and upgrade on one screen, a column per element and a row per rarity, with open slots and totals (upgrades and picks, counting stacks) to see where each element stands.",
 			]],
 			["AI", [
 				"The AI sees spinning and sliding walls coming and steers out of their way.",
@@ -46,6 +57,9 @@ const RELEASES = [
 			["Match flow", [
 				"There's a countdown before every round, for every mode. Turn it off with the Countdown match setting (the first round always counts down).",
 				"The first countdown shows the match's goal, like FREE FOR ALL - FIRST TO 30 - DODGE EVERYTHING.",
+				"During the countdown a ring in each snake's color closes in on its head every second, so you know where you start.",
+				"Snakes start facing open ground (no wall or level obstacle right ahead, moving walls included) and farther apart.",
+				"After a match, the players who picked REMATCH go back to the lobby when not everyone did; the ones who picked QUIT leave (online they leave the session).",
 				"The win and stats screens use the players' names.",
 				"New stats: Fire's times revived and Earth's crossings of its own trail.",
 			]],

@@ -34,16 +34,21 @@ func refresh(id, hidden = false):
 			count += entry.stacks
 		add_child(_label("? x%d" % count, 22, Color(0.7, 0.7, 0.7)))
 		return
-	var shown = 0
+	# Rarest first
+	var owned = []
 	for buff_id in stats.active_buffs:
+		var upgrade = UpgradeCatalog.get_upgrade(buff_id)
+		if not upgrade.is_empty():
+			owned.append(upgrade)
+	var order = UpgradeCatalog.RARITIES.keys()
+	owned.sort_custom(func(a, b): return order.find(a.get("rarity", "common")) > order.find(b.get("rarity", "common")))
+	var shown = 0
+	for upgrade in owned:
 		if shown >= MAX_SHOWN:
 			add_child(_label("...", 22, Color.WHITE))
 			break
 		shown += 1
-		var upgrade = UpgradeCatalog.get_upgrade(buff_id)
-		if upgrade.is_empty():
-			continue
-		add_child(_badge(upgrade, stats.active_buffs[buff_id].stacks))
+		add_child(_badge(upgrade, stats.active_buffs[upgrade.id].stacks))
 
 func _badge(upgrade, stacks):
 	var holder = Control.new()
@@ -66,6 +71,17 @@ func _badge(upgrade, stacks):
 	icon.size = Vector2(120, 120)
 	icon.scale = Vector2.ONE * (icon_size / 120.0)
 	holder.add_child(icon)
+	# A frame in the rarity's color, over the icon
+	var frame = Panel.new()
+	var frame_style = StyleBoxFlat.new()
+	frame_style.draw_center = false
+	frame_style.border_color = UpgradeCatalog.rarity_of(upgrade).color
+	frame_style.set_border_width_all(max(2, int(icon_size * 0.06)))
+	frame_style.set_corner_radius_all(int(icon_size * 0.22))
+	frame.add_theme_stylebox_override("panel", frame_style)
+	frame.size = Vector2(icon_size, icon_size)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(frame)
 	if stacks > 1:
 		var count = _label("x%d" % stacks, int(icon_size * 0.36), Color.WHITE)
 		count.position = icon_size * Vector2(0.52, 0.56)

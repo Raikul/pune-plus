@@ -28,6 +28,7 @@ func activate() -> void:
 	if player.stats != null:
 		duration = player.stats.get_stat("fire.duration")
 	proj.lifetime = duration
+	proj.fire_trail = player.stats != null and player.stats.get_stat("fire.trail") >= 1.0
 
 	if has_node("Shoot"):
 		$Shoot.play()

@@ -637,14 +637,40 @@ func _host_check_end_votes():
 	if not peers.all(func(peer_id): return end_votes.has(peer_id)):
 		return
 	var rematch = SteamNet.roster.size() >= 2
+	# Machines where every player picked QUIT leave; the others go back to the lobby
+	var leaving = []
 	for peer_id in peers:
-		for wants_more in end_votes[peer_id].values():
+		var votes = end_votes[peer_id].values()
+		for wants_more in votes:
 			rematch = rematch and wants_more
+		if not votes.is_empty() and not votes.any(func(wants_more): return wants_more):
+			leaving.append(peer_id)
 	end_votes.clear()
 	if rematch:
 		SteamNet.start_match()
-	else:
-		back_to_lobby.rpc()
+		return
+	# The host keeps the lobby for whoever stays; it only leaves if everyone does
+	if leaving.size() == peers.size():
+		for peer_id in peers:
+			if peer_id != 1:
+				leave_match.rpc_id(peer_id)
+		leave_match()
+		return
+	for peer_id in peers:
+		if peer_id == 1:
+			continue
+		if peer_id in leaving:
+			leave_match.rpc_id(peer_id)
+		else:
+			back_to_lobby.rpc_id(peer_id)
+	back_to_lobby()
+
+# QUIT at the end of a match: out of the session, to the main menu
+@rpc("authority", "call_remote", "reliable")
+func leave_match():
+	SteamNet.leave()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 @rpc("authority", "call_local", "reliable")
 func back_to_lobby():

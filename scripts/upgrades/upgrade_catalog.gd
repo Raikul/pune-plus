@@ -84,7 +84,17 @@ const UPGRADES = [
 		"element": "fire",
 		"icon": "fireball_big",
 		"stat_mods": {"fire.radius": {"add": 0.3}},
-		"max_stacks": 3,
+		"max_stacks": 2,
+	},
+	{
+		"id": &"fire_wildfire",
+		"rarity": "epic",
+		"name": "Wildfire",
+		"description": "Your fireball leaves a trail of flames that burns for 2 s. It kills other snakes, never you.",
+		"element": "fire",
+		"icon": "wildfire",
+		"stat_mods": {"fire.trail": {"add": 1.0}},
+		"max_stacks": 1,
 	},
 	{
 		"id": &"fire_phoenix",
@@ -118,7 +128,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"air_shock",
-		"rarity": "rare",
+		"rarity": "epic",
 		"name": "Static Shock",
 		"description": "Snakes whose heads you teleport through are electrocuted: no power for 5 s.",
 		"element": "air",
@@ -128,7 +138,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"air_scramble",
-		"rarity": "epic",
+		"rarity": "legendary",
 		"name": "Scrambler",
 		"description": "Your shock also swaps their left and right for 3 s.",
 		"element": "air",
@@ -139,7 +149,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"earth_wide_body",
-		"rarity": "rare",
+		"rarity": "epic",
 		"name": "Tectonic Bulk",
 		"description": "Your rocky path is 30% wider: more ground for you, more wall for them.",
 		"element": "earth",
@@ -149,7 +159,7 @@ const UPGRADES = [
 	},
 	{
 		"id": &"earth_stone_walk",
-		"rarity": "rare",
+		"rarity": "legendary",
 		"name": "Stone Walker",
 		"description": "You walk through your own stone walls. They still stop everyone else.",
 		"element": "earth",
@@ -158,14 +168,24 @@ const UPGRADES = [
 		"max_stacks": 1,
 	},
 	{
-		"id": &"earth_off_the_map",
-		"rarity": "epic",
-		"name": "Off the Map",
-		"description": "While your armor lasts you can leave the arena through its edges. Be back inside when it wears off, or you're crushed.",
+		"id": &"earth_burrower",
+		"rarity": "rare",
+		"name": "Burrower",
+		"description": "While your armor lasts you dig through walls: the arena's obstacles and its edges. Be out in the open when it wears off, or you're crushed.",
 		"element": "earth",
-		"icon": "off_the_map",
+		"icon": "burrower",
 		"stat_mods": {"earth.border_pass": {"add": 1.0}},
 		"max_stacks": 1,
+	},
+	{
+		"id": &"earth_bedrock",
+		"rarity": "rare",
+		"name": "Bedrock",
+		"description": "Your armor and rocky path last 0.25 s longer.",
+		"element": "earth",
+		"icon": "bedrock",
+		"stat_mods": {"earth.duration": {"add": 0.25}},
+		"max_stacks": 2,
 	},
 	{
 		"id": &"water_extra_copy",
@@ -210,6 +230,16 @@ const UPGRADES = [
 		"max_stacks": 1,
 	},
 ]
+
+# Offered as an extra card when a snake has fewer than 3 upgrades left: take nothing
+const SKIP = {
+	"id": &"skip",
+	"rarity": "common",
+	"name": "Skip",
+	"description": "Take nothing this time and keep the rest for later.",
+	"element": "generic",
+	"icon": "skip",
+}
 
 static func get_upgrade(upgrade_id) -> Dictionary:
 	for upgrade in UPGRADES:

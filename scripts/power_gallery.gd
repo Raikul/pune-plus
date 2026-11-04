@@ -3,8 +3,9 @@ class_name PowerGallery
 
 # Every power in the game on one screen, opened from Instructions: a column per snake
 # (plus upgrades any snake can take) and a row per rarity, with each element's base power
-# on top. Empty cells show an open slot, and the totals row counts each column, so it's
-# easy to see where an element is short of powers.
+# on top. Empty cells show an open slot, and the totals row counts each column (upgrades
+# and picks: an upgrade that stacks x3 is three picks), so it's easy to see where an
+# element is short of powers.
 
 const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
@@ -99,7 +100,8 @@ func _fill(grid):
 			for upgrade in UpgradeCatalog.UPGRADES:
 				if upgrade.element != column or upgrade.get("rarity", "common") != rarity_id:
 					continue
-				counts[column][rarity_id] = counts[column].get(rarity_id, 0) + 1
+				counts[column][rarity_id] = counts[column].get(rarity_id, 0) + upgrade.get("max_stacks", 1)
+				counts[column]["upgrades"] = counts[column].get("upgrades", 0) + 1
 				cell.add_child(_upgrade_card(upgrade, rarity.color))
 			if cell.get_child_count() == 0:
 				cell.add_child(_slot("Open slot"))
@@ -195,14 +197,15 @@ func _slot(text) -> Control:
 	slot.add_child(label)
 	return slot
 
-# Total upgrades in a column and a block per upgrade in its rarity's color
+# Upgrades and picks (stacks included) in a column, and a block per pick in its rarity's color
 func _totals(counts) -> Control:
 	var box = VBoxContainer.new()
 	box.custom_minimum_size = Vector2(CELL_WIDTH, 0)
-	var total = 0
-	for amount in counts.values():
-		total += amount
-	box.add_child(_label("%d upgrade%s" % [total, "" if total == 1 else "s"], 22, Color.WHITE))
+	var upgrades = counts.get("upgrades", 0)
+	var picks = 0
+	for rarity_id in UpgradeCatalog.RARITIES:
+		picks += counts.get(rarity_id, 0)
+	box.add_child(_label("%d upgrade%s, %d pick%s" % [upgrades, "" if upgrades == 1 else "s", picks, "" if picks == 1 else "s"], 22, Color.WHITE))
 	var bar = HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 3)
 	box.add_child(bar)
@@ -210,7 +213,7 @@ func _totals(counts) -> Control:
 		for i in counts.get(rarity_id, 0):
 			var block = ColorRect.new()
 			block.color = UpgradeCatalog.RARITIES[rarity_id].color
-			block.custom_minimum_size = Vector2(22, 14)
+			block.custom_minimum_size = Vector2(18, 14)
 			bar.add_child(block)
 	return box
 

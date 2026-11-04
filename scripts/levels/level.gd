@@ -58,10 +58,11 @@ func spawn_for(player_id) -> Array:
 		return [marker.global_position.x, marker.global_position.y, marker.global_rotation]
 	return []
 
-# No wall within margin pixels of this point (walls where they are right now)
-func is_clear(point: Vector2, margin: float) -> bool:
+# No wall within margin pixels of this point (walls where they are right now, or some
+# seconds from now for moving ones)
+func is_clear(point: Vector2, margin: float, seconds: float = 0.0) -> bool:
 	for wall in walls():
-		var shape = wall.global_polygon()
+		var shape = wall.global_polygon_in(seconds) if seconds > 0 else wall.global_polygon()
 		if shape.size() < 3:
 			continue
 		if Geometry2D.is_point_in_polygon(point, shape):

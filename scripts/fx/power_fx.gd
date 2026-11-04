@@ -10,6 +10,7 @@ class_name PowerFx
 # - pulse: a soft ring around a snake whose power just recharged
 # - burst: shards flying out where a snake died
 # - score: a "+1" floating up from a snake that scored
+# - home: a thick ring closing in on a snake's head (round countdown: where you start)
 # Each effect is its own node on the playground, so it outlives the snake that made it.
 
 const LIGHTNING_TIME = 0.35
@@ -59,6 +60,14 @@ static func pulse(parent: Node, snake: Node2D, pulse_color: Color) -> void:
 	fx.kind = "pulse"
 	fx.color = pulse_color
 	fx.duration = 0.55
+	fx.target = snake
+	parent.add_child(fx)
+
+static func home(parent: Node, snake: Node2D, ring_color: Color, time: float = 0.85) -> void:
+	var fx = PowerFx.new()
+	fx.kind = "home"
+	fx.color = ring_color
+	fx.duration = time
 	fx.target = snake
 	parent.add_child(fx)
 
@@ -116,8 +125,10 @@ func _ready():
 	elif kind == "score":
 		position = center
 		z_index = 30
-	elif kind == "pulse":
+	elif kind in ["pulse", "home"]:
 		position = target.global_position
+		if kind == "home":
+			z_index = 30
 	elif kind in ["ember", "explosion"]:
 		position = center
 		for i in 18:
@@ -141,7 +152,7 @@ func _process(delta):
 		if flicker >= FLICKER_INTERVAL:
 			flicker = 0.0
 			_roll_bolts()
-	elif kind == "pulse":
+	elif kind in ["pulse", "home"]:
 		if is_instance_valid(target) and target.is_inside_tree():
 			position = target.global_position
 	elif kind == "shock":
@@ -215,6 +226,15 @@ func _draw():
 		var grow = ease(t, 0.35)
 		draw_arc(Vector2.ZERO, 10.0 + 26.0 * grow, 0, TAU, 40, Color(color.lightened(0.25), 0.55 * fade), 3.0 * fade + 1.0, true)
 		draw_circle(Vector2.ZERO, 10.0 + 18.0 * grow, Color(color, 0.12 * fade))
+	elif kind == "home":
+		# Starts wide and closes in on the head, fading in then out: hard to miss
+		var close = ease(t, 0.5)
+		var ring = lerp(260.0, 18.0, close)
+		var alpha = min(t * 5.0, 1.0) * (1.0 - max(t - 0.75, 0.0) * 4.0)
+		draw_circle(Vector2.ZERO, ring, Color(color, 0.12 * alpha))
+		draw_arc(Vector2.ZERO, ring, 0, TAU, 72, Color(0, 0, 0, 0.55 * alpha), 14.0, true)
+		draw_arc(Vector2.ZERO, ring, 0, TAU, 72, Color(color.lightened(0.2), alpha), 8.0, true)
+		draw_circle(Vector2.ZERO, 7.0, Color(color.lightened(0.4), alpha))
 	elif kind == "burst":
 		# Shards of the snake's color flying apart, and a quick flash
 		var grow = ease(t, 0.3)

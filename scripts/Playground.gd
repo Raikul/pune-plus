@@ -146,9 +146,6 @@ func groupColliders():
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
-	# The outer border only (not the level's walls): Earth's Off the Map passes it
-	for border in [$Colliders/Control/LimitBottom, $Colliders/LimitTop, $Colliders/LimitLeft, $Colliders/LimitRight]:
-		border.add_to_group("border")
 	_draw_arena_border()
 
 # One thin line on the inner edge of the four wall colliders (where a head dies), instead
@@ -256,6 +253,11 @@ func _start_countdown(seconds, quest = ""):
 		# Fades out with the GO!
 		line.create_tween().tween_property(line, "modulate:a", 0.0, 0.6).set_delay(seconds + 0.4)
 	for step in steps:
+		# A ring closing in on each snake, so everyone sees where they start
+		if step != steps.back():
+			for snake in snakes:
+				if is_instance_valid(snake):
+					PowerFx.home(self, snake, Color(Global.playerColors[snake.playerId]))
 		label.text = step
 		label.pivot_offset = get_viewport_rect().size / 2
 		label.scale = Vector2(1.4, 1.4)
@@ -290,9 +292,50 @@ func _load_level():
 
 ## How far from a level's walls a snake can start
 const SPAWN_LEVEL_MARGIN = 110.0
+## How far ahead of a starting snake must be free of walls (arena border and level walls,
+## where moving walls will be by then); otherwise its heading is turned until it is
+const SPAWN_CLEAR_AHEAD = 320.0
+## Seconds a moving wall is followed to check a start: the countdown and a bit more
+const SPAWN_WALL_LOOKAHEAD = 4.5
 
-func _clear_of_level(point) -> bool:
-	return level == null or level.is_clear(point, SPAWN_LEVEL_MARGIN)
+# Clear of the level's walls now and while moving walls go by during the countdown
+func _clear_of_level(point, margin = SPAWN_LEVEL_MARGIN) -> bool:
+	if level == null:
+		return true
+	var seconds = 0.0
+	while seconds <= SPAWN_WALL_LOOKAHEAD:
+		if not level.is_clear(point, margin, seconds):
+			return false
+		seconds += 0.75
+	return true
+
+# How far a snake starting here with this heading goes before reaching a wall (up to
+# SPAWN_CLEAR_AHEAD)
+func _clear_ahead(point, heading) -> float:
+	var arena = _arena_rect().grow(-30)
+	var forward = Vector2.UP.rotated(heading)
+	var distance = 40.0
+	while distance <= SPAWN_CLEAR_AHEAD:
+		var at = point + forward * distance
+		if not arena.has_point(at) or not _clear_of_level(at, 30.0):
+			return distance
+		distance += 40.0
+	return SPAWN_CLEAR_AHEAD
+
+# The heading itself if the way ahead is clear, else the closest turn of it that is (or
+# the one with the most room)
+func _open_heading(point, heading) -> float:
+	var best = heading
+	var best_room = -1.0
+	for turn in [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8]:
+		var candidate = heading + turn * PI / 8
+		var room = _clear_ahead(point, candidate)
+		if room >= SPAWN_CLEAR_AHEAD:
+			return candidate
+		if room > best_room:
+			best_room = room
+			best = candidate
+	return best
 
 ## Random starting spots: distance from the walls, from each other, and how far the
 ## heading can stray from facing the middle of the arena
@@ -314,10 +357,15 @@ func roll_spawns(ids):
 		for id in ids:
 			var spot = level.spawn_for(id) if level else []
 			if spot.is_empty():
-				spot = roll_spawn(id)
+				# Around its corner, away from the walls and from the snakes placed so far
+				for attempt in 20:
+					spot = roll_spawn(id)
+					if _clear_of_level(Vector2(spot[0], spot[1])) and _far_from(Vector2(spot[0], spot[1]), taken):
+						break
 				if not _clear_of_level(Vector2(spot[0], spot[1])):
 					to_roll.append(id)
 					continue
+				spot[2] = _open_heading(Vector2(spot[0], spot[1]), spot[2])
 			spawns[id] = spot
 			taken.append(Vector2(spot[0], spot[1]))
 	for id in to_roll:
@@ -338,8 +386,14 @@ func roll_spawns(ids):
 				break
 		taken.append(point)
 		var heading = Vector2.UP.angle_to(middle - point) + randf_range(-SPAWN_HEADING_SPREAD, SPAWN_HEADING_SPREAD)
-		spawns[id] = [point.x, point.y, heading]
+		spawns[id] = [point.x, point.y, _open_heading(point, heading)]
 	return spawns
+
+func _far_from(point, others) -> bool:
+	for other in others:
+		if point.distance_to(other) < SPAWN_MIN_DISTANCE:
+			return false
+	return true
 
 # Inside the walls and under the scoreboard (the purple border)
 func _arena_rect() -> Rect2:
@@ -558,8 +612,10 @@ func match_stats_totals():
 		return Global.sum_stats([Global.match_stats] + net_session.peer_stats.values())
 	return Global.match_stats
 
-# Everyone on REMATCH plays again with the same snakes and rules; anything else goes back
-# to the lobby. Online the host decides once every machine confirmed (NetSession).
+# Everyone on REMATCH plays again with the same snakes and rules. Otherwise the players
+# who wanted a rematch go back to the lobby (player setup) without the ones who quit; if
+# nobody did, back to the main menu. Online the host decides once every machine confirmed
+# (NetSession).
 func _on_stats_confirmed(choices):
 	if net_session:
 		var mine = {}
@@ -572,9 +628,15 @@ func _on_stats_confirmed(choices):
 	if choices.values().all(func(rematch): return rematch):
 		Global.reset_score()
 		get_tree().change_scene_to_file("res://scenes/Playground.tscn")
-	else:
+		return
+	# AI snakes always vote rematch: only the humans count to keep the lobby going
+	var staying = choices.keys().filter(func(id): return choices[id] and not Global.AI_Enabled.get(id, false))
+	if not staying.is_empty():
+		for id in choices:
+			if not choices[id]:
+				Global.set("player%dActive" % id, false)
 		Global.open_player_setup = true
-		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 	
 func stopTime():
 	time_flowing = false

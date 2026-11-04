@@ -8,6 +8,10 @@ var lifetime = 0.0
 const EXPIRE_TIME = 0.4
 var age = 0.0
 var expiring = false
+## Wildfire (set by FirePower): flames left along the flight, burning other snakes
+var fire_trail = false
+const FLAME_SPACING = 16.0
+var last_flame = null
 
 
 func _ready():
@@ -34,6 +38,19 @@ func _process(delta):
 	position.x = clamp(position.x, 0, screen_size.x)
 #	position.y = clamp(position.y, colorRect.position.y * colorRect.scale.y, screen_size.y)
 	position.y = clamp(position.y, 0, screen_size.y)
+	if fire_trail and not expiring and (last_flame == null or global_position.distance_to(last_flame) >= FLAME_SPACING):
+		_drop_flame()
+
+func _drop_flame():
+	last_flame = global_position
+	var shooter = get_parent()
+	var flame = FireTrail.new()
+	flame.owner_id = shooter.playerId if "playerId" in shooter else 0
+	flame.color = Color(Global.playerColors[flame.owner_id]) if flame.owner_id in [1, 2, 3, 4] else Color(1, 0.5, 0.1)
+	flame.radius = FireTrail.RADIUS * scale.x
+	flame.global_position = global_position
+	# On the playground, so the flames outlive the fireball (and the snake)
+	shooter.get_parent().add_child(flame)
 
 # End of the flight: it stops burning and fades away.
 # Placeholder look: shrinks and fades. For a custom effect, add an "expire" animation
@@ -55,7 +72,7 @@ func expire():
 	tween.tween_callback(queue_free)
 
 func _on_area_entered(area):
-	if area == get_parent() or expiring:
+	if area == get_parent() or expiring or area.is_in_group("fire_trail"):
 		return
 	# Walls, snakes (and Water's twin heads) and Earth's stone stop it: it crashes and fades
 	# away. Freeing a twin head would also free its whole trail (the segments are its children);
