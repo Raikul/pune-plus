@@ -82,7 +82,7 @@ func show_wisdom(winner_id):
 	var quote = Wisdom.for_winner(winner_id)
 	quote_label.text = tr("WISDOM_QUOTE") % tr(quote.text)
 	quote_label.add_theme_color_override("font_color",
-		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4] else Color(0.9, 0.9, 0.9))
+		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4, 5] else Color(0.9, 0.9, 0.9))
 	quote_source.text = "— " + tr(quote.source)
 	quote_box.show()
 	subtitle_label.hide()
@@ -102,10 +102,7 @@ func unpicked():
 	return missing
 
 func _active_player_ids():
-	var ids = []
-	for id in [1, 2, 3, 4]:
-		if Global.get("player" + str(id) + "Active"):
-			ids.append(id)
+	var ids = Global.active_ids()
 	if ids.is_empty():
 		ids = [1, 2, 3, 4]
 	return ids

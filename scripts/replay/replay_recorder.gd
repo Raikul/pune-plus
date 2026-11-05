@@ -195,6 +195,7 @@ const CAPTIONS = {
 	"shock": "REPLAY_SHOCK",
 	"round": "REPLAY_LAST_STANDING",
 	"crash": "REPLAY_WIPEOUT",
+	"absorb": "REPLAY_ABSORB",
 }
 
 func _caption(streak, kind) -> String:

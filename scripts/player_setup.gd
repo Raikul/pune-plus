@@ -3,11 +3,13 @@ var player1Active = false
 var player2Active = false
 var player3Active = false
 var player4Active = false
+var player5Active = false
 
 var P1Box
 var P2Box
 var P3Box
 var P4Box
+var P5Box
 
 signal back
 signal go
@@ -19,17 +21,58 @@ func _ready():
 	P2Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/2"
 	P3Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3"
 	P4Box = $"PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4"
+	P5Box = _add_void_card()
 	P1Box.set_ai_status(Global.AI_Enabled[1])
 	P2Box.set_ai_status(Global.AI_Enabled[2])
 	P3Box.set_ai_status(Global.AI_Enabled[3])
-	P4Box.set_ai_status(Global.AI_Enabled[4])	
+	P4Box.set_ai_status(Global.AI_Enabled[4])
+	P5Box.set_ai_status(Global.AI_Enabled[5])	
 	_polish_cards()
 	_build_match_options()
 	_build_name_boxes()
 	_apply_card_colors()
 	# Borders start hidden (nobody selected yet)
+	for id in [1, 2, 3, 4, 5]:
+		activatePlayer(get("player%dActive" % id), _card(id), Global.playerColors[id])
+
+# Void (EXPERIMENTAL): a fifth card, built like the others. Only four snakes play at once,
+# so picking Void means one of the classic four sits out (Global.MAX_SNAKES).
+func _add_void_card():
+	var row = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer
+	# Five cards: closer together, and clear of the match settings in the corner
+	row.add_theme_constant_override("separation", 30)
+	var spacer = Control.new()
+	spacer.custom_minimum_size.x = 380
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(spacer)
+	row.move_child(spacer, 0)
+	var box = preload("res://scenes/individual_player_setup.tscn").instantiate()
+	box.name = "5"
+	row.add_child(box)
+	box.get_node("PanelContainer2/PanelContainer/MarginContainer2/PanelContainer/Label").text = "ELEMENT_VOID_UPPER"
+	var symbol = box.get_node("PanelContainer2/PanelContainer/MarginContainer/TextureRect")
+	symbol.texture = Global.element_symbol(5)
+	symbol.flip_v = false
+	box.get_node("VBoxContainer/Redefine").pressed.connect(func():
+		$RedefineKeys.show()
+		$RedefineKeys.redefinePlayer(5))
+	box.get_node("VBoxContainer/Select").pressed.connect(_toggle_player.bind(5))
+	box.get_node("VBoxContainer/Enable AI").toggled.connect(_on_enable_ai_toggled.bind(5))
+	var badge = Label.new()
+	badge.text = "SETUP_EXPERIMENTAL"
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 18)
+	badge.add_theme_color_override("font_color", Color(1, 0.75, 0.3))
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(badge)
+	box.move_child(badge, 0)
+	# The other cards get the same room on top, so the rows stay aligned
 	for id in [1, 2, 3, 4]:
-		activatePlayer(get("player%dActive" % id), [P1Box, P2Box, P3Box, P4Box][id - 1], Global.playerColors[id])
+		var space = Control.new()
+		space.custom_minimum_size.y = badge.get_combined_minimum_size().y
+		_card(id).add_child(space)
+		_card(id).move_child(space, 0)
+	return box
 
 # Look tweaks on the four player cards (individual_player_setup.tscn)
 const SETUP_ACCENT = Color(1, 0.6, 0.15)
@@ -51,8 +94,8 @@ func _apply_card_colors():
 		activatePlayer(get("player%dActive" % id), _card(id), Global.playerColors[id])
 
 func _polish_cards():
-	for id in [1, 2, 3, 4]:
-		var box = [P1Box, P2Box, P3Box, P4Box][id - 1]
+	for id in [1, 2, 3, 4, 5]:
+		var box = _card(id)
 		var element_color = Color(Global.playerColors[id])
 		# Element name: centered in its header, which gets a thin line in the element color
 		var header = box.get_node("PanelContainer2/PanelContainer/MarginContainer2/PanelContainer")
@@ -117,33 +160,48 @@ func recalculate_all_labels():
 	_on_redefine_keys_recalculate_labels(2)
 	_on_redefine_keys_recalculate_labels(3)
 	_on_redefine_keys_recalculate_labels(4)
+	_on_redefine_keys_recalculate_labels(5)
 	
 	P1Box.get_node("VBoxContainer/Select").grab_focus.call_deferred()
 	
 func _on_p_1on_pressed():
-	player1Active = not player1Active
-	activatePlayer(player1Active, P1Box, Global.playerColors[1])
-#	activatePlayer(player1Active, P1Box,Color("1ab2ff"))
-	
+	_toggle_player(1)
+
 func _on_p_2on_pressed():
-	player2Active = not player2Active
-	activatePlayer(player2Active, P2Box, Global.playerColors[2])
-#	activatePlayer(player2Active, P2Box, Color("aecd53"))
+	_toggle_player(2)
 
 func _on_p_3on_pressed():
-	player3Active = not player3Active
-	activatePlayer(player3Active, P3Box, Global.playerColors[3])
-#	activatePlayer(player3Active, P3Box, Color("e8a547"))
+	_toggle_player(3)
 
 func _on_p_4on_pressed():
-	player4Active = not player4Active
-	activatePlayer(player4Active, P4Box, Global.playerColors[4])
-#	activatePlayer(player4Active, P4Box, Color("13c9ee"))
+	_toggle_player(4)
+
+# Selects or deselects a snake. Only MAX_SNAKES play: a fifth one asks to free a seat first.
+func _toggle_player(id):
+	var active = not get("player%dActive" % id)
+	if active and _active_count() >= Global.MAX_SNAKES:
+		_warn(tr("SETUP_MAX_SNAKES") % Global.MAX_SNAKES)
+		return
+	_warn("")
+	set("player%dActive" % id, active)
+	activatePlayer(active, _card(id), Global.playerColors[id])
+
+# The red line under the cards. It doesn't exist yet while the cards restore their AI
+# switches (that selects those snakes) at the start of _ready.
+func _warn(text):
+	if options_warning != null:
+		options_warning.text = text
+
+func _active_count() -> int:
+	return [1, 2, 3, 4, 5].filter(func(id): return get("player%dActive" % id)).size()
 
 func activatePlayer(active, playerBox, color):
 #	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
 	# Selected: the card takes a light tint of the element color (a full tint made its
-	# text hard to read) and a glowing border in that color
+	# text hard to read) and a glowing border in that color. Void's color is nearly white,
+	# so its card glows in the void's purple instead.
+	if playerBox == P5Box:
+		color = Global.VOID_ACCENT
 	var card = playerBox.get_node("PanelContainer2")
 	var style = card.get_theme_stylebox("panel").duplicate()
 	if style is StyleBoxFlat:
@@ -172,7 +230,7 @@ func _on_back_pressed():
 func _on_go_pressed():
 	# Teams need players on both sides
 	if Global.teams:
-		var actives = {1: player1Active, 2: player2Active, 3: player3Active, 4: player4Active}
+		var actives = {1: player1Active, 2: player2Active, 3: player3Active, 4: player4Active, 5: player5Active}
 		var sides = {}
 		for id in actives:
 			if actives[id]:
@@ -185,6 +243,8 @@ func _on_go_pressed():
 	Global.player2Active = player2Active
 	Global.player3Active = player3Active
 	Global.player4Active = player4Active
+	Global.player5Active = player5Active
+	Global.reset_score()
 	Global.player1Score = 0
 	Global.player2Score = 0
 	Global.player3Score = 0
@@ -286,15 +346,8 @@ func _on_enable_ai_toggled(button_pressed, player_id):
 	pass # Replace with function body.
 
 func enable_player(player_id:int) -> void:
-	match player_id:
-		1:
-			if !player1Active : _on_p_1on_pressed()
-		2:
-			if !player2Active : _on_p_2on_pressed()
-		3:
-			if !player3Active : _on_p_3on_pressed()
-		4:
-			if !player4Active : _on_p_4on_pressed()
+	if not get("player%dActive" % player_id):
+		_toggle_player(player_id)
 
 
 #region Match options (saved in Global's settings): a panel in the top left corner with
@@ -358,7 +411,7 @@ func _build_match_options():
 	options_warning.add_theme_color_override("font_color", Color(1, 0.4, 0.3))
 	options_box.add_child(options_warning)
 	options_box.move_child(options_warning, row.get_index() + 1)
-	for id in [1, 2, 3, 4]:
+	for id in [1, 2, 3, 4, 5]:
 		var box = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer.get_node(str(id))
 		var team_button = _pill_button(28, 0)
 		team_button.custom_minimum_size.y = 56
@@ -444,7 +497,7 @@ func _refresh_match_options():
 var name_edits = {}
 
 func _build_name_boxes():
-	for id in [1, 2, 3, 4]:
+	for id in [1, 2, 3, 4, 5]:
 		var box = _card(id)
 		var holder = PanelContainer.new()
 		var style = StyleBoxFlat.new()

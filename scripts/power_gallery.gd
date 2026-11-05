@@ -10,16 +10,17 @@ class_name PowerGallery
 const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = {"fire": "Fire-Water symbol.png", "earth": "Air-Earth symbol rot.png", "air": "Air-Earth symbol.png", "water": "Fire-Water symbol rot.png"}
-const COLUMNS = ["generic", "fire", "earth", "air", "water"]
+const COLUMNS = ["generic", "fire", "earth", "air", "water", "void"]
 # Translation keys
 const BASE_POWERS = {
 	"fire": "GALLERY_BASE_FIRE",
 	"earth": "GALLERY_BASE_EARTH",
 	"air": "GALLERY_BASE_AIR",
 	"water": "GALLERY_BASE_WATER",
+	"void": "GALLERY_BASE_VOID",
 }
 const LABEL_WIDTH = 150
-const CELL_WIDTH = 330
+const CELL_WIDTH = 272 # Six columns (any snake + five elements) across the screen
 const BG = Color(0.07, 0.07, 0.09)
 
 signal closed
@@ -118,9 +119,9 @@ func _column_head(column) -> Control:
 	box.custom_minimum_size = Vector2(CELL_WIDTH, 56)
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 10)
-	if SYMBOLS.has(column):
+	if column != "generic":
 		var symbol = TextureRect.new()
-		symbol.texture = load(SYMBOLS_PATH + SYMBOLS[column])
+		symbol.texture = Global.element_symbol(UpgradeCatalog.PLAYER_ELEMENTS.find_key(column))
 		symbol.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		symbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		symbol.custom_minimum_size = Vector2(44, 44)
@@ -129,6 +130,8 @@ func _column_head(column) -> Control:
 	var name_label = _label(tr("UPGRADE_ANY_SNAKE") if column == "generic" else tr("ELEMENT_" + column.to_upper() + "_UPPER"), 30, _element_color(column))
 	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	box.add_child(name_label)
+	if column == "void":
+		box.add_child(_label(tr("SETUP_EXPERIMENTAL"), 14, Color(1, 0.75, 0.3)))
 	return box
 
 func _row_head(text, color, note) -> Control:

@@ -397,3 +397,40 @@ NET_LAN_JOIN_FAILED,LAN join failed (%s),Falló la conexión LAN (%s),加入局�
 NET_CONNECTING_TO,Connecting to %s...,Conectando con %s...,正在连接 %s...
 NET_CONNECTED,Connected,Conectado,已连接
 NET_AI_OF,AI (%s),IA (%s),AI（%s）
+ELEMENT_VOID,Void,Vacío,虚空
+ELEMENT_VOID_UPPER,VOID,VACÍO,虚空
+POWER_VOID,Absorb,Absorber,吞噬
+SETUP_EXPERIMENTAL,EXPERIMENTAL,EXPERIMENTAL,实验性
+SETUP_MAX_SNAKES,Only %d snakes can play at once: deselect one first,Solo pueden jugar %d serpientes a la vez: quita una primero,最多同时 %d 条蛇参战：请先取消选择一条
+GALLERY_BASE_VOID,"Opens a void around its head for 3 s. Fireballs, rocks, twins and lightning it touches give it their power; a snake crashing on its trail gives it for the round. Absorbing recharges Punchi, and the next press casts it all.","Abre un vacío alrededor de su cabeza durante 3 s. Las bolas de fuego, rocas, gemelos y rayos que toca le dan su poder; una serpiente que choca contra su estela se lo da toda la ronda. Absorber recarga Punchi, y el siguiente toque lo lanza todo.",在头部周围开启 3 秒虚空。触碰到的火球、岩石、分身和闪电都会把能力交给它；撞上其尾迹的蛇会交出能力一整回合。吞噬会充能 Punchi，下次按键全部施放。
+AI_ABYSS,Abyss,Abismo,深渊
+AI_ECHO,Echo,Eco,回响
+AI_HOLLOW,Hollow,Hueco,空洞
+AI_NULL,Null,Nulo,虚无
+AI_ECLIPSE,Eclipse,Eclipse,日蚀
+STAT_VOID_ABSORBS,Powers absorbed,Poderes absorbidos,吞噬的能力
+STAT_VOID_ROUND_ABSORBS,Powers kept for a round,Poderes guardados una ronda,保留整回合的能力
+REPLAY_ABSORB,DEVOURED,DEVORADO,吞噬
+UPG_FIRE_HEARTH,Hearth,Hogar,炉火
+UPG_FIRE_HEARTH_DESC,"A circle of fire burns where you start each round, for the whole round. It kills other snakes, never you. With Phoenix, rising lights another one.","Un círculo de fuego arde donde empiezas cada ronda, durante toda la ronda. Mata a las demás serpientes, nunca a ti. Con Fénix, al renacer enciendes otro.",每回合在你出生的地方燃起一圈火焰，持续整回合。它会烧死其他蛇，但不会伤到你。若有凤凰，重生时会再点燃一圈。
+UPG_FIRE_PYRE,Pyre,Pira,火葬堆
+UPG_FIRE_PYRE_DESC,"When your fireball kills a snake, a circle of fire is left burning where it fell.","Cuando tu bola de fuego mata a una serpiente, queda un círculo de fuego ardiendo donde cayó.",你的火球击杀一条蛇时，会在它倒下处留下一圈燃烧的火焰。
+UPG_WATER_ICE,Black Ice,Hielo Negro,黑冰
+UPG_WATER_ICE_DESC,The gaps in your trail freeze over for 10 s. Other snakes on the ice slide: they turn slower and keep drifting the way they were going.,Los huecos de tu estela se congelan durante 10 s. Las demás serpientes resbalan sobre el hielo: giran más lento y siguen derrapando hacia donde iban.,你尾迹中的缺口会结冰 10 秒。其他蛇在冰上会打滑：转向变慢，并继续朝原方向滑行。
+UPG_EARTH_ROOTS,Strangling Roots,Raíces Asfixiantes,缠绕之根
+UPG_EARTH_ROOTS_DESC,Roots grow in the gaps of your trail for 10 s. Other snakes crawl through them at a third of their speed.,En los huecos de tu estela crecen raíces durante 10 s. Las demás serpientes las cruzan a un tercio de su velocidad.,你尾迹的缺口中会长出树根，持续 10 秒。其他蛇穿过时速度降为三分之一。
+UPG_VOID_DURATION,Lingering Void,Vacío Persistente,持久虚空
+UPG_VOID_DURATION_DESC,Your void stays open 1 s longer.,Tu vacío permanece abierto 1 s más.,你的虚空多开启 1 秒。
+UPG_VOID_RADIUS,Wide Void,Vacío Amplio,广域虚空
+UPG_VOID_RADIUS_DESC,Your void is 30% wider.,Tu vacío es un 30% más amplio.,你的虚空范围扩大 30%。
+UPG_VOID_MEMORY,Long Memory,Memoria Larga,长久记忆
+UPG_VOID_MEMORY_DESC,Absorbed powers last 8 s instead of 4.,Los poderes absorbidos duran 8 s en lugar de 4.,吞噬的能力保留 8 秒，而不是 4 秒。
+UPG_VOID_MIMIC,Perfect Mimic,Imitación Perfecta,完美拟态
+UPG_VOID_MIMIC_DESC,You absorb powers with their owner's upgrades.,Absorbes los poderes con las mejoras de su dueño.,吞噬的能力会带上其原主的强化。
+UPG_VOID_HOARD,Event Horizon,Horizonte de Sucesos,事件视界
+UPG_VOID_HOARD_DESC,"Everything you absorb stays for the whole round, and is cast on every press.",Todo lo que absorbes se queda toda la ronda y se lanza en cada toque.,你吞噬的一切都会保留整回合，每次按键都会施放。
+WISDOM_SRC_HEART_SUTRA,Heart Sutra,Sutra del Corazón,《心经》
+WISDOM_SRC_NIETZSCHE,after Friedrich Nietzsche,según Friedrich Nietzsche,化用自尼采
+WISDOM_VOID_1,Form is emptiness; emptiness is form.,La forma es vacío; el vacío es forma.,色即是空，空即是色。
+WISDOM_VOID_2,"Stare long into the abyss, and the abyss stares back into you.","Mira largo tiempo al abismo, y el abismo te devolverá la mirada.",凝视深渊过久，深渊也会凝视你。
+WISDOM_VOID_3,"Clay shapes the bowl, but the emptiness inside is what holds the tea.","La arcilla da forma al cuenco, pero es el vacío de dentro lo que guarda el té.",埏埴以为器，当其无，有器之用。

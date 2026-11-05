@@ -39,6 +39,8 @@ No test suite; verify changes by headless runs (look for `ERROR`/`SCRIPT ERROR`)
   2. Earth – `hulk()`: temporary invincibility + spawns a chain of `fissure.tscn` segments (`scenes/fissure.gd`).
   3. Air – `teleport()` jumps to `DynamicTeleportNode` (point ahead, wrapped around the arena limits).
   4. Water – `twinHead()` spawns `twin_head.tscn` (mirrored second head; if the main head dies while the twin lives, it takes over).
+  5. Void (EXPERIMENTAL, offline only) – `scripts/void_power.gd`: opens a void (`void_field.gd`) that absorbs other powers and casts them on the next press. Only `Global.MAX_SNAKES` (4) play at once; Void sits in the seat of the element left out (`Global.seat_of`: scoreboard card, corner spawn). Loop over `Global.element_ids()` / `Global.active_ids()` instead of `[1, 2, 3, 4]`.
+- Element symbols: `Global.element_symbol(id)`. Hazards owned by a snake (`hazards` group, `owner_id`): Wildfire flames, Hearth/Pyre rings (`fire_ring.gd`), Storm Fence arcs. Gap patches (`gap_patch.gd`: Black Ice, Strangling Roots) sit on their own physics layer and are polled under the head.
 - AI: `scripts/raycaster.gd` steers by raycast distances; `Player.ai_punchi()` decides when AI uses its power.
 - `Events.gd` spawns score mushrooms (`shroom.tscn`); `HUD.gd` shows scores and cooldown bars.
 - Multiplayer (`Multiplayer*.gd`, `multiplayer_*.tscn`) is an experimental network mode, mostly unused.

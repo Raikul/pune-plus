@@ -37,7 +37,7 @@ func _ready():
 	groupColliders()
 	$Events.set_space(topLimit,bottomLimit)
 	setup_music()
-	var active_ids = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active"))
+	var active_ids = Global.active_ids()
 	# Teams only make sense with players on both sides
 	var active_teams = {}
 	for id in active_ids:
@@ -108,7 +108,7 @@ func exit_menu_input() -> void:
 # "+1" over a snake whenever its score goes up (online too: it watches the synced scores)
 var shown_scores = {}
 func _pop_scores():
-	for id in [1, 2, 3, 4]:
+	for id in Global.element_ids():
 		var score = Global.get("player%dScore" % id)
 		var before = shown_scores.get(id, score)
 		shown_scores[id] = score
@@ -164,6 +164,9 @@ func groupColliders():
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
+	# The arena's edge (not a level's walls): fireballs go through it (projectile.gd)
+	for edge in [$Colliders/Control/LimitBottom, $Colliders/LimitTop, $Colliders/LimitLeft, $Colliders/LimitRight]:
+		edge.add_to_group("arena_border")
 	_draw_arena_border()
 
 # One thin line on the inner edge of the four wall colliders (where a head dies), instead
@@ -202,8 +205,8 @@ func _draw_arena_border():
 # spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
 func setupPlayers(spawns = {}):
 	if spawns.is_empty() and not net_session:
-		spawns = roll_spawns([1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active")))
-	for player_id in [1, 2, 3, 4]:
+		spawns = roll_spawns(Global.active_ids())
+	for player_id in Global.element_ids():
 		if spawns.has(player_id):
 			spawn_player(player_id, spawns[player_id])
 	for player in get_tree().get_nodes_in_group("activePlayers"):
@@ -410,7 +413,8 @@ func roll_spawns(ids):
 		# level wall gets a random spot instead
 		to_roll = []
 		for id in ids:
-			var spot = level.spawn_for(id) if level else []
+			# Void starts where the element that sits out would (Global.seat_of)
+			var spot = level.spawn_for(Global.seat_of(id)) if level else []
 			if spot.is_empty():
 				# Around its corner, away from the walls and from the snakes placed so far
 				for attempt in 20:
@@ -457,13 +461,14 @@ func _arena_rect() -> Rect2:
 
 # Random spawn point and heading for a snake: [x, y, rotation]
 func roll_spawn(player_id):
-	var spawn_x = spawn_locations[player_id][0]
-	var spawn_y = spawn_locations[player_id][1]
+	var seat = Global.seat_of(player_id)
+	var spawn_x = spawn_locations[seat][0]
+	var spawn_y = spawn_locations[seat][1]
 	var spawn_range = 150
 	return [
 		spawn_x + randf_range(-spawn_range,spawn_range),
 		spawn_y + randf_range(-spawn_range,spawn_range),
-		(3/2 * PI) - (player_id * PI/2) - (randf_range(0,PI/2)) + PI/2,
+		(3/2 * PI) - (seat * PI/2) - (randf_range(0,PI/2)) + PI/2,
 	]
 
 func spawn_player(player_id, spawn):
@@ -476,7 +481,7 @@ func spawn_player(player_id, spawn):
 		newPlayer.net_remote = not net_session.is_local(player_id)
 		newPlayer.input_id = net_session.input_id_for(player_id)
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
-	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
+	newPlayer.get_node("ElementHeadSprite").set_texture(Global.element_symbol(5) if player_id == Global.VOID_ID else air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
 	newPlayer.connect("score", _on_player_score.bind(player_id))
 	newPlayer.name = "Player" + str(player_id)
@@ -548,7 +553,7 @@ func round_is_over():
 # Teams keep the same score on both members, so the scoreboard shows it on each
 func add_team_point(team):
 	var score = 0
-	var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+	var members = Global.active_ids().filter(func(id): return Global.team_of(id) == team)
 	for id in members:
 		score = max(score, Global.get("player%dScore" % id))
 	score += 1
@@ -611,7 +616,7 @@ var stats_screen: MatchStatsScreen
 var replay_recorder: ReplayRecorder
 
 func _active_ids():
-	return [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id))
+	return Global.active_ids()
 
 # The winning snake, or the whole winning team
 func _winners(player_id):
@@ -843,6 +848,10 @@ func _on_player_score(player_id):
 		2: _on_player_2_score()
 		3: _on_player_3_score()
 		4: _on_player_4_score()
+		5:
+			Global.player5Score += 1
+			if Global.player5Score >= Global.scoreToReach:
+				finishGame(5)
 	
 func _on_player_1_score():
 	Global.player1Score += 1

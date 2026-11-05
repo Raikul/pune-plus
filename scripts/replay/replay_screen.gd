@@ -29,7 +29,7 @@ var done = false
 func setup(play: Dictionary):
 	clip = play
 	var star = clip.get("player", 0)
-	star_color = Color(Global.playerColors[star]) if star in [1, 2, 3, 4] else Color.WHITE
+	star_color = Color(Global.playerColors[star]) if star in [1, 2, 3, 4, 5] else Color.WHITE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var backdrop = ColorRect.new()
@@ -67,7 +67,7 @@ func setup(play: Dictionary):
 	var title = _label(tr("REPLAY_TITLE"), 64, Color.WHITE)
 	title.position = Vector2(60, 18)
 	add_child(title)
-	var who = Global.player_name(star) if star in [1, 2, 3, 4] else ""
+	var who = Global.player_name(star) if star in [1, 2, 3, 4, 5] else ""
 	var caption_text = tr(clip.get("caption", ""))
 	var caption = _label(("%s  -  %s" % [who.to_upper(), caption_text]) if who != "" else caption_text, 34, star_color)
 	caption.position = Vector2(64, 92)
@@ -170,7 +170,7 @@ func _input(event):
 	if done or age < LOCKOUT:
 		return
 	var skip = event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
-	for id in range(1, 5):
+	for id in range(1, 6):
 		skip = skip or event.is_action_pressed("Player%dUp" % id)
 	if event is InputEventMouseButton and event.pressed:
 		skip = true

@@ -37,7 +37,7 @@ func advance(delta, pressed) -> bool:
 static func punchi_pressed() -> bool:
 	if Input.is_action_pressed("ui_accept"):
 		return true
-	for id in range(1, 5):
+	for id in range(1, 6):
 		if Input.is_action_pressed("Player%dUp" % id):
 			return true
 	return false

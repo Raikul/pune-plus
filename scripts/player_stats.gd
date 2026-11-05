@@ -22,6 +22,15 @@ var base: Dictionary = {
 	"water.max_twins": 1.0,     # Gemelos vivos a la vez
 	"water.twins_per_cast": 1.0, # Gemelos por cada uso del poder (hasta el máximo)
 	"water.lasting_twin": 0.0,  # 1 = la estela del gemelo nunca cambia de color
+	"water.ice": 0.0,           # 1 = deja hielo en los huecos de su estela (10 s)
+	"earth.roots": 0.0,         # 1 = deja raíces en los huecos de su estela (10 s)
+	"fire.hearth": 0.0,         # 1 = un círculo de fuego donde aparece (y donde renace)
+	"fire.pyre": 0.0,           # 1 = también donde su bola de fuego mata
+	"void.duration": 3.0,       # Segundos con el vacío abierto
+	"void.radius": 80.0,        # Radio del vacío
+	"void.absorb_time": 4.0,    # Segundos que guarda un poder absorbido
+	"void.keep_upgrades": 0.0,  # 1 = absorbe los poderes con sus mejoras
+	"void.round_absorbs": 0.0,  # 1 = todo lo absorbido dura la ronda entera
 }
 var active_buffs: Dictionary = {}
 

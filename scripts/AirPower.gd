@@ -15,7 +15,7 @@ func is_recast_ready() -> bool:
 	return recast_active
 
 func recast_window() -> float:
-	return player.stats.get_stat("air.recast_window") if player.stats != null else 0.0
+	return stat("air.recast_window") if _stats() != null else 0.0
 
 func execute_recast() -> void:
 	recast_active = false
@@ -79,9 +79,9 @@ const SCRAMBLE_TIME = 3.0 # Scrambler: swapped left/right, shorter than the powe
 const SHOCK_REACH = 24.0
 
 func _shock_heads(parts: Array) -> void:
-	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+	if _stats() == null or stat("air.shock") < 1.0:
 		return
-	var scramble = SCRAMBLE_TIME if player.stats.get_stat("air.scramble") >= 1.0 else 0.0
+	var scramble = SCRAMBLE_TIME if stat("air.scramble") >= 1.0 else 0.0
 	for other in get_tree().get_nodes_in_group("alivePlayers"):
 		if other == player or not other.has_method("shock"):
 			continue
@@ -105,14 +105,14 @@ func _storm_gaps() -> void:
 	if not has_storm():
 		return
 	var arc_color = Color(Global.playerColors[player.playerId]).lerp(player.SHOCK_COLOR, 0.5)
-	var scramble = SCRAMBLE_TIME if player.stats.get_stat("air.scramble") >= 1.0 else 0.0
+	var scramble = SCRAMBLE_TIME if stat("air.scramble") >= 1.0 else 0.0
 	for gap in player.intact_gaps():
 		var arc = StormArc.spawn(player.get_parent(), gap[0].global_position, gap[1].global_position, player.playerId, arc_color)
 		arc.shock_time = SHOCK_TIME
 		arc.scramble_time = scramble
 
 func has_storm() -> bool:
-	return player.stats != null and player.stats.get_stat("air.storm") >= 1.0
+	return _stats() != null and stat("air.storm") >= 1.0
 
 # --- AI ---
 # Teleport when something is about to be hit and the landing spot is free. Without
@@ -144,7 +144,7 @@ func _ai_wants_to_jump() -> bool:
 
 # Static Shock: an enemy head lies on the jump's path
 func _ai_can_shock() -> bool:
-	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+	if _stats() == null or stat("air.shock") < 1.0:
 		return false
 	player.actualizarPuntoDeTransporte()
 	var parts = _jump_parts(player.global_position, player.get_node("DynamicTeleportNode").global_position)
@@ -158,7 +158,7 @@ func _ai_can_shock() -> bool:
 
 # With Static Shock, the jump would go through a teammate's head
 func _ai_jump_hits_ally() -> bool:
-	if player.stats == null or player.stats.get_stat("air.shock") < 1.0:
+	if _stats() == null or stat("air.shock") < 1.0:
 		return false
 	var parts = _jump_parts(player.global_position, player.get_node("DynamicTeleportNode").global_position)
 	for ally in player.allies():

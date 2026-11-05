@@ -22,6 +22,7 @@ const ELEMENT_STATS = {
 	2: [["earth_blocked", "Fireballs & twins blocked"], ["earth_own_trail", "Own trail crossed"]],
 	3: [["air_warps", "Warps through the edge"], ["air_shocks", "Enemies electrocuted"], ["air_scramble_kills", "Kills on scrambled foes"]],
 	4: [["water_twins", "Twins summoned"], ["water_saves", "Lives saved by a twin"]],
+	5: [["void_absorbs", "Powers absorbed"], ["void_round_absorbs", "Powers kept for a round"]],
 }
 ## Shown only when it happened at all (Air without Wall Warp never warps)
 const HIDE_WHEN_ZERO = ["air_warps"]
@@ -114,7 +115,7 @@ func _column(id, winner):
 
 	box.add_child(_label(tr("STATS_WINNER") if winner else " ", 26, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
 	var symbol = TextureRect.new()
-	symbol.texture = load(SYMBOLS_PATH + SYMBOLS[id])
+	symbol.texture = Global.element_symbol(id)
 	symbol.modulate = color
 	symbol.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	symbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

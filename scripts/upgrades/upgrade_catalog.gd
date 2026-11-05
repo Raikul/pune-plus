@@ -13,7 +13,7 @@ class_name UpgradeCatalog
 # "name" and "description" (and the rarities' names) are translation keys: UPG_<ID> and
 # UPG_<ID>_DESC in translations/strings.csv. Show them with tr().
 
-const PLAYER_ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water"}
+const PLAYER_ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water", 5: "void"}
 
 # weight: how likely an upgrade of that rarity is to be offered, relative to the others
 const RARITIES = {
@@ -239,6 +239,98 @@ const UPGRADES = [
 		"element": "water",
 		"icon": "lasting_twin",
 		"stat_mods": {"water.lasting_twin": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"fire_hearth",
+		"rarity": "uncommon",
+		"name": "UPG_FIRE_HEARTH",
+		"description": "UPG_FIRE_HEARTH_DESC",
+		"element": "fire",
+		"icon": "hearth",
+		"stat_mods": {"fire.hearth": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"fire_pyre",
+		"rarity": "epic",
+		"name": "UPG_FIRE_PYRE",
+		"description": "UPG_FIRE_PYRE_DESC",
+		"element": "fire",
+		"icon": "pyre",
+		"stat_mods": {"fire.pyre": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"fire_hearth",
+	},
+	{
+		"id": &"water_ice",
+		"rarity": "legendary",
+		"name": "UPG_WATER_ICE",
+		"description": "UPG_WATER_ICE_DESC",
+		"element": "water",
+		"icon": "ice",
+		"stat_mods": {"water.ice": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"earth_roots",
+		"rarity": "legendary",
+		"name": "UPG_EARTH_ROOTS",
+		"description": "UPG_EARTH_ROOTS_DESC",
+		"element": "earth",
+		"icon": "roots",
+		"stat_mods": {"earth.roots": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	# Void (EXPERIMENTAL)
+	{
+		"id": &"void_duration",
+		"rarity": "common",
+		"name": "UPG_VOID_DURATION",
+		"description": "UPG_VOID_DURATION_DESC",
+		"element": "void",
+		"icon": "void_time",
+		"stat_mods": {"void.duration": {"add": 1.0}},
+		"max_stacks": 2,
+	},
+	{
+		"id": &"void_radius",
+		"rarity": "uncommon",
+		"name": "UPG_VOID_RADIUS",
+		"description": "UPG_VOID_RADIUS_DESC",
+		"element": "void",
+		"icon": "void_wide",
+		"stat_mods": {"void.radius": {"mult": 1.3}},
+		"max_stacks": 2,
+	},
+	{
+		"id": &"void_memory",
+		"rarity": "uncommon",
+		"name": "UPG_VOID_MEMORY",
+		"description": "UPG_VOID_MEMORY_DESC",
+		"element": "void",
+		"icon": "void_memory",
+		"stat_mods": {"void.absorb_time": {"add": 4.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"void_mimic",
+		"rarity": "epic",
+		"name": "UPG_VOID_MIMIC",
+		"description": "UPG_VOID_MIMIC_DESC",
+		"element": "void",
+		"icon": "void_mimic",
+		"stat_mods": {"void.keep_upgrades": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"void_hoard",
+		"rarity": "legendary",
+		"name": "UPG_VOID_HOARD",
+		"description": "UPG_VOID_HOARD_DESC",
+		"element": "void",
+		"icon": "void_hoard",
+		"stat_mods": {"void.round_absorbs": {"add": 1.0}},
 		"max_stacks": 1,
 	},
 ]

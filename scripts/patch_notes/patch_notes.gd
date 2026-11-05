@@ -13,6 +13,30 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.7.0",
+		"name": "The Void",
+		"date": "2026-11-05",
+		"sections": [
+			["Void (EXPERIMENTAL)", [
+				"A fifth snake, Void, white, with its own symbol: a snake shaped like an hourglass. Only four snakes play at once, so picking Void means one element sits out; Void takes its seat on the scoreboard and its corner. Offline only for now. Default keys: F / H / T.",
+				"Its Punchi opens a wiggling void around its head for 3 seconds. A rival's fireball, rock or twin head it touches gives it that power, and so does lightning that strikes it (the shock does nothing). A snake that crashes into Void's trail meanwhile gives up its power for the whole round.",
+				"Its Punchi takes 10 seconds to recharge, but absorbing recharges it. An absorbed power lasts 4 seconds and is cast on the next press, together with everything else it holds (and the void opens again); powers kept for the round are cast on every press. Holding Water, its twins copy the rest: they shoot fireballs, wear stone armor with a rocky path and jump.",
+				"Upgrades: Lingering Void (+1 s, common), Wide Void (30% wider, uncommon), Long Memory (absorbs last 8 s, uncommon), Perfect Mimic (absorbs come with their owner's upgrades, epic) and Event Horizon (every absorb lasts the whole round, legendary).",
+			]],
+			["Fire", [
+				"The fireball no longer crashes on the arena's edge: it flies out one side and comes back in on the other, so it can be used close to the edge.",
+				"New uncommon upgrade, Hearth: a circle of fire burns where you start each round, for the whole round. It kills other snakes, never you. With Phoenix, rising lights another one.",
+				"New epic upgrade, Pyre (needs Hearth): your fireball's kills leave a circle of fire where they fell.",
+			]],
+			["Water", [
+				"New legendary upgrade, Black Ice: the gaps in your trail freeze over for 10 seconds. Other snakes on the ice slide: they turn slower and keep drifting the way they were going.",
+			]],
+			["Earth", [
+				"New legendary upgrade, Strangling Roots: roots grow in the gaps of your trail for 10 seconds, and other snakes crawl through them at a third of their speed.",
+			]],
+		],
+	},
+	{
 		"version": "0.6.2",
 		"name": "Languages",
 		"date": "2026-11-04",

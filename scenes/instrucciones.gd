@@ -14,8 +14,8 @@ const DIM_COLOR = Color(0.62, 0.62, 0.62)
 const PANEL_COLOR = Color(0.13, 0.13, 0.13, 0.97)
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = ["", "Fire-Water symbol.png", "Air-Earth symbol rot.png", "Air-Earth symbol.png", "Fire-Water symbol rot.png"]
-const DESCRIPTIONS = ["", "GALLERY_BASE_FIRE", "GALLERY_BASE_EARTH", "GALLERY_BASE_AIR", "GALLERY_BASE_WATER"]
-const CARD_SIZE = Vector2(300, 360)
+const DESCRIPTIONS = ["", "GALLERY_BASE_FIRE", "GALLERY_BASE_EARTH", "GALLERY_BASE_AIR", "GALLERY_BASE_WATER", "GALLERY_BASE_VOID"]
+const CARD_SIZE = Vector2(280, 380)
 
 var close_button: Button
 
@@ -67,13 +67,13 @@ func _build():
 	column.add_child(_label(tr("INSTR_TITLE"), 56, Color.WHITE))
 	var controls = _label(tr("INSTR_CONTROLS"), 26, TEXT_COLOR)
 	controls.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	controls.custom_minimum_size.x = 4 * CARD_SIZE.x + 3 * 20
+	controls.custom_minimum_size.x = 5 * CARD_SIZE.x + 4 * 20
 	column.add_child(controls)
 
 	var cards = HBoxContainer.new()
 	cards.add_theme_constant_override("separation", 20)
 	column.add_child(cards)
-	for id in [1, 2, 3, 4]:
+	for id in [1, 2, 3, 4, 5]:
 		cards.add_child(_element_card(id))
 
 	var line = ColorRect.new()
@@ -114,7 +114,7 @@ func _element_card(id) -> Control:
 	box.add_theme_constant_override("separation", 6)
 	card.add_child(box)
 	var symbol = TextureRect.new()
-	symbol.texture = load(SYMBOLS_PATH + SYMBOLS[id])
+	symbol.texture = Global.element_symbol(id)
 	symbol.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	symbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	symbol.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -122,6 +122,8 @@ func _element_card(id) -> Control:
 	symbol.modulate = color
 	box.add_child(symbol)
 	box.add_child(_label(tr(Global.ELEMENT_KEYS[id] + "_UPPER"), 34, color))
+	if id == Global.VOID_ID:
+		box.add_child(_label(tr("SETUP_EXPERIMENTAL"), 16, Color(1, 0.75, 0.3)))
 	box.add_child(_label(tr(Global.POWER_TAGLINES[id]), 22, color.lightened(0.35)))
 	var description = _label(tr(DESCRIPTIONS[id]), 20, DIM_COLOR)
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

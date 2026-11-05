@@ -117,6 +117,11 @@ func _ready():
 	if stats != null:
 		stats.stats_changed.connect(refresh_stats)
 		refresh_stats()
+	# Hearth (Fire): a circle of fire where it starts the round. Deferred: the playground
+	# is still adding the snake.
+	if has_hearth() and not net_remote:
+		(func(): FireRing.spawn(self, global_position)).call_deferred()
+	move_heading = rotation
 var face: SnakeFace
 
 # "effort" for a moment when it uses its power, "dead" when it crashes
@@ -162,9 +167,46 @@ func _process(delta):
 		direction = -direction
 	steer_direction = direction
 
-	rotation += angular_speed * direction * delta
-	var velocity = Vector2.UP.rotated(rotation) * speed
+	_move(direction, delta)
+
+# --- Ground: the patches other snakes leave in their gaps (scripts/gap_patch.gd) ---
+## On ice the head turns slower and the body keeps drifting the way it was going,
+## catching up with the head at this rate (higher = grippier)
+const ICE_TURN = 0.7
+const ICE_GRIP = 1.6
+## On roots it crawls
+const ROOTS_SPEED = 0.3
+# The direction it actually moves in (on ice it lags behind where the head points)
+var move_heading = 0.0
+var on_ice = false
+var on_roots = false
+
+func _move(direction, delta):
+	_ground_patches()
+	rotation += angular_speed * direction * delta * (ICE_TURN if on_ice else 1.0)
+	if on_ice:
+		move_heading = lerp_angle(move_heading, rotation, clamp(ICE_GRIP * delta, 0.0, 1.0))
+	else:
+		move_heading = rotation
+	var velocity = Vector2.UP.rotated(move_heading) * speed * (ROOTS_SPEED if on_roots else 1.0)
 	position += velocity * delta
+
+# The ice and roots under the head, except its own (and its teammate's)
+func _ground_patches():
+	on_ice = false
+	on_roots = false
+	if get_tree().get_nodes_in_group("gap_patches").is_empty():
+		return
+	for patch in GapPatch.at_point(get_world_2d(), global_position):
+		if patch.owner_id == playerId:
+			continue
+		var maker = get_parent().get_node_or_null("Player%d" % patch.owner_id) if get_parent() else null
+		if maker != null and is_ally(maker):
+			continue
+		if patch.kind == "ice":
+			on_ice = true
+		else:
+			on_roots = true
 # Off the Map: outside the arena the raycasts see the border from behind and would steer
 # further out; head back to the middle instead
 func _ai_steer_home() -> int:
@@ -242,7 +284,7 @@ func actualizarPuntoDeTransporte():
 
 	# NOTA: Si solo quieres que se vea con el jugador 3 (aire), deja esta condición.
 	# Si estás probando con el jugador 1 o 2, comenta estas líneas temporalmente:
-	if playerId != 3 or not is_in_group("alivePlayers"):
+	if not can_teleport() or not is_in_group("alivePlayers"):
 		$DynamicTeleportNode.hide()
 		return
 	else:
@@ -338,7 +380,7 @@ const TRAIL_SPACING = 7.5
 var trail_tail = null
 
 func _extend_trail(body):
-	if main_power is AirPower:
+	if main_power is AirPower or _gap_patch_kind() != "":
 		_note_gap(body)
 	body.link_to(trail_tail)
 	trail_tail = body
@@ -363,9 +405,21 @@ func _note_gap(body):
 		return
 	if length > MAX_GAP_LENGTH:
 		return
+	var kind = _gap_patch_kind()
+	if kind != "" and not net_remote:
+		var middle = (last_laid.global_position + body.global_position) / 2.0
+		GapPatch.spawn(get_parent(), middle, kind, playerId, max(GapPatch.RADIUS, length * 0.6))
 	gaps.append([last_laid, body])
 	if gaps.size() > MAX_GAPS:
 		gaps.pop_front()
+
+# Black Ice (Water) or Strangling Roots (Earth): what its gaps leave behind ("" = nothing)
+func _gap_patch_kind() -> String:
+	if stat_value("water.ice") >= 1.0:
+		return "ice"
+	if stat_value("earth.roots") >= 1.0:
+		return "roots"
+	return ""
 
 # The gaps whose both ends are still there (a fireball may have burnt one)
 func intact_gaps() -> Array:
@@ -385,6 +439,10 @@ func _on_area_entered(area):
 		$ShroomEaten.play()
 		emit_signal("score")
 		area.queue_free()
+		return
+
+	# A fireball that's fading out (spent, or swallowed by Void) is harmless
+	if area.is_in_group("fireballs") and area.expiring:
 		return
 
 	# Just risen from its ashes: untouchable for a moment (_end_phoenix_grace checks again)
@@ -421,10 +479,21 @@ func _on_area_entered(area):
 
 func _crash(cause):
 	_credit_death(cause)
+	_feed_void(cause)
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Split.play()
 	set_process(false)
 	emit_signal("dead")
+
+# Died on Void's trail while its void was open: Void keeps this snake's power for the round
+func _feed_void(cause):
+	if not (cause is TrailSegment) or cause.get_parent() == self:
+		return
+	var void_snake = cause.get_parent()
+	if void_snake == null or not ("main_power" in void_snake) or not (void_snake.main_power is VoidPower):
+		return
+	if void_snake.main_power.field_active() and playerId != Global.VOID_ID:
+		void_snake.main_power.absorb(playerId, playerId, true)
 
 # End-screen stats: Earth's armor taking it through its own trail. One crossing touches a
 # few pieces in a row, so touches close together count once.
@@ -443,6 +512,10 @@ func _credit_death(cause):
 		Global.add_stat(killer, "fire_kills")
 	if cause.is_in_group("fireballs") and killer != 0:
 		Global.add_stat(killer, "fire_kills")
+		# Pyre (Fire): the fire stays where its fireball killed
+		var shooter = cause.get_parent()
+		if shooter != null and shooter.has_method("has_pyre") and shooter.has_pyre():
+			FireRing.spawn.call_deferred(shooter, global_position)
 	if scrambled_time > 0 and scrambled_by != 0 and scrambled_by != playerId:
 		Global.add_stat(scrambled_by, "air_scramble_kills")
 		if killer == 0:
@@ -560,16 +633,20 @@ var rock_time = 1.2
 # True from the power until the head is off the path it just laid: those rocks don't kill
 # it (the last one can reach the head right after the invincibility ends) and get no trail
 var on_fresh_path = false
-func start_fissure(fissure_step, fissure_scene, previous_body_list = []):	
+# origin: where the path is laid (a Void twin with Earth held); null = this snake
+func start_fissure(fissure_step, fissure_scene, previous_body_list = [], origin = null):
+	if origin != null and (not is_instance_valid(origin) or not origin.alive):
+		return null
+	var source = origin if origin != null else self
 	var fissure_instance : Fissure = fissure_scene.instantiate()
 
 	fissure_instance.set_as_top_level(true)
-	fissure_instance.global_position = global_position
+	fissure_instance.global_position = source.global_position
 	# As many rocks as fit in the power's duration (one every fissure_gap seconds)
 	fissure_instance.maximum_step_number = max(2, roundi(rock_time / fissure_instance.fissure_gap))
 	var body_list = fissure_instance.set_body(fissure_step, previous_body_list)
 	if fissure_step < fissure_instance.maximum_step_number:
-		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene, body_list) )
+		fissure_instance.connect("fissure_ready", start_fissure.bind(fissure_scene, body_list, origin))
 
 #	var bodySprite = sceneInstance.get_node("BodySprite")
 #	bodySprite.set_texture(head_texture)
@@ -579,8 +656,8 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = []):
 
 		
 #	sceneInstance.apply_scale(get_scale())
-	fissure_instance.rotation = rotation
-	var width = stats.get_stat("earth.scale") if stats != null else 1.0
+	fissure_instance.rotation = source.rotation
+	var width = stat_value("earth.scale") if stats != null else 1.0
 	fissure_instance.scale = FISSURE_SCALE * Vector2(width, 1.0)
 	
 	listOfNodes.append(fissure_instance)
@@ -743,6 +820,10 @@ func update_power_indicator():
 func shock(duration, scramble = 0.0, by = 0):
 	if not is_in_group("alivePlayers") or reviving:
 		return
+	# Void with its void open drinks the lightning: it absorbs Air instead
+	if main_power is VoidPower and main_power.field_active():
+		main_power.absorb(3, by if by != 0 else 3)
+		return
 	var parent = get_parent()
 	if shocked_time <= 0 and parent:
 		PowerFx.shock(parent, self, SHOCK_COLOR, duration)
@@ -821,6 +902,10 @@ func phoenix_rise(point, heading):
 		Global.add_stat(playerId, "fire_revives")
 	_clear_area(point, PHOENIX_CLEAR_RADIUS)
 	PowerFx.explosion(get_parent(), point, Color(Global.playerColors[playerId]), PHOENIX_CLEAR_RADIUS)
+	# Hearth: rising lights a new fire where it rises
+	if has_hearth() and not net_remote:
+		FireRing.spawn.call_deferred(self, point)
+	move_heading = heading
 	$HeadSprite.show()
 	$ElementHeadSprite.show()
 	if face:
@@ -893,13 +978,49 @@ func _beyond_border(walls = true) -> bool:
 	return false
 
 func has_border_pass() -> bool:
-	return stats != null and stats.get_stat("earth.border_pass") >= 1.0
+	return stat_value("earth.border_pass") >= 1.0
 
 func has_stone_walk() -> bool:
-	return stats != null and stats.get_stat("earth.stone_walk") >= 1.0
+	return stat_value("earth.stone_walk") >= 1.0
 
 func has_wall_warp() -> bool:
-	return stats != null and stats.get_stat("air.wall_warp") >= 1.0
+	return stat_value("air.wall_warp") >= 1.0
+
+func has_hearth() -> bool:
+	return stat_value("fire.hearth") >= 1.0
+
+func has_pyre() -> bool:
+	return stat_value("fire.pyre") >= 1.0
+
+# A stat of this snake's upgrades; for Void, also of the snakes whose powers it holds with
+# their upgrades (Epic): the higher one counts
+func stat_value(key: String) -> float:
+	var value = stats.get_stat(key) if stats != null else 0.0
+	if main_power is VoidPower:
+		for power in main_power.instances.values():
+			if power.stats_source != null:
+				value = max(value, power.stats_source.get_stat(key))
+	return value
+
+# Air's jump marker: Air itself, or Void holding Air
+func can_teleport() -> bool:
+	return playerId == 3 or (main_power is VoidPower and main_power.holds(3))
+
+# The Water power that makes this snake's twins (Water's own, or one Void holds)
+func water_power():
+	if main_power is WaterPower:
+		return main_power
+	if main_power is VoidPower and main_power.instances.has(4):
+		return main_power.instances[4]
+	return null
+
+# Void absorbed a power: Punchi is ready again right away
+func reset_cooldown():
+	$CooldownTimer.stop()
+	if not powerAvailable:
+		powerAvailable = true
+		update_power_indicator()
+		pulse_power_ready()
 
 func set_gap_size():
 	gapTimer.set_wait_time(Global.gap_time())

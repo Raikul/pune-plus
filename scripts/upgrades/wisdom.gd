@@ -36,6 +36,11 @@ const QUOTES = {
 		{"text": "WISDOM_WATER_4", "source": "WISDOM_SRC_JUNG"},
 		{"text": "WISDOM_WATER_5", "source": "WISDOM_SRC_PUNE_LESSON"},
 	],
+	"void": [
+		{"text": "WISDOM_VOID_1", "source": "WISDOM_SRC_HEART_SUTRA"},
+		{"text": "WISDOM_VOID_2", "source": "WISDOM_SRC_NIETZSCHE"},
+		{"text": "WISDOM_VOID_3", "source": "WISDOM_SRC_LAO_TZU"},
+	],
 	"any": [
 		{"text": "WISDOM_ANY_1", "source": "WISDOM_SRC_PUNE_PROVERB"},
 		{"text": "WISDOM_ANY_2", "source": "WISDOM_SRC_MUSASHI"},
@@ -43,7 +48,7 @@ const QUOTES = {
 	],
 }
 
-const ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water"}
+const ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water", 5: "void"}
 
 # A random quote for the snake (player id) that won; 0 or unknown -> "any"
 static func for_winner(player_id) -> Dictionary:

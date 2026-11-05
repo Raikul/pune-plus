@@ -84,6 +84,16 @@ func _draw():
 			_draw_twins(center, "3 MAX")
 		"lasting_twin":
 			_draw_lasting_twin()
+		"hearth":
+			_draw_hearth(center, false)
+		"pyre":
+			_draw_hearth(center, true)
+		"ice":
+			_draw_gap_patch(center, true)
+		"roots":
+			_draw_gap_patch(center, false)
+		"void_time", "void_wide", "void_memory", "void_mimic", "void_hoard":
+			_draw_void(center, kind)
 
 # Water symbols splitting from the middle one, with a caption
 func _draw_twins(center, caption):
@@ -350,6 +360,101 @@ func _draw_storm_fence(center):
 	var head_x = left + 2 * stroke + gap * 1.5
 	var head_y = lerp(size.y * 0.95, y + 16.0, clamp(cycle / 0.7, 0.0, 1.0))
 	_dot(Vector2(head_x, head_y), 7.0, Color(1, 1, 1, 0.9) if not lit else Color(1, 0.4, 0.3, 0.9))
+
+# A ring of fire around the Fire symbol; Pyre: a fireball flies in and lights a second one
+func _draw_hearth(center, pyre):
+	var ring_center = center + (Vector2(size.x * 0.14, 0) if pyre else Vector2.ZERO)
+	var r = size.y * 0.3
+	_dot(ring_center, r * 1.1, Color(1.0, 0.4, 0.05, 0.2))
+	for i in 10:
+		var angle = TAU * i / 10.0 + time * 0.6
+		var flicker = 0.7 + 0.3 * sin(time * 12.0 + i * 1.7)
+		var out = Vector2.RIGHT.rotated(angle)
+		var base = ring_center + out * r * 0.8
+		var side = out.orthogonal() * r * 0.17
+		_shape(PackedVector2Array([base - side, base + out * r * 0.45 * flicker, base + side]), Color(1.0, 0.45 + 0.3 * flicker, 0.1, 0.9))
+	if pyre:
+		var t = fmod(time, 1.6) / 1.6
+		_draw_fireball(Vector2(lerp(-10.0, ring_center.x - r, t), center.y), 0.4)
+		_draw_text("+", size.y * 0.95, 30)
+	else:
+		_draw_symbol(FIRE_WATER_SYMBOL, ring_center, size.x * 0.26, false)
+
+# A trail with a gap; in the gap a patch of ice (a head sliding across it) or roots
+func _draw_gap_patch(center, ice):
+	var y = center.y + size.y * 0.12
+	var gap_from = size.x * 0.38
+	var gap_to = size.x * 0.62
+	_stroke(PackedVector2Array([Vector2(8, y), Vector2(gap_from, y)]), color, TRAIL_WIDTH - 3.0)
+	_stroke(PackedVector2Array([Vector2(gap_to, y), Vector2(size.x - 8, y)]), color, TRAIL_WIDTH - 3.0)
+	var patch = Vector2((gap_from + gap_to) / 2.0, y)
+	var r = size.y * 0.3
+	if ice:
+		_dot(patch, r, Color(0.75, 0.92, 1.0, 0.35))
+		draw_arc(patch, r, 0, TAU, 40, Color(0.85, 0.96, 1.0, 0.9), 2.0, true)
+		for i in 3:
+			var a = TAU * i / 3.0 + 0.4
+			draw_line(patch, patch + Vector2.RIGHT.rotated(a) * r * 0.7, Color(1, 1, 1, 0.7), 1.5, true)
+		# A head sliding sideways across it
+		var t = fmod(time, 1.8) / 1.8
+		var head = patch + Vector2(lerp(-r, r, t), -r * 0.9 + sin(t * PI) * r * 0.5)
+		_dot(head, 7.0, Color(1, 0.4, 0.3))
+		_stroke(PackedVector2Array([head + Vector2(-14, 4), head]), Color(1, 0.4, 0.3, 0.6), 4.0)
+	else:
+		_dot(patch, r, Color(0.3, 0.2, 0.08, 0.6))
+		for i in 5:
+			var a = TAU * i / 5.0 + sin(time * 2.0 + i) * 0.2
+			var tip = patch + Vector2.RIGHT.rotated(a) * r * 0.95
+			var mid = patch.lerp(tip, 0.5) + Vector2.RIGHT.rotated(a).orthogonal() * 5.0
+			_stroke(PackedVector2Array([patch, mid, tip]), Color(0.5, 0.36, 0.16), 3.0)
+		# A head crawling over it
+		var t = fmod(time, 3.0) / 3.0
+		_dot(patch + Vector2(lerp(-r, r, t), -r * 0.6), 7.0, Color(1, 0.4, 0.3))
+
+# Void: its symbol, with what each upgrade does to the void around it
+func _draw_void(center, which):
+	var symbol = Global.element_symbol(Global.VOID_ID)
+	var r = size.y * 0.36
+	match which:
+		"void_wide":
+			r *= 0.8 + 0.25 * (0.5 + 0.5 * sin(time * 2.5))
+		"void_time":
+			var cycle = fmod(time, 2.4) / 2.4
+			draw_arc(center, size.y * 0.46, -PI / 2, -PI / 2 + TAU * cycle, 40, Color(color, 0.85), 3.0, true)
+	_draw_void_ring(center, r)
+	_draw_symbol(symbol, center, size.x * 0.24, false)
+	match which:
+		"void_time":
+			_draw_text("+1s", size.y * 0.95, 22)
+		"void_memory":
+			# Two absorbed powers circling, slowly
+			for i in 2:
+				var a = time * 1.5 + PI * i
+				_dot(center + Vector2.RIGHT.rotated(a) * r * 0.9, 6.0, Color(Global.playerColors[1 + i * 3]))
+			_draw_text("8s", size.y * 0.95, 22)
+		"void_mimic":
+			# A power orb with its upgrade badge
+			var a = time * 1.8
+			var orb = center + Vector2.RIGHT.rotated(a) * r * 0.9
+			_dot(orb, 7.0, Color(Global.playerColors[1]))
+			draw_arc(orb, 10.0, 0, TAU, 20, Color(1, 0.82, 0.3), 2.0, true)
+			_draw_text("+", size.y * 0.95, 30)
+		"void_hoard":
+			# Every element orbiting, held for good
+			for i in 4:
+				var a = time * 1.2 + TAU * i / 4.0
+				var orb = center + Vector2.RIGHT.rotated(a) * r * 0.95
+				_dot(orb, 6.0, Color(Global.playerColors[i + 1]))
+				draw_arc(orb, 8.5, 0, TAU, 16, Color(1, 1, 1, 0.8), 1.2, true)
+
+func _draw_void_ring(center, r):
+	_dot(center, r, Color(0.1, 0.03, 0.18, 0.5))
+	var points = PackedVector2Array()
+	for i in 49:
+		var angle = TAU * i / 48.0
+		var wobble = sin(angle * 7.0 + time * 6.0) * 0.07 + sin(angle * 3.0 - time * 4.0) * 0.05
+		points.append(center + Vector2.RIGHT.rotated(angle) * r * (1.0 + wobble))
+	draw_polyline(points, Color(0.62, 0.36, 1.0, 0.85), 3.0, true)
 
 ## Width of the trails in the icons
 const TRAIL_WIDTH = 13.0

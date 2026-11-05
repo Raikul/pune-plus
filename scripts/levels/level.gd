@@ -45,6 +45,7 @@ func _playtest():
 	for id in [1, 2, 3, 4]:
 		Global.set("player%dActive" % id, true)
 		Global.AI_Enabled[id] = id != 1
+	Global.player5Active = false
 	Global.reset_score()
 	get_tree().change_scene_to_file("res://scenes/Playground.tscn")
 

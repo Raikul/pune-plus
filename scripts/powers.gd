@@ -23,5 +23,9 @@ static func create(element_id: int) -> Power:
 			var p = WATER_SCENE.instantiate()
 			p.element = 4
 			return p
+		5:
+			var p = VoidPower.new()
+			p.element = 5
+			return p
 		_:
 			return null
