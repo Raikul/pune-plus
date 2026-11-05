@@ -72,7 +72,7 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 		row.modulate.a = 0
 		create_tween().tween_property(row, "modulate:a", 1.0, 0.3).set_delay(0.08 * i)
 
-	footer_label.text = "Left / Right to browse   |   Punchi to confirm"
+	footer_label.text = tr("UPGRADES_FOOTER")
 	signal_label.text = ""
 
 # winner_id: the snake that won the last round (0 = nobody); its element picks the quote
@@ -80,10 +80,10 @@ func show_wisdom(winner_id):
 	if not is_node_ready():
 		await ready
 	var quote = Wisdom.for_winner(winner_id)
-	quote_label.text = "“%s”" % quote.text
+	quote_label.text = tr("WISDOM_QUOTE") % tr(quote.text)
 	quote_label.add_theme_color_override("font_color",
 		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4] else Color(0.9, 0.9, 0.9))
-	quote_source.text = "— " + quote.source
+	quote_source.text = "— " + tr(quote.source)
 	quote_box.show()
 	subtitle_label.hide()
 
@@ -139,7 +139,7 @@ func _finish():
 	if finishing:
 		return
 	finishing = true
-	footer_label.text = "All snakes are ready!"
+	footer_label.text = tr("UPGRADES_ALL_READY")
 	# Not process_always, so pausing the game also holds the screen
 	await get_tree().create_timer(finish_delay, false).timeout
 	if not is_inside_tree():
@@ -149,7 +149,7 @@ func _finish():
 	finished.emit()
 	if get_tree().current_scene == self:
 		waiting_for_reroll = true
-		footer_label.text = "Press any Punchi key to roll new upgrades"
+		footer_label.text = tr("UPGRADES_REROLL")
 
 func _unhandled_input(event):
 	if not waiting_for_reroll:
@@ -201,8 +201,8 @@ func _build_layout():
 	resized.connect(_fit_to_screen)
 	_fit_to_screen.call_deferred()
 
-	layout.add_child(_centered_label("CHOOSE YOUR UPGRADE", 56, Color.WHITE))
-	subtitle_label = _centered_label("Each snake picks one of its own upgrades", 24, Color(0.6, 0.6, 0.6))
+	layout.add_child(_centered_label(tr("UPGRADES_TITLE"), 56, Color.WHITE))
+	subtitle_label = _centered_label(tr("UPGRADES_SUBTITLE"), 24, Color(0.6, 0.6, 0.6))
 	layout.add_child(subtitle_label)
 	# Wise words for the element that won the last round (show_wisdom)
 	quote_box = VBoxContainer.new()

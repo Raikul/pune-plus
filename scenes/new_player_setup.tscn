@@ -100,8 +100,7 @@ alignment = 1
 layout_mode = 2
 
 [node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
-text = "FIRE
-"
+text = "ELEMENT_FIRE_UPPER"
 
 [node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/1/PanelContainer2/PanelContainer/MarginContainer" index="0"]
 modulate = Color(1, 0.25098, 0.101961, 1)
@@ -126,8 +125,7 @@ clip_contents = true
 layout_mode = 2
 
 [node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
-text = "AIR
-"
+text = "ELEMENT_AIR_UPPER"
 
 [node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/3/PanelContainer2/PanelContainer/MarginContainer" index="0"]
 modulate = Color(0.101961, 0.698039, 1, 1)
@@ -140,8 +138,7 @@ clip_contents = true
 layout_mode = 2
 
 [node name="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/PanelContainer2/PanelContainer/MarginContainer2/PanelContainer" index="1"]
-text = "WATER
-"
+text = "ELEMENT_WATER_UPPER"
 
 [node name="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/4/PanelContainer2/PanelContainer/MarginContainer" index="0"]
 modulate = Color(0, 0.901961, 0.6, 1)
@@ -162,14 +159,14 @@ theme_override_constants/separation = 10
 [node name="GO" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
 theme = ExtResource("7_tjh4d")
-text = "Play"
+text = "MENU_PLAY"
 flat = true
 
 [node name="Back" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
 theme = SubResource("Theme_7avap")
 theme_override_font_sizes/font_size = 66
-text = "Back"
+text = "UI_BACK"
 flat = true
 
 [connection signal="recalculateLabels" from="RedefineKeys" to="." method="_on_redefine_keys_recalculate_labels"]

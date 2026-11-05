@@ -143,7 +143,7 @@ layout_mode = 0
 layout_mode = 0
 
 [node name="DopamineLabel" parent="Lesson/DopamineContainer/Dopamine" index="0"]
-text = "DISFRUTA TU DOPAMINA"
+text = "WIN_DOPAMINE"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=141854364]
 root_node = NodePath("../HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1Cooldown")
@@ -530,12 +530,6 @@ grow_horizontal = 0
 grow_vertical = 1
 size_flags_stretch_ratio = 1.22
 
-[node name="Label" parent="PauseLayer/Instrucciones" index="2" unique_id=124205885]
-text = "                                                                 The player earns points when their other players touch a border or are killed by an opponent
-                                                               If Shroom Mode is activated, picking up shrooms also earns points
-
-"
-
 [node name="MenuPause" type="Control" parent="PauseLayer" unique_id=1131243987]
 process_mode = 3
 visible = false
@@ -570,8 +564,7 @@ alignment = 1
 [node name="Resume" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=408504120]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
-text = "Resume
-"
+text = "PAUSE_RESUME"
 
 [node name="Title" type="Label" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1789424007]
 visible = false
@@ -584,30 +577,29 @@ horizontal_alignment = 1
 [node name="Simulate" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1005429580]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
-text = "Simulate Round
-"
+text = "PAUSE_SIMULATE"
 
 [node name="Multiplayer" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=910356513]
 visible = false
 layout_mode = 2
-text = "Multiplayer"
+text = "MENU_MULTIPLAYER"
 
 [node name="Options" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1140593985]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
-text = "Options"
+text = "MENU_OPTIONS"
 
 [node name="Instructions" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1129607360]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
-text = "Instructions"
+text = "MENU_INSTRUCTIONS"
 
 [node name="Quit" type="Button" parent="PauseLayer/MenuPause/PanelContainer/MarginContainer/VBoxContainer" unique_id=1714335034]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
-text = "Quit"
+text = "MENU_QUIT"
 
 [node name="Options" parent="PauseLayer" unique_id=1501364392 instance=ExtResource("15_s4mno")]
 visible = false
@@ -616,4 +608,3 @@ visible = false
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
 
 [editable path="Lesson"]
-[editable path="PauseLayer/Instrucciones"]

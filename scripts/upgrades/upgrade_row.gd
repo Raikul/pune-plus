@@ -60,7 +60,7 @@ func setup(id, options, ai, input = -1, remote = false, hidden = false):
 		card_box.add_child(card)
 		cards.append(card)
 	if options.is_empty():
-		var none_label = _label("Every upgrade taken!", 30, Color(0.6, 0.6, 0.6))
+		var none_label = _label(tr("UPGRADES_NONE_LEFT"), 30, Color(0.6, 0.6, 0.6))
 		none_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		none_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		none_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -130,7 +130,7 @@ func _confirm():
 		return
 	has_chosen = true
 	if cards.is_empty():
-		status_label.text = "MAXED OUT"
+		status_label.text = tr("UPGRADES_MAXED")
 		status_label.modulate.a = 1.0
 		chosen.emit(player_id, &"")
 		return
@@ -141,10 +141,10 @@ func _confirm():
 	# A rival's hidden row doesn't show which card it took
 	card.play_chosen(not is_hidden)
 	confirm_sound_player.play()
-	status_label.text = "READY!"
+	status_label.text = tr("UPGRADES_READY")
 	status_label.modulate.a = 1.0
 	status_label.add_theme_color_override("font_color", player_color)
-	detail_label.text = "" if is_hidden else card.upgrade.name
+	detail_label.text = "" if is_hidden else tr(card.upgrade.name)
 	chosen.emit(player_id, card.upgrade.id)
 
 # AI snakes browse a few cards and pick wherever they land
@@ -205,7 +205,7 @@ func _build_header():
 	info.alignment = BoxContainer.ALIGNMENT_CENTER
 	info.add_theme_constant_override("separation", 6)
 	box.add_child(info)
-	info.add_child(_label(element.to_upper(), 40, player_color))
+	info.add_child(_label(tr("ELEMENT_" + element.to_upper() + "_UPPER"), 40, player_color))
 	var name_label = _label(Global.player_name(player_id), 22, Color(0.7, 0.7, 0.7))
 	name_label.custom_minimum_size.x = KEY_HINTS_WIDTH
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -230,7 +230,7 @@ func _build_key_hints():
 	hints.custom_minimum_size.x = KEY_HINTS_WIDTH
 	hints.add_theme_constant_override("separation", 6)
 	if is_remote:
-		hints.add_child(_label("Picking online", 20, Color(0.75, 0.75, 0.75)))
+		hints.add_child(_label(tr("UPGRADES_PICKING_ONLINE"), 20, Color(0.75, 0.75, 0.75)))
 		return hints
 	var prefix = "Player" + str(input_id)
 	for hint in [["Left", DIRECTION_ICON, true], ["Right", DIRECTION_ICON, false], ["Up", PUNCHI_ICON, false]]:
@@ -242,7 +242,7 @@ func _build_key_hints():
 		hint_icon.custom_minimum_size = Vector2(20, 22)
 		hints.add_child(hint_icon)
 		# "Pad" goes: the icons already say which key it is
-		var key_label = _label(Global.action_key_name(prefix + hint[0]).trim_prefix("Pad "), 20, Color.WHITE)
+		var key_label = _label(Global.action_key_name(prefix + hint[0]).trim_prefix(tr("KEY_PAD") + " "), 20, Color.WHITE)
 		key_label.custom_minimum_size.x = KEY_NAME_WIDTH
 		key_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		key_label.clip_text = true
@@ -253,7 +253,7 @@ func _build_status():
 	var box = VBoxContainer.new()
 	box.custom_minimum_size = Vector2(200, 0)
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	status_label = _label("CHOOSING...", 28, Color(0.75, 0.75, 0.75))
+	status_label = _label(tr("UPGRADES_CHOOSING"), 28, Color(0.75, 0.75, 0.75))
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(status_label)
 	detail_label = _label("", 22, player_color)

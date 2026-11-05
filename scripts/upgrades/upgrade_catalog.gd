@@ -10,16 +10,18 @@ class_name UpgradeCatalog
 # "enabled": false keeps an upgrade out of the rolls until it does something.
 # "rarity" (RARITIES) sets how often it is offered and its color on the card.
 # "requires": the id of an upgrade the snake must already have.
+# "name" and "description" (and the rarities' names) are translation keys: UPG_<ID> and
+# UPG_<ID>_DESC in translations/strings.csv. Show them with tr().
 
 const PLAYER_ELEMENTS = {1: "fire", 2: "earth", 3: "air", 4: "water"}
 
 # weight: how likely an upgrade of that rarity is to be offered, relative to the others
 const RARITIES = {
-	"common": {"name": "Common", "color": Color(0.72, 0.72, 0.72), "weight": 40.0},
-	"uncommon": {"name": "Uncommon", "color": Color(0.35, 0.85, 0.35), "weight": 26.0},
-	"rare": {"name": "Rare", "color": Color(0.3, 0.6, 1.0), "weight": 18.0},
-	"epic": {"name": "Epic", "color": Color(0.7, 0.35, 0.95), "weight": 9.0},
-	"legendary": {"name": "Legendary", "color": Color(1.0, 0.6, 0.1), "weight": 4.0},
+	"common": {"name": "RARITY_COMMON", "color": Color(0.72, 0.72, 0.72), "weight": 40.0},
+	"uncommon": {"name": "RARITY_UNCOMMON", "color": Color(0.35, 0.85, 0.35), "weight": 26.0},
+	"rare": {"name": "RARITY_RARE", "color": Color(0.3, 0.6, 1.0), "weight": 18.0},
+	"epic": {"name": "RARITY_EPIC", "color": Color(0.7, 0.35, 0.95), "weight": 9.0},
+	"legendary": {"name": "RARITY_LEGENDARY", "color": Color(1.0, 0.6, 0.1), "weight": 4.0},
 }
 
 static func rarity_of(upgrade) -> Dictionary:
@@ -39,8 +41,8 @@ const UPGRADES = [
 	{
 		"id": &"gap_tighter",
 		"rarity": "common",
-		"name": "Tighter Trail",
-		"description": "The holes in your trail close 25% sooner.",
+		"name": "UPG_GAP_TIGHTER",
+		"description": "UPG_GAP_TIGHTER_DESC",
 		"element": "generic",
 		"icon": "gap_narrow",
 		"stat_mods": {"gap.time": {"mult": 0.75}},
@@ -49,8 +51,8 @@ const UPGRADES = [
 	{
 		"id": &"speed_up",
 		"rarity": "common",
-		"name": "Swift Snake",
-		"description": "Your snake moves 10% faster.",
+		"name": "UPG_SPEED_UP",
+		"description": "UPG_SPEED_UP_DESC",
 		"element": "generic",
 		"icon": "speed",
 		"stat_mods": {"speed": {"add": 15.0}},
@@ -59,8 +61,8 @@ const UPGRADES = [
 	{
 		"id": &"cooldown_down",
 		"rarity": "uncommon",
-		"name": "Quick Recharge",
-		"description": "Your power recharges 15% faster.",
+		"name": "UPG_COOLDOWN_DOWN",
+		"description": "UPG_COOLDOWN_DOWN_DESC",
 		"element": "generic",
 		"icon": "cooldown",
 		"stat_mods": {"cooldown": {"mult": 0.85}},
@@ -69,8 +71,8 @@ const UPGRADES = [
 	{
 		"id": &"fire_piercing",
 		"rarity": "rare",
-		"name": "Piercing Flame",
-		"description": "Your fireball flies 1.5 s longer, burning through more of the trail.",
+		"name": "UPG_FIRE_PIERCING",
+		"description": "UPG_FIRE_PIERCING_DESC",
 		"element": "fire",
 		"icon": "fireball",
 		"stat_mods": {"fire.duration": {"add": 1.5}},
@@ -79,8 +81,8 @@ const UPGRADES = [
 	{
 		"id": &"fire_radius",
 		"rarity": "rare",
-		"name": "Big Fireball",
-		"description": "Your fireball is 30% bigger.",
+		"name": "UPG_FIRE_RADIUS",
+		"description": "UPG_FIRE_RADIUS_DESC",
 		"element": "fire",
 		"icon": "fireball_big",
 		"stat_mods": {"fire.radius": {"add": 0.3}},
@@ -89,8 +91,8 @@ const UPGRADES = [
 	{
 		"id": &"fire_wildfire",
 		"rarity": "epic",
-		"name": "Wildfire",
-		"description": "Your fireball leaves a trail of flames that burns for 2 s. It kills other snakes, never you.",
+		"name": "UPG_FIRE_WILDFIRE",
+		"description": "UPG_FIRE_WILDFIRE_DESC",
 		"element": "fire",
 		"icon": "wildfire",
 		"stat_mods": {"fire.trail": {"add": 1.0}},
@@ -99,8 +101,8 @@ const UPGRADES = [
 	{
 		"id": &"fire_phoenix",
 		"rarity": "legendary",
-		"name": "Phoenix",
-		"description": "Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right. Doesn't trigger in a duel: with a single rival left, the round just ends.",
+		"name": "UPG_FIRE_PHOENIX",
+		"description": "UPG_FIRE_PHOENIX_DESC",
 		"element": "fire",
 		"icon": "phoenix",
 		"stat_mods": {"fire.phoenix": {"add": 1.0}},
@@ -109,8 +111,8 @@ const UPGRADES = [
 	{
 		"id": &"air_wall_warp",
 		"rarity": "rare",
-		"name": "Wall Warp",
-		"description": "Your teleport passes through the arena walls and comes out on the other side.",
+		"name": "UPG_AIR_WALL_WARP",
+		"description": "UPG_AIR_WALL_WARP_DESC",
 		"element": "air",
 		"icon": "wall_warp",
 		"stat_mods": {"air.wall_warp": {"add": 1.0}},
@@ -119,8 +121,8 @@ const UPGRADES = [
 	{
 		"id": &"air_second_wind",
 		"rarity": "rare",
-		"name": "Second Wind",
-		"description": "After teleporting, teleport once more for free within 1 second.",
+		"name": "UPG_AIR_SECOND_WIND",
+		"description": "UPG_AIR_SECOND_WIND_DESC",
 		"element": "air",
 		"icon": "second_wind",
 		"stat_mods": {"air.recast_window": {"add": 1.0}},
@@ -129,8 +131,8 @@ const UPGRADES = [
 	{
 		"id": &"air_shock",
 		"rarity": "epic",
-		"name": "Static Shock",
-		"description": "Snakes whose heads you teleport through are electrocuted: no power for 5 s.",
+		"name": "UPG_AIR_SHOCK",
+		"description": "UPG_AIR_SHOCK_DESC",
 		"element": "air",
 		"icon": "shock",
 		"stat_mods": {"air.shock": {"add": 1.0}},
@@ -139,8 +141,8 @@ const UPGRADES = [
 	{
 		"id": &"air_scramble",
 		"rarity": "legendary",
-		"name": "Scrambler",
-		"description": "Your shock also swaps their left and right for 3 s.",
+		"name": "UPG_AIR_SCRAMBLE",
+		"description": "UPG_AIR_SCRAMBLE_DESC",
 		"element": "air",
 		"icon": "scramble",
 		"stat_mods": {"air.scramble": {"add": 1.0}},
@@ -150,8 +152,8 @@ const UPGRADES = [
 	{
 		"id": &"air_storm_fence",
 		"rarity": "legendary",
-		"name": "Storm Fence",
-		"description": "When you teleport, lightning crackles across every gap in your trail for 1 s. Snakes caught in a gap are electrocuted: no power for 5 s (and with Scrambler, left and right swapped for 3 s).",
+		"name": "UPG_AIR_STORM_FENCE",
+		"description": "UPG_AIR_STORM_FENCE_DESC",
 		"element": "air",
 		"icon": "storm_fence",
 		"stat_mods": {"air.storm": {"add": 1.0}},
@@ -160,8 +162,8 @@ const UPGRADES = [
 	{
 		"id": &"earth_wide_body",
 		"rarity": "epic",
-		"name": "Tectonic Bulk",
-		"description": "Your rocky path is 30% wider: more ground for you, more wall for them.",
+		"name": "UPG_EARTH_WIDE_BODY",
+		"description": "UPG_EARTH_WIDE_BODY_DESC",
 		"element": "earth",
 		"icon": "wide_body",
 		"stat_mods": {"earth.scale": {"add": 0.3}},
@@ -170,8 +172,8 @@ const UPGRADES = [
 	{
 		"id": &"earth_stone_walk",
 		"rarity": "legendary",
-		"name": "Stone Walker",
-		"description": "You walk through your own stone walls. They still stop everyone else.",
+		"name": "UPG_EARTH_STONE_WALK",
+		"description": "UPG_EARTH_STONE_WALK_DESC",
 		"element": "earth",
 		"icon": "stone_walk",
 		"stat_mods": {"earth.stone_walk": {"add": 1.0}},
@@ -180,8 +182,8 @@ const UPGRADES = [
 	{
 		"id": &"earth_burrower",
 		"rarity": "rare",
-		"name": "Burrower",
-		"description": "While your armor lasts you dig through walls: the arena's obstacles and its edges. Be out in the open when it wears off, or you're crushed.",
+		"name": "UPG_EARTH_BURROWER",
+		"description": "UPG_EARTH_BURROWER_DESC",
 		"element": "earth",
 		"icon": "burrower",
 		"stat_mods": {"earth.border_pass": {"add": 1.0}},
@@ -190,8 +192,8 @@ const UPGRADES = [
 	{
 		"id": &"earth_bedrock",
 		"rarity": "rare",
-		"name": "Bedrock",
-		"description": "Your armor and rocky path last 0.25 s longer.",
+		"name": "UPG_EARTH_BEDROCK",
+		"description": "UPG_EARTH_BEDROCK_DESC",
 		"element": "earth",
 		"icon": "bedrock",
 		"stat_mods": {"earth.duration": {"add": 0.25}},
@@ -200,8 +202,8 @@ const UPGRADES = [
 	{
 		"id": &"water_extra_copy",
 		"rarity": "rare",
-		"name": "Extra Twin",
-		"description": "Keep up to 2 twins alive. Cast again while your twin lives to summon another.",
+		"name": "UPG_WATER_EXTRA_COPY",
+		"description": "UPG_WATER_EXTRA_COPY_DESC",
 		"element": "water",
 		"icon": "extra_copy",
 		"stat_mods": {"water.max_twins": {"add": 1.0}},
@@ -210,8 +212,8 @@ const UPGRADES = [
 	{
 		"id": &"water_twin_burst",
 		"rarity": "epic",
-		"name": "Twin Burst",
-		"description": "Your power summons twins two at a time, up to your maximum.",
+		"name": "UPG_WATER_TWIN_BURST",
+		"description": "UPG_WATER_TWIN_BURST_DESC",
 		"element": "water",
 		"icon": "twin_burst",
 		"stat_mods": {"water.twins_per_cast": {"add": 1.0}},
@@ -221,8 +223,8 @@ const UPGRADES = [
 	{
 		"id": &"water_third_twin",
 		"rarity": "legendary",
-		"name": "Triplets",
-		"description": "Keep up to 3 twins alive.",
+		"name": "UPG_WATER_THIRD_TWIN",
+		"description": "UPG_WATER_THIRD_TWIN_DESC",
 		"element": "water",
 		"icon": "third_twin",
 		"stat_mods": {"water.max_twins": {"add": 1.0}},
@@ -232,8 +234,8 @@ const UPGRADES = [
 	{
 		"id": &"water_lasting_twin",
 		"rarity": "rare",
-		"name": "Lasting Twin",
-		"description": "Your twin's trail never sheds: it stays aqua and never blocks you.",
+		"name": "UPG_WATER_LASTING_TWIN",
+		"description": "UPG_WATER_LASTING_TWIN_DESC",
 		"element": "water",
 		"icon": "lasting_twin",
 		"stat_mods": {"water.lasting_twin": {"add": 1.0}},
@@ -245,8 +247,8 @@ const UPGRADES = [
 const SKIP = {
 	"id": &"skip",
 	"rarity": "common",
-	"name": "Skip",
-	"description": "Take nothing this time and keep the rest for later.",
+	"name": "UPG_SKIP",
+	"description": "UPG_SKIP_DESC",
 	"element": "generic",
 	"icon": "skip",
 }
@@ -280,8 +282,8 @@ static func make_buff(upgrade_id) -> Buff:
 		return null
 	var buff = Buff.new()
 	buff.id = upgrade.id
-	buff.display_name = upgrade.name
-	buff.description = upgrade.description
+	buff.display_name = TranslationServer.translate(upgrade.name)
+	buff.description = TranslationServer.translate(upgrade.description)
 	buff.element = PLAYER_ELEMENTS.find_key(upgrade.element) if upgrade.element != "generic" else -1
 	buff.max_stacks = upgrade.get("max_stacks", 1)
 	buff.stat_mods = upgrade.get("stat_mods", {})
@@ -331,5 +333,5 @@ static func _with_level(player_id, upgrade) -> Dictionary:
 	if max_stacks <= 1:
 		return upgrade
 	var shown = upgrade.duplicate()
-	shown.name = "%s %d/%d" % [upgrade.name, stacks_for(player_id, upgrade.id) + 1, max_stacks]
+	shown.name = "%s %d/%d" % [TranslationServer.translate(upgrade.name), stacks_for(player_id, upgrade.id) + 1, max_stacks]
 	return shown

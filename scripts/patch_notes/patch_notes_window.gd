@@ -89,10 +89,10 @@ func _build_layout():
 
 	var header = HBoxContainer.new()
 	layout.add_child(header)
-	var title = _label("PATCH NOTES", 56, Color.WHITE)
+	var title = _label(tr("PATCH_NOTES_TITLE"), 56, Color.WHITE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	close_button = _button("Close", close)
+	close_button = _button(tr("UI_CLOSE"), close)
 	close_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(close_button)
 
@@ -141,7 +141,7 @@ func _release_block(release, latest):
 	block.add_child(_label(heading, 44, HIGHLIGHT if latest else Color.WHITE))
 	var subtitle = PatchNotes.format_date(release.date)
 	if latest:
-		subtitle += "   -   current version"
+		subtitle += "   -   " + tr("PATCH_NOTES_CURRENT")
 	block.add_child(_label(subtitle, 22, DIM_COLOR))
 	if release.has("note"):
 		block.add_child(_label(release.note, 22, DIM_COLOR))

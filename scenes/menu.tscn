@@ -110,7 +110,7 @@ theme_override_constants/shadow_offset_x = 8
 theme_override_constants/shadow_offset_y = -5
 theme_override_constants/outline_size = 8
 theme_override_constants/shadow_outline_size = 12
-text = "Shrooms?"
+text = "MENU_SHROOMS_Q"
 
 [node name="UpgradesPanel" type="PanelContainer" parent="CanvasLayer/Modifiers" unique_id=1517582730]
 layout_mode = 1
@@ -145,7 +145,7 @@ theme_override_constants/shadow_offset_x = 8
 theme_override_constants/shadow_offset_y = -5
 theme_override_constants/outline_size = 8
 theme_override_constants/shadow_outline_size = 12
-text = "Upgrades?"
+text = "MENU_UPGRADES_Q"
 
 [node name="Options" parent="CanvasLayer" unique_id=464464145 instance=ExtResource("3_wmb4s")]
 visible = false
@@ -296,28 +296,28 @@ horizontal_alignment = 1
 [node name="Play" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=880425664]
 layout_mode = 2
 theme = SubResource("Theme_7avap")
-text = "Play"
+text = "MENU_PLAY"
 
 [node name="Multiplayer" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1559298825]
 layout_mode = 2
-text = "Multiplayer"
+text = "MENU_MULTIPLAYER"
 
 [node name="Options" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1228341811]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
-text = "Options"
+text = "MENU_OPTIONS"
 
 [node name="Instructions" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=399230022]
 layout_mode = 2
 theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
-text = "Instructions"
+text = "MENU_INSTRUCTIONS"
 
 [node name="Quit" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1123454094]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
-text = "Quit"
+text = "MENU_QUIT"
 
 [node name="PlayerSetup" type="CenterContainer" parent="CanvasLayer" unique_id=552390979]
 visible = false

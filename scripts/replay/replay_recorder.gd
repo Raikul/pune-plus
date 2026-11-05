@@ -54,6 +54,9 @@ func _ready():
 	view.texture = get_tree().root.get_texture()
 	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	view.stretch_mode = TextureRect.STRETCH_SCALE
+	# Averaged, not every other pixel (the project's default filter is Nearest): thin
+	# trails and text stay whole instead of breaking into jagged steps
+	view.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	view.size = SIZE
 	viewport.add_child(view)
 	add_child(viewport)
@@ -183,24 +186,25 @@ func _score_ring():
 	best_score = score
 	best = {"frames": frames.duplicate(), "player": star, "score": score, "caption": _caption(streaks.get(star, 0), biggest.get(star, {}).get("kind", ""))}
 
+# Translation keys (the replay screen shows them with tr())
 const CAPTIONS = {
-	"kill": "TAKEDOWN",
-	"phoenix": "RISEN FROM THE ASHES",
-	"save": "SAVED BY THE TWIN",
-	"block": "ROCK SOLID",
-	"shock": "SHOCKING",
-	"round": "LAST ONE STANDING",
-	"crash": "WIPEOUT",
+	"kill": "REPLAY_TAKEDOWN",
+	"phoenix": "REPLAY_PHOENIX",
+	"save": "REPLAY_SAVE",
+	"block": "REPLAY_BLOCK",
+	"shock": "REPLAY_SHOCK",
+	"round": "REPLAY_LAST_STANDING",
+	"crash": "REPLAY_WIPEOUT",
 }
 
 func _caption(streak, kind) -> String:
 	match streak:
-		2: return "DOUBLE KILL"
-		3: return "TRIPLE KILL"
-		4: return "QUAD KILL"
+		2: return "REPLAY_DOUBLE_KILL"
+		3: return "REPLAY_TRIPLE_KILL"
+		4: return "REPLAY_QUAD_KILL"
 	if streak > 4:
-		return "UNSTOPPABLE"
-	return CAPTIONS.get(kind, "WHAT A MOMENT")
+		return "REPLAY_UNSTOPPABLE"
+	return CAPTIONS.get(kind, "REPLAY_WHAT_A_MOMENT")
 
 # The play of the game, or the last seconds of the match if nothing stood out
 func play_of_the_game() -> Dictionary:
@@ -210,5 +214,5 @@ func play_of_the_game() -> Dictionary:
 	tasks.clear()
 	if best.is_empty() and frames.size() >= FPS:
 		var last = playground.winners[0] if not playground.winners.is_empty() else 0
-		best = {"frames": frames.duplicate(), "player": last, "score": 0.0, "caption": "THE FINAL MOMENTS"}
+		best = {"frames": frames.duplicate(), "player": last, "score": 0.0, "caption": "REPLAY_FINAL_MOMENTS"}
 	return best

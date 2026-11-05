@@ -99,6 +99,9 @@ func _restyle():
 		style.border_width_bottom = 4
 		card.add_theme_stylebox_override("panel", style)
 		_cooldown_bar(id).custom_minimum_size = Vector2(64, 64)
+		# The symbol fills in the element's color (the scene's tints are the default colors)
+		_cooldown_bar(id).tint_under = color
+		_cooldown_bar(id).tint_progress = color.darkened(0.7)
 	# "FIRST TO 10" under the middle of the bar
 	target_label = Label.new()
 	target_label.add_theme_font_override("font", ODIN_FONT)
@@ -114,8 +117,15 @@ func _restyle():
 	target_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	$PanelContainer/ColorRect.add_child(target_label)
 
+var target_points = 0
 func set_target(points):
-	target_label.text = "FIRST TO %d" % points
+	target_points = points
+	target_label.text = tr("HUD_FIRST_TO") % points
+
+# A new language (Options in the pause menu)
+func _notification(what):
+	if what == NOTIFICATION_TRANSLATION_CHANGED and target_label != null:
+		target_label.text = tr("HUD_FIRST_TO") % target_points
 
 # total: the cooldown's full length (upgrades can shorten it), so the bar starts full
 func set_cooldown(player_id, time_left, total = 0.0):
@@ -138,7 +148,7 @@ func setup_teams(enabled):
 	for id in team_tags:
 		var team = Global.team_of(id)
 		team_tags[id].visible = enabled
-		team_tags[id].text = Global.TEAM_NAMES[team].right(1)
+		team_tags[id].text = ["A", "B"][team]
 		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
 	if enabled:
 		_group_by_team()

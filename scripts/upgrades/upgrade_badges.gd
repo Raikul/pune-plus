@@ -53,7 +53,7 @@ func refresh(id, hidden = false):
 func _badge(upgrade, stacks):
 	var holder = Control.new()
 	holder.custom_minimum_size = Vector2(icon_size, icon_size)
-	holder.tooltip_text = upgrade.name + ("  x%d" % stacks if stacks > 1 else "")
+	holder.tooltip_text = tr(upgrade.name) + ("  x%d" % stacks if stacks > 1 else "")
 	holder.mouse_filter = Control.MOUSE_FILTER_PASS
 	holder.clip_contents = true
 	var backing = Panel.new()

@@ -47,4 +47,5 @@ No test suite; verify changes by headless runs (look for `ERROR`/`SCRIPT ERROR`)
 
 - Keep the existing style: tabs, GDScript without static typing for most code, commented-out experiments are common.
 - Input actions: `Player{1..4}{Left,Right,Up}`, `Pause`, `ui_accept`, `ui_cancel` (defined in `project.godot`).
+- Player-facing text is a translation key (English, Spanish, Simplified Chinese in `translations/strings.csv`); see `docs/translations.md`. Patch notes stay English.
 - Branches are per feature/person (e.g. `ivo_bola_de_fuego`, `gus_instrucciones`), merged into `main` via PR.

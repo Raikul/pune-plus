@@ -4,41 +4,42 @@ class_name Wisdom
 # Quotes shown at the top of the upgrade screen, for the element of the snake that won
 # the previous round ("any" when nobody won). PLACEHOLDERS: short paraphrases in the
 # spirit of each source, not exact quotes. Edit, add or replace them freely; each entry
-# is {"text", "source"}.
+# is {"text", "source"}, both translation keys
+# (translations/strings.csv: WISDOM_<ELEMENT>_<N> and WISDOM_SRC_*); show them with tr().
 
 const QUOTES = {
 	"fire": [
-		{"text": "Strike when the moment opens. Hesitation is the only wall.", "source": "after Miyamoto Musashi, The Book of Five Rings"},
-		{"text": "The Warrior serves something larger than himself, and burns only what must burn.", "source": "after Moore & Gillette, King, Warrior, Magician, Lover"},
-		{"text": "What you do not bring to light rules you from the dark.", "source": "after C. G. Jung"},
-		{"text": "Solve et coagula: dissolve, then make whole again.", "source": "alchemical maxim"},
-		{"text": "From the ashes, the same bird, but wiser.", "source": "Phoenix legend"},
+		{"text": "WISDOM_FIRE_1", "source": "WISDOM_SRC_MUSASHI"},
+		{"text": "WISDOM_FIRE_2", "source": "WISDOM_SRC_MOORE"},
+		{"text": "WISDOM_FIRE_3", "source": "WISDOM_SRC_JUNG"},
+		{"text": "WISDOM_FIRE_4", "source": "WISDOM_SRC_ALCHEMY"},
+		{"text": "WISDOM_FIRE_5", "source": "WISDOM_SRC_PHOENIX"},
 	],
 	"earth": [
-		{"text": "Heavy is the root of light; stillness is the master of restlessness.", "source": "after Lao Tzu, Tao Te Ching"},
-		{"text": "Know the ground before you step on it, and let it fight for you.", "source": "after Miyamoto Musashi, The Book of Five Rings"},
-		{"text": "The King orders the realm so that everything in it may grow.", "source": "after Moore & Gillette, King, Warrior, Magician, Lover"},
-		{"text": "As above, so below.", "source": "Hermetic maxim"},
-		{"text": "A tree as wide as your arms grows from a tiny sprout.", "source": "after Lao Tzu, Tao Te Ching"},
+		{"text": "WISDOM_EARTH_1", "source": "WISDOM_SRC_LAO_TZU"},
+		{"text": "WISDOM_EARTH_2", "source": "WISDOM_SRC_MUSASHI"},
+		{"text": "WISDOM_EARTH_3", "source": "WISDOM_SRC_MOORE"},
+		{"text": "WISDOM_EARTH_4", "source": "WISDOM_SRC_HERMETIC"},
+		{"text": "WISDOM_EARTH_5", "source": "WISDOM_SRC_LAO_TZU"},
 	],
 	"air": [
-		{"text": "The way is in training: see what cannot be seen at a glance.", "source": "after Miyamoto Musashi, The Book of Five Rings"},
-		{"text": "The Magician knows the hidden rules, and moves through what others think is solid.", "source": "after Moore & Gillette, King, Warrior, Magician, Lover"},
-		{"text": "The space between the spokes is what makes the wheel useful.", "source": "after Lao Tzu, Tao Te Ching"},
-		{"text": "Who looks outside, dreams; who looks inside, awakes.", "source": "after C. G. Jung"},
-		{"text": "Know thyself.", "source": "inscription at Delphi"},
+		{"text": "WISDOM_AIR_1", "source": "WISDOM_SRC_MUSASHI"},
+		{"text": "WISDOM_AIR_2", "source": "WISDOM_SRC_MOORE"},
+		{"text": "WISDOM_AIR_3", "source": "WISDOM_SRC_LAO_TZU"},
+		{"text": "WISDOM_AIR_4", "source": "WISDOM_SRC_JUNG"},
+		{"text": "WISDOM_AIR_5", "source": "WISDOM_SRC_DELPHI"},
 	],
 	"water": [
-		{"text": "Nothing is softer than water, yet nothing is better at wearing down the hard.", "source": "after Lao Tzu, Tao Te Ching"},
-		{"text": "Become like water: take the shape of whatever holds you.", "source": "after Miyamoto Musashi, The Book of Five Rings"},
-		{"text": "The Lover feels the whole world as one living thing.", "source": "after Moore & Gillette, King, Warrior, Magician, Lover"},
-		{"text": "The meeting of two people is like two substances touching: both are changed.", "source": "after C. G. Jung"},
-		{"text": "Anyone knows the drop is in the sea; the wise know the sea is in the drop.", "source": "Pune lesson"},
+		{"text": "WISDOM_WATER_1", "source": "WISDOM_SRC_LAO_TZU"},
+		{"text": "WISDOM_WATER_2", "source": "WISDOM_SRC_MUSASHI"},
+		{"text": "WISDOM_WATER_3", "source": "WISDOM_SRC_MOORE"},
+		{"text": "WISDOM_WATER_4", "source": "WISDOM_SRC_JUNG"},
+		{"text": "WISDOM_WATER_5", "source": "WISDOM_SRC_PUNE_LESSON"},
 	],
 	"any": [
-		{"text": "When nobody wins, the board teaches everyone.", "source": "Pune proverb"},
-		{"text": "Do nothing that is of no use.", "source": "after Miyamoto Musashi, The Book of Five Rings"},
-		{"text": "The journey of a thousand miles begins beneath one's feet.", "source": "after Lao Tzu, Tao Te Ching"},
+		{"text": "WISDOM_ANY_1", "source": "WISDOM_SRC_PUNE_PROVERB"},
+		{"text": "WISDOM_ANY_2", "source": "WISDOM_SRC_MUSASHI"},
+		{"text": "WISDOM_ANY_3", "source": "WISDOM_SRC_LAO_TZU"},
 	],
 }
 

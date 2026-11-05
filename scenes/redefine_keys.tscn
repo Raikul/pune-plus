@@ -19,7 +19,7 @@ horizontal_alignment = 1
 
 [node name="Instructions" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
-text = "Press a key or a gamepad button for: "
+text = "REDEFINE_PRESS"
 
 [node name="Key" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2

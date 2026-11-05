@@ -321,7 +321,7 @@ func twin_state(state_round, player_id, serial, state_sequence, sent_at, state_p
 		var twin = player.spawn_remote_twin()
 		twin.global_position = state_position
 		twin.rotation = state_rotation
-		snake = _new_remote_snake(twin, twin.GHOST_COLOR)
+		snake = _new_remote_snake(twin, twin.ghost_color())
 		snake.serial = serial
 		remote_twins[key] = snake
 	if not is_instance_valid(snake.player):

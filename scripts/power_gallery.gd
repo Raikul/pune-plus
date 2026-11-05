@@ -11,11 +11,12 @@ const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded -
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = {"fire": "Fire-Water symbol.png", "earth": "Air-Earth symbol rot.png", "air": "Air-Earth symbol.png", "water": "Fire-Water symbol rot.png"}
 const COLUMNS = ["generic", "fire", "earth", "air", "water"]
+# Translation keys
 const BASE_POWERS = {
-	"fire": "Shoots a fireball that burns through the trails it hits.",
-	"earth": "Rock armor: passes through trails for a moment, leaving a path of stone behind.",
-	"air": "Jumps to the marker ahead of it.",
-	"water": "Splits off a mirrored twin. If the head dies while the twin lives, you take over the twin.",
+	"fire": "GALLERY_BASE_FIRE",
+	"earth": "GALLERY_BASE_EARTH",
+	"air": "GALLERY_BASE_AIR",
+	"water": "GALLERY_BASE_WATER",
 }
 const LABEL_WIDTH = 150
 const CELL_WIDTH = 330
@@ -45,11 +46,11 @@ func _ready():
 
 	var header = HBoxContainer.new()
 	page.add_child(header)
-	var title = _label("POWER GALLERY", 44, Color.WHITE)
+	var title = _label(tr("GALLERY_TITLE"), 44, Color.WHITE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	var close = Button.new()
-	close.text = "CLOSE"
+	close.text = tr("UI_CLOSE_UPPER")
 	close.custom_minimum_size = Vector2(160, 48)
 	close.add_theme_font_override("font", ODIN)
 	close.add_theme_font_size_override("font_size", 22)
@@ -75,13 +76,13 @@ func _fill(grid):
 		grid.add_child(_column_head(column))
 
 	# Each element's base power
-	grid.add_child(_row_head("BASE", Color(0.9, 0.9, 0.9), "Always on"))
+	grid.add_child(_row_head(tr("GALLERY_BASE"), Color(0.9, 0.9, 0.9), tr("GALLERY_ALWAYS_ON")))
 	for column in COLUMNS:
 		if column == "generic":
-			grid.add_child(_slot("Every snake: turn with Left/Right, power on Up"))
+			grid.add_child(_slot(tr("GALLERY_EVERY_SNAKE")))
 		else:
 			var id = UpgradeCatalog.PLAYER_ELEMENTS.find_key(column)
-			grid.add_child(_card(Global.POWER_TAGLINES[id], BASE_POWERS[column], _element_color(column), Color(0.9, 0.9, 0.9), []))
+			grid.add_child(_card(tr(Global.POWER_TAGLINES[id]), tr(BASE_POWERS[column]), _element_color(column), Color(0.9, 0.9, 0.9), []))
 
 	# Upgrades by rarity
 	var counts = {}
@@ -92,7 +93,7 @@ func _fill(grid):
 		total_weight += rarity.weight
 	for rarity_id in UpgradeCatalog.RARITIES:
 		var rarity = UpgradeCatalog.RARITIES[rarity_id]
-		grid.add_child(_row_head(rarity.name.to_upper(), rarity.color, "%d%% of rolls" % roundi(100.0 * rarity.weight / total_weight)))
+		grid.add_child(_row_head(tr(rarity.name).to_upper(), rarity.color, tr("GALLERY_PERCENT_ROLLS") % roundi(100.0 * rarity.weight / total_weight)))
 		for column in COLUMNS:
 			var cell = VBoxContainer.new()
 			cell.custom_minimum_size = Vector2(CELL_WIDTH, 0)
@@ -104,11 +105,11 @@ func _fill(grid):
 				counts[column]["upgrades"] = counts[column].get("upgrades", 0) + 1
 				cell.add_child(_upgrade_card(upgrade, rarity.color))
 			if cell.get_child_count() == 0:
-				cell.add_child(_slot("Open slot"))
+				cell.add_child(_slot(tr("GALLERY_OPEN_SLOT")))
 			grid.add_child(cell)
 
 	# How many each column has
-	grid.add_child(_row_head("TOTAL", Color.WHITE, "Upgrades"))
+	grid.add_child(_row_head(tr("GALLERY_TOTAL"), Color.WHITE, tr("GALLERY_UPGRADES")))
 	for column in COLUMNS:
 		grid.add_child(_totals(counts[column]))
 
@@ -125,7 +126,7 @@ func _column_head(column) -> Control:
 		symbol.custom_minimum_size = Vector2(44, 44)
 		symbol.modulate = _element_color(column)
 		box.add_child(symbol)
-	var name_label = _label("ANY SNAKE" if column == "generic" else column.to_upper(), 30, _element_color(column))
+	var name_label = _label(tr("UPGRADE_ANY_SNAKE") if column == "generic" else tr("ELEMENT_" + column.to_upper() + "_UPPER"), 30, _element_color(column))
 	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	box.add_child(name_label)
 	return box
@@ -141,12 +142,12 @@ func _row_head(text, color, note) -> Control:
 func _upgrade_card(upgrade, rarity_color) -> Control:
 	var notes = []
 	if upgrade.get("max_stacks", 1) > 1:
-		notes.append("Stacks x%d" % upgrade.max_stacks)
+		notes.append(tr("GALLERY_STACKS") % upgrade.max_stacks)
 	if upgrade.has("requires"):
-		notes.append("Needs " + UpgradeCatalog.get_upgrade(upgrade.requires).get("name", str(upgrade.requires)))
+		notes.append(tr("GALLERY_NEEDS") % tr(UpgradeCatalog.get_upgrade(upgrade.requires).get("name", str(upgrade.requires))))
 	if not upgrade.get("enabled", true):
-		notes.append("OFF (not in the rolls)")
-	var card = _card(upgrade.name, upgrade.description, _element_color(upgrade.element), rarity_color, notes, upgrade.icon)
+		notes.append(tr("GALLERY_DISABLED"))
+	var card = _card(tr(upgrade.name), tr(upgrade.description), _element_color(upgrade.element), rarity_color, notes, upgrade.icon)
 	if not upgrade.get("enabled", true):
 		card.modulate.a = 0.45
 	return card
@@ -205,7 +206,9 @@ func _totals(counts) -> Control:
 	var picks = 0
 	for rarity_id in UpgradeCatalog.RARITIES:
 		picks += counts.get(rarity_id, 0)
-	box.add_child(_label("%d upgrade%s, %d pick%s" % [upgrades, "" if upgrades == 1 else "s", picks, "" if picks == 1 else "s"], 22, Color.WHITE))
+	var upgrades_text = tr("GALLERY_ONE_UPGRADE") if upgrades == 1 else tr("GALLERY_N_UPGRADES") % upgrades
+	var picks_text = tr("GALLERY_ONE_PICK") if picks == 1 else tr("GALLERY_N_PICKS") % picks
+	box.add_child(_label(upgrades_text + ", " + picks_text, 22, Color.WHITE))
 	var bar = HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 3)
 	box.add_child(bar)

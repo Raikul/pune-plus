@@ -2,7 +2,8 @@ extends Control
 
 # Options screen (main menu and pause menu). Built in code with the same look as the
 # patch notes window. Every value lives in Global and is saved to user://settings.cfg.
-# Rows are browsed with up/down; left/right (or clicking) changes the value.
+# Rows are browsed with up/down; left/right (or clicking) changes the value. Texts are
+# translation keys (translations/strings.csv); changing the language rebuilds the screen.
 
 signal back
 
@@ -13,9 +14,9 @@ const DIM_COLOR = Color(0.6, 0.6, 0.6)
 const PANEL_COLOR = Color(0.13, 0.13, 0.13, 0.97)
 const ROW_WIDTH = 1000
 
-const WINDOW_MODES = ["Full-screen", "Windowed", "Borderless Window", "Borderless Full-screen"]
-const GAP_SIZES = ["Small", "Medium", "Large"]
-const TABS = ["Video", "Audio", "Gameplay", "Controls", "Accessibility"]
+const WINDOW_MODES = ["OPT_FULLSCREEN", "OPT_WINDOWED", "OPT_BORDERLESS_WINDOW", "OPT_BORDERLESS_FULLSCREEN"]
+const GAP_SIZES = ["OPT_GAP_SMALL", "OPT_GAP_MEDIUM", "OPT_GAP_LARGE"]
+const TABS = ["OPT_TAB_VIDEO", "OPT_TAB_AUDIO", "OPT_TAB_GAMEPLAY", "OPT_TAB_CONTROLS", "OPT_TAB_ACCESSIBILITY"]
 
 var tab_buttons = []
 var pages = []
@@ -46,7 +47,32 @@ func _close():
 
 #region Layout
 
+var built_locale = ""
+
+func _notification(what):
+	if what == NOTIFICATION_TRANSLATION_CHANGED and not pages.is_empty():
+		_rebuild.call_deferred()
+
+# A new language: every text again, on the same tab, with the language row in focus
+func _rebuild():
+	if TranslationServer.get_locale() == built_locale:
+		return
+	var had_focus = get_viewport().gui_get_focus_owner() != null and is_ancestor_of(get_viewport().gui_get_focus_owner())
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	tab_buttons.clear()
+	pages.clear()
+	volume_sliders.clear()
+	resolution_row = null
+	_build()
+	_show_tab(current_tab)
+	var rows = pages[current_tab].get_children().filter(func(row): return row.has_meta("control"))
+	if had_focus and not rows.is_empty():
+		rows[0].get_meta("control").grab_focus.call_deferred()
+
 func _build():
+	built_locale = TranslationServer.get_locale()
 	theme = _make_theme()
 
 	var dim = ColorRect.new()
@@ -73,7 +99,7 @@ func _build():
 	panel.add_child(column)
 
 	var title = Label.new()
-	title.text = "OPTIONS"
+	title.text = tr("OPT_TITLE")
 	title.add_theme_font_size_override("font_size", 56)
 	column.add_child(title)
 
@@ -82,7 +108,7 @@ func _build():
 	column.add_child(tabs)
 	for i in TABS.size():
 		var button = Button.new()
-		button.text = TABS[i]
+		button.text = tr(TABS[i])
 		button.custom_minimum_size = Vector2(180, 54)
 		button.focus_entered.connect(_show_tab.bind(i))
 		button.pressed.connect(_show_tab.bind(i))
@@ -106,7 +132,7 @@ func _build():
 		pages.append(page)
 
 	var back_button = Button.new()
-	back_button.text = "Back"
+	back_button.text = tr("UI_BACK")
 	back_button.custom_minimum_size = Vector2(220, 60)
 	back_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	back_button.pressed.connect(_close)
@@ -126,66 +152,81 @@ func _link_focus():
 		button.focus_neighbor_bottom = button.get_path_to(rows[0].get_meta("control")) if not rows.is_empty() else NodePath()
 
 func _video_page(page):
-	_selector(page, "Window mode", WINDOW_MODES, func(): return Global.window_mode, func(i):
+	_selector(page, tr("OPT_WINDOW_MODE"), WINDOW_MODES.map(tr), func(): return Global.window_mode, func(i):
 		Global.window_mode = i
 		Global.apply_window_mode()
 		_update_resolution_row())
 	var sizes = Global.RESOLUTIONS.map(func(size): return "%d x %d" % [size.x, size.y])
-	resolution_row = _selector(page, "Window size", sizes, func(): return Global.resolution, func(i):
+	resolution_row = _selector(page, tr("OPT_WINDOW_SIZE"), sizes, func(): return Global.resolution, func(i):
 		Global.resolution = i
 		Global.apply_window_size())
 	_update_resolution_row()
-	_toggle(page, "VSync", func(): return Global.vsync, func(on):
+	_toggle(page, tr("OPT_VSYNC"), func(): return Global.vsync, func(on):
 		Global.vsync = on
 		Global.apply_video_settings())
-	var fps_names = Global.MAX_FPS_OPTIONS.map(func(fps): return "No limit" if fps == 0 else str(fps))
-	_selector(page, "Max FPS", fps_names, func(): return max(Global.MAX_FPS_OPTIONS.find(Global.max_fps), 0), func(i):
+	var fps_names = Global.MAX_FPS_OPTIONS.map(func(fps): return tr("OPT_NO_LIMIT") if fps == 0 else str(fps))
+	_selector(page, tr("OPT_MAX_FPS"), fps_names, func(): return max(Global.MAX_FPS_OPTIONS.find(Global.max_fps), 0), func(i):
 		Global.max_fps = Global.MAX_FPS_OPTIONS[i]
 		Global.apply_video_settings())
-	_toggle(page, "Show FPS", func(): return Global.show_fps, func(on):
+	_toggle(page, tr("OPT_SHOW_FPS"), func(): return Global.show_fps, func(on):
 		Global.show_fps = on
 		Global.apply_video_settings())
 
 func _update_resolution_row():
 	if resolution_row:
 		resolution_row.modulate.a = 1.0 if Global.is_windowed() else 0.4
-		resolution_row.get_meta("control").tooltip_text = "" if Global.is_windowed() else "Only for the windowed modes"
+		resolution_row.get_meta("control").tooltip_text = "" if Global.is_windowed() else tr("OPT_ONLY_WINDOWED")
 
 func _audio_page(page):
 	for bus in ["Master", "Music", "Effects"]:
-		_slider(page, bus + " volume", bus)
+		_slider(page, tr("OPT_VOLUME_" + bus.to_upper()), bus)
 
 func _gameplay_page(page):
-	_selector(page, "Gap size", GAP_SIZES, func(): return Global.gapSize, func(i): Global.gapSize = i)
+	# Each language by its own name
+	var languages = Global.LANGUAGES.map(func(entry): return entry[1])
+	_selector(page, tr("OPT_LANGUAGE"), languages,
+		func(): return max(Global.LANGUAGES.map(func(entry): return entry[0]).find(Global.language), 0),
+		func(i):
+			Global.language = Global.LANGUAGES[i][0]
+			# Every screen follows (NOTIFICATION_TRANSLATION_CHANGED); this one is rebuilt
+			Global.apply_language())
+	_selector(page, tr("OPT_GAP_SIZE"), GAP_SIZES.map(tr), func(): return Global.gapSize, func(i): Global.gapSize = i)
 	var times = Global.UPGRADE_TIME_OPTIONS.map(Global.upgrade_time_text)
-	_selector(page, "Upgrade pick time (offline)", times,
+	_selector(page, tr("OPT_UPGRADE_TIME"), times,
 		func(): return max(Global.UPGRADE_TIME_OPTIONS.find(Global.upgrade_time), 0),
 		func(i): Global.upgrade_time = Global.UPGRADE_TIME_OPTIONS[i])
-	_toggle(page, "Wisdom on the upgrade screen", func(): return Global.show_quotes, func(on): Global.show_quotes = on)
+	_toggle(page, tr("OPT_WISDOM"), func(): return Global.show_quotes, func(on): Global.show_quotes = on)
 
 func _accessibility_page(page):
-	_toggle(page, "Nameplates on snakes", func(): return Global.nameplates, func(on): Global.nameplates = on)
-	_toggle(page, "Direction arrow", func(): return Global.direction_arrow, func(on): Global.direction_arrow = on)
-	_toggle(page, "Snake eyes (look at the nearest snake)", func(): return Global.snake_eyes, func(on): Global.snake_eyes = on)
+	_toggle(page, tr("OPT_NAMEPLATES"), func(): return Global.nameplates, func(on): Global.nameplates = on)
+	_toggle(page, tr("OPT_DIRECTION_ARROW"), func(): return Global.direction_arrow, func(on): Global.direction_arrow = on)
+	_toggle(page, tr("OPT_SNAKE_EYES"), func(): return Global.snake_eyes, func(on): Global.snake_eyes = on)
+	_toggle(page, tr("OPT_COLORBLIND"), func(): return Global.colorblind, func(on):
+		Global.colorblind = on
+		# A match keeps its colors; the next one starts with the new ones (Playground)
+		if not Global.in_match():
+			Global.apply_colors())
 	var note = Label.new()
-	note.text = "Both apply from the next round."
+	note.text = tr("OPT_NEXT_ROUND_NOTE")
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size.x = ROW_WIDTH
 	note.add_theme_color_override("font_color", DIM_COLOR)
 	note.add_theme_font_size_override("font_size", 24)
 	page.add_child(note)
 
 func _controls_page(page):
 	var note = Label.new()
-	note.text = "Each player's keys are set in player setup (Redefine Keys)\nor in the online lobby (Keys)."
+	note.text = tr("OPT_KEYS_NOTE")
 	note.add_theme_color_override("font_color", DIM_COLOR)
 	note.add_theme_font_size_override("font_size", 24)
 	page.add_child(note)
 	var reset = Button.new()
-	reset.text = "Reset all keys to default"
+	reset.text = tr("OPT_RESET_KEYS")
 	reset.custom_minimum_size = Vector2(0, 60)
 	reset.pressed.connect(func():
 		InputMap.load_from_project_settings()
-		reset.text = "Keys reset to default")
-	_row(page, "Keys", reset)
+		reset.text = tr("OPT_KEYS_RESET_DONE"))
+	_row(page, tr("OPT_KEYS"), reset)
 	reset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 #endregion
@@ -225,7 +266,7 @@ func _selector(page, label_text, values, getter: Callable, setter: Callable):
 	return _row(page, label_text, button)
 
 func _toggle(page, label_text, getter: Callable, setter: Callable):
-	return _selector(page, label_text, ["Off", "On"], func(): return 1 if getter.call() else 0,
+	return _selector(page, label_text, [tr("VALUE_OFF"), tr("VALUE_ON")], func(): return 1 if getter.call() else 0,
 		func(i): setter.call(i == 1))
 
 # The pause menu has its own volume sliders: show their values here too
