@@ -54,6 +54,9 @@ func _ready():
 	view.texture = get_tree().root.get_texture()
 	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	view.stretch_mode = TextureRect.STRETCH_SCALE
+	# Averaged, not every other pixel (the project's default filter is Nearest): thin
+	# trails and text stay whole instead of breaking into jagged steps
+	view.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	view.size = SIZE
 	viewport.add_child(view)
 	add_child(viewport)

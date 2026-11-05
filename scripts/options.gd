@@ -201,8 +201,15 @@ func _accessibility_page(page):
 	_toggle(page, tr("OPT_NAMEPLATES"), func(): return Global.nameplates, func(on): Global.nameplates = on)
 	_toggle(page, tr("OPT_DIRECTION_ARROW"), func(): return Global.direction_arrow, func(on): Global.direction_arrow = on)
 	_toggle(page, tr("OPT_SNAKE_EYES"), func(): return Global.snake_eyes, func(on): Global.snake_eyes = on)
+	_toggle(page, tr("OPT_COLORBLIND"), func(): return Global.colorblind, func(on):
+		Global.colorblind = on
+		# A match keeps its colors; the next one starts with the new ones (Playground)
+		if not Global.in_match():
+			Global.apply_colors())
 	var note = Label.new()
 	note.text = tr("OPT_NEXT_ROUND_NOTE")
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size.x = ROW_WIDTH
 	note.add_theme_color_override("font_color", DIM_COLOR)
 	note.add_theme_font_size_override("font_size", 24)
 	page.add_child(note)

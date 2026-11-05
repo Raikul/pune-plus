@@ -19,6 +19,11 @@ const RELEASES = [
 		"sections": [
 			["Menus", [
 				"New Language option (Options > Gameplay): English, Español and 简体中文 (Simplified Chinese). Every menu, screen, upgrade and quote is translated; the patch notes stay in English.",
+				"Match stats: the awards are a list, each with what it's for written next to it.",
+				"Upgrade cards: the animated icons draw their trails as smooth strokes like the snakes' own, with soft edges everywhere.",
+				"The play of the game replay is smooth instead of blocky.",
+				"Instructions and the pause menu redone in the look of Options: a card per element in its color (colorblind mode included), how points work, and a dimmed game behind a rounded panel.",
+				"New colorblind mode (Options > Accessibility): fire red, earth green, air yellow and water blue, colors that stay distinct with any kind of color blindness. Water's twins turn light blue.",
 			]],
 		],
 	},

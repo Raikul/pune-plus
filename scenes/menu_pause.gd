@@ -19,13 +19,14 @@ func _ready():
 	if instructions_panel:
 		instructions_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 		instructions_panel.hide()
-		_conectar_botones_cerrar(instructions_panel, _on_instructions_back_pressed)
+		instructions_panel.closed.connect(_on_instructions_back_pressed)
 
 	if options_panel:
 		options_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 		options_panel.hide()
 		options_panel.back.connect(_on_options_back_pressed)
 	# Deferred: Options builds its theme in its own _ready, which runs after this one
+	_style_menu.call_deferred()
 	_add_volume_sliders.call_deferred()
 
 	# Conectar botones del menú
@@ -36,6 +37,49 @@ func _ready():
 	if options_button: options_button.pressed.connect(_on_options_pressed)
 	if instructions_button: instructions_button.pressed.connect(_on_instructions_pressed)
 	if quit_button: quit_button.pressed.connect(_on_quit_pressed)
+
+# Same look as Options: the game dimmed behind a rounded dark panel with a title, and pill
+# buttons in the Options theme (orange when focused)
+func _style_menu():
+	var dim = ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(dim)
+	move_child(dim, 0)
+	if options_panel:
+		theme = options_panel.theme
+	var panel = $PanelContainer
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.13, 0.13, 0.13, 0.97)
+	style.set_corner_radius_all(18)
+	style.set_content_margin_all(40)
+	style.border_color = Color(1, 1, 1, 0.08)
+	style.set_border_width_all(2)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var margin = $PanelContainer/MarginContainer
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 0)
+	var list = resume_button.get_parent()
+	list.add_theme_constant_override("separation", 14)
+	var title = list.get_node_or_null("Title")
+	if title:
+		title.text = "PAUSE_TITLE"
+		title.show()
+		title.add_theme_font_size_override("font_size", 56)
+		title.add_theme_color_override("font_color", Color.WHITE)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		list.move_child(title, 0)
+	for button in [resume_button, simulate_button, options_button, instructions_button, quit_button]:
+		if button:
+			button.custom_minimum_size = Vector2(720, 68)
+			button.add_theme_font_size_override("font_size", 34)
+	# Quit stands a little apart, under the volume
+	if quit_button:
+		quit_button.add_theme_color_override("font_color", Color(0.85, 0.5, 0.45))
 
 # Volume right in the pause menu (same look and settings as Options > Audio)
 var volume_sliders = {}
@@ -89,15 +133,6 @@ func _refresh_volume_sliders():
 		volume_sliders[bus].value = Global.volumes[bus]
 		volume_sliders[bus].value_changed.emit(Global.volumes[bus])
 
-func _conectar_botones_cerrar(nodo: Node, metodo_destino: Callable):
-	for hijo in nodo.get_children():
-		if hijo is Button:
-			var nombre = hijo.name.to_lower()
-			if "back" in nombre or "close" in nombre or "volver" in nombre or nombre == "button":
-				if not hijo.pressed.is_connected(metodo_destino):
-					hijo.pressed.connect(metodo_destino)
-		_conectar_botones_cerrar(hijo, metodo_destino)
-
 func _unhandled_input(event):
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
@@ -117,6 +152,8 @@ func toggle_pause():
 	else:
 		show()
 		_refresh_volume_sliders()
+		if resume_button:
+			resume_button.grab_focus.call_deferred()
 		# Online the match keeps running for everyone else
 		get_tree().paused = not Global.isMultiplayerActive
 

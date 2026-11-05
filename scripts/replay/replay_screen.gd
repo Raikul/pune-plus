@@ -41,6 +41,8 @@ func setup(play: Dictionary):
 	video.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	video.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	video.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	# Blown up smoothly, not in 2x2 blocks (the project's default filter is Nearest)
+	video.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	add_child(video)
 
 	# The featured snake's ring

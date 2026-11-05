@@ -26,6 +26,8 @@ var AI_Enabled = {
 	4: false
 }
 
+# Each element's color (by player id). Filled from ELEMENT_COLORS or, with the colorblind
+# mode on, COLORBLIND_COLORS (apply_colors).
 var playerColors = [
 	"",
 	"ff401a",
@@ -33,6 +35,24 @@ var playerColors = [
 	"1ab2ff",
 	"00e699"
 ]
+const ELEMENT_COLORS = ["", "ff401a", "e6bf00", "1ab2ff", "00e699"]
+## Colorblind mode (Options > Accessibility): fire red, earth green, air yellow, water blue,
+## from the Okabe-Ito palette, which stays distinct with every kind of color blindness
+## (they also differ in brightness: yellow lightest, then green, blue and red)
+const COLORBLIND_COLORS = ["", "e0491c", "00b386", "f0e442", "3a86ff"]
+var colorblind = false
+
+# The colors of the current mode into playerColors. Called at startup, by Options outside
+# a match and when a match starts (a match keeps the colors it started with).
+func apply_colors() -> void:
+	var colors = COLORBLIND_COLORS if colorblind else ELEMENT_COLORS
+	for id in [1, 2, 3, 4]:
+		playerColors[id] = colors[id]
+
+## The water twins' see-through color: aqua, or a light blue in the colorblind mode (aqua
+## is too close to its green earth)
+func twin_color() -> Color:
+	return Color("9cc4ff") if colorblind else Color.AQUA
 
 var isMultiplayerActive = false
 
@@ -304,6 +324,11 @@ var nameplates = false   # Each snake's name under its head
 var snake_eyes = false   # Eyes on the heads, looking at the nearest snake
 var direction_arrow = false # A small arrow in front of each head
 
+# A match is being played (the Playground scene is on)
+func in_match() -> bool:
+	var scene = get_tree().current_scene
+	return scene != null and scene.scene_file_path == "res://scenes/Playground.tscn"
+
 func random_spawns_enabled() -> bool:
 	return online_random_spawns if isMultiplayerActive else random_spawns
 
@@ -370,6 +395,7 @@ const SETTINGS_PATH = "user://settings.cfg"
 func _ready():
 	load_settings()
 	apply_language()
+	apply_colors()
 	apply_volumes()
 	apply_video_settings()
 	_set_cursors()
@@ -415,6 +441,7 @@ func load_settings() -> void:
 	nameplates = config.get_value("accessibility", "nameplates", nameplates)
 	snake_eyes = config.get_value("accessibility", "snake_eyes", snake_eyes)
 	direction_arrow = config.get_value("accessibility", "direction_arrow", direction_arrow)
+	colorblind = config.get_value("accessibility", "colorblind", colorblind)
 	vsync = config.get_value("video", "vsync", vsync)
 	max_fps = config.get_value("video", "max_fps", max_fps)
 	show_fps = config.get_value("video", "show_fps", show_fps)
@@ -445,6 +472,7 @@ func save_settings() -> void:
 	config.set_value("accessibility", "nameplates", nameplates)
 	config.set_value("accessibility", "snake_eyes", snake_eyes)
 	config.set_value("accessibility", "direction_arrow", direction_arrow)
+	config.set_value("accessibility", "colorblind", colorblind)
 	config.set_value("video", "vsync", vsync)
 	config.set_value("video", "max_fps", max_fps)
 	config.set_value("video", "show_fps", show_fps)

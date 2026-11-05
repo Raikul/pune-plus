@@ -99,6 +99,9 @@ func _restyle():
 		style.border_width_bottom = 4
 		card.add_theme_stylebox_override("panel", style)
 		_cooldown_bar(id).custom_minimum_size = Vector2(64, 64)
+		# The symbol fills in the element's color (the scene's tints are the default colors)
+		_cooldown_bar(id).tint_under = color
+		_cooldown_bar(id).tint_progress = color.darkened(0.7)
 	# "FIRST TO 10" under the middle of the bar
 	target_label = Label.new()
 	target_label.add_theme_font_override("font", ODIN_FONT)

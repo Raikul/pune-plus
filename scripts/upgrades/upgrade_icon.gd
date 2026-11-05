@@ -2,7 +2,9 @@ extends Control
 class_name UpgradeIcon
 
 # Animated icon of an upgrade card. Drawn in code so every upgrade gets a small
-# looping animation from the art we already have.
+# looping animation from the art we already have. Trails are drawn like the snakes' own
+# (scripts/trail_segment.gd): one smooth antialiased stroke with round ends, not a row of
+# dots; circles, arcs and shapes are antialiased too (_stroke, _dot, _shape).
 
 const FIREBALL_SHEET = preload("res://fireball sprite/Fires/Small_Fireball_10x26.png")
 const FIREBALL_FRAME_SIZE = Vector2(10, 26)
@@ -41,7 +43,7 @@ func _draw():
 		"fireball_big":
 			var grow = 0.5 + 0.5 * sin(time * 3.0)
 			var ball = _draw_fireball(center, 0.7 + 0.35 * grow)
-			draw_arc(ball, size.y * (0.16 + 0.12 * grow), 0, TAU, 32, Color(1, 0.6, 0.1, 0.9 - 0.6 * grow), 3.0)
+			draw_arc(ball, size.y * (0.16 + 0.12 * grow), 0, TAU, 32, Color(1, 0.6, 0.1, 0.9 - 0.6 * grow), 3.0, true)
 		"gap_wide":
 			_draw_trail(60.0)
 		"gap_narrow":
@@ -100,7 +102,7 @@ func _draw_fireball(pos, scale_mult) -> Vector2:
 	var length = min(size.x, size.y * 1.6) * 0.8 * scale_mult
 	var width = length * FIREBALL_FRAME_SIZE.x / FIREBALL_FRAME_SIZE.y
 	var ball = pos + Vector2(length * 0.2, 0)
-	draw_circle(ball, width * 0.9, Color(1, 0.55, 0.1, 0.25))
+	_dot(ball, width * 0.9, Color(1, 0.55, 0.1, 0.25))
 	# The sheet's flames point up: flip and turn it so the flames trail to the left
 	draw_set_transform(pos, PI / 2, Vector2(1, -1))
 	draw_texture_rect_region(FIREBALL_SHEET, Rect2(-width / 2, -length / 2, width, length), region)
@@ -112,22 +114,33 @@ func _draw_trail(gap_length):
 	var dash = 52.0
 	var period = dash + gap_length
 	var head_x = size.x - 16
+	var stroke = PackedVector2Array()
 	var x = 4.0
-	while x < head_x - 10:
+	while x <= head_x - 10:
 		if fposmod(x - time * 70.0, period) < dash:
-			draw_circle(Vector2(x, _trail_y(x)), 7, color)
-		x += 8.0
-	draw_circle(Vector2(head_x, _trail_y(head_x)), 11, color.lightened(0.35))
+			stroke.append(Vector2(x, _trail_y(x)))
+		elif not stroke.is_empty():
+			_stroke(stroke, color, TRAIL_WIDTH)
+			stroke = PackedVector2Array()
+		x += 2.0
+	_stroke(stroke, color, TRAIL_WIDTH)
+	_dot(Vector2(head_x, _trail_y(head_x)), 11, color.lightened(0.35))
 
 # An aqua twin trail with a shimmer running along it: it never fades to the water color
 func _draw_lasting_twin():
 	var head_x = size.x - 16
+	var points = PackedVector2Array()
+	var colors = PackedColorArray()
 	var x = 4.0
-	while x < head_x - 10:
+	while x <= head_x - 10:
 		var shimmer = 0.5 + 0.5 * sin(x * 0.08 - time * 6.0)
-		draw_circle(Vector2(x, _trail_y(x)), 7, Color.AQUA.lerp(Color.WHITE, shimmer * 0.45))
-		x += 8.0
-	draw_circle(Vector2(head_x, _trail_y(head_x)), 11, Color.AQUA.lightened(0.35))
+		points.append(Vector2(x, _trail_y(x)))
+		colors.append(Global.twin_color().lerp(Color.WHITE, shimmer * 0.45))
+		x += 2.0
+	draw_polyline_colors(points, colors, TRAIL_WIDTH, true)
+	_dot(points[0], TRAIL_WIDTH / 2, colors[0])
+	_dot(points[points.size() - 1], TRAIL_WIDTH / 2, colors[colors.size() - 1])
+	_dot(Vector2(head_x, _trail_y(head_x)), 11, Global.twin_color().lightened(0.35))
 
 func _trail_y(x):
 	return size.y / 2 + sin(x * 0.045 - time * 2.0) * 14
@@ -139,28 +152,29 @@ func _draw_speed(center):
 		var y = center.y + (i - 2) * 12
 		var length = 22 + 14 * ((i * 37) % 3)
 		var x = size.x - fposmod(time * 260.0 + i * 47, size.x + length)
-		draw_line(Vector2(x, y), Vector2(x + length, y), Color(color, 0.45), 3)
-	var trail_x = 8.0
-	while trail_x < head.x - 10:
-		draw_circle(Vector2(trail_x, center.y), 6, color)
-		trail_x += 8.0
-	draw_circle(head, 12, color.lightened(0.35))
+		_stroke(PackedVector2Array([Vector2(x, y), Vector2(x + length, y)]), Color(color, 0.45), 3.0)
+	_stroke(PackedVector2Array([Vector2(8, center.y), Vector2(head.x - 10, center.y)]), color, TRAIL_WIDTH - 2.0)
+	_dot(head, 12, color.lightened(0.35))
 	for i in 2:
 		var tip_x = size.x * 0.82 + i * 13 + fposmod(time * 30.0, 6.0)
-		draw_polyline([Vector2(tip_x - 9, center.y - 11), Vector2(tip_x, center.y), Vector2(tip_x - 9, center.y + 11)], Color.WHITE, 4)
+		_stroke(PackedVector2Array([Vector2(tip_x - 9, center.y - 11), Vector2(tip_x, center.y), Vector2(tip_x - 9, center.y + 11)]), Color.WHITE, 4.0)
 
 # Cooldown ring around the Punchi icon that refills quickly and pops when ready
 func _draw_cooldown(center):
 	var progress = fmod(time, COOLDOWN_CYCLE) / (COOLDOWN_CYCLE * 0.7)
 	var radius = size.y * 0.38
-	draw_arc(center, radius, 0, TAU, 48, Color(0.35, 0.35, 0.35), 8)
+	draw_arc(center, radius, 0, TAU, 64, Color(0.35, 0.35, 0.35), 8, true)
 	if progress < 1.0:
-		draw_arc(center, radius, -PI / 2, -PI / 2 + TAU * progress, 48, color, 8)
+		var end = -PI / 2 + TAU * progress
+		draw_arc(center, radius, -PI / 2, end, 64, color, 8, true)
+		# Round ends, like a trail
+		_dot(center + Vector2.UP * radius, 4, color)
+		_dot(center + Vector2.RIGHT.rotated(end) * radius, 4, color)
 	else:
 		# Ready: full ring with a burst expanding outward
 		var burst = (progress - 1.0) / 0.43
-		draw_arc(center, radius, 0, TAU, 48, color.lightened(0.4), 8)
-		draw_arc(center, radius + 4 + burst * 14, 0, TAU, 48, Color(color, 1.0 - burst), 3)
+		draw_arc(center, radius, 0, TAU, 64, color.lightened(0.4), 8, true)
+		draw_arc(center, radius + 4 + burst * 14, 0, TAU, 64, Color(color, 1.0 - burst), 3, true)
 	var icon_height = radius * 1.2
 	var icon_width = icon_height * PUNCHI_ICON.get_width() / float(PUNCHI_ICON.get_height())
 	draw_texture_rect(PUNCHI_ICON, Rect2(center - Vector2(icon_width, icon_height) / 2, Vector2(icon_width, icon_height)), false)
@@ -202,9 +216,8 @@ func _draw_wide_body(center):
 	for side in [-1, 1]:
 		var base = center + Vector2(side * (half_width + 4), 0)
 		var tip = base + Vector2(side * 14, 0)
-		draw_line(base, tip, color, 4)
-		draw_line(tip, tip + Vector2(-side * 8, -8), color, 4)
-		draw_line(tip, tip + Vector2(-side * 8, 8), color, 4)
+		_stroke(PackedVector2Array([base, tip]), color, 4.0)
+		_stroke(PackedVector2Array([tip + Vector2(-side * 8, -8), tip, tip + Vector2(-side * 8, 8)]), color, 4.0)
 
 # The Earth symbol walks through a stone wall, which turns see-through while it passes
 func _draw_stone_walk(center):
@@ -231,7 +244,7 @@ func _draw_burrower(center):
 		# Bits of rock flying off where it digs
 		for i in 3:
 			var bit = Vector2(x, center.y) + Vector2(randf_range(-8, 8), randf_range(-size.y * 0.25, size.y * 0.25))
-			draw_circle(bit, 2.5, Color(0.8, 0.7, 0.55))
+			_dot(bit, 2.5, Color(0.8, 0.7, 0.55))
 
 # The Earth symbol with a ring that runs past a full turn: the armor lasts longer
 func _draw_bedrock(center):
@@ -249,7 +262,7 @@ func _draw_skip(center):
 	draw_rect(Rect2(center.x - size.x * 0.36, center.y - size.y * 0.2, size.x * 0.24, size.y * 0.4), Color(1, 1, 1, 0.35), false, 3.0)
 	for i in 2:
 		var x = center.x + i * 18.0 + nudge
-		draw_colored_polygon(PackedVector2Array([Vector2(x, center.y - 16), Vector2(x + 18, center.y), Vector2(x, center.y + 16)]), Color(1, 1, 1, 0.85))
+		_shape(PackedVector2Array([Vector2(x, center.y - 16), Vector2(x + 18, center.y), Vector2(x, center.y + 16)]), Color(1, 1, 1, 0.85))
 
 # A fireball flying across, a strip of flickering flames behind it
 func _draw_wildfire(center):
@@ -259,7 +272,7 @@ func _draw_wildfire(center):
 		var age = (x - flame_x) / size.x
 		var flicker = 0.7 + 0.3 * sin(time * 20.0 + flame_x)
 		var height = (14.0 - age * 8.0) * flicker
-		draw_colored_polygon(PackedVector2Array([
+		_shape(PackedVector2Array([
 			Vector2(flame_x - 6, center.y + 8), Vector2(flame_x, center.y + 8 - height * 1.6), Vector2(flame_x + 6, center.y + 8)]),
 			Color(1.0, 0.45 + 0.3 * flicker, 0.1, 0.9 - age * 0.6))
 		flame_x += 10.0
@@ -272,11 +285,11 @@ func _draw_phoenix(center):
 		_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, false, 1.0 - cycle / 0.35)
 	elif cycle < 0.75:
 		var pulse = 0.5 + 0.5 * sin(time * 9.0)
-		draw_circle(center, 6.0 + 3.0 * pulse, Color(1, 0.6, 0.15, 0.9))
+		_dot(center, 6.0 + 3.0 * pulse, Color(1, 0.6, 0.15, 0.9))
 		draw_arc(center, 20.0, -PI / 2, -PI / 2 + TAU * (cycle - 0.35) / 0.4, 32, Color(1, 0.5, 0.1), 3.0, true)
 	else:
 		var burst = (cycle - 0.75) / 0.25
-		draw_circle(center, size.x * 0.4 * burst, Color(1, 0.55, 0.1, 0.4 * (1.0 - burst)))
+		_dot(center, size.x * 0.4 * burst, Color(1, 0.55, 0.1, 0.4 * (1.0 - burst)))
 		_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.42, false, burst)
 
 # A bolt hits a head, which crackles; the Scrambler swaps its arrows too
@@ -290,7 +303,7 @@ func _draw_shock(center, scramble):
 	points.append(head)
 	draw_polyline(points, Color(0.55, 0.85, 1.0, 0.6), 6.0, true)
 	draw_polyline(points, Color(1, 1, 1, 0.6 + 0.4 * flash), 2.0, true)
-	draw_circle(head, 12.0, Color(color, 0.9))
+	_dot(head, 12.0, Color(color, 0.9))
 	for i in 3:
 		var angle = time * 5.0 + i * TAU / 3.0
 		var a = head + Vector2.RIGHT.rotated(angle) * 15.0
@@ -302,8 +315,8 @@ func _draw_shock(center, scramble):
 		var left = lerp(center.x - 24.0, center.x + 24.0, swap)
 		var right = lerp(center.x + 24.0, center.x - 24.0, swap)
 		# Left arrow and right arrow trading places
-		draw_colored_polygon(PackedVector2Array([Vector2(left - 8, y), Vector2(left + 6, y - 9), Vector2(left + 6, y + 9)]), Color.WHITE)
-		draw_colored_polygon(PackedVector2Array([Vector2(right + 8, y), Vector2(right - 6, y - 9), Vector2(right - 6, y + 9)]), Color.WHITE)
+		_shape(PackedVector2Array([Vector2(left - 8, y), Vector2(left + 6, y - 9), Vector2(left + 6, y + 9)]), Color.WHITE)
+		_shape(PackedVector2Array([Vector2(right + 8, y), Vector2(right - 6, y - 9), Vector2(right - 6, y + 9)]), Color.WHITE)
 	else:
 		_draw_text("5s", size.y * 0.95, 24)
 
@@ -320,9 +333,7 @@ func _draw_storm_fence(center):
 	var trail_color = color
 	for i in 3:
 		var a = left + i * (stroke + gap)
-		draw_line(Vector2(a, y), Vector2(a + stroke, y), trail_color, 7.0, true)
-		draw_circle(Vector2(a, y), 3.5, trail_color)
-		draw_circle(Vector2(a + stroke, y), 3.5, trail_color)
+		_stroke(PackedVector2Array([Vector2(a, y), Vector2(a + stroke, y)]), trail_color, 7.0)
 	for i in 2:
 		var a = Vector2(left + stroke + i * (stroke + gap), y)
 		var b = a + Vector2(gap, 0)
@@ -333,12 +344,35 @@ func _draw_storm_fence(center):
 			points.append(b)
 			draw_polyline(points, Color(0.55, 0.85, 1.0, 0.55 * flash), 7.0, true)
 			draw_polyline(points, Color(1, 1, 1, flash), 2.2, true)
-			draw_circle(a, 5.0, Color(1, 1, 1, 0.8 * flash))
-			draw_circle(b, 5.0, Color(1, 1, 1, 0.8 * flash))
+			_dot(a, 5.0, Color(1, 1, 1, 0.8 * flash))
+			_dot(b, 5.0, Color(1, 1, 1, 0.8 * flash))
 	# A snake head about to cross the second gap from below
 	var head_x = left + 2 * stroke + gap * 1.5
 	var head_y = lerp(size.y * 0.95, y + 16.0, clamp(cycle / 0.7, 0.0, 1.0))
-	draw_circle(Vector2(head_x, head_y), 7.0, Color(1, 1, 1, 0.9) if not lit else Color(1, 0.4, 0.3, 0.9))
+	_dot(Vector2(head_x, head_y), 7.0, Color(1, 1, 1, 0.9) if not lit else Color(1, 0.4, 0.3, 0.9))
+
+## Width of the trails in the icons
+const TRAIL_WIDTH = 13.0
+
+# A smooth trail stroke: an antialiased line through the points with round ends
+func _stroke(points: PackedVector2Array, stroke_color, width):
+	if points.is_empty():
+		return
+	if points.size() > 1:
+		draw_polyline(points, stroke_color, width, true)
+	_dot(points[0], width / 2, stroke_color)
+	if points.size() > 1:
+		_dot(points[points.size() - 1], width / 2, stroke_color)
+
+func _dot(pos, radius, dot_color):
+	draw_circle(pos, radius, dot_color, true, -1.0, true)
+
+# A filled shape with a soft (antialiased) edge
+func _shape(points: PackedVector2Array, shape_color):
+	draw_colored_polygon(points, shape_color)
+	var outline = points.duplicate()
+	outline.append(points[0])
+	draw_polyline(outline, shape_color, 1.0, true)
 
 func _draw_symbol(texture, pos, width, flipped, alpha = 1.0, stretch = Vector2.ONE):
 	var height = width * texture.get_height() / float(texture.get_width())

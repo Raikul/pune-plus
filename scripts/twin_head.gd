@@ -35,10 +35,12 @@ signal body_laid(body_position, body_rotation)
 
 @export var snakeBodyScene : PackedScene
 
-# Ghostly look, so the twin can't be mistaken for the water snake itself: its usual aqua,
-# but see-through and shimmering (scripts/fx/twin_ghost.gdshader). (No particles behind the
-# head: during a gap they looked like real trail.)
-const GHOST_COLOR = Color.AQUA
+# Ghostly look, so the twin can't be mistaken for the water snake itself: its usual aqua
+# (light blue in the colorblind mode: Global.twin_color), but see-through and shimmering
+# (scripts/fx/twin_ghost.gdshader). (No particles behind the head: during a gap they
+# looked like real trail.)
+static func ghost_color() -> Color:
+	return Global.twin_color()
 static var ghost_material: ShaderMaterial
 static func get_ghost_material() -> ShaderMaterial:
 	if ghost_material == null:
@@ -64,7 +66,7 @@ func _ready():
 	_add_ghost_fx()
 
 func _add_ghost_fx():
-	$BodySprite.modulate = GHOST_COLOR
+	$BodySprite.modulate = ghost_color()
 	$BodySprite.material = get_ghost_material()
 
 func _process(delta):
@@ -185,7 +187,7 @@ func createBody(scene):
 
 	snakeBody.add_to_group("TwinBodies")
 	# Drawn as a line (scripts/trail_segment.gd); see-through, so no overlapping joints
-	snakeBody.modulate = GHOST_COLOR
+	snakeBody.modulate = ghost_color()
 	snakeBody.material = get_ghost_material()
 	snakeBody.round_joints = false
 	snakeBody.collision_layer = 0b100

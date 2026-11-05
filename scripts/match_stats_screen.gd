@@ -155,10 +155,11 @@ func _column(id, winner):
 	var award_gap = Control.new()
 	award_gap.custom_minimum_size.y = 8
 	box.add_child(award_gap)
-	var awards = HFlowContainer.new()
-	awards.alignment = FlowContainer.ALIGNMENT_CENTER
-	awards.add_theme_constant_override("h_separation", 16)
-	awards.add_theme_constant_override("v_separation", 14)
+	# One award per line: the badge, and what it's for to its right (the badges share a width)
+	var awards = GridContainer.new()
+	awards.columns = 2
+	awards.add_theme_constant_override("h_separation", 10)
+	awards.add_theme_constant_override("v_separation", 6)
 	box.add_child(awards)
 
 	var filler = Control.new()
@@ -260,34 +261,39 @@ func awards_for(totals: Dictionary) -> Dictionary:
 func _show_awards(totals):
 	var given = awards_for(totals)
 	for id in ids:
-		var flow = columns[id].awards
-		for child in flow.get_children():
+		var list = columns[id].awards
+		for child in list.get_children():
 			child.queue_free()
 		for award in given[id].slice(0, MAX_AWARDS):
-			flow.add_child(_award_chip(award))
+			list.add_child(_award_chip(award))
+			var description = _label(tr(_award_key(award) + "_DESC"), 16, DIM)
+			description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			description.add_theme_constant_override("line_spacing", -3)
+			description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			list.add_child(description)
 
 func _award_chip(award) -> Control:
 	var chip = PanelContainer.new()
-	chip.tooltip_text = tr(_award_key(award) + "_DESC")
+	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var style = StyleBoxFlat.new()
 	style.bg_color = GOLD
 	style.border_color = GOLD.lightened(0.4)
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(14)
-	style.content_margin_left = 10
-	style.content_margin_right = 14
-	style.content_margin_top = 5
-	style.content_margin_bottom = 5
+	style.content_margin_left = 8
+	style.content_margin_right = 10
+	style.content_margin_top = 3
+	style.content_margin_bottom = 3
 	chip.add_theme_stylebox_override("panel", style)
 	var row = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
+	row.add_theme_constant_override("separation", 4)
 	chip.add_child(row)
 	var icon = AwardIcon.new()
 	icon.award = award[0]
 	icon.custom_minimum_size = Vector2(24, 24)
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(icon)
-	row.add_child(_label(tr(_award_key(award)), 18, AWARD_INK, HORIZONTAL_ALIGNMENT_CENTER))
+	row.add_child(_label(tr(_award_key(award)), 16, AWARD_INK))
 	return chip
 
 # AWARD_LONGEST_TRAIL...

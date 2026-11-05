@@ -89,7 +89,8 @@ OPT_WISDOM,Wisdom on the upgrade screen,Sabiduría en la pantalla de mejoras,强
 OPT_NAMEPLATES,Nameplates on snakes,Nombres sobre las serpientes,蛇身显示名字
 OPT_DIRECTION_ARROW,Direction arrow,Flecha de dirección,方向箭头
 OPT_SNAKE_EYES,Snake eyes (look at the nearest snake),Ojos (miran a la serpiente más cercana),蛇眼（注视最近的蛇）
-OPT_NEXT_ROUND_NOTE,Both apply from the next round.,Se aplican desde la siguiente ronda.,从下一回合开始生效。
+OPT_NEXT_ROUND_NOTE,"Changes apply from the next round; during a match, colors from the next match.","Los cambios se aplican desde la siguiente ronda; durante una partida, los colores desde la siguiente partida.",更改从下一回合开始生效；比赛中更改的配色从下一场比赛开始生效。
+OPT_COLORBLIND,Colorblind mode (distinct colors),Modo daltónico (colores bien distintos),色盲模式（高区分度配色）
 OPT_KEYS_NOTE,"Each player's keys are set in player setup (Redefine Keys)
 or in the online lobby (Keys).","Las teclas de cada jugador se configuran en la selección de jugadores (Redefinir teclas)
 o en la sala en línea (Teclas).","每位玩家的按键可在玩家设置（重设按键）
@@ -113,14 +114,12 @@ PATCH_NOTES_TITLE,PATCH NOTES,NOTAS DEL PARCHE,更新日志
 PATCH_NOTES_CURRENT,current version,versión actual,当前版本
 PAUSE_RESUME,Resume,Continuar,继续
 PAUSE_SIMULATE,Simulate Round,Simular ronda,模拟回合
-INSTR_FIRE,Throws a ball of fire that destroys everything it comes into contact with,Lanza una bola de fuego que destruye todo lo que toca,发射火球，摧毁接触到的一切
-INSTR_EARTH,"Provides temporary invincibility, making you immune to attacks",Da invencibilidad temporal: los ataques no te afectan,获得短暂无敌，免疫一切攻击
-INSTR_AIR,"Teleports you to the point, passing through snakes unharmed","Te teletransporta al punto, atravesando serpientes sin daño",瞬移到标记点，穿过蛇身毫发无伤
-INSTR_WATER,"The player splits into two. If one dies, you control the other","El jugador se divide en dos. Si uno muere, controlas al otro",玩家一分为二。若其中一个死亡，你将控制另一个
-INSTR_SCORING,"Players earn points when other players die either by touching walls or an opponent.
-Additionally you may earn points by picking up shrooms, only in Shroom Mode","Los jugadores ganan puntos cuando otros mueren al tocar una pared o a un rival.
-Además puedes ganar puntos recogiendo hongos, solo en el modo Hongos","当其他玩家撞墙或撞上对手而死亡时，你会得分。
-在蘑菇模式中，拾取蘑菇也能得分"
+INSTR_TITLE,HOW TO PLAY,CÓMO JUGAR,游戏玩法
+INSTR_CONTROLS,"Every snake turns with Left and Right and uses its element's power with Punchi (Up). Crashing into a wall, the edge or any trail, yours included, takes you out of the round.","Cada serpiente gira con Izquierda y Derecha y usa el poder de su elemento con Punchi (Arriba). Chocar contra un muro, el borde o cualquier estela, incluida la tuya, te saca de la ronda.",每条蛇用左、右键转向，用 Punchi（上）键使用元素能力。撞上墙壁、边界或任何尾迹（包括你自己的）都会让你出局。
+INSTR_SCORING_TITLE,POINTS,PUNTOS,得分
+INSTR_SCORING,"Every time a snake crashes, each snake still alive earns a point. The round ends when one is left, and the first to the target wins the match. In 2v2, your team scores for every enemy snake that crashes. With Shrooms on, picking one up also scores.","Cada vez que una serpiente choca, todas las que siguen vivas ganan un punto. La ronda termina cuando queda una, y la primera en llegar al objetivo gana la partida. En 2v2, tu equipo suma por cada serpiente rival que choca. Con los hongos activados, recoger uno también suma.",每当有蛇撞毁，所有仍存活的蛇各得一分。只剩一条蛇时回合结束，最先达到目标分数者赢得比赛。2v2 模式中，每有一条敌方蛇撞毁，你的队伍得一分。开启蘑菇时，拾取蘑菇也能得分。
+PAUSE_TITLE,PAUSED,PAUSA,已暂停
+INSTR_GALLERY_BUTTON,Power gallery,Galería de poderes,能力图鉴
 SETUP_REDEFINE_KEYS,Redefine Keys,Redefinir teclas,重设按键
 SETUP_SELECT,Select,Elegir,选择
 SETUP_DESELECT,Deselect,Quitar,取消选择

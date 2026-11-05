@@ -530,9 +530,6 @@ grow_horizontal = 0
 grow_vertical = 1
 size_flags_stretch_ratio = 1.22
 
-[node name="Label" parent="PauseLayer/Instrucciones" index="2" unique_id=124205885]
-text = "INSTR_SCORING"
-
 [node name="MenuPause" type="Control" parent="PauseLayer" unique_id=1131243987]
 process_mode = 3
 visible = false
@@ -611,4 +608,3 @@ visible = false
 [connection signal="timeout" from="Events/ShroomTimer" to="Events" method="_on_shroom_timer_timeout"]
 
 [editable path="Lesson"]
-[editable path="PauseLayer/Instrucciones"]

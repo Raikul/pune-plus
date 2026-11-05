@@ -26,12 +26,30 @@ func _ready():
 	_polish_cards()
 	_build_match_options()
 	_build_name_boxes()
+	_apply_card_colors()
 	# Borders start hidden (nobody selected yet)
 	for id in [1, 2, 3, 4]:
 		activatePlayer(get("player%dActive" % id), [P1Box, P2Box, P3Box, P4Box][id - 1], Global.playerColors[id])
 
 # Look tweaks on the four player cards (individual_player_setup.tscn)
 const SETUP_ACCENT = Color(1, 0.6, 0.15)
+# id -> the parts drawn in the element's color: {"header", "tagline", "symbol", "name"} (styles and nodes)
+var card_parts = {}
+
+# The element colors of the current mode (Options can switch the colorblind mode while
+# this screen waits hidden in the main menu)
+func _apply_card_colors():
+	for id in card_parts:
+		var parts = card_parts[id]
+		var element_color = Color(Global.playerColors[id])
+		parts.header.border_color = element_color
+		parts.tagline.add_theme_color_override("font_color", element_color.lightened(0.3))
+		if parts.symbol:
+			parts.symbol.modulate = element_color
+		if parts.has("name"):
+			parts.name.border_color = element_color
+		activatePlayer(get("player%dActive" % id), _card(id), Global.playerColors[id])
+
 func _polish_cards():
 	for id in [1, 2, 3, 4]:
 		var box = [P1Box, P2Box, P3Box, P4Box][id - 1]
@@ -50,6 +68,7 @@ func _polish_cards():
 		header_style.border_color = element_color
 		header_style.border_width_bottom = 4
 		header.add_theme_stylebox_override("panel", header_style)
+		card_parts[id] = {"header": header_style, "symbol": box.get_node_or_null("PanelContainer2/PanelContainer/MarginContainer/TextureRect")}
 		# PUNCHI key: no black plate behind the key name, like Left and Right
 		var punchi_plate = box.get_node("InputList/Up/MarginContainer/PanelContainer")
 		punchi_plate.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
@@ -61,6 +80,7 @@ func _polish_cards():
 		tagline.add_theme_font_size_override("font_size", 28)
 		tagline.add_theme_color_override("font_color", element_color.lightened(0.3))
 		box.get_node("PanelContainer2/PanelContainer").add_child(tagline)
+		card_parts[id]["tagline"] = tagline
 		var bottom_space = Control.new()
 		bottom_space.custom_minimum_size.y = 10
 		box.get_node("PanelContainer2/PanelContainer").add_child(bottom_space)
@@ -92,6 +112,7 @@ func _pill_button(text_size, min_width):
 	
 
 func recalculate_all_labels():
+	_apply_card_colors()
 	_on_redefine_keys_recalculate_labels(1)
 	_on_redefine_keys_recalculate_labels(2)
 	_on_redefine_keys_recalculate_labels(3)
@@ -434,6 +455,7 @@ func _build_name_boxes():
 		style.border_color = Color(Global.playerColors[id])
 		style.border_width_bottom = 3
 		holder.add_theme_stylebox_override("panel", style)
+		card_parts[id]["name"] = style
 		holder.tooltip_text = "SETUP_DRAG_NAME"
 		holder.mouse_default_cursor_shape = Control.CURSOR_MOVE
 		var row = HBoxContainer.new()

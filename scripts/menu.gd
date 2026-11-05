@@ -94,6 +94,16 @@ func _on_multiplayer_pressed():
 	get_tree().change_scene_to_file("res://scenes/net/online_lobby.tscn")
 
 
+# Like Options: the menu steps aside while it's open
 func _on_instructions_pressed() -> void:
+	$CanvasLayer/TopMenu.hide()
+	$CanvasLayer/ChangeLog.hide()
 	%Instrucciones.show()
+	if not %Instrucciones.closed.is_connected(_on_instructions_closed):
+		%Instrucciones.closed.connect(_on_instructions_closed)
+
+func _on_instructions_closed() -> void:
+	$CanvasLayer/TopMenu.show()
+	$CanvasLayer/ChangeLog.show()
+	play_button.grab_focus.call_deferred()
 	pass

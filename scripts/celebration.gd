@@ -108,7 +108,7 @@ func _split(snake):
 		var twin = Snake.new()
 		twin.player_id = snake.player_id
 		twin.ghost = true
-		twin.color = Color.AQUA
+		twin.color = Global.twin_color()
 		twin.position = snake.position
 		# Fanned out: one to each side and one straight ahead
 		twin.heading = snake.heading + (i - (count - 1) / 2.0) * 0.7

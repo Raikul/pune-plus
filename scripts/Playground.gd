@@ -20,6 +20,11 @@ var teams_mode = false
 @onready var animation_player = $AnimationPlayer
 @onready var spawn_locations = [[0,0],[300,300],[300,900],[1400,900],[1400,300]]
 
+# Before the HUD and everything else get ready: the match's colors (a colorblind mode
+# switched on in the pause menu waits for the next match)
+func _enter_tree():
+	Global.apply_colors()
+
 func _ready():
 	# Every match starts without upgrades; they build up round after round
 	Global.reset_all_player_stats()
