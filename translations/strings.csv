@@ -204,7 +204,7 @@ UPG_WATER_TWIN_BURST_DESC,"Your power summons twins two at a time, up to your ma
 UPG_WATER_THIRD_TWIN,Triplets,Trillizos,三胞胎
 UPG_WATER_THIRD_TWIN_DESC,Keep up to 3 twins alive.,Mantén hasta 3 gemelos vivos.,最多同时保留 3 个分身。
 UPG_WATER_LASTING_TWIN,Lasting Twin,Gemelo Duradero,持久分身
-UPG_WATER_LASTING_TWIN_DESC,Your twin's trail never sheds: it stays aqua and never blocks you.,La estela de tu gemelo nunca se suelta: sigue siendo agua y nunca te bloquea.,分身的尾迹永不脱落：始终保持水色，永远不会挡住你。
+UPG_WATER_LASTING_TWIN_DESC,Your twin's trail never sheds: it keeps its ghost color and never blocks you.,La estela de tu gemelo nunca se suelta: conserva su color fantasma y nunca te bloquea.,分身的尾迹永不脱落：始终保持幽灵般的颜色，永远不会挡住你。
 UPG_SKIP,Skip,Saltar,跳过
 UPG_SKIP_DESC,Take nothing this time and keep the rest for later.,No elijas nada esta vez y guarda el resto para más adelante.,这次什么都不拿，把剩下的留到以后。
 UPGRADES_TITLE,CHOOSE YOUR UPGRADE,ELIGE TU MEJORA,选择你的强化
@@ -415,16 +415,12 @@ UPG_FIRE_HEARTH,Hearth,Hogar,炉火
 UPG_FIRE_HEARTH_DESC,"A circle of fire burns where you start each round, for the whole round. It kills other snakes, never you. With Phoenix, rising lights another one.","Un círculo de fuego arde donde empiezas cada ronda, durante toda la ronda. Mata a las demás serpientes, nunca a ti. Con Fénix, al renacer enciendes otro.",每回合在你出生的地方燃起一圈火焰，持续整回合。它会烧死其他蛇，但不会伤到你。若有凤凰，重生时会再点燃一圈。
 UPG_FIRE_PYRE,Pyre,Pira,火葬堆
 UPG_FIRE_PYRE_DESC,"When your fireball kills a snake, a circle of fire is left burning where it fell.","Cuando tu bola de fuego mata a una serpiente, queda un círculo de fuego ardiendo donde cayó.",你的火球击杀一条蛇时，会在它倒下处留下一圈燃烧的火焰。
-UPG_WATER_ICE,Black Ice,Hielo Negro,黑冰
-UPG_WATER_ICE_DESC,The gaps in your trail freeze over for 10 s. Other snakes on the ice slide: they turn slower and keep drifting the way they were going.,Los huecos de tu estela se congelan durante 10 s. Las demás serpientes resbalan sobre el hielo: giran más lento y siguen derrapando hacia donde iban.,你尾迹中的缺口会结冰 10 秒。其他蛇在冰上会打滑：转向变慢，并继续朝原方向滑行。
-UPG_EARTH_ROOTS,Strangling Roots,Raíces Asfixiantes,缠绕之根
-UPG_EARTH_ROOTS_DESC,Roots grow in the gaps of your trail for 10 s. Other snakes crawl through them at a third of their speed.,En los huecos de tu estela crecen raíces durante 10 s. Las demás serpientes las cruzan a un tercio de su velocidad.,你尾迹的缺口中会长出树根，持续 10 秒。其他蛇穿过时速度降为三分之一。
 UPG_VOID_DURATION,Lingering Void,Vacío Persistente,持久虚空
 UPG_VOID_DURATION_DESC,Your void stays open 1 s longer.,Tu vacío permanece abierto 1 s más.,你的虚空多开启 1 秒。
 UPG_VOID_RADIUS,Wide Void,Vacío Amplio,广域虚空
 UPG_VOID_RADIUS_DESC,Your void is 30% wider.,Tu vacío es un 30% más amplio.,你的虚空范围扩大 30%。
 UPG_VOID_MEMORY,Long Memory,Memoria Larga,长久记忆
-UPG_VOID_MEMORY_DESC,Absorbed powers last 8 s instead of 4.,Los poderes absorbidos duran 8 s en lugar de 4.,吞噬的能力保留 8 秒，而不是 4 秒。
+UPG_VOID_MEMORY_DESC,Absorbed powers stay for two presses instead of one.,Los poderes absorbidos duran dos toques en lugar de uno.,吞噬的能力可施放两次，而不是一次。
 UPG_VOID_MIMIC,Perfect Mimic,Imitación Perfecta,完美拟态
 UPG_VOID_MIMIC_DESC,You absorb powers with their owner's upgrades.,Absorbes los poderes con las mejoras de su dueño.,吞噬的能力会带上其原主的强化。
 UPG_VOID_HOARD,Event Horizon,Horizonte de Sucesos,事件视界
@@ -434,3 +430,15 @@ WISDOM_SRC_NIETZSCHE,after Friedrich Nietzsche,según Friedrich Nietzsche,化用
 WISDOM_VOID_1,Form is emptiness; emptiness is form.,La forma es vacío; el vacío es forma.,色即是空，空即是色。
 WISDOM_VOID_2,"Stare long into the abyss, and the abyss stares back into you.","Mira largo tiempo al abismo, y el abismo te devolverá la mirada.",凝视深渊过久，深渊也会凝视你。
 WISDOM_VOID_3,"Clay shapes the bowl, but the emptiness inside is what holds the tea.","La arcilla da forma al cuenco, pero es el vacío de dentro lo que guarda el té.",埏埴以为器，当其无，有器之用。
+OPT_AUDIO_DEVICE,Output device,Dispositivo de salida,输出设备
+OPT_DEVICE_DEFAULT,System default,El del sistema,系统默认
+ROUND_WINNER,%s takes the round!,¡%s gana la ronda!,%s 赢下本回合！
+STAT_ALIVE_TIME,Time alive,Tiempo vivo,存活时长
+MATCH_RANDOM_TEAMS,Random teams: %s,Equipos al azar: %s,随机分队：%s
+PAUSE_SPACE_HINT,"Paused
+Click to continue, Esc to restart the round","En pausa
+Haz clic para seguir, Esc para reiniciar la ronda","已暂停
+点击继续，按 Esc 重开本回合"
+REPLAY_CLOSE_CALL,CLOSE CALL,POR LOS PELOS,千钧一发
+REPLAY_CLUTCH,CLUTCH,JUGADA SALVADORA,关键救场
+REPLAY_PHASE,STONE WALKER,PASO DE PIEDRA,穿石而过

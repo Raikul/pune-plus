@@ -88,10 +88,6 @@ func _draw():
 			_draw_hearth(center, false)
 		"pyre":
 			_draw_hearth(center, true)
-		"ice":
-			_draw_gap_patch(center, true)
-		"roots":
-			_draw_gap_patch(center, false)
 		"void_time", "void_wide", "void_memory", "void_mimic", "void_hoard":
 			_draw_void(center, kind)
 
@@ -380,37 +376,6 @@ func _draw_hearth(center, pyre):
 	else:
 		_draw_symbol(FIRE_WATER_SYMBOL, ring_center, size.x * 0.26, false)
 
-# A trail with a gap; in the gap a patch of ice (a head sliding across it) or roots
-func _draw_gap_patch(center, ice):
-	var y = center.y + size.y * 0.12
-	var gap_from = size.x * 0.38
-	var gap_to = size.x * 0.62
-	_stroke(PackedVector2Array([Vector2(8, y), Vector2(gap_from, y)]), color, TRAIL_WIDTH - 3.0)
-	_stroke(PackedVector2Array([Vector2(gap_to, y), Vector2(size.x - 8, y)]), color, TRAIL_WIDTH - 3.0)
-	var patch = Vector2((gap_from + gap_to) / 2.0, y)
-	var r = size.y * 0.3
-	if ice:
-		_dot(patch, r, Color(0.75, 0.92, 1.0, 0.35))
-		draw_arc(patch, r, 0, TAU, 40, Color(0.85, 0.96, 1.0, 0.9), 2.0, true)
-		for i in 3:
-			var a = TAU * i / 3.0 + 0.4
-			draw_line(patch, patch + Vector2.RIGHT.rotated(a) * r * 0.7, Color(1, 1, 1, 0.7), 1.5, true)
-		# A head sliding sideways across it
-		var t = fmod(time, 1.8) / 1.8
-		var head = patch + Vector2(lerp(-r, r, t), -r * 0.9 + sin(t * PI) * r * 0.5)
-		_dot(head, 7.0, Color(1, 0.4, 0.3))
-		_stroke(PackedVector2Array([head + Vector2(-14, 4), head]), Color(1, 0.4, 0.3, 0.6), 4.0)
-	else:
-		_dot(patch, r, Color(0.3, 0.2, 0.08, 0.6))
-		for i in 5:
-			var a = TAU * i / 5.0 + sin(time * 2.0 + i) * 0.2
-			var tip = patch + Vector2.RIGHT.rotated(a) * r * 0.95
-			var mid = patch.lerp(tip, 0.5) + Vector2.RIGHT.rotated(a).orthogonal() * 5.0
-			_stroke(PackedVector2Array([patch, mid, tip]), Color(0.5, 0.36, 0.16), 3.0)
-		# A head crawling over it
-		var t = fmod(time, 3.0) / 3.0
-		_dot(patch + Vector2(lerp(-r, r, t), -r * 0.6), 7.0, Color(1, 0.4, 0.3))
-
 # Void: its symbol, with what each upgrade does to the void around it
 func _draw_void(center, which):
 	var symbol = Global.element_symbol(Global.VOID_ID)
@@ -431,7 +396,7 @@ func _draw_void(center, which):
 			for i in 2:
 				var a = time * 1.5 + PI * i
 				_dot(center + Vector2.RIGHT.rotated(a) * r * 0.9, 6.0, Color(Global.playerColors[1 + i * 3]))
-			_draw_text("8s", size.y * 0.95, 22)
+			_draw_text("x2", size.y * 0.95, 22)
 		"void_mimic":
 			# A power orb with its upgrade badge
 			var a = time * 1.8

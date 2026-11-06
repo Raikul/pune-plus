@@ -180,6 +180,17 @@ func _update_resolution_row():
 func _audio_page(page):
 	for bus in ["Master", "Music", "Effects"]:
 		_slider(page, tr("OPT_VOLUME_" + bus.to_upper()), bus)
+	# The system's sound outputs (speakers, headphones...); "Default" follows the system
+	var devices = Array(AudioServer.get_output_device_list())
+	var names = devices.map(func(device): return tr("OPT_DEVICE_DEFAULT") if device == "Default" else device)
+	var row = _selector(page, tr("OPT_AUDIO_DEVICE"), names,
+		func(): return max(devices.find(Global.audio_device), 0),
+		func(i):
+			Global.audio_device = devices[i]
+			Global.apply_audio_device())
+	# Long device names: cut short on the button
+	row.get_meta("control").clip_text = true
+	row.get_meta("control").text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 
 func _gameplay_page(page):
 	# Each language by its own name

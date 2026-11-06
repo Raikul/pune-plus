@@ -5,11 +5,13 @@ class_name VoidPower extends Power
 #  - a rival's fireball it touches: Fire (the fireball is swallowed)
 #  - a rival's rock (Earth's stone path): Earth
 #  - a rival water twin's head: Water
-#  - being electrocuted (Static Shock, Storm Fence): Air, and the shock does nothing
+#  - being electrocuted (Static Shock, Storm Fence), or Air's jump bolt or Storm Fence
+#    lightning crossing the void: Air (a shock does nothing)
 #  - a snake that crashes into Void's trail: that snake's power, for the whole round
 # Absorbing resets the Punchi cooldown (10 s: Global.VOID_COOLDOWN). An absorbed power
-# lasts void.absorb_time seconds (4) and is cast on the next Punchi press, together with every other one held (and the
-# void opens again). Powers kept for the round are cast on every press. With Water held,
+# stays until the next Punchi press (void.absorb_uses presses), which casts it together with
+# every other one held (and the void opens again). Powers kept for the round are cast on every press. What it holds
+# shows as bands of color on its newest trail (VoidField). With Water held,
 # its twins copy the other powers too (fireballs, stone armor and path, jumps).
 # Upgrades: longer, wider, longer-held absorbs, absorbs with their owner's upgrades (Epic,
 # void.keep_upgrades) and absorbs kept for the whole round (Legendary, void.round_absorbs).
@@ -21,7 +23,7 @@ const TWIN_JUMP = 160.0
 const ABSORB_LOCKOUT = 4.0
 
 var field_left = 0.0
-var held = {} # element -> {"left": seconds (INF = the whole round), "source": player id}
+var held = {} # element -> {"uses": presses left (INF = the whole round), "source": player id}
 var instances = {} # element -> its Power, created the first time it's absorbed
 var lockouts = {} # "element:source" -> seconds before it can be absorbed again
 var field: VoidField
@@ -36,8 +38,10 @@ func activate() -> void:
 	for element in ORDER:
 		if held.has(element):
 			_cast(element)
-			if held.has(element) and held[element].left != INF:
-				held.erase(element)
+			if held.has(element) and held[element].uses != INF:
+				held[element].uses -= 1
+				if held[element].uses <= 0:
+					held.erase(element)
 	field_left = stat("void.duration")
 	activated.emit()
 
@@ -55,11 +59,6 @@ func _process(delta):
 		lockouts[key] -= delta
 		if lockouts[key] <= 0.0:
 			lockouts.erase(key)
-	for element in held.keys():
-		if held[element].left != INF:
-			held[element].left -= delta
-			if held[element].left <= 0.0:
-				held.erase(element)
 	if field_left > 0.0:
 		field_left = max(field_left - delta, 0.0)
 		if not player.net_remote and player.is_in_group("alivePlayers"):
@@ -90,23 +89,36 @@ func _scan():
 			var earth = Fissure.owner_of(area)
 			if earth != null and earth != player:
 				absorb(2, earth.playerId)
+		elif area.is_in_group("storm_arcs"):
+			if area.owner_id != player.playerId and area.owner_id != 0:
+				absorb(3, area.owner_id)
 		elif area.is_in_group("twinHeads"):
 			var water = area.get_parent()
 			if water != player and "playerId" in water:
 				absorb(4, water.playerId)
 
 # Takes `element`'s power from snake `source_id`. whole_round: kept (and cast on every
-# press) until the round ends; otherwise for void.absorb_time seconds, one press.
+# press) until the round ends; otherwise until it's cast (void.absorb_uses presses).
+# Online it goes through NetSession, so every machine's copy of Void gets it.
 func absorb(element, source_id, whole_round = false):
 	if element < 1 or element > 4:
 		return
+	if lockouts.has("%d:%d" % [element, source_id]) and not whole_round:
+		return
+	var session = player.get_parent().get_node_or_null("NetSession") if player.get_parent() else null
+	if session != null and SteamNet.is_online():
+		session.send_void_absorb(player.playerId, element, source_id, whole_round, player.global_position)
+	else:
+		apply_absorb(element, source_id, whole_round)
+
+func apply_absorb(element, source_id, whole_round = false):
 	var lock_key = "%d:%d" % [element, source_id]
 	if lockouts.has(lock_key) and not whole_round:
 		return
 	lockouts[lock_key] = ABSORB_LOCKOUT
-	var keep = whole_round or stat("void.round_absorbs") >= 1.0 or (held.has(element) and held[element].left == INF)
-	var fresh = not held.has(element) or (keep and held[element].left != INF)
-	held[element] = {"left": INF if keep else stat("void.absorb_time"), "source": source_id}
+	var keep = whole_round or stat("void.round_absorbs") >= 1.0 or (held.has(element) and held[element].uses == INF)
+	var fresh = not held.has(element) or (keep and held[element].uses != INF)
+	held[element] = {"uses": INF if keep else stat("void.absorb_uses"), "source": source_id}
 	var power = _instance(element)
 	power.stats_source = Global.player_stats.get(source_id) if stat("void.keep_upgrades") >= 1.0 else null
 	player.reset_cooldown()
@@ -133,7 +145,8 @@ func _instance(element) -> Power:
 func _cast(element):
 	var power = _instance(element)
 	if element == 4:
-		if power.can_activate():
+		# Online, another machine's Void: its twins arrive through NetSession (twin_state)
+		if power.can_activate() and not player.net_remote:
 			power.activate()
 		return
 	power.activate()
@@ -147,10 +160,9 @@ func _cast(element):
 			3:
 				_twin_jump(twin)
 
+# Its living twins (here, or the copies of another machine's twins online)
 func _twins() -> Array:
-	if not instances.has(4):
-		return []
-	return instances[4].copies.filter(func(twin): return is_instance_valid(twin) and twin.alive)
+	return player.get_children().filter(func(twin): return twin.is_in_group("twinHeads") and twin.alive)
 
 # A twin's jump: straight ahead, kept inside the arena
 func _twin_jump(twin):

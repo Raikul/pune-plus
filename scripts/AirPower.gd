@@ -79,6 +79,7 @@ const SCRAMBLE_TIME = 3.0 # Scrambler: swapped left/right, shorter than the powe
 const SHOCK_REACH = 24.0
 
 func _shock_heads(parts: Array) -> void:
+	_feed_voids(parts)
 	if _stats() == null or stat("air.shock") < 1.0:
 		return
 	var scramble = SCRAMBLE_TIME if stat("air.scramble") >= 1.0 else 0.0
@@ -88,13 +89,25 @@ func _shock_heads(parts: Array) -> void:
 		for part in parts:
 			var closest = Geometry2D.get_closest_point_to_segment(other.global_position, part[0], part[1])
 			if closest.distance_to(other.global_position) <= SHOCK_REACH:
-				PowerFx.lightning(player.get_parent(), [[closest, other.global_position]], player.SHOCK_COLOR)
+				PowerFx.lightning(player.get_parent(), [[closest, other.global_position]], _bolt_color())
 				# Only the snake's own machine decides (remote copies just show it)
 				if not other.net_remote:
 					other.shock(SHOCK_TIME, scramble, player.playerId)
 					Global.add_stat(player.playerId, "air_shocks")
 				else:
 					other.shock_visual(SHOCK_TIME)
+				break
+
+# Void with its void open eats the jump's bolt when it crosses the void: it absorbs Air.
+# Only Void's own machine decides (it tells the others, VoidPower.absorb).
+func _feed_voids(parts: Array) -> void:
+	for other in get_tree().get_nodes_in_group("alivePlayers"):
+		if other == player or other.net_remote or not (other.main_power is VoidPower) or not other.main_power.field_active():
+			continue
+		for part in parts:
+			var closest = Geometry2D.get_closest_point_to_segment(other.global_position, part[0], part[1])
+			if closest.distance_to(other.global_position) <= other.main_power.radius():
+				other.main_power.absorb(3, player.playerId)
 				break
 
 # Storm Fence: lightning across every gap of the trail that is still whole for
@@ -104,12 +117,16 @@ func _shock_heads(parts: Array) -> void:
 func _storm_gaps() -> void:
 	if not has_storm():
 		return
-	var arc_color = Color(Global.playerColors[player.playerId]).lerp(player.SHOCK_COLOR, 0.5)
+	var arc_color = _bolt_color() if player.main_power is VoidPower else Color(Global.playerColors[player.playerId]).lerp(player.SHOCK_COLOR, 0.5)
 	var scramble = SCRAMBLE_TIME if stat("air.scramble") >= 1.0 else 0.0
 	for gap in player.intact_gaps():
 		var arc = StormArc.spawn(player.get_parent(), gap[0].global_position, gap[1].global_position, player.playerId, arc_color)
 		arc.shock_time = SHOCK_TIME
 		arc.scramble_time = scramble
+
+# Electric blue, or purple when Void casts it
+func _bolt_color() -> Color:
+	return Global.void_tint() if player.main_power is VoidPower else player.SHOCK_COLOR
 
 func has_storm() -> bool:
 	return _stats() != null and stat("air.storm") >= 1.0

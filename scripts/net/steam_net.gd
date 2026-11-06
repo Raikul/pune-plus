@@ -21,6 +21,8 @@ signal match_options_changed
 
 const APP_ID = 480 # Spacewar test app until Pune has its own Steam app id
 const MAX_PLAYERS = 4
+## Elements to pick from: the four classic ones and Void. Only MAX_PLAYERS of them play.
+const MAX_SLOTS = 5
 const LOBBY_GAME_KEY = "game"
 const LOBBY_GAME_VALUE = "pune_plus"
 const LAN_PORT = 7531
@@ -418,8 +420,8 @@ func introduce(player_name):
 # Returns the slot, or 0 when it's taken or the lobby is full.
 func _add_slot(peer_id, player_name, ai, slot = 0):
 	if slot == 0:
-		slot = _lowest_free(roster.keys())
-	if slot < 1 or slot > MAX_PLAYERS or roster.has(slot):
+		slot = _lowest_free(roster.keys(), MAX_SLOTS)
+	if slot < 1 or slot > MAX_SLOTS or roster.has(slot) or roster.size() >= MAX_PLAYERS:
 		return 0
 	var keys = 0
 	if not ai:
@@ -429,8 +431,8 @@ func _add_slot(peer_id, player_name, ai, slot = 0):
 	roster[slot] = {"peer": peer_id, "name": player_name, "ai": ai, "keys": keys}
 	return slot
 
-func _lowest_free(used):
-	for number in range(1, MAX_PLAYERS + 1):
+func _lowest_free(used, top = MAX_PLAYERS):
+	for number in range(1, top + 1):
 		if not used.has(number):
 			return number
 	return 0
@@ -502,7 +504,7 @@ func request_move_slot(from_slot, to_slot):
 		_host_move_slot(multiplayer.get_remote_sender_id(), from_slot, to_slot)
 
 func _host_move_slot(peer_id, from_slot, to_slot):
-	if peer_for_slot(from_slot) != peer_id or roster.has(to_slot) or to_slot < 1 or to_slot > MAX_PLAYERS:
+	if peer_for_slot(from_slot) != peer_id or roster.has(to_slot) or to_slot < 1 or to_slot > MAX_SLOTS:
 		return
 	roster[to_slot] = roster[from_slot]
 	roster.erase(from_slot)
@@ -584,7 +586,11 @@ func start_match():
 		if roster[slot].ai:
 			roster[slot].name = Global.random_ai_name(slot)
 	# The host's own toggles decide the match options
-	begin_match.rpc(roster, Global.match_options())
+	var options = Global.match_options()
+	# Random teams: the host deals them, and everyone plays with that deal
+	if options.get("teams", false) and options.get("random_teams", false):
+		options["player_team"] = Global.deal_teams(roster.keys())
+	begin_match.rpc(roster, options)
 
 @rpc("authority", "call_local", "reliable")
 func begin_match(final_roster, options = {}):
@@ -592,7 +598,7 @@ func begin_match(final_roster, options = {}):
 	ready_peers.clear()
 	if offline_ai == null:
 		offline_ai = Global.AI_Enabled.duplicate()
-	for slot in range(1, MAX_PLAYERS + 1):
+	for slot in range(1, MAX_SLOTS + 1):
 		Global.set("player" + str(slot) + "Active", roster.has(slot))
 		# Only matters on the machine that runs the snake; the others just mirror it
 		Global.AI_Enabled[slot] = roster.has(slot) and roster[slot].ai
@@ -602,7 +608,7 @@ func begin_match(final_roster, options = {}):
 	# toggles stay untouched, Global.shrooms_enabled() / upgrades_enabled() handle online
 	Global.online_upgrades = options.get("upgrades", false)
 	Global.online_teams = options.get("teams", false)
-	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1})
+	Global.online_player_team = options.get("player_team", {1: 0, 2: 1, 3: 0, 4: 1, 5: 1})
 	Global.online_points_to_win = options.get("points_to_win", 0)
 	Global.online_random_spawns = options.get("random_spawns", false)
 	Global.online_round_countdown = options.get("round_countdown", true)

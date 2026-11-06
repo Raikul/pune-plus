@@ -262,26 +262,6 @@ const UPGRADES = [
 		"max_stacks": 1,
 		"requires": &"fire_hearth",
 	},
-	{
-		"id": &"water_ice",
-		"rarity": "legendary",
-		"name": "UPG_WATER_ICE",
-		"description": "UPG_WATER_ICE_DESC",
-		"element": "water",
-		"icon": "ice",
-		"stat_mods": {"water.ice": {"add": 1.0}},
-		"max_stacks": 1,
-	},
-	{
-		"id": &"earth_roots",
-		"rarity": "legendary",
-		"name": "UPG_EARTH_ROOTS",
-		"description": "UPG_EARTH_ROOTS_DESC",
-		"element": "earth",
-		"icon": "roots",
-		"stat_mods": {"earth.roots": {"add": 1.0}},
-		"max_stacks": 1,
-	},
 	# Void (EXPERIMENTAL)
 	{
 		"id": &"void_duration",
@@ -310,7 +290,7 @@ const UPGRADES = [
 		"description": "UPG_VOID_MEMORY_DESC",
 		"element": "void",
 		"icon": "void_memory",
-		"stat_mods": {"void.absorb_time": {"add": 4.0}},
+		"stat_mods": {"void.absorb_uses": {"add": 1.0}},
 		"max_stacks": 1,
 	},
 	{

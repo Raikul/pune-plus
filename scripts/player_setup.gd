@@ -198,10 +198,7 @@ func _active_count() -> int:
 func activatePlayer(active, playerBox, color):
 #	var labelNode = playerBox.get_node("PanelContainer").get_node("Label")
 	# Selected: the card takes a light tint of the element color (a full tint made its
-	# text hard to read) and a glowing border in that color. Void's color is nearly white,
-	# so its card glows in the void's purple instead.
-	if playerBox == P5Box:
-		color = Global.VOID_ACCENT
+	# text hard to read) and a glowing border in that color
 	var card = playerBox.get_node("PanelContainer2")
 	var style = card.get_theme_stylebox("panel").duplicate()
 	if style is StyleBoxFlat:
@@ -228,8 +225,8 @@ func _on_back_pressed():
 	back.emit()
 
 func _on_go_pressed():
-	# Teams need players on both sides
-	if Global.teams:
+	# Teams need players on both sides (a random deal always has both)
+	if Global.teams and not Global.random_teams:
 		var actives = {1: player1Active, 2: player2Active, 3: player3Active, 4: player4Active, 5: player5Active}
 		var sides = {}
 		for id in actives:
@@ -356,6 +353,7 @@ func enable_player(player_id:int) -> void:
 var mode_button: Button
 var points_button: Button
 var spawns_button: Button
+var random_teams_button: Button
 var countdown_button: Button
 var arena_button: Button
 var upgrades_button: Button
@@ -399,6 +397,9 @@ func _build_match_options():
 		_options_changed())
 	shrooms_button = _match_button(settings_box, func():
 		Global.shrooms = not Global.shrooms
+		_options_changed())
+	random_teams_button = _match_button(settings_box, func():
+		Global.random_teams = not Global.random_teams
 		_options_changed())
 	spawns_button = _match_button(settings_box, _toggle_random_spawns)
 	countdown_button = _match_button(settings_box, func():
@@ -472,6 +473,8 @@ func _refresh_match_options():
 	mode_button.text = tr("MATCH_MODE") % (tr("MATCH_TEAMS") if Global.teams else tr("MATCH_FFA"))
 	points_button.text = tr("MATCH_POINTS") % Global.points_to_win_text(Global.points_to_win)
 	spawns_button.text = tr("MATCH_SPAWNS") % (tr("MATCH_SPAWNS_RANDOM") if Global.random_spawns else tr("MATCH_SPAWNS_FIXED"))
+	random_teams_button.text = tr("MATCH_RANDOM_TEAMS") % Global.on_off(Global.random_teams)
+	random_teams_button.disabled = not Global.teams
 	settings_toggle.text = tr("MATCH_SETTINGS") + "  " + ("-" if settings_box.visible else "+")
 	arena_button.text = tr("MATCH_ARENAS") % Global.level_rotation_text(Global.level_rotation)
 	upgrades_button.text = tr("MATCH_UPGRADES") % Global.on_off(Global.upgrades)
@@ -482,7 +485,8 @@ func _refresh_match_options():
 	options_warning.text = ""
 	for id in team_buttons:
 		var team = Global.team_of(id)
-		team_buttons[id].visible = Global.teams
+		# Random teams: dealt when the match starts, nothing to pick here
+		team_buttons[id].visible = Global.teams and not Global.random_teams
 		team_buttons[id].text = Global.team_name(team)
 		team_buttons[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
 		team_buttons[id].add_theme_color_override("font_hover_color", Global.TEAM_COLORS[team].lightened(0.3))

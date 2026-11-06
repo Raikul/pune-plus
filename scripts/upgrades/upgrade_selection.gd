@@ -77,9 +77,13 @@ func start(ids = [], time_limit = 0.0, preset = {}):
 
 # winner_id: the snake that won the last round (0 = nobody); its element picks the quote
 func show_wisdom(winner_id):
+	show_quote(Wisdom.for_winner(winner_id), winner_id)
+
+# hidden: the spot is kept for a quote that flies in on its own (RoundQuote)
+func show_quote(quote, winner_id, hidden = false):
 	if not is_node_ready():
 		await ready
-	var quote = Wisdom.for_winner(winner_id)
+	quote_box.modulate.a = 0.0 if hidden else 1.0
 	quote_label.text = tr("WISDOM_QUOTE") % tr(quote.text)
 	quote_label.add_theme_color_override("font_color",
 		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4, 5] else Color(0.9, 0.9, 0.9))

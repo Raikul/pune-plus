@@ -28,7 +28,7 @@ func _seat(player_id) -> int:
 	return Global.seat_of(player_id)
 
 func _player_in(seat) -> int:
-	if Global.player5Active and not Global.isMultiplayerActive and Global.seat_of(Global.VOID_ID) == seat:
+	if Global.player5Active and Global.seat_of(Global.VOID_ID) == seat:
 		return Global.VOID_ID
 	return seat
 

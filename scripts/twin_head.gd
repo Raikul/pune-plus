@@ -35,12 +35,13 @@ signal body_laid(body_position, body_rotation)
 
 @export var snakeBodyScene : PackedScene
 
-# Ghostly look, so the twin can't be mistaken for the water snake itself: its usual aqua
-# (light blue in the colorblind mode: Global.twin_color), but see-through and shimmering
+# Ghostly look, so the twin can't be mistaken for the snake itself: a lighter shade of its
+# snake's color (Global.twin_color), see-through and shimmering
 # (scripts/fx/twin_ghost.gdshader). (No particles behind the head: during a gap they
 # looked like real trail.)
-static func ghost_color() -> Color:
-	return Global.twin_color()
+func ghost_color() -> Color:
+	var snake = get_parent()
+	return Global.twin_color(snake.playerId if snake != null and "playerId" in snake else 4)
 static var ghost_material: ShaderMaterial
 static func get_ghost_material() -> ShaderMaterial:
 	if ghost_material == null:

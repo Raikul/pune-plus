@@ -8,7 +8,7 @@ extends Control
 
 const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 # Translation keys (shown with tr())
-const ELEMENT_NAMES = ["", "ELEMENT_FIRE_UPPER", "ELEMENT_EARTH_UPPER", "ELEMENT_AIR_UPPER", "ELEMENT_WATER_UPPER"]
+const ELEMENT_NAMES = ["", "ELEMENT_FIRE_UPPER", "ELEMENT_EARTH_UPPER", "ELEMENT_AIR_UPPER", "ELEMENT_WATER_UPPER", "ELEMENT_VOID_UPPER"]
 const FAKE_LATENCIES = [0.0, 0.1, 0.2]
 const KEY_ACTIONS = ["Left", "Right", "Up"]
 const KEY_NAMES = {"Left": "KEY_LEFT", "Right": "KEY_RIGHT", "Up": "KEY_PUNCHI"}
@@ -28,6 +28,7 @@ var mode_button
 var points_button
 var upgrade_time_button
 var spawns_button
+var random_teams_button
 var countdown_button
 var arena_button
 var settings_toggle
@@ -131,6 +132,8 @@ func _refresh_roster():
 	# Seconds each snake has to pick its upgrade (only matters with upgrades on)
 	upgrade_time_button.disabled = not host or not options.get("upgrades", false)
 	upgrade_time_button.text = tr("MATCH_UPGRADE_TIME") % Global.upgrade_time_text(int(options.get("upgrade_time", Global.online_upgrade_time)))
+	random_teams_button.disabled = not host or not options.get("teams", false)
+	random_teams_button.text = tr("MATCH_RANDOM_TEAMS") % Global.on_off(options.get("random_teams", false))
 	spawns_button.disabled = not host
 	spawns_button.text = tr("MATCH_SPAWNS") % (tr("MATCH_SPAWNS_RANDOM") if options.get("random_spawns", false) else tr("MATCH_SPAWNS_FIXED"))
 	countdown_button.disabled = not host
@@ -141,7 +144,7 @@ func _refresh_roster():
 	for slot in slot_rows:
 		var team_button = slot_rows[slot].team_button
 		var team = player_team.get(slot, 0)
-		team_button.visible = options.get("teams", false)
+		team_button.visible = options.get("teams", false) and not options.get("random_teams", false)
 		team_button.disabled = not host
 		team_button.text = Global.team_name(team)
 		team_button.add_theme_color_override("font_color", Global.TEAM_COLORS[team])
@@ -355,6 +358,10 @@ func _build_layout():
 	settings_box.add_child(upgrades_button)
 	upgrade_time_button = _button(tr("MATCH_UPGRADE_TIME") % Global.upgrade_time_text(10), _cycle_upgrade_time)
 	settings_box.add_child(upgrade_time_button)
+	random_teams_button = _button(tr("MATCH_RANDOM_TEAMS") % tr("VALUE_OFF"), func():
+		Global.random_teams = not Global.random_teams
+		_match_options_edited())
+	settings_box.add_child(random_teams_button)
 	spawns_button = _button(tr("MATCH_SPAWNS") % tr("MATCH_SPAWNS_FIXED"), _toggle_random_spawns)
 	settings_box.add_child(spawns_button)
 	countdown_button = _button(tr("MATCH_COUNTDOWN") % tr("VALUE_ON"), _toggle_round_countdown)
@@ -390,7 +397,7 @@ func _build_layout():
 		DisplayServer.clipboard_set(SteamNet.lobby_code)
 		status_label.text = tr("LOBBY_CODE_COPIED") % SteamNet.lobby_code)
 	players_header.add_child(copy_code_button)
-	for slot in range(1, 5):
+	for slot in range(1, SteamNet.MAX_SLOTS + 1):
 		var panel = PanelContainer.new()
 		var style = _box_style(Color(0.16, 0.16, 0.16))
 		style.border_color = Color(Global.playerColors[slot])

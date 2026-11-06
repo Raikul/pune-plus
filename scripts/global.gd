@@ -29,20 +29,17 @@ var AI_Enabled = {
 	5: false,
 }
 
-# --- Elements by id: 1 Fire, 2 Earth, 3 Air, 4 Water, 5 Void (EXPERIMENTAL, offline only).
+# --- Elements by id: 1 Fire, 2 Earth, 3 Air, 4 Water, 5 Void (EXPERIMENTAL).
 # Only MAX_SNAKES of them play at once: the scoreboard, stats and upgrade screens have room
 # for four, so with Void in, one element sits out and Void takes its seat (seat_of).
 const VOID_ID = 5
 const MAX_SNAKES = 4
-## Void's own color is nearly white; where white wouldn't show (a selected card's tint),
-## the purple of its void is used
-const VOID_ACCENT = Color(0.62, 0.36, 1.0)
 ## Void's Punchi cooldown (the others: PlayerStats "cooldown", 6 s)
 const VOID_COOLDOWN = 10.0
 
-# Every element that can play: online stays with the classic four
+# Every element that can play
 func element_ids() -> Array:
-	return [1, 2, 3, 4] if isMultiplayerActive else [1, 2, 3, 4, 5]
+	return [1, 2, 3, 4, 5]
 
 # The elements playing this match
 func active_ids() -> Array:
@@ -77,12 +74,13 @@ var playerColors = [
 	"1ab2ff",
 	"00e699"
 ]
-const ELEMENT_COLORS = ["", "ff401a", "e6bf00", "1ab2ff", "00e699", "e4dcff"]
+## Void is a magenta purple, brighter and pinker than the arena's violet walls
+const ELEMENT_COLORS = ["", "ff401a", "e6bf00", "1ab2ff", "00e699", "d45cff"]
 ## Colorblind mode (Options > Accessibility): fire red, earth green, air yellow, water blue,
 ## from the Okabe-Ito palette, which stays distinct with every kind of color blindness
 ## (they also differ in brightness: yellow lightest, then green, blue and red)
-## (Void is white in both: no color blindness mixes it up with the others)
-const COLORBLIND_COLORS = ["", "e0491c", "00b386", "f0e442", "3a86ff", "ffffff"]
+## (Void: Okabe-Ito's reddish purple, also told apart from the others)
+const COLORBLIND_COLORS = ["", "e0491c", "00b386", "f0e442", "3a86ff", "cc79a7"]
 var colorblind = false
 
 # The colors of the current mode into playerColors. Called at startup, by Options outside
@@ -94,10 +92,16 @@ func apply_colors() -> void:
 	for id in range(1, colors.size()):
 		playerColors[id] = colors[id]
 
-## The water twins' see-through color: aqua, or a light blue in the colorblind mode (aqua
-## is too close to its green earth)
-func twin_color() -> Color:
-	return Color("9cc4ff") if colorblind else Color.AQUA
+### What Void does with the powers it absorbed (rocks, fireballs, lightning) is tinted in its
+## purple, so everyone sees whose they are
+func void_tint() -> Color:
+	return Color(playerColors[VOID_ID]).lerp(Color.WHITE, 0.3)
+
+# A twin's see-through color: a lighter shade of its snake's (Water's, or Void's when it
+## holds Water), so it reads as that snake's and never as Air's blue
+func twin_color(owner_id = 4) -> Color:
+	var base = Color(playerColors[owner_id]) if owner_id > 0 and owner_id < playerColors.size() else Color(playerColors[4])
+	return base.lightened(0.45)
 
 var isMultiplayerActive = false
 
@@ -169,11 +173,21 @@ const HIGHLIGHT_STATS = {
 	"fire_revives": ["phoenix", 3.0],
 	"water_saves": ["save", 3.0],
 	"earth_blocked": ["block", 2.0],
-	"air_shocks": ["shock", 1.5],
+	"earth_phases": ["phase", 1.5],
+	"air_shocks": ["shock", 2.0],
+	"air_scramble_kills": ["clutch", 3.0],
 }
 
-func note_highlight(player_id, kind, weight, victim_id = 0) -> void:
+# A moment for the play of the game (scripts/replay/replay_recorder.gd). Online each
+# machine notes what it decides and shares it, so every machine scores the same moments
+# and picks the same play (from its own recording of it).
+func note_highlight(player_id, kind, weight, victim_id = 0, from_net = false) -> void:
 	highlight.emit(player_id, kind, weight, victim_id)
+	if isMultiplayerActive and not from_net:
+		var scene = get_tree().current_scene
+		var session = scene.get_node_or_null("NetSession") if scene else null
+		if session != null:
+			session.share_highlight(player_id, kind, weight, victim_id)
 
 # Several machines' match_stats added up
 static func sum_stats(sources: Array) -> Dictionary:
@@ -253,6 +267,21 @@ var online_points_to_win = 0
 # Random starting spots each round (spread out, away from walls, facing inwards)
 var random_spawns = false
 var online_random_spawns = false
+
+## 2v2 Random teams (saved): every match deals the snakes into two teams at random instead
+## of the teams picked in setup. Offline the deal lives in match_teams for that match;
+## online the host deals and sends it as the match's player_team (SteamNet.start_match).
+var random_teams = false
+var match_teams = {}
+
+# player id -> team: shuffled, the first half (rounded up) on Team A, the rest on Team B
+func deal_teams(ids: Array) -> Dictionary:
+	var shuffled = ids.duplicate()
+	shuffled.shuffle()
+	var dealt = {}
+	for i in shuffled.size():
+		dealt[shuffled[i]] = 0 if i < ceili(shuffled.size() / 2.0) else 1
+	return dealt
 
 # "3, 2, 1, GO!" before every round (the first one always has it)
 var round_countdown = true
@@ -385,6 +414,8 @@ func teams_enabled() -> bool:
 	return online_teams if isMultiplayerActive else teams
 
 func team_of(player_id) -> int:
+	if not isMultiplayerActive and not match_teams.is_empty():
+		return match_teams.get(player_id, 0)
 	return (online_player_team if isMultiplayerActive else player_team).get(player_id, 0)
 
 func points_to_win_setting() -> int:
@@ -401,6 +432,7 @@ func on_off(on) -> String:
 func match_options() -> Dictionary:
 	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win,
 		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns, "round_countdown": round_countdown,
+		"random_teams": random_teams,
 		"levels": level_rotation.duplicate()}
 
 func shrooms_enabled() -> bool:
@@ -445,6 +477,7 @@ func _ready():
 	load_settings()
 	apply_language()
 	apply_colors()
+	apply_audio_device()
 	apply_volumes()
 	apply_video_settings()
 	_set_cursors()
@@ -471,6 +504,7 @@ func load_settings() -> void:
 	player_team = config.get_value("match", "player_team", player_team)
 	points_to_win = config.get_value("match", "points_to_win", points_to_win)
 	random_spawns = config.get_value("match", "random_spawns", random_spawns)
+	random_teams = config.get_value("match", "random_teams", random_teams)
 	round_countdown = config.get_value("match", "round_countdown", round_countdown)
 	level = config.get_value("match", "level", level)
 	if level != "" and not ResourceLoader.exists(level):
@@ -502,6 +536,7 @@ func load_settings() -> void:
 	show_fps = config.get_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		volumes[bus] = config.get_value("audio", bus.to_lower(), volumes[bus])
+	audio_device = config.get_value("audio", "device", audio_device)
 	# Own key for the offline limit, so it starts Off even where the old shared one was saved
 	upgrade_time = config.get_value("game", "offline_upgrade_time", upgrade_time)
 	online_upgrade_time = config.get_value("game", "upgrade_time", online_upgrade_time)
@@ -518,6 +553,7 @@ func save_settings() -> void:
 	config.set_value("match", "player_team", player_team)
 	config.set_value("match", "points_to_win", points_to_win)
 	config.set_value("match", "random_spawns", random_spawns)
+	config.set_value("match", "random_teams", random_teams)
 	config.set_value("match", "round_countdown", round_countdown)
 	config.set_value("match", "level", level)
 	config.set_value("match", "level_rotation", level_rotation)
@@ -533,6 +569,7 @@ func save_settings() -> void:
 	config.set_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		config.set_value("audio", bus.to_lower(), volumes[bus])
+	config.set_value("audio", "device", audio_device)
 	config.set_value("game", "offline_upgrade_time", upgrade_time)
 	config.set_value("game", "upgrade_time", online_upgrade_time)
 	config.set_value("game", "show_quotes", show_quotes)
@@ -584,6 +621,15 @@ func apply_video_settings() -> void:
 		add_child(layer)
 	if fps_label:
 		fps_label.get_parent().visible = show_fps
+
+## The system device the sound plays on (Options > Audio): "Default" follows the system's
+var audio_device = "Default"
+
+func apply_audio_device() -> void:
+	if not AudioServer.get_output_device_list().has(audio_device):
+		audio_device = "Default"
+	if AudioServer.output_device != audio_device:
+		AudioServer.output_device = audio_device
 
 func apply_volumes() -> void:
 	for bus in volumes:

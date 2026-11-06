@@ -121,7 +121,6 @@ func _ready():
 	# is still adding the snake.
 	if has_hearth() and not net_remote:
 		(func(): FireRing.spawn(self, global_position)).call_deferred()
-	move_heading = rotation
 var face: SnakeFace
 
 # "effort" for a moment when it uses its power, "dead" when it crashes
@@ -157,6 +156,7 @@ func _process(delta):
 				elif _beyond_border():
 					direction = 0
 
+	_watch_close_calls(delta)
 	if ai_enabled and powerAvailable: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
 	_update_shock(delta)
@@ -169,44 +169,43 @@ func _process(delta):
 
 	_move(direction, delta)
 
-# --- Ground: the patches other snakes leave in their gaps (scripts/gap_patch.gd) ---
-## On ice the head turns slower and the body keeps drifting the way it was going,
-## catching up with the head at this rate (higher = grippier)
-const ICE_TURN = 0.7
-const ICE_GRIP = 1.6
-## On roots it crawls
-const ROOTS_SPEED = 0.3
-# The direction it actually moves in (on ice it lags behind where the head points)
-var move_heading = 0.0
-var on_ice = false
-var on_roots = false
+# --- Play of the game: close calls and clutch powers ---
+## Something deadly this close ahead counts as nearly crashing...
+const CLOSE_CALL_DISTANCE = 14.0
+## ...if it's still alive this long after
+const CLOSE_CALL_SURVIVE = 0.6
+## At most one close call this often
+const CLOSE_CALL_COOLDOWN = 4.0
+## A power used with danger this close ahead that it then survives is a clutch use
+const CLUTCH_DANGER = 60.0
+const CLUTCH_SURVIVE = 1.0
+var close_call_left = -1.0
+var close_call_cooldown = 0.0
+var clutch_left = -1.0
+
+func _watch_close_calls(delta):
+	close_call_cooldown = max(close_call_cooldown - delta, 0.0)
+	if close_call_left >= 0.0:
+		close_call_left -= delta
+		if close_call_left < 0.0:
+			Global.note_highlight(playerId, "close_call", 1.5)
+			close_call_cooldown = CLOSE_CALL_COOLDOWN
+	elif close_call_cooldown <= 0.0 and not invincible and teleport_grace <= 0 and _danger_ahead() < CLOSE_CALL_DISTANCE:
+		close_call_left = CLOSE_CALL_SURVIVE
+	if clutch_left >= 0.0:
+		clutch_left -= delta
+		if clutch_left < 0.0:
+			Global.note_highlight(playerId, "clutch", 3.0)
+
+# How far the nearest deadly thing straight ahead is (INF = nothing)
+func _danger_ahead() -> float:
+	var raycaster = get_node_or_null("Raycaster")
+	return raycaster.collision_distance("Up") if raycaster else INF
 
 func _move(direction, delta):
-	_ground_patches()
-	rotation += angular_speed * direction * delta * (ICE_TURN if on_ice else 1.0)
-	if on_ice:
-		move_heading = lerp_angle(move_heading, rotation, clamp(ICE_GRIP * delta, 0.0, 1.0))
-	else:
-		move_heading = rotation
-	var velocity = Vector2.UP.rotated(move_heading) * speed * (ROOTS_SPEED if on_roots else 1.0)
-	position += velocity * delta
+	rotation += angular_speed * direction * delta
+	position += Vector2.UP.rotated(rotation) * speed * delta
 
-# The ice and roots under the head, except its own (and its teammate's)
-func _ground_patches():
-	on_ice = false
-	on_roots = false
-	if get_tree().get_nodes_in_group("gap_patches").is_empty():
-		return
-	for patch in GapPatch.at_point(get_world_2d(), global_position):
-		if patch.owner_id == playerId:
-			continue
-		var maker = get_parent().get_node_or_null("Player%d" % patch.owner_id) if get_parent() else null
-		if maker != null and is_ally(maker):
-			continue
-		if patch.kind == "ice":
-			on_ice = true
-		else:
-			on_roots = true
 # Off the Map: outside the arena the raycasts see the border from behind and would steer
 # further out; head back to the middle instead
 func _ai_steer_home() -> int:
@@ -379,12 +378,19 @@ const TRAIL_SPACING = 7.5
 # The newest piece of the trail being laid (null at the start of a stroke)
 var trail_tail = null
 
+## The newest trail pieces, newest last (Void colors them with the powers it holds)
+var recent_trail = []
+const RECENT_TRAIL = 80
+
 func _extend_trail(body):
-	if main_power is AirPower or _gap_patch_kind() != "":
+	if main_power is AirPower:
 		_note_gap(body)
 	body.link_to(trail_tail)
 	trail_tail = body
 	last_laid = body
+	recent_trail.append(body)
+	if recent_trail.size() > RECENT_TRAIL:
+		recent_trail.pop_front()
 
 # Air's Storm Fence: every gap in its trail, as [end of a stroke, start of the next]. A new
 # stroke after a teleport isn't a gap (skip_next_gap), nor are pieces too far apart.
@@ -405,21 +411,9 @@ func _note_gap(body):
 		return
 	if length > MAX_GAP_LENGTH:
 		return
-	var kind = _gap_patch_kind()
-	if kind != "" and not net_remote:
-		var middle = (last_laid.global_position + body.global_position) / 2.0
-		GapPatch.spawn(get_parent(), middle, kind, playerId, max(GapPatch.RADIUS, length * 0.6))
 	gaps.append([last_laid, body])
 	if gaps.size() > MAX_GAPS:
 		gaps.pop_front()
-
-# Black Ice (Water) or Strangling Roots (Earth): what its gaps leave behind ("" = nothing)
-func _gap_patch_kind() -> String:
-	if stat_value("water.ice") >= 1.0:
-		return "ice"
-	if stat_value("earth.roots") >= 1.0:
-		return "roots"
-	return ""
 
 # The gaps whose both ends are still there (a fireball may have burnt one)
 func intact_gaps() -> Array:
@@ -468,6 +462,9 @@ func _on_area_entered(area):
 		return
 	if invincible and area is TrailSegment and area.get_parent() == self and listOfNodes.find(area) == -1:
 		_count_own_trail_pass()
+	# Stone armor going through a rival's trail or rock: a moment for the play of the game
+	if invincible and (area is TrailSegment or area.is_in_group("Fissures")) and not is_ancestor_of(area):
+		_count_phase()
 	if (not invincible and teleport_grace <= 0) or area.is_in_group("limits"):
 		if listOfNodes.find(area) == -1:
 			# Le preguntamos al poder si puede salvar al jugador de morir (Agua reviviendo)
@@ -504,6 +501,13 @@ func _count_own_trail_pass():
 	if now - last_own_pass >= OWN_PASS_GAP_MS:
 		Global.add_stat(playerId, "earth_own_trail")
 	last_own_pass = now
+
+var last_phase = -OWN_PASS_GAP_MS
+func _count_phase():
+	var now = Time.get_ticks_msec()
+	if now - last_phase >= OWN_PASS_GAP_MS:
+		Global.add_stat(playerId, "earth_phases")
+	last_phase = now
 
 # End-screen stats: a rival's fireball, or dying while a rival Air had it scrambled
 func _credit_death(cause):
@@ -657,6 +661,9 @@ func start_fissure(fissure_step, fissure_scene, previous_body_list = [], origin 
 		
 #	sceneInstance.apply_scale(get_scale())
 	fissure_instance.rotation = source.rotation
+	# Void's borrowed rocks are purple (scripts/fx/void_rock.gdshader recolors the art)
+	if main_power is VoidPower:
+		fissure_instance.get_node("FissureBody").material = _void_rock_material()
 	var width = stat_value("earth.scale") if stats != null else 1.0
 	fissure_instance.scale = FISSURE_SCALE * Vector2(width, 1.0)
 	
@@ -729,6 +736,10 @@ func try_use_power() -> void:
 	
 	powerCooldown()
 	
+	# About to crash: if the power gets it out alive, that's a clutch play
+	if _danger_ahead() < CLUTCH_DANGER:
+		clutch_left = CLUTCH_SURVIVE
+		close_call_left = -1.0
 	if main_power != null:
 		main_power.activate()
 	set_face("effort", 0.5)
@@ -826,7 +837,8 @@ func shock(duration, scramble = 0.0, by = 0):
 		return
 	var parent = get_parent()
 	if shocked_time <= 0 and parent:
-		PowerFx.shock(parent, self, SHOCK_COLOR, duration)
+		# Void's borrowed lightning is purple
+		PowerFx.shock(parent, self, Global.void_tint() if by == Global.VOID_ID else SHOCK_COLOR, duration)
 	shocked_time = max(shocked_time, duration)
 	if scramble > 0:
 		scrambled_time = max(scrambled_time, scramble)
@@ -867,27 +879,18 @@ func phoenix_ash():
 	if not net_remote:
 		phoenix_changed.emit(false)
 
-# Where it can rise: its death spot, moved away from the walls (it would die on them again),
-# and the heading the arrow starts with
+# Where it rises: right where it died (the moments of immunity after rising, PHOENIX_GRACE,
+# get it clear of what killed it), and the heading the aiming arrow starts with: the way it
+# was going, or towards the middle of the arena if it died next to a wall
 func phoenix_rise_point() -> Array:
 	var point = global_position
 	var heading = rotation
 	if left_limit_x != null:
-		var inside = Vector2(
-			clamp(point.x, left_limit_x + PHOENIX_WALL_MARGIN, right_limit_x - PHOENIX_WALL_MARGIN),
-			clamp(point.y, top_limit_y + PHOENIX_WALL_MARGIN, bottom_limit_y - PHOENIX_WALL_MARGIN))
-		var middle = Vector2((left_limit_x + right_limit_x) / 2, (top_limit_y + bottom_limit_y) / 2)
-		# A level wall there: step towards the middle until it's clear
+		var near_edge = point.x < left_limit_x + PHOENIX_WALL_MARGIN or point.x > right_limit_x - PHOENIX_WALL_MARGIN 			or point.y < top_limit_y + PHOENIX_WALL_MARGIN or point.y > bottom_limit_y - PHOENIX_WALL_MARGIN
 		var level = get_parent().get("level") if get_parent() else null
-		if level != null:
-			for step in 30:
-				if level.is_clear(inside, PHOENIX_WALL_MARGIN * 0.6):
-					break
-				inside = inside.move_toward(middle, 30.0)
-		if inside != point:
-			# Face the middle of the arena instead of the wall it hit
-			heading = Vector2.UP.angle_to(middle - inside)
-		point = inside
+		if near_edge or (level != null and not level.is_clear(point, PHOENIX_WALL_MARGIN * 0.6)):
+			var middle = Vector2((left_limit_x + right_limit_x) / 2, (top_limit_y + bottom_limit_y) / 2)
+			heading = Vector2.UP.angle_to(middle - point)
 	return [point, heading]
 
 ## Seconds after rising in which nothing can kill it (it can rise next to a level wall)
@@ -905,7 +908,6 @@ func phoenix_rise(point, heading):
 	# Hearth: rising lights a new fire where it rises
 	if has_hearth() and not net_remote:
 		FireRing.spawn.call_deferred(self, point)
-	move_heading = heading
 	$HeadSprite.show()
 	$ElementHeadSprite.show()
 	if face:
@@ -976,6 +978,14 @@ func _beyond_border(walls = true) -> bool:
 			if area.is_in_group("limits"):
 				return true
 	return false
+
+static var void_rock_material: ShaderMaterial
+func _void_rock_material() -> ShaderMaterial:
+	if void_rock_material == null:
+		void_rock_material = ShaderMaterial.new()
+		void_rock_material.shader = preload("res://scripts/fx/void_rock.gdshader")
+	void_rock_material.set_shader_parameter("tint", Color(Global.playerColors[Global.VOID_ID]))
+	return void_rock_material
 
 func has_border_pass() -> bool:
 	return stat_value("earth.border_pass") >= 1.0

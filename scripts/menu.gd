@@ -10,6 +10,8 @@ var patch_notes_scene = preload("res://scenes/patch_notes.tscn")
 func _ready():
 	Options = $CanvasLayer/Options
 	Options.hide()
+	# The teams picked in setup again (Random teams only dealt them for that match)
+	Global.match_teams = {}
 	# Shrooms and upgrades moved to player setup's match settings
 	$CanvasLayer/Modifiers.hide()
 	# Back from an online match

@@ -176,6 +176,46 @@ func _on_local_power_used(recast, player_id):
 		return
 	power_event.rpc(round_id, player_id, recast)
 
+# A play-of-the-game moment noted here (Global.note_highlight): the others note it too
+func share_highlight(player_id, kind, weight, victim_id):
+	if _online():
+		highlight_event.rpc(round_id, player_id, kind, weight, victim_id)
+
+@rpc("any_peer", "call_remote", "reliable")
+func highlight_event(event_round, player_id, kind, weight, victim_id):
+	if not await _arrived() or event_round != round_id:
+		return
+	Global.note_highlight(player_id, kind, weight, victim_id, true)
+
+# Void absorbed a power. Whoever saw it happen sends it to every machine (itself too):
+# Void's own machine for what its void touched or the lightning that hit it, the victim's
+# machine for a snake that died on Void's trail. Each machine then gives its copy of Void
+# the power (what it holds is cast when its Punchi is replayed there).
+func send_void_absorb(void_id, element, source_id, whole_round, at):
+	if not _online():
+		return
+	void_absorb.rpc(round_id, void_id, element, source_id, whole_round, at)
+
+@rpc("any_peer", "call_local", "reliable")
+func void_absorb(event_round, void_id, element, source_id, whole_round, at):
+	if not _online():
+		return
+	if multiplayer.get_remote_sender_id() != multiplayer.get_unique_id() and not await _arrived():
+		return
+	if event_round != round_id:
+		return
+	var void_snake = players.get(void_id)
+	if void_snake == null or not is_instance_valid(void_snake) or not (void_snake.main_power is VoidPower):
+		return
+	void_snake.main_power.apply_absorb(element, source_id, whole_round)
+	# A swallowed fireball goes on every screen, not just Void's
+	if element == 1 and not whole_round:
+		var shooter = players.get(source_id)
+		if shooter != null and is_instance_valid(shooter):
+			for ball in shooter.get_children():
+				if ball.is_in_group("fireballs") and not ball.expiring and ball.global_position.distance_to(at) <= void_snake.main_power.radius() * 1.5:
+					ball.expire(true)
+
 # Phoenix: our fire snake turned to ash (frozen and hidden everywhere) or rose again
 func _on_local_phoenix(rising, player_id):
 	if not _online():
@@ -558,7 +598,7 @@ func sync_scores(scores):
 	_apply_scores(scores)
 
 func _scores():
-	return [Global.player1Score, Global.player2Score, Global.player3Score, Global.player4Score]
+	return [Global.player1Score, Global.player2Score, Global.player3Score, Global.player4Score, Global.player5Score]
 
 func _apply_scores(scores):
 	for i in scores.size():

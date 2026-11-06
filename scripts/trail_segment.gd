@@ -33,6 +33,24 @@ func link_to(segment):
 	segment.tree_exiting.connect(_on_previous_gone)
 	queue_redraw()
 
+## Void's power bands (VoidField): the piece is drawn in `band` with a `core` line down
+## the middle (Void's own purple), so its trail still reads as one line. Alpha 0 = no band.
+var band = Color(0, 0, 0, 0)
+var core = Color.WHITE
+const CORE_WIDTH = 0.4
+
+func set_band(band_color: Color, core_color: Color):
+	if band == band_color and core == core_color:
+		return
+	band = band_color
+	core = core_color
+	queue_redraw()
+
+func clear_band():
+	if band.a > 0.0:
+		band = Color(0, 0, 0, 0)
+		queue_redraw()
+
 func _on_previous_gone():
 	previous = null
 	queue_redraw()
@@ -42,10 +60,18 @@ func _draw():
 	var world_to_local = 1.0 / max(global_scale.x, 0.0001)
 	var width = WIDTH * thickness * world_to_local
 	var radius = width / 2
+	var banded = band.a > 0.0
+	# With a band the colors are drawn as they are (modulate stays white)
+	var outer = band if banded else Color.WHITE
 	if previous != null:
-		draw_line(to_local(previous.global_position), Vector2.ZERO, Color.WHITE, width, true)
+		draw_line(to_local(previous.global_position), Vector2.ZERO, outer, width, true)
 		if round_joints:
-			draw_circle(Vector2.ZERO, radius, Color.WHITE, true, -1.0, true)
+			draw_circle(Vector2.ZERO, radius, outer, true, -1.0, true)
+		if banded:
+			draw_line(to_local(previous.global_position), Vector2.ZERO, core, width * CORE_WIDTH, true)
+			draw_circle(Vector2.ZERO, radius * CORE_WIDTH, core, true, -1.0, true)
 	else:
 		# The start of a stroke: a round end
-		draw_circle(Vector2.ZERO, radius, Color.WHITE, true, -1.0, true)
+		draw_circle(Vector2.ZERO, radius, outer, true, -1.0, true)
+		if banded:
+			draw_circle(Vector2.ZERO, radius * CORE_WIDTH, core, true, -1.0, true)

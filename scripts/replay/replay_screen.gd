@@ -52,17 +52,13 @@ func setup(play: Dictionary):
 	marker.draw.connect(_draw_marker)
 	add_child(marker)
 
-	# Old-TV feel: dark bands at the top and bottom with the titles
+	# A dark band at the top with the titles, the skip hint and the progress bar: it covers
+	# the scoreboard, never the arena
 	var top = ColorRect.new()
 	top.color = Color(0, 0, 0, 0.88)
 	top.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	top.offset_bottom = 150
 	add_child(top)
-	var bottom = ColorRect.new()
-	bottom.color = Color(0, 0, 0, 0.88)
-	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	bottom.offset_top = -96
-	add_child(bottom)
 
 	var title = _label(tr("REPLAY_TITLE"), 64, Color.WHITE)
 	title.position = Vector2(60, 18)
@@ -79,19 +75,18 @@ func setup(play: Dictionary):
 	rec_dot.draw.connect(_draw_rec)
 	add_child(rec_dot)
 
-	var hint = _label(tr("REPLAY_SKIP"), 30, Color(1, 1, 1, 0.85))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	var hint = _label(tr("REPLAY_SKIP"), 26, Color(1, 1, 1, 0.85))
+	hint.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	hint.offset_right = -60
-	hint.offset_bottom = -30
+	hint.offset_top = 96
 	add_child(hint)
 
 	var bar_back = ColorRect.new()
 	bar_back.color = Color(1, 1, 1, 0.15)
-	bar_back.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	bar_back.offset_top = -96
-	bar_back.offset_bottom = -90
+	bar_back.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	bar_back.offset_top = 144
+	bar_back.offset_bottom = 150
 	add_child(bar_back)
 	progress = ColorRect.new()
 	progress.color = star_color

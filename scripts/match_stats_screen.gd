@@ -16,7 +16,7 @@ const HOLD_TIME = 2.0
 const SYMBOLS_PATH = "res://assets/jorge-resources/Game Selection/"
 const SYMBOLS = ["", "Fire-Water symbol.png", "Air-Earth symbol rot.png", "Air-Earth symbol.png", "Fire-Water symbol rot.png"]
 ## [stat, its name in English]; shown translated by the key STAT_<STAT> (translations/strings.csv)
-const GENERIC_STATS = [["kills", "Kills"], ["length", "Trail length"], ["dead_time", "Time dead"], ["powers", "Powers used"]]
+const GENERIC_STATS = [["kills", "Kills"], ["alive_time", "Time alive"], ["dead_time", "Time dead"], ["powers", "Powers used"]]
 const ELEMENT_STATS = {
 	1: [["fire_kills", "Fireball kills"], ["fire_revives", "Times revived"]],
 	2: [["earth_blocked", "Fireballs & twins blocked"], ["earth_own_trail", "Own trail crossed"]],
@@ -223,7 +223,7 @@ func _show_choice(id):
 
 func set_totals(totals: Dictionary):
 	var best = {}
-	for stat in ["kills", "length", "powers"]:
+	for stat in ["kills", "alive_time", "powers"]:
 		best[stat] = 0
 		for id in ids:
 			best[stat] = max(best[stat], totals.get(id, {}).get(stat, 0))
@@ -305,7 +305,7 @@ func _format(stat, amount) -> String:
 	match stat:
 		"length":
 			return tr("METERS_N") % roundi(amount / PIXELS_PER_METER)
-		"dead_time":
+		"dead_time", "alive_time":
 			if amount >= 60:
 				return "%d:%02d" % [int(amount) / 60, int(amount) % 60]
 			return tr("SECONDS_DECIMAL") % amount

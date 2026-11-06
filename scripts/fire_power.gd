@@ -39,6 +39,10 @@ func _fire(origin) -> void:
 		duration = stat("fire.duration")
 	proj.lifetime = duration
 	proj.fire_trail = _stats() != null and stat("fire.trail") >= 1.0
+	# Void's borrowed fireball burns purple (its flames and its burst too)
+	if player.main_power is VoidPower:
+		proj.tint = Global.void_tint()
+		proj.modulate = proj.tint
 
 	if has_node("Shoot"):
 		$Shoot.play()
