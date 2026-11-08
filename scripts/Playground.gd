@@ -594,9 +594,9 @@ func finishGame(playerId):
 	var arena_top = $Colliders/ArenaBorder.points[0].y - BORDER_WIDTH
 	var arena = Rect2(0, arena_top, screen.x, screen.y - arena_top)
 	if teams_mode:
-		$Lesson.improvise(tr("WIN_NAME") % Global.team_name(Global.team_of(playerId)), arena)
+		$Lesson.improvise(tr("WIN_NAME") % Global.team_name(Global.team_of(playerId)), arena, playerId)
 	else:
-		$Lesson.improvise(tr("WIN_NAME") % Global.player_name(playerId), arena)
+		$Lesson.improvise(tr("WIN_NAME") % Global.player_name(playerId), arena, playerId)
 	$Lesson.show()
 	$Victory.play()
 	winners = _winners(playerId)

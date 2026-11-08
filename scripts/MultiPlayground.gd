@@ -68,7 +68,7 @@ func on_player_scored(player):
 func finishGame(playerId):
 	stopTime()
 	gameEnded = true
-	$Lesson.improvise("Player "+str(playerId)+" Wins")
+	$Lesson.improvise("Player "+str(playerId)+" Wins", Rect2(), playerId)
 	$Lesson.show()
 
 func stopTime():

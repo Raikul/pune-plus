@@ -142,9 +142,6 @@ layout_mode = 0
 [node name="PanelContainer" parent="Lesson" index="2"]
 layout_mode = 0
 
-[node name="DopamineLabel" parent="Lesson/DopamineContainer/Dopamine" index="0"]
-text = "WIN_DOPAMINE"
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=141854364]
 root_node = NodePath("../HUD/PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1Cooldown")
 libraries/ = SubResource("AnimationLibrary_ynogr")

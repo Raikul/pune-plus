@@ -13,14 +13,96 @@ const ODIN = preload("res://assets/jorge-resources/Game Selection/Odin Rounded -
 var hold_ring: HoldRing
 signal closed
 
+# Frases de victoria organizadas por elemento.
+# 1 = Fuego, 2 = Tierra, 3 = Aire, 4 = Agua.
+
+
+const VICTORY_QUOTES = {
+	1: [ # FIRE
+		"La claridad no siempre llega antes de actuar; a veces es el movimiento el que ilumina el camino.",
+		"Comprender el momento oportuno permite actuar antes de perder la ventaja.",
+		"La iniciativa no consiste siempre en ser el primero en moverse.",
+		"Lo que no ofrece ninguna ventaja puede dejarse pasar; lo que importa exige actuar antes de que ocurra.",
+		"Cuando la situación se estanca, abandona tu disposición anterior y comienza de nuevo.",
+		"No permitas que una situación difícil te obligue a repetir una respuesta que ya ha fracasado.",
+		"No se puede vivir plenamente mientras uno se esconde de la vida.",
+		"La peor derrota es perder la esperanza.",
+		"La belleza puede ser la primera puerta hacia la sabiduría."
+	],
+
+	2: [ # EARTH
+		"La fortaleza no consiste en permanecer intacto, sino en conservar la capacidad de volver a florecer.",
+		"Quien conoce sus fundamentos puede mantenerse firme incluso cuando todo a su alrededor cambia.",
+		"La experiencia y las victorias no garantizan haber comprendido verdaderamente un arte.",
+		"Lo profundo se alcanza a través de lo superficial; lo pequeño se comprende a partir de lo grande.",
+		"Todo arte tiene su propio ritmo, incluso cuando no podemos percibirlo.",
+		"Aprende a distinguir lo que se gana y lo que se pierde en cada cosa.",
+		"Contamos historias de héroes para recordar que nosotros también podemos alcanzar la grandeza.",
+		"El valor verdadero no necesita recurrir a la crueldad.",
+		"Cada día de tu vida existe un juez del que no podés escapar: vos mismo.",
+		"La humildad puede enseñarnos aquello que el orgullo nos impide comprender.",
+		"La tierra enseña que algunas respuestas llegan con el tiempo y que el silencio también puede ser sabiduría."
+	],
+
+	3: [ # AIR
+		"No necesitas ver aquello que te transforma para reconocer su presencia.",
+		"Para comprender el propio camino también hay que conocer los caminos ajenos.",
+		"Sin conocer bien a los demás, difícilmente podrás conocerte a ti mismo.",
+		"Aunque practiques tu camino todos los días, puedes estar alejándote de él sin advertirlo.",
+		"El exceso puede ser tan perjudicial como la insuficiencia.",
+		"La verdadera velocidad no consiste en apresurarse, sino en encontrar el ritmo adecuado.",
+		"La verdadera nobleza consiste en superar a la persona que fuiste ayer.",
+		"No podés encontrar equilibrio en lo que te rodea si no cultivás equilibrio en tu interior.",
+		"La verdadera libertad comienza cuando dejamos de obedecer al miedo.",
+		"Un obstáculo debe reconocerse por lo que es, no por lo que aparenta ser."
+	],
+
+	4: [ # WATER
+		"La verdadera claridad no consiste en encontrar lo que deseas ver, sino en aceptar lo que las aguas revelan.",
+		"No confundas la firmeza con la rigidez. El agua conserva su naturaleza sin aferrarse a ninguna forma.",
+		"El verdadero aprendizaje exige descubrir los principios por uno mismo, no limitarse a imitarlos.",
+		"La mente debe conservar el equilibrio incluso en las situaciones más apremiantes.",
+		"Percibir lo importante exige mirar más allá de aquello que atrae inmediatamente nuestra atención.",
+		"La rigidez impide responder con libertad.",
+		"Cuando todo está en calma, la mente no debe quedarse inmóvil. Cuando todo se acelera, la mente no debe apresurarse.",
+		"Fortalece la percepción y no dependas únicamente de lo que ven tus ojos.",
+		"No leas las enseñanzas como algo ajeno; descubre sus principios dentro de ti.",
+		"El camino de mil leguas se recorre paso a paso.",
+		"Hoy debes superar a quien fuiste ayer.",
+		"Mil días de práctica forjan; diez mil días de práctica perfeccionan.",
+		"La vida es como un río: sus enseñanzas no tienen un principio ni un final.",
+		"No podemos dominar las fuerzas de la naturaleza; debemos aprender a movernos en armonía con ellas.",
+		"El agua encuentra alegría en la transformación y no teme cambiar de forma."
+	],
+
+	5: [ # VOID
+		"Nada existe por sí solo. Incluso aquello que parece separado forma parte de una misma totalidad.",
+		"No confundas aquello que todavía no comprendes con aquello que no existe.",
+		"Ignorar algo no significa que aquello carezca de existencia.",
+		"Confundir lo que desconocemos con el vacío es permanecer en la confusión.",
+		"El conocimiento requiere despejar las nubes que oscurecen nuestro juicio.",
+		"Nadie reconoce su propio error mientras continúe convencido de que su camino es el correcto.",
+		"La sabiduría exige pulir tanto el pensamiento como la percepción, hasta que desaparezca la confusión.",
+		"Quien busca sabiduría debe aprender primero a encontrarla dentro de sí.",
+		"Solo una mente abierta al mundo puede percibirlo verdaderamente.",
+		"Aquel que ve enemigos en todas partes puede permanecer ciego ante sí mismo.",
+		"El vacío une aquello que parece separado, como el silencio que da forma a cada nota musical."
+	]
+}
+
+
 func _ready():
 	_style_dopamine()
 #	var my_random_number = rng.randf_range(-10.0, 10.0)
 
 # area: the screen rectangle it covers (Playground: the whole arena, under the scoreboard);
 # empty = its own size, centered on the screen
-func improvise(improvisedText, area = Rect2()):
+func improvise(improvisedText, area = Rect2(), winner_id: int = 0):
+	print("IMPROVISE EJECUTADO")
+	print("Ganador recibido: ", winner_id)
+	print("Texto recibido: ", improvisedText)
 	winnerTextBox.set_text(improvisedText)
+	show_victory_quote(winner_id)
 	$DopamineContainer.show()
 	# Above trails, heads and power effects
 	z_index = 60
@@ -110,3 +192,9 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
 			get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		
+func show_victory_quote(player_id: int):
+	if VICTORY_QUOTES.has(player_id):
+		var quotes = VICTORY_QUOTES[player_id]
+		dopamineLabel.text = quotes.pick_random()
+	else:
+		dopamineLabel.text = "DISFRUTA TU DOPAMINA"
