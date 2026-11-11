@@ -1,43 +1,62 @@
 class_name EarthPower extends Power
 
 @export var fissure_scene: PackedScene
-@export var duration: float = 2.0
+@export var duration: float = 1.2
 
 @onready var timer: Timer = $Timer
 @onready var hulk_sound: AudioStreamPlayer = $Hulk
+
+var walker_enabled: bool = false
+var burrow_enabled: bool = false
 
 func activate() -> void:
 	if is_active():
 		return
 
-	# 1. Invencibilidad
 	player.set_invincible(true)
-	player.head_modulate.a = 0
+	player.set_head_visible(false)
 
-	# 2. Agrandar colisión (2.0x por defecto o lo que diga la consola/stats)
-	var scale_mult: float = 2.0
-	if player.stats != null:
-		scale_mult = player.stats.get_stat("earth.scale")
-	player.set_earth_collision_scale(scale_mult)
+	var dur: float = duration
+	if _stats() != null:
+		dur = stat("earth.duration")
 
-	# 3. Fisuras y sonido
+	player.rock_time = dur
+	player.on_fresh_path = true
 	if fissure_scene:
 		player.start_fissure(1, fissure_scene)
+	player.gap_delta_sum = 0.0
 
 	if hulk_sound:
 		hulk_sound.play()
 	
-	var dur: float = duration
-	if player.stats != null:
-		dur = player.stats.get_stat("earth.duration")
 	timer.start(dur)
 	activated.emit()
 
+# CAMINANTE DE PIEDRA: Ignora el choque si la roca es tuya
+func should_ignore_collision(area: Area2D) -> bool:
+	# CAMINANTE DE PIEDRA:
+	if area.is_in_group("Fissures") or "fissure" in area.name.to_lower() or "rock" in area.name.to_lower():
+		if Global.debug_walker:
+			print(">>> [CAMINANTE DE PIEDRA] ¡Atravesaste la roca sin morir!")
+			return true
+
+	# EXCAVADOR:
+	if area.is_in_group("limits") or "limit" in area.name.to_lower():
+		if Global.debug_burrow and is_active():
+			print(">>> [EXCAVADOR] ¡Cavando a través del muro!")
+			return true
+
+	return false
 func _on_timer_timeout() -> void:
-	# Vuelve al tamaño normal y quita invencibilidad
 	player.set_invincible(false)
-	player.head_modulate.a = 1.0
-	player.reset_earth_collision_scale()
+	player.set_head_visible(true)
+	
+	# EXCAVADOR: Si se terminó el tiempo y quedaste adentro de una pared, mueres aplastado
+	var es_excavador = burrow_enabled or (_stats() != null and stat("earth.burrow") >= 1.0)
+	if es_excavador and player.has_method("is_inside_wall") and player.is_inside_wall():
+		print("¡APLASTADO POR LA ROCA!")
+		player.crush_death()
+		
 	finished.emit()
 
 func is_active() -> bool:

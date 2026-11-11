@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_kt54t"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_xapo5"]
+
+[node name="TwinBlocks" type="Node2D" unique_id=621531894]
+script = ExtResource("1_kt54t")
+display_name = "Twin Blocks"
+
+[node name="Block1" type="Polygon2D" parent="." unique_id=129609340]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(305, 400, 695, 400, 695, 750, 305, 750)
+script = ExtResource("2_xapo5")
+
+[node name="Block2" type="Polygon2D" parent="." unique_id=418751897]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1225, 400, 1615, 400, 1615, 750, 1225, 750)
+script = ExtResource("2_xapo5")
+
+[node name="ShroomSpots" type="Node2D" parent="." unique_id=938948093]
+
+[node name="Shroom1" type="Marker2D" parent="ShroomSpots" unique_id=1700179479]
+position = Vector2(567, 221)
+
+[node name="Shroom2" type="Marker2D" parent="ShroomSpots" unique_id=1842572953]
+position = Vector2(1464, 218)
+
+[node name="Shroom3" type="Marker2D" parent="ShroomSpots" unique_id=1824062004]
+position = Vector2(138, 525)
+
+[node name="Shroom4" type="Marker2D" parent="ShroomSpots" unique_id=129823818]
+position = Vector2(1790, 518)
+
+[node name="Shroom5" type="Marker2D" parent="ShroomSpots" unique_id=1212939599]
+position = Vector2(945, 552)
+
+[node name="Shroom6" type="Marker2D" parent="ShroomSpots" unique_id=1340141624]
+position = Vector2(504, 912)
+
+[node name="Shroom7" type="Marker2D" parent="ShroomSpots" unique_id=38131389]
+position = Vector2(1460, 858)

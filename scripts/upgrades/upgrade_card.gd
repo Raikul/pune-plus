@@ -1,0 +1,144 @@
+extends PanelContainer
+class_name UpgradeCard
+
+# One selectable upgrade inside an UpgradeRow: icon, name, rarity and element tags and
+# description. The rarity color is on its tag and on the card's border.
+
+const NORMAL_BG = Color(0.2, 0.2, 0.2)
+const FOCUSED_BG = Color(0.27, 0.27, 0.27)
+const NORMAL_BORDER = Color(0.33, 0.33, 0.33)
+const FOCUS_SCALE = Vector2(1.06, 1.06)
+
+var upgrade = {}
+var player_color = Color.WHITE
+var icon
+var style
+var flash
+var tag_label
+var scale_tween
+var rarity_color = NORMAL_BORDER
+
+func setup(upgrade_data, color):
+	upgrade = upgrade_data
+	player_color = color
+	var rarity = UpgradeCatalog.rarity_of(upgrade)
+	rarity_color = rarity.color
+	custom_minimum_size = Vector2(390, 0)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	style = StyleBoxFlat.new()
+	style.set_corner_radius_all(18)
+	style.set_content_margin_all(16)
+	add_theme_stylebox_override("panel", style)
+
+	var content = HBoxContainer.new()
+	content.add_theme_constant_override("separation", 14)
+	add_child(content)
+
+	icon = UpgradeIcon.new()
+	icon.kind = upgrade.icon
+	icon.color = player_color
+	icon.custom_minimum_size = Vector2(120, 120)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	content.add_child(icon)
+
+	var text_box = VBoxContainer.new()
+	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	text_box.add_theme_constant_override("separation", 4)
+	content.add_child(text_box)
+
+	text_box.add_child(_label(tr(upgrade.name), 28, Color.WHITE))
+	var tags = HBoxContainer.new()
+	tags.add_theme_constant_override("separation", 8)
+	text_box.add_child(tags)
+	var rarity_tag = _label(tr(rarity.name).to_upper(), 16, rarity_color)
+	rarity_tag.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tags.add_child(rarity_tag)
+	if upgrade.element == "generic":
+		tag_label = _label(tr("UPGRADE_ANY_SNAKE"), 16, Color(0.6, 0.6, 0.6))
+	else:
+		tag_label = _label(tr("UPGRADE_ELEMENT_POWER") % tr("ELEMENT_" + upgrade.element.to_upper() + "_UPPER"), 16, player_color)
+	tag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tags.add_child(tag_label)
+	# Long descriptions get a smaller font so they stay inside the card
+	var description = tr(upgrade.description)
+	# Chinese packs a lot more in fewer characters
+	var description_length = description.length() * (2 if TranslationServer.get_locale().begins_with("zh") else 1)
+	var description_size = 19 if description_length <= 90 else 16
+	text_box.add_child(_label(description, description_size, Color(0.82, 0.82, 0.82)))
+
+	# White overlay flashed when the card is chosen
+	flash = Panel.new()
+	var flash_style = StyleBoxFlat.new()
+	flash_style.bg_color = Color.WHITE
+	flash_style.set_corner_radius_all(18)
+	flash.add_theme_stylebox_override("panel", flash_style)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.modulate.a = 0
+	add_child(flash)
+
+	resized.connect(func(): pivot_offset = size / 2)
+	set_focused(false)
+
+func set_focused(focused):
+	style.bg_color = FOCUSED_BG if focused else NORMAL_BG
+	style.border_color = player_color if focused else rarity_color.darkened(0.25)
+	style.set_border_width_all(6 if focused else 3)
+	# Unfocused cards glow in their rarity color (stronger for rarer ones)
+	var glow = clamp(UpgradeCatalog.RARITIES.keys().find(upgrade.get("rarity", "common")) * 0.08, 0.0, 0.35)
+	style.shadow_color = Color(player_color, 0.45) if focused else Color(rarity_color, glow)
+	style.shadow_size = 14 if focused else (8 if glow > 0 else 0)
+	icon.speed_scale = 1.8 if focused else 1.0
+	_tween_scale(FOCUS_SCALE if focused else Vector2.ONE, 0.12)
+
+func set_dimmed(dimmed):
+	create_tween().tween_property(self, "modulate", Color(1, 1, 1, 0.35 if dimmed else 1.0), 0.25)
+
+# show_text: the "+ Upgrade" text that floats up (it is top-level, so a hidden row's
+# transparency doesn't hide it)
+func play_chosen(show_text = true):
+	style.bg_color = player_color.darkened(0.55)
+	style.border_color = player_color.lightened(0.3)
+	style.shadow_color = Color(player_color, 0.75)
+	style.shadow_size = 26
+	tag_label.text = tr("UPGRADE_CHOSEN")
+	tag_label.add_theme_color_override("font_color", Color.WHITE)
+
+	flash.modulate.a = 0.85
+	create_tween().tween_property(flash, "modulate:a", 0.0, 0.45)
+	scale = Vector2(1.2, 1.2)
+	_tween_scale(FOCUS_SCALE, 0.6).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	if show_text:
+		_float_text("+ " + tr(upgrade.name))
+
+# Text that rises from the card and fades out as pick confirmation
+func _float_text(text):
+	var label = _label(text, 36, player_color)
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_constant_override("outline_size", 10)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.top_level = true
+	label.z_index = 10
+	add_child(label)
+	label.size = Vector2(size.x, 50)
+	label.global_position = global_position + Vector2(0, -20)
+	var tween = create_tween().set_parallel()
+	tween.tween_property(label, "position:y", label.position.y - 90, 1.3).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate:a", 0.0, 0.6).set_delay(0.7)
+	tween.chain().tween_callback(label.queue_free)
+
+func _tween_scale(target, duration):
+	if scale_tween:
+		scale_tween.kill()
+	scale_tween = create_tween()
+	return scale_tween.tween_property(self, "scale", target, duration)
+
+func _label(text, font_size, font_color):
+	var label = Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", font_color)
+	return label

@@ -1,0 +1,262 @@
+extends Control
+
+# Between-rounds upgrade screen. Every active snake picks one of its own upgrades
+# at the same time, browsing with its Left/Right keys and confirming with its
+# Punchi (Up) key. For now the picks are only reported through the signals below.
+
+signal upgrade_selected(player_id, upgrade_id)
+signal all_upgrades_selected(selections)
+## Emitted right after all_upgrades_selected, when the screen can be closed.
+signal finished
+
+const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
+
+@export var options_per_player = 3
+## Seconds the screen stays up after the last pick before all_upgrades_selected is emitted.
+@export var finish_delay = 1.2
+
+var selections = {}
+var rows = []
+var player_ids = []
+var waiting_for_reroll = false
+var finishing = false
+var time_left = 0.0
+var rows_box
+var footer_label
+var signal_label
+var timer_label
+var subtitle_label
+var quote_box
+var quote_label
+var quote_source
+
+func _ready():
+	_build_layout()
+	# Running this scene on its own (F6) starts a test round right away
+	if get_tree().current_scene == self:
+		start()
+
+# player_ids defaults to the snakes marked active in Global (all four when none are).
+# With a time_limit, snakes that haven't picked when it runs out get their highlighted card.
+# preset (online): {player_id: {"options": [upgrade ids], "ai": bool, "input_id": int,
+# "remote": bool}} so every machine shows the host's options and only drives its own rows.
+func start(ids = [], time_limit = 0.0, preset = {}):
+	if not is_node_ready():
+		await ready
+	for row in rows:
+		row.queue_free()
+	rows.clear()
+	selections.clear()
+	waiting_for_reroll = false
+	finishing = false
+	time_left = time_limit
+	timer_label.visible = time_limit > 0
+	_update_timer_label()
+	if ids.is_empty() and not preset.is_empty():
+		ids = preset.keys()
+		ids.sort()
+	player_ids = ids if not ids.is_empty() else _active_player_ids()
+
+	for i in player_ids.size():
+		var id = player_ids[i]
+		var row = UpgradeRow.new()
+		rows_box.add_child(row)
+		if preset.has(id):
+			var row_preset = preset[id]
+			row.setup(id, UpgradeCatalog.options_from_ids(id, row_preset.options), row_preset.ai,
+				row_preset.input_id, row_preset.remote, row_preset.get("hidden", false))
+		else:
+			row.setup(id, UpgradeCatalog.roll_options(id, options_per_player), Global.AI_Enabled.get(id, false))
+		row.chosen.connect(_on_row_chosen)
+		rows.append(row)
+		row.modulate.a = 0
+		create_tween().tween_property(row, "modulate:a", 1.0, 0.3).set_delay(0.08 * i)
+
+	footer_label.text = tr("UPGRADES_FOOTER")
+	signal_label.text = ""
+
+# winner_id: the snake that won the last round (0 = nobody); its element picks the quote
+func show_wisdom(winner_id):
+	if not is_node_ready():
+		await ready
+	var quote = Wisdom.for_winner(winner_id)
+	quote_label.text = tr("WISDOM_QUOTE") % tr(quote.text)
+	quote_label.add_theme_color_override("font_color",
+		Color(Global.playerColors[winner_id]).lightened(0.25) if winner_id in [1, 2, 3, 4, 5] else Color(0.9, 0.9, 0.9))
+	quote_source.text = "— " + tr(quote.source)
+	quote_box.show()
+	subtitle_label.hide()
+
+# Online: another machine picked for this snake
+func remote_pick(player_id, upgrade_id):
+	for row in rows:
+		if row.player_id == player_id:
+			row.pick(upgrade_id)
+
+# [[player_id, highlighted upgrade id], ...] for the snakes that haven't picked yet
+func unpicked():
+	var missing = []
+	for row in rows:
+		if not row.has_chosen:
+			missing.append([row.player_id, row.highlighted_id()])
+	return missing
+
+func _active_player_ids():
+	var ids = Global.active_ids()
+	if ids.is_empty():
+		ids = [1, 2, 3, 4]
+	return ids
+
+func _on_row_chosen(player_id, upgrade_id):
+	selections[player_id] = upgrade_id
+	upgrade_selected.emit(player_id, upgrade_id)
+	_report("upgrade_selected(%d, %s)" % [player_id, upgrade_id])
+	if selections.size() == rows.size():
+		_finish()
+
+func _process(delta):
+	if time_left <= 0 or finishing:
+		return
+	var previous_second = ceili(time_left)
+	time_left -= delta
+	if ceili(time_left) != previous_second:
+		_update_timer_label()
+		timer_label.scale = Vector2(1.3, 1.3)
+		create_tween().tween_property(timer_label, "scale", Vector2.ONE, 0.25)
+	if time_left <= 0:
+		for row in rows:
+			row.confirm()
+
+func _update_timer_label():
+	var seconds = max(ceili(time_left), 0)
+	timer_label.text = str(seconds)
+	timer_label.add_theme_color_override("font_color", Color(1, 0.3, 0.25) if seconds <= 3 else Color.WHITE)
+
+func _finish():
+	if finishing:
+		return
+	finishing = true
+	footer_label.text = tr("UPGRADES_ALL_READY")
+	# Not process_always, so pausing the game also holds the screen
+	await get_tree().create_timer(finish_delay, false).timeout
+	if not is_inside_tree():
+		return
+	all_upgrades_selected.emit(selections.duplicate())
+	_report("all_upgrades_selected(%s)" % selections)
+	finished.emit()
+	if get_tree().current_scene == self:
+		waiting_for_reroll = true
+		footer_label.text = tr("UPGRADES_REROLL")
+
+func _unhandled_input(event):
+	if not waiting_for_reroll:
+		return
+	for id in player_ids:
+		if event.is_action_pressed("Player" + str(id) + "Up"):
+			get_viewport().set_input_as_handled()
+			start(player_ids)
+			return
+
+func _report(text):
+	print("[UpgradeSelection] " + text)
+	signal_label.text = "Signal: " + text
+
+func _build_layout():
+	var ui_theme = Theme.new()
+	ui_theme.default_font = ODIN_FONT
+	ui_theme.default_font_size = 24
+	theme = ui_theme
+
+	var gradient = Gradient.new()
+	gradient.set_color(0, Color(0.17, 0.17, 0.17))
+	gradient.set_color(1, Color(0.06, 0.06, 0.06))
+	var background_texture = GradientTexture2D.new()
+	background_texture.gradient = gradient
+	background_texture.fill = GradientTexture2D.FILL_RADIAL
+	background_texture.fill_from = Vector2(0.5, 0.45)
+	background_texture.fill_to = Vector2(1.1, 1.1)
+	var background = TextureRect.new()
+	background.texture = background_texture
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_SCALE
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(background)
+
+	margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 40)
+	margin.add_theme_constant_override("margin_right", 40)
+	margin.add_theme_constant_override("margin_top", 24)
+	margin.add_theme_constant_override("margin_bottom", 24)
+	add_child(margin)
+
+	layout = VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 10)
+	margin.add_child(layout)
+	# Too much to fit (four snakes, long quote, small window): shrink it all instead of
+	# pushing cards and status off screen
+	layout.minimum_size_changed.connect(_fit_to_screen)
+	resized.connect(_fit_to_screen)
+	_fit_to_screen.call_deferred()
+
+	layout.add_child(_centered_label(tr("UPGRADES_TITLE"), 56, Color.WHITE))
+	subtitle_label = _centered_label(tr("UPGRADES_SUBTITLE"), 24, Color(0.6, 0.6, 0.6))
+	layout.add_child(subtitle_label)
+	# Wise words for the element that won the last round (show_wisdom)
+	quote_box = VBoxContainer.new()
+	quote_box.add_theme_constant_override("separation", 6)
+	quote_box.hide()
+	layout.add_child(quote_box)
+	quote_label = _centered_label("", 28, Color.WHITE)
+	quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	quote_box.add_child(quote_label)
+	quote_source = _centered_label("", 18, Color(0.55, 0.55, 0.55))
+	quote_box.add_child(quote_source)
+	# Breathing room between the quote and the cards
+	var quote_gap = Control.new()
+	quote_gap.custom_minimum_size = Vector2(0, 22)
+	quote_box.add_child(quote_gap)
+
+	rows_box = VBoxContainer.new()
+	rows_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	rows_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	rows_box.add_theme_constant_override("separation", 16)
+	layout.add_child(rows_box)
+
+	footer_label = _centered_label("", 30, Color.WHITE)
+	layout.add_child(footer_label)
+	signal_label = _centered_label("", 18, Color(0.5, 0.5, 0.5))
+	layout.add_child(signal_label)
+
+	# Countdown in the top-right corner, only shown when there's a time limit
+	timer_label = _centered_label("", 72, Color.WHITE)
+	timer_label.add_theme_constant_override("outline_size", 10)
+	timer_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	timer_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	timer_label.offset_left = -180
+	timer_label.offset_right = -40
+	timer_label.offset_top = 20
+	timer_label.offset_bottom = 110
+	timer_label.pivot_offset = Vector2(70, 45)
+	timer_label.visible = false
+	add_child(timer_label)
+
+var margin
+var layout
+
+func _fit_to_screen():
+	if margin == null:
+		return
+	var padding = Vector2(80, 48)
+	var needed = layout.get_combined_minimum_size() + padding
+	var factor = min(1.0, size.x / needed.x, size.y / needed.y)
+	margin.scale = Vector2.ONE * factor
+	margin.position = Vector2.ZERO
+	margin.size = size / factor
+
+func _centered_label(text, font_size, font_color):
+	var label = Label.new()
+	label.text = text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", font_color)
+	return label

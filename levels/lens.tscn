@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_40myh"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_opgbp"]
+
+[node name="Lens" type="Node2D" unique_id=1656754148]
+script = ExtResource("1_40myh")
+display_name = "Lens"
+
+[node name="Wall1" type="Polygon2D" parent="." unique_id=989976497]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(649, 247, 652, 249, 678, 276, 704, 301, 729, 324, 755, 344, 781, 362, 807, 377, 832, 390, 858, 400, 884, 408, 909, 414, 935, 418, 960, 419, 985, 418, 1011, 414, 1036, 408, 1062, 400, 1088, 390, 1113, 377, 1139, 362, 1165, 344, 1191, 324, 1216, 301, 1242, 276, 1268, 249, 1272, 247, 1276, 246, 1280, 248, 1283, 251, 1284, 255, 1283, 259, 1282, 261, 1255, 289, 1229, 314, 1202, 337, 1176, 358, 1149, 377, 1122, 392, 1095, 406, 1068, 417, 1041, 426, 1015, 432, 987, 436, 960, 437, 933, 436, 906, 432, 879, 426, 852, 417, 825, 406, 798, 393, 772, 377, 745, 359, 718, 338, 692, 315, 665, 289, 638, 261, 636, 258, 636, 253, 638, 249, 641, 247, 645, 246)
+script = ExtResource("2_opgbp")
+
+[node name="Wall2" type="Polygon2D" parent="." unique_id=1355732497]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(987, 764, 1014, 768, 1041, 774, 1068, 783, 1095, 794, 1122, 807, 1148, 823, 1175, 841, 1202, 862, 1228, 885, 1255, 911, 1282, 939, 1284, 942, 1284, 947, 1282, 951, 1279, 953, 1275, 954, 1271, 953, 1268, 951, 1242, 924, 1216, 899, 1191, 876, 1165, 856, 1139, 838, 1113, 823, 1088, 810, 1062, 800, 1036, 792, 1011, 786, 985, 782, 960, 781, 935, 782, 909, 786, 884, 792, 858, 800, 832, 810, 807, 823, 781, 838, 755, 856, 729, 876, 704, 899, 678, 924, 652, 951, 648, 953, 644, 954, 640, 952, 637, 949, 636, 945, 637, 941, 638, 939, 665, 911, 691, 886, 718, 863, 744, 842, 771, 823, 798, 808, 825, 794, 852, 783, 879, 774, 905, 768, 933, 764, 960, 763)
+script = ExtResource("2_opgbp")
+
+[node name="Wall3" type="Polygon2D" parent="." unique_id=1138809353]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(579, 467, 582, 470, 584, 474, 584, 478, 581, 481, 578, 484, 575, 484, 215, 484, 211, 483, 208, 480, 206, 476, 206, 472, 209, 469, 212, 466, 215, 466, 575, 466)
+script = ExtResource("2_opgbp")
+
+[node name="Wall4" type="Polygon2D" parent="." unique_id=1013437821]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(579, 717, 582, 720, 584, 724, 584, 728, 581, 731, 578, 734, 575, 734, 215, 734, 211, 733, 208, 730, 206, 726, 206, 722, 209, 719, 212, 716, 215, 716, 575, 716)
+script = ExtResource("2_opgbp")
+
+[node name="Wall5" type="Polygon2D" parent="." unique_id=1854685933]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1709, 467, 1712, 470, 1714, 474, 1714, 478, 1711, 481, 1708, 484, 1705, 484, 1345, 484, 1341, 483, 1338, 480, 1336, 476, 1336, 472, 1339, 469, 1342, 466, 1345, 466, 1705, 466)
+script = ExtResource("2_opgbp")
+
+[node name="Wall6" type="Polygon2D" parent="." unique_id=185144149]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1709, 717, 1712, 720, 1714, 724, 1714, 728, 1711, 731, 1708, 734, 1705, 734, 1345, 734, 1341, 733, 1338, 730, 1336, 726, 1336, 722, 1339, 719, 1342, 716, 1345, 716, 1705, 716)
+script = ExtResource("2_opgbp")
+
+[node name="ShroomSpots" type="Node2D" parent="." unique_id=1093549433]
+
+[node name="Shroom1" type="Marker2D" parent="ShroomSpots" unique_id=1383955054]
+position = Vector2(957, 278)
+
+[node name="Shroom2" type="Marker2D" parent="ShroomSpots" unique_id=102027170]
+position = Vector2(383, 548)
+
+[node name="Shroom3" type="Marker2D" parent="ShroomSpots" unique_id=1814098728]
+position = Vector2(924, 570)
+
+[node name="Shroom4" type="Marker2D" parent="ShroomSpots" unique_id=1322134371]
+position = Vector2(1557, 530)
+
+[node name="Shroom5" type="Marker2D" parent="ShroomSpots" unique_id=197569952]
+position = Vector2(915, 893)

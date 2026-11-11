@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/level.gd" id="1_thlrn"]
+[ext_resource type="Script" path="res://scripts/levels/level_wall.gd" id="2_q1h3l"]
+
+[node name="Crossroads" type="Node2D" unique_id=1218271602]
+script = ExtResource("1_thlrn")
+display_name = "Crossroads"
+
+[node name="Wall1" type="Polygon2D" parent="." unique_id=1341373458]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(788, 266, 791, 269, 794, 272, 794, 275, 794, 497, 793, 501, 790, 504, 786, 506, 375, 506, 371, 505, 368, 502, 366, 498, 366, 494, 369, 491, 372, 488, 375, 488, 776, 488, 776, 275, 777, 271, 780, 268, 784, 266)
+script = ExtResource("2_q1h3l")
+
+[node name="Wall2" type="Polygon2D" parent="." unique_id=173024592]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(789, 705, 792, 708, 794, 712, 794, 935, 793, 939, 790, 942, 786, 944, 782, 944, 779, 941, 776, 938, 776, 935, 776, 722, 375, 722, 371, 721, 368, 718, 366, 714, 366, 710, 369, 707, 372, 704, 375, 704, 785, 704)
+script = ExtResource("2_q1h3l")
+
+[node name="Wall3" type="Polygon2D" parent="." unique_id=1223959799]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1138, 266, 1141, 269, 1144, 272, 1144, 275, 1144, 488, 1545, 488, 1549, 489, 1552, 492, 1554, 496, 1554, 500, 1551, 503, 1548, 506, 1545, 506, 1135, 506, 1131, 505, 1128, 502, 1126, 498, 1126, 275, 1127, 271, 1130, 268, 1134, 266)
+script = ExtResource("2_q1h3l")
+
+[node name="Wall4" type="Polygon2D" parent="." unique_id=1712781744]
+color = Color(0.17, 0.11, 0.27, 1)
+polygon = PackedVector2Array(1549, 705, 1552, 708, 1554, 712, 1554, 716, 1551, 719, 1548, 722, 1545, 722, 1144, 722, 1144, 935, 1143, 939, 1140, 942, 1136, 944, 1132, 944, 1129, 941, 1126, 938, 1126, 935, 1126, 713, 1127, 709, 1130, 706, 1134, 704, 1545, 704)
+script = ExtResource("2_q1h3l")
+
+[node name="ShroomSpots" type="Node2D" parent="." unique_id=1377128763]
+
+[node name="Shroom1" type="Marker2D" parent="ShroomSpots" unique_id=700557187]
+position = Vector2(630, 368)
+
+[node name="Shroom2" type="Marker2D" parent="ShroomSpots" unique_id=1482330087]
+position = Vector2(981, 360)
+
+[node name="Shroom3" type="Marker2D" parent="ShroomSpots" unique_id=2012868366]
+position = Vector2(1347, 330)
+
+[node name="Shroom4" type="Marker2D" parent="ShroomSpots" unique_id=126373825]
+position = Vector2(560, 608)
+
+[node name="Shroom5" type="Marker2D" parent="ShroomSpots" unique_id=516780892]
+position = Vector2(939, 612)
+
+[node name="Shroom6" type="Marker2D" parent="ShroomSpots" unique_id=854515246]
+position = Vector2(1328, 623)
+
+[node name="Shroom7" type="Marker2D" parent="ShroomSpots" unique_id=2004633810]
+position = Vector2(582, 878)
+
+[node name="Shroom8" type="Marker2D" parent="ShroomSpots" unique_id=1119257575]
+position = Vector2(944, 866)
+
+[node name="Shroom9" type="Marker2D" parent="ShroomSpots" unique_id=1139644649]
+position = Vector2(1362, 900)

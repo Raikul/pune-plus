@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-var menu_font = preload("res://assets/fonts/Flat Earth Scribe.TTF")
 
 var label1: Label
 var label2: Label
@@ -13,6 +12,25 @@ var player4cooldown: TextureProgressBar
 
 # Diccionario para saber quién murio
 var dead_players = {1: false, 2: false, 3: false, 4: false}
+# Red cross drawn over a dead snake's symbol, per player
+var dead_marks = {}
+const DEAD_SYMBOL_ALPHA = 0.3
+const DEAD_CROSS_COLOR = Color(0.9, 0.1, 0.1)
+# Team letter before the symbol (2v2) and the snake's upgrades after the score
+var team_tags = {}
+var upgrade_badges = {}
+const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
+
+# The bar has four seats (cards). The classic four sit in their own; Void (player 5) takes
+# the seat of the element that sits out (Global.seat_of). Everything here is kept by seat;
+# the functions called with a player id turn it into its seat.
+func _seat(player_id) -> int:
+	return Global.seat_of(player_id)
+
+func _player_in(seat) -> int:
+	if Global.player5Active and not Global.isMultiplayerActive and Global.seat_of(Global.VOID_ID) == seat:
+		return Global.VOID_ID
+	return seat
 
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
@@ -25,16 +43,108 @@ func _ready():
 	player4cooldown = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer4/HBoxContainer/Player4Cooldown
 	
 
-	label1.add_theme_font_override("font", menu_font)
-	label2.add_theme_font_override("font", menu_font)
-	label3.add_theme_font_override("font", menu_font)
-	label4.add_theme_font_override("font", menu_font)
-	
+	_restyle()
+
+	for id in [1, 2, 3, 4]:
+		dead_marks[id] = _make_dead_mark(_cooldown_bar(id))
+		var row = _cooldown_bar(id).get_parent()
+		var tag = Label.new()
+		tag.add_theme_font_override("font", ODIN_FONT)
+		tag.add_theme_font_size_override("font_size", 34)
+		tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tag.hide()
+		row.add_child(tag)
+		row.move_child(tag, 0)
+		team_tags[id] = tag
+		# Two rows of small icons, no taller than the symbol, so a pile of upgrades
+		# never stretches the scoreboard off screen
+		var badges = UpgradeBadges.new()
+		badges.icon_size = 29.0
+		badges.columns = 4
+		badges.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(badges)
+		upgrade_badges[id] = badges
+
 	add_to_group("HUD")
 
-func set_cooldown(player_id, time_left):
+# Dark bar with one rounded card per snake, the score in its element's color
+const BAR_COLOR = Color(0.07, 0.07, 0.08, 0.94)
+const CARD_COLOR = Color(0.13, 0.13, 0.15)
+var target_label: Label
+
+func _restyle():
+	$PanelContainer/ColorRect.color = BAR_COLOR
+	var accent = ColorRect.new()
+	accent.color = Color(1, 1, 1, 0.07)
+	accent.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	accent.offset_top = -2
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(accent)
+	var margin = $PanelContainer/MarginContainer
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 22)
+	for id in [1, 2, 3, 4]:
+		var label = [null, label1, label2, label3, label4][id]
+		var color = Color(Global.playerColors[_player_in(id)])
+		label.self_modulate = Color.WHITE
+		label.add_theme_font_override("font", ODIN_FONT)
+		label.add_theme_font_size_override("font_size", 56)
+		label.add_theme_color_override("font_color", color.lightened(0.15))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+		label.add_theme_constant_override("outline_size", 6)
+		label.custom_minimum_size.x = 64
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var row = label.get_parent()
+		row.add_theme_constant_override("separation", 16)
+		var card = row.get_parent()
+		card.self_modulate = Color.WHITE
+		var style = StyleBoxFlat.new()
+		style.bg_color = CARD_COLOR
+		style.set_corner_radius_all(16)
+		style.content_margin_left = 18
+		style.content_margin_right = 22
+		style.content_margin_top = 8
+		style.content_margin_bottom = 8
+		style.border_color = color
+		style.border_width_bottom = 4
+		card.add_theme_stylebox_override("panel", style)
+		_cooldown_bar(id).custom_minimum_size = Vector2(64, 64)
+		# The symbol fills in the element's color (the scene's tints are the default colors)
+		_cooldown_bar(id).tint_under = color
+		_cooldown_bar(id).tint_progress = color.darkened(0.7)
+		if _player_in(id) == Global.VOID_ID:
+			_cooldown_bar(id).texture_under = Global.element_symbol(Global.VOID_ID)
+			_cooldown_bar(id).texture_progress = Global.element_symbol(Global.VOID_ID)
+	# "FIRST TO 10" under the middle of the bar
+	target_label = Label.new()
+	target_label.add_theme_font_override("font", ODIN_FONT)
+	target_label.add_theme_font_size_override("font_size", 18)
+	target_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	target_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	target_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	target_label.offset_left = -150
+	target_label.offset_right = 150
+	# Lifted off the bar's bottom edge, so it has some room above the arena border
+	target_label.offset_top = -34
+	target_label.offset_bottom = -12
+	target_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$PanelContainer/ColorRect.add_child(target_label)
+
+var target_points = 0
+func set_target(points):
+	target_points = points
+	target_label.text = tr("HUD_FIRST_TO") % points
+
+# A new language (Options in the pause menu)
+func _notification(what):
+	if what == NOTIFICATION_TRANSLATION_CHANGED and target_label != null:
+		target_label.text = tr("HUD_FIRST_TO") % target_points
+
+# total: the cooldown's full length (upgrades can shorten it), so the bar starts full
+func set_cooldown(player_id, time_left, total = 0.0):
 	var cooldown
-	match player_id:
+	match _seat(player_id):
 		1:
 			cooldown = player1cooldown
 		2:
@@ -43,10 +153,68 @@ func set_cooldown(player_id, time_left):
 			cooldown = player3cooldown
 		4:
 			cooldown = player4cooldown
+	if total > 0:
+		cooldown.max_value = total
 	cooldown.value = time_left
 
+# 2v2: shows which team each snake is on ("A" / "B")
+func setup_teams(enabled):
+	for id in team_tags:
+		var team = Global.team_of(_player_in(id))
+		team_tags[id].visible = enabled
+		team_tags[id].text = ["A", "B"][team]
+		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
+	if enabled:
+		_group_by_team()
+
+# 2v2: one card per team, its snakes' symbols side by side and one shared score (teammates
+# always have the same score). Each snake's upgrades sit on its own side of the card.
+func _group_by_team():
+	var cards_row = $PanelContainer/MarginContainer/HBoxContainer
+	var position_in_bar = 0
+	for team in [0, 1]:
+		var members = Global.active_ids().filter(func(id): return Global.team_of(id) == team).map(_seat)
+		if members.is_empty():
+			continue
+		var lead = members[0]
+		var card = _card(lead)
+		cards_row.move_child(card, position_in_bar)
+		position_in_bar += 1
+		var team_color = Global.TEAM_COLORS[team]
+		card.get_theme_stylebox("panel").border_color = team_color
+		var row = _cooldown_bar(lead).get_parent()
+		var score = _score_label(lead)
+		score.add_theme_color_override("font_color", team_color.lightened(0.15))
+		# The lead's upgrades go before its symbol
+		row.move_child(upgrade_badges[lead], team_tags[lead].get_index() + 1)
+		for mate in members.slice(1):
+			_cooldown_bar(mate).reparent(row, false)
+			row.move_child(_cooldown_bar(mate), score.get_index())
+			upgrade_badges[mate].reparent(row, false)
+			_card(mate).hide()
+	# Inactive snakes have no team card
+	for id in [1, 2, 3, 4]:
+		if not Global.get("player%dActive" % _player_in(id)):
+			_card(id).hide()
+
+func _score_label(player_id):
+	return [null, label1, label2, label3, label4][player_id]
+
+# The rounded card a snake starts in
+func _card(player_id):
+	return _score_label(player_id).get_parent().get_parent()
+
+# can_see(player_id) -> bool: false shows only how many upgrades a rival has
+func refresh_upgrades(can_see: Callable):
+	for id in upgrade_badges:
+		var player = _player_in(id)
+		if Global.get("player%dActive" % player):
+			upgrade_badges[id].refresh(player, not can_see.call(player))
+		else:
+			upgrade_badges[id].refresh(player, true)
+
 func set_player_dead(player_id: int):
-	dead_players[player_id] = true
+	dead_players[_seat(player_id)] = true
 
 func reset_labels():
 	label1.self_modulate = Color.WHITE
@@ -57,29 +225,39 @@ func reset_labels():
 	for id in dead_players:
 		dead_players[id] = false
 
+func _cooldown_bar(player_id):
+	return [null, player1cooldown, player2cooldown, player3cooldown, player4cooldown][player_id]
+
+func _make_dead_mark(bar):
+	var mark = Control.new()
+	mark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mark.top_level = false
+	mark.hide()
+	mark.draw.connect(func():
+		var inset = mark.size * 0.12
+		var a = inset
+		var b = mark.size - inset
+		for line in [[a, b], [Vector2(b.x, a.y), Vector2(a.x, b.y)]]:
+			mark.draw_line(line[0], line[1], Color.BLACK, 14.0, true)
+			mark.draw_line(line[0], line[1], DEAD_CROSS_COLOR, 8.0, true))
+	bar.add_child(mark)
+	return mark
+
+# A dead snake's symbol is dimmed and crossed out until the next round
+func _show_dead(player_id, dead):
+	var bar = _cooldown_bar(player_id)
+	bar.self_modulate.a = DEAD_SYMBOL_ALPHA if dead else 1.0 # self_modulate: the cross stays bright
+	dead_marks[player_id].visible = dead
+
 func _process(_delta):
-	var mensaje_muerte = "(DISABLED)"
+	refresh()
 
-	if Global.player1Active:
-		var texto = str(Global.player1Score)
-		if dead_players[1]:
-			texto += mensaje_muerte
-		label1.text = texto
-
-	if Global.player2Active:	
-		var texto = str(Global.player2Score)
-		if dead_players[2]:
-			texto += mensaje_muerte
-		label2.text = texto
-
-	if Global.player3Active:	
-		var texto = str(Global.player3Score)
-		if dead_players[3]:
-			texto += mensaje_muerte
-		label3.text = texto
-
-	if Global.player4Active:	
-		var texto = str(Global.player4Score)
-		if dead_players[4]:
-			texto += mensaje_muerte
-		label4.text = texto
+# Scores and dead marks. Also called once when time stops (round or match over), since
+# _process is off from then on and the last point would never be shown
+func refresh():
+	for id in [1, 2, 3, 4]:
+		var player = _player_in(id)
+		if Global.get("player%dActive" % player):
+			[null, label1, label2, label3, label4][id].text = str(Global.get("player%dScore" % player))
+			_show_dead(id, dead_players[id])

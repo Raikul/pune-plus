@@ -49,8 +49,7 @@ color = Color(0.4, 0.4, 0.4, 1)
 
 [node name="Label" type="Label" parent="PanelContainer2/PanelContainer/MarginContainer2/PanelContainer"]
 layout_mode = 2
-text = "EARTH
-"
+text = "ELEMENT_EARTH_UPPER"
 horizontal_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer2/PanelContainer"]
@@ -126,7 +125,7 @@ size_flags_horizontal = 4
 text = "I"
 horizontal_alignment = 1
 
-[node name="PunchySprite" type="Sprite2D" parent="InputList/Up"]
+[node name="PunchiSprite" type="Sprite2D" parent="InputList/Up"]
 position = Vector2(47, 29)
 scale = Vector2(0.42848, 0.42848)
 texture = ExtResource("4_2ld1l")
@@ -140,14 +139,13 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 25
-text = "Redefine Keys
-"
+text = "SETUP_REDEFINE_KEYS"
 
 [node name="Select" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
-text = "Select"
+text = "SETUP_SELECT"
 
 [node name="Enable AI" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 56)
@@ -155,6 +153,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 25
 theme_override_styles/pressed = SubResource("StyleBoxFlat_01lo7")
 toggle_mode = true
-text = "Enable AI"
+text = "SETUP_ENABLE_AI"
 
 [connection signal="toggled" from="VBoxContainer/Enable AI" to="." method="_on_enable_ai_toggled"]

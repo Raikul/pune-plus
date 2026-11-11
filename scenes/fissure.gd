@@ -7,14 +7,63 @@ var _fissure_step: = 1
 var delta_sum : float = 0
 var next_created := false
 var fissure_gap := 0.1
-var maximum_step_number := 8
+var maximum_step_number := 8 # Set by the player from Earth's duration (Player.start_fissure)
+const BODY_TEXTURES = 8 # cuerpo_1..8.png
 var available_bodies : Array
 var available_ends : Array
 signal fissure_ready(step)
 
-# Called when the node enters the scene tree for the first time.
+# The stone is solid like a trail: snakes that touch it die (Earth too, unless it has
+# the Stone Walker upgrade) and the fireball crashes on it. Only the drawn rock collides,
+# not the transparent gaps between the rocks.
+static var _outlines = {} # texture path -> rock outlines in texture pixels
+
 func _ready() -> void:
-	pass # Replace with function body.
+	_add_wall.call_deferred()
+
+func _add_wall() -> void:
+	var texture = fissure_rect.texture
+	var area = Area2D.new()
+	area.collision_mask = 0
+	area.add_to_group("Fissures")
+	var pixel_scale = fissure_rect.size * fissure_rect.scale / Vector2(texture.get_size())
+	for outline in _rock_outlines(texture):
+		var points = PackedVector2Array()
+		for point in outline:
+			if fissure_rect.flip_h:
+				point.x = texture.get_width() - point.x
+			if fissure_rect.flip_v:
+				point.y = texture.get_height() - point.y
+			points.append(fissure_rect.position + point * pixel_scale)
+		var shape = CollisionPolygon2D.new()
+		shape.polygon = points
+		area.add_child(shape)
+	add_child(area)
+
+# The Earth snake that laid this rock's collider (null if it's gone)
+static func owner_of(area: Area2D):
+	var fissure = area.get_parent()
+	var snake = fissure.get_parent() if fissure != null else null
+	if snake != null and is_instance_valid(snake) and "playerId" in snake:
+		return snake
+	return null
+
+static func _rock_outlines(texture) -> Array:
+	if _outlines.has(texture.resource_path):
+		return _outlines[texture.resource_path]
+	var image = texture.get_image()
+	if image.is_compressed():
+		image.decompress()
+	var bitmap = BitMap.new()
+	bitmap.create_from_image_alpha(image, 0.5)
+	var outlines = []
+	for outline in bitmap.opaque_to_polygons(Rect2i(Vector2i.ZERO, image.get_size()), 2.0):
+		# A little inside the art, so grazing the jagged edges doesn't kill
+		for shrunk in Geometry2D.offset_polygon(outline, -4.0):
+			if shrunk.size() >= 3:
+				outlines.append(shrunk)
+	_outlines[texture.resource_path] = outlines
+	return outlines
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -26,10 +75,7 @@ func _physics_process(delta: float) -> void:
 
 func set_body(fissure_step: int, body_list = []) -> Array:
 	if fissure_step == 1:
-		var index = 1
-		while index < maximum_step_number:
-			available_bodies.append(index)
-			index += 1
+		available_bodies = range(1, BODY_TEXTURES + 1)
 		#index = 0
 		#while index < 4:
 			#available_ends.append(index)
@@ -46,6 +92,9 @@ func set_body(fissure_step: int, body_list = []) -> Array:
 		if fissure_step == 1:
 			$FissureBody.set_flip_v(true)
 	else: 
+		# Long paths use every rock once, then start over
+		if available_bodies.is_empty():
+			available_bodies = range(1, BODY_TEXTURES + 1)
 		var random_body = available_bodies[randi_range(0,available_bodies.size() - 1)]
 		available_bodies.erase(random_body)
 		$FissureBody.texture = load(texture_path + "cuerpo_" + str(random_body) + ".png")

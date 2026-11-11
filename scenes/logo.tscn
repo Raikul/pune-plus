@@ -60,7 +60,7 @@ offset_bottom = 35.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_nlwch")
-text = "PRESS ANY KEY"
+text = "LOGO_PRESS_ANY_KEY"
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 1.857

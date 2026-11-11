@@ -1,9 +1,9 @@
 class_name Powers
 
 const FIRE_SCENE = preload("res://scenes/firepower.tscn")
-const EARTH_SCENE = preload("res://scenes/earthpower.tscn")
-const AIR_SCENE = preload("res://scenes/airpower.tscn")
-const WATER_SCENE = preload("res://scenes/waterpower.tscn")
+const EARTH_SCENE = preload("res://scenes/EarthPower.tscn")
+const AIR_SCENE = preload("res://scenes/AirPower.tscn")
+const WATER_SCENE = preload("res://scenes/WaterPower.tscn")
 
 static func create(element_id: int) -> Power:
 	match element_id:
@@ -22,6 +22,10 @@ static func create(element_id: int) -> Power:
 		4:
 			var p = WATER_SCENE.instantiate()
 			p.element = 4
+			return p
+		5:
+			var p = VoidPower.new()
+			p.element = 5
 			return p
 		_:
 			return null
