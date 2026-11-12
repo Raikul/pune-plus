@@ -150,6 +150,10 @@ func _style_dopamine():
 	winnerTextBox.offset_bottom = -50
 	dopamineLabel.add_theme_font_size_override("font_size", 56)
 	dopamineLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dopamineLabel.anchor_left = 0.1
+	dopamineLabel.anchor_right = 0.9
+	dopamineLabel.offset_left = 0
+	dopamineLabel.offset_right = 0
 	dopamineLabel.offset_top = -30
 	dopamineLabel.offset_bottom = 130
 
