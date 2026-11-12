@@ -7,10 +7,10 @@ var copies: Array = []
 
 # Twins it can have alive at once, and how many one cast summons (upgrades raise both)
 func max_twins() -> int:
-	return int(player.stats.get_stat("water.max_twins")) if player.stats != null else 1
+	return int(stat("water.max_twins")) if _stats() != null else 1
 
 func twins_per_cast() -> int:
-	return int(player.stats.get_stat("water.twins_per_cast")) if player.stats != null else 1
+	return int(stat("water.twins_per_cast")) if _stats() != null else 1
 
 func alive_twins() -> int:
 	copies = copies.filter(func(c): return is_instance_valid(c) and c.alive)
@@ -31,7 +31,7 @@ func activate() -> void:
 
 	# One twin per cast, two with Twin Burst, never past the maximum
 	var cantidad_clones: int = mini(twins_per_cast(), max_twins() - alive_twins())
-	var lasting = player.stats != null and player.stats.get_stat("water.lasting_twin") >= 1.0
+	var lasting = _stats() != null and stat("water.lasting_twin") >= 1.0
 
 	var spawned = []
 	for i in range(cantidad_clones):

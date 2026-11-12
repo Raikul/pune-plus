@@ -395,9 +395,7 @@ offset_top = 496.0
 offset_right = 1183.0
 offset_bottom = 686.0
 theme_override_font_sizes/font_size = 66
-text = "CLICK to Unpause
-ESC to Restart
-"
+text = "PAUSE_SPACE_HINT"
 script = ExtResource("8_1ieds")
 
 [node name="Colliders" type="Node2D" parent="." unique_id=1808286707]

@@ -5,6 +5,7 @@ var player1Score = 0
 var player2Score = 0
 var player3Score = 0
 var player4Score = 0
+var player5Score = 0
 var baseSpeed = 150
 
 var player1Left = "A"
@@ -13,6 +14,7 @@ var player1Active
 var player2Active
 var player3Active
 var player4Active
+var player5Active = false
 
 var player1AIEnabled = false
 var player2AIEnabled = false
@@ -23,8 +25,45 @@ var AI_Enabled = {
 	1: false,
 	2: false,
 	3: false,
-	4: false
+	4: false,
+	5: false,
 }
+
+# --- Elements by id: 1 Fire, 2 Earth, 3 Air, 4 Water, 5 Void (EXPERIMENTAL).
+# Only MAX_SNAKES of them play at once: the scoreboard, stats and upgrade screens have room
+# for four, so with Void in, one element sits out and Void takes its seat (seat_of).
+const VOID_ID = 5
+const MAX_SNAKES = 4
+## Void's Punchi cooldown (the others: PlayerStats "cooldown", 6 s)
+const VOID_COOLDOWN = 10.0
+
+# Every element that can play
+func element_ids() -> Array:
+	return [1, 2, 3, 4, 5]
+
+# The elements playing this match
+func active_ids() -> Array:
+	return element_ids().filter(func(id): return get("player%dActive" % id))
+
+## Where a snake sits on four-seat screens (scoreboard card, corner spawn): the classic four
+## sit in their own seat, Void in the seat of the element that sits out
+func seat_of(player_id) -> int:
+	if player_id != VOID_ID:
+		return player_id
+	for id in [1, 2, 3, 4]:
+		if not get("player%dActive" % id):
+			return id
+	return 4
+
+## Each element's symbol (white art, tinted with the element's color)
+const SYMBOL_PATHS = ["", "res://assets/jorge-resources/Game Selection/Fire-Water symbol.png",
+	"res://assets/jorge-resources/Game Selection/Air-Earth symbol rot.png",
+	"res://assets/jorge-resources/Game Selection/Air-Earth symbol.png",
+	"res://assets/jorge-resources/Game Selection/Fire-Water symbol rot.png",
+	"res://assets/images/void_symbol.png"]
+
+func element_symbol(player_id) -> Texture2D:
+	return load(SYMBOL_PATHS[player_id]) if player_id > 0 and player_id < SYMBOL_PATHS.size() else null
 
 # Each element's color (by player id). Filled from ELEMENT_COLORS or, with the colorblind
 # mode on, COLORBLIND_COLORS (apply_colors).
@@ -35,24 +74,34 @@ var playerColors = [
 	"1ab2ff",
 	"00e699"
 ]
-const ELEMENT_COLORS = ["", "ff401a", "e6bf00", "1ab2ff", "00e699"]
+## Void is a magenta purple, brighter and pinker than the arena's violet walls
+const ELEMENT_COLORS = ["", "ff401a", "e6bf00", "1ab2ff", "00e699", "d45cff"]
 ## Colorblind mode (Options > Accessibility): fire red, earth green, air yellow, water blue,
 ## from the Okabe-Ito palette, which stays distinct with every kind of color blindness
 ## (they also differ in brightness: yellow lightest, then green, blue and red)
-const COLORBLIND_COLORS = ["", "e0491c", "00b386", "f0e442", "3a86ff"]
+## (Void: Okabe-Ito's reddish purple, also told apart from the others)
+const COLORBLIND_COLORS = ["", "e0491c", "00b386", "f0e442", "3a86ff", "cc79a7"]
 var colorblind = false
 
 # The colors of the current mode into playerColors. Called at startup, by Options outside
 # a match and when a match starts (a match keeps the colors it started with).
 func apply_colors() -> void:
 	var colors = COLORBLIND_COLORS if colorblind else ELEMENT_COLORS
-	for id in [1, 2, 3, 4]:
+	while playerColors.size() < colors.size():
+		playerColors.append("")
+	for id in range(1, colors.size()):
 		playerColors[id] = colors[id]
 
-## The water twins' see-through color: aqua, or a light blue in the colorblind mode (aqua
-## is too close to its green earth)
-func twin_color() -> Color:
-	return Color("9cc4ff") if colorblind else Color.AQUA
+### What Void does with the powers it absorbed (rocks, fireballs, lightning) is tinted in its
+## purple, so everyone sees whose they are
+func void_tint() -> Color:
+	return Color(playerColors[VOID_ID]).lerp(Color.WHITE, 0.3)
+
+# A twin's see-through color: a lighter shade of its snake's (Water's, or Void's when it
+## holds Water), so it reads as that snake's and never as Air's blue
+func twin_color(owner_id = 4) -> Color:
+	var base = Color(playerColors[owner_id]) if owner_id > 0 and owner_id < playerColors.size() else Color(playerColors[4])
+	return base.lightened(0.45)
 
 var isMultiplayerActive = false
 
@@ -72,7 +121,8 @@ var player_stats: Dictionary = {
 	1: null,
 	2: null,
 	3: null,
-	4: null
+	4: null,
+	5: null,
 }
 
 # Duración de los huecos de la estela según la opción Gap Size (Options > Gameplay)
@@ -86,8 +136,10 @@ func gap_time() -> float:
 signal player_stats_reset
 
 func reset_all_player_stats() -> void:
-	for id in [1, 2, 3, 4]:
+	for id in [1, 2, 3, 4, 5]:
 		player_stats[id] = PlayerStats.new()
+	# Void absorbs powers and recharges by absorbing: its own recharge is slower
+	player_stats[VOID_ID].set_stat("cooldown", VOID_COOLDOWN)
 	player_stats_reset.emit()
 
 ## What each snake did this match, for the end screen (scripts/match_stats_screen.gd):
@@ -97,7 +149,7 @@ func reset_all_player_stats() -> void:
 var match_stats = {}
 
 func reset_match_stats() -> void:
-	match_stats = {1: {}, 2: {}, 3: {}, 4: {}}
+	match_stats = {1: {}, 2: {}, 3: {}, 4: {}, 5: {}}
 
 func add_stat(player_id, stat, amount = 1) -> void:
 	if not match_stats.has(player_id):
@@ -121,11 +173,21 @@ const HIGHLIGHT_STATS = {
 	"fire_revives": ["phoenix", 3.0],
 	"water_saves": ["save", 3.0],
 	"earth_blocked": ["block", 2.0],
-	"air_shocks": ["shock", 1.5],
+	"earth_phases": ["phase", 1.5],
+	"air_shocks": ["shock", 2.0],
+	"air_scramble_kills": ["clutch", 3.0],
 }
 
-func note_highlight(player_id, kind, weight, victim_id = 0) -> void:
+# A moment for the play of the game (scripts/replay/replay_recorder.gd). Online each
+# machine notes what it decides and shares it, so every machine scores the same moments
+# and picks the same play (from its own recording of it).
+func note_highlight(player_id, kind, weight, victim_id = 0, from_net = false) -> void:
 	highlight.emit(player_id, kind, weight, victim_id)
+	if isMultiplayerActive and not from_net:
+		var scene = get_tree().current_scene
+		var session = scene.get_node_or_null("NetSession") if scene else null
+		if session != null:
+			session.share_highlight(player_id, kind, weight, victim_id)
 
 # Several machines' match_stats added up
 static func sum_stats(sources: Array) -> Dictionary:
@@ -193,7 +255,7 @@ var online_upgrades = false
 # --- Match rules: 2v2 teams and points to win (saved). Online the host's copies are used.
 # Team mode: two teams share their score and earn one point per enemy snake that dies.
 var teams = false
-var player_team = {1: 0, 2: 1, 3: 0, 4: 1} # 0 = Team A, 1 = Team B
+var player_team = {1: 0, 2: 1, 3: 0, 4: 1, 5: 1} # 0 = Team A, 1 = Team B
 ## 0 = automatic: (players - 1) x 10 in free for all, 10 with teams
 var points_to_win = 0
 const POINTS_TO_WIN_OPTIONS = [0, 5, 10, 15, 20, 30, 50]
@@ -205,6 +267,21 @@ var online_points_to_win = 0
 # Random starting spots each round (spread out, away from walls, facing inwards)
 var random_spawns = false
 var online_random_spawns = false
+
+## 2v2 Random teams (saved): every match deals the snakes into two teams at random instead
+## of the teams picked in setup. Offline the deal lives in match_teams for that match;
+## online the host deals and sends it as the match's player_team (SteamNet.start_match).
+var random_teams = false
+var match_teams = {}
+
+# player id -> team: shuffled, the first half (rounded up) on Team A, the rest on Team B
+func deal_teams(ids: Array) -> Dictionary:
+	var shuffled = ids.duplicate()
+	shuffled.shuffle()
+	var dealt = {}
+	for i in shuffled.size():
+		dealt[shuffled[i]] = 0 if i < ceili(shuffled.size() / 2.0) else 1
+	return dealt
 
 # "3, 2, 1, GO!" before every round (the first one always has it)
 var round_countdown = true
@@ -277,7 +354,7 @@ func level_name(path) -> String:
 # Names of the people at the keyboard, by the element they play (player setup). They move
 # with their keys when they drag their name to another element.
 # "" = the default "Player N", in the current language
-var player_names = {1: "", 2: "", 3: "", 4: ""}
+var player_names = {1: "", 2: "", 3: "", 4: "", 5: ""}
 
 func team_name(team) -> String:
 	return tr(TEAM_NAMES[team])
@@ -293,7 +370,7 @@ func player_name(player_id) -> String:
 	return name if name.strip_edges() != "" else tr("PLAYER_N") % player_id
 
 ## Translation keys of the elements' names (Title case: "Fire"; ELEMENT_*_UPPER: "FIRE")
-const ELEMENT_KEYS = ["", "ELEMENT_FIRE", "ELEMENT_EARTH", "ELEMENT_AIR", "ELEMENT_WATER"]
+const ELEMENT_KEYS = ["", "ELEMENT_FIRE", "ELEMENT_EARTH", "ELEMENT_AIR", "ELEMENT_WATER", "ELEMENT_VOID"]
 
 ## AI snakes' names (translation keys): every match each AI gets a random one of its element's
 const AI_NAMES = {
@@ -301,6 +378,7 @@ const AI_NAMES = {
 	2: ["AI_BOULDER", "AI_GRANITE", "AI_TREMOR", "AI_PEBBLE", "AI_QUAKE"],
 	3: ["AI_GALE", "AI_ZEPHYR", "AI_CYCLONE", "AI_BREEZE", "AI_TEMPEST"],
 	4: ["AI_TIDE", "AI_RIPPLE", "AI_TORRENT", "AI_DRIZZLE", "AI_RIPTIDE"],
+	5: ["AI_ABYSS", "AI_ECHO", "AI_HOLLOW", "AI_NULL", "AI_ECLIPSE"],
 }
 var ai_match_names = {}
 
@@ -317,7 +395,7 @@ static func random_ai_name(element) -> String:
 var online_names = {}
 
 # What each element's power does, in two words (player setup and online lobby; translation keys)
-const POWER_TAGLINES = ["", "POWER_FIRE", "POWER_EARTH", "POWER_AIR", "POWER_WATER"]
+const POWER_TAGLINES = ["", "POWER_FIRE", "POWER_EARTH", "POWER_AIR", "POWER_WATER", "POWER_VOID"]
 
 # --- Accessibility (Options), off by default ---
 var nameplates = false   # Each snake's name under its head
@@ -336,6 +414,8 @@ func teams_enabled() -> bool:
 	return online_teams if isMultiplayerActive else teams
 
 func team_of(player_id) -> int:
+	if not isMultiplayerActive and not match_teams.is_empty():
+		return match_teams.get(player_id, 0)
 	return (online_player_team if isMultiplayerActive else player_team).get(player_id, 0)
 
 func points_to_win_setting() -> int:
@@ -352,6 +432,7 @@ func on_off(on) -> String:
 func match_options() -> Dictionary:
 	return {"upgrades": upgrades, "teams": teams, "player_team": player_team.duplicate(), "points_to_win": points_to_win,
 		"upgrade_time": online_upgrade_time, "random_spawns": random_spawns, "round_countdown": round_countdown,
+		"random_teams": random_teams,
 		"levels": level_rotation.duplicate()}
 
 func shrooms_enabled() -> bool:
@@ -396,6 +477,7 @@ func _ready():
 	load_settings()
 	apply_language()
 	apply_colors()
+	apply_audio_device()
 	apply_volumes()
 	apply_video_settings()
 	_set_cursors()
@@ -422,6 +504,7 @@ func load_settings() -> void:
 	player_team = config.get_value("match", "player_team", player_team)
 	points_to_win = config.get_value("match", "points_to_win", points_to_win)
 	random_spawns = config.get_value("match", "random_spawns", random_spawns)
+	random_teams = config.get_value("match", "random_teams", random_teams)
 	round_countdown = config.get_value("match", "round_countdown", round_countdown)
 	level = config.get_value("match", "level", level)
 	if level != "" and not ResourceLoader.exists(level):
@@ -436,6 +519,12 @@ func load_settings() -> void:
 	for id in player_names:
 		if str(player_names[id]) == "Player %d" % id:
 			player_names[id] = ""
+	# Settings saved before Void had a seat
+	for id in [1, 2, 3, 4, 5]:
+		if not player_names.has(id):
+			player_names[id] = ""
+		if not player_team.has(id):
+			player_team[id] = 1
 	language = config.get_value("game", "language", language)
 	online_names = config.get_value("game", "online_names", online_names)
 	nameplates = config.get_value("accessibility", "nameplates", nameplates)
@@ -447,6 +536,7 @@ func load_settings() -> void:
 	show_fps = config.get_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		volumes[bus] = config.get_value("audio", bus.to_lower(), volumes[bus])
+	audio_device = config.get_value("audio", "device", audio_device)
 	# Own key for the offline limit, so it starts Off even where the old shared one was saved
 	upgrade_time = config.get_value("game", "offline_upgrade_time", upgrade_time)
 	online_upgrade_time = config.get_value("game", "upgrade_time", online_upgrade_time)
@@ -463,6 +553,7 @@ func save_settings() -> void:
 	config.set_value("match", "player_team", player_team)
 	config.set_value("match", "points_to_win", points_to_win)
 	config.set_value("match", "random_spawns", random_spawns)
+	config.set_value("match", "random_teams", random_teams)
 	config.set_value("match", "round_countdown", round_countdown)
 	config.set_value("match", "level", level)
 	config.set_value("match", "level_rotation", level_rotation)
@@ -478,6 +569,7 @@ func save_settings() -> void:
 	config.set_value("video", "show_fps", show_fps)
 	for bus in volumes:
 		config.set_value("audio", bus.to_lower(), volumes[bus])
+	config.set_value("audio", "device", audio_device)
 	config.set_value("game", "offline_upgrade_time", upgrade_time)
 	config.set_value("game", "upgrade_time", online_upgrade_time)
 	config.set_value("game", "show_quotes", show_quotes)
@@ -530,6 +622,15 @@ func apply_video_settings() -> void:
 	if fps_label:
 		fps_label.get_parent().visible = show_fps
 
+## The system device the sound plays on (Options > Audio): "Default" follows the system's
+var audio_device = "Default"
+
+func apply_audio_device() -> void:
+	if not AudioServer.get_output_device_list().has(audio_device):
+		audio_device = "Default"
+	if AudioServer.output_device != audio_device:
+		AudioServer.output_device = audio_device
+
 func apply_volumes() -> void:
 	for bus in volumes:
 		var index = AudioServer.get_bus_index(bus)
@@ -546,4 +647,5 @@ func reset_score():
 	player2Score = 0
 	player3Score = 0
 	player4Score = 0
+	player5Score = 0
 	

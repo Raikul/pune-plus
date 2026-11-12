@@ -11,24 +11,38 @@ const AIM_SPEED = 3.5
 var aim = 0.0
 
 func activate() -> void:
+	_fire(null)
+
+# Void with Fire and Water held: its twins shoot too (from where they are, where they head)
+func shoot_from(origin: Node2D) -> void:
+	_fire(origin)
+
+func _fire(origin) -> void:
 	if projectile_scene == null:
 		return
 
 	var proj = player.spawn_projectile(projectile_scene)
+	if origin != null and is_instance_valid(origin):
+		proj.global_position = origin.global_position
+		proj.rotation = origin.rotation
 
 	# 1. Aplicar Radio / Escala
 	var radius_mult: float = 1.0
-	if player.stats != null:
-		radius_mult = player.stats.get_stat("fire.radius")
+	if _stats() != null:
+		radius_mult = stat("fire.radius")
 	proj.scale = Vector2(radius_mult, radius_mult)
 
 	# 2. Aplicar Duración en el aire
 	# The projectile flies this long, then fades out (projectile.gd); 0 = until it hits something
 	var duration: float = DEFAULT_DURATION
-	if player.stats != null:
-		duration = player.stats.get_stat("fire.duration")
+	if _stats() != null:
+		duration = stat("fire.duration")
 	proj.lifetime = duration
-	proj.fire_trail = player.stats != null and player.stats.get_stat("fire.trail") >= 1.0
+	proj.fire_trail = _stats() != null and stat("fire.trail") >= 1.0
+	# Void's borrowed fireball burns purple (its flames and its burst too)
+	if player.main_power is VoidPower:
+		proj.tint = Global.void_tint()
+		proj.modulate = proj.tint
 
 	if has_node("Shoot"):
 		$Shoot.play()
@@ -52,7 +66,7 @@ func ai_should_activate(_direction: int) -> bool:
 
 # Phoenix upgrade: the first death of the round turns the snake to an ember instead
 func try_prevent_death() -> bool:
-	if phoenix_used or player.stats == null or player.stats.get_stat("fire.phoenix") < 1.0:
+	if phoenix_used or _stats() == null or stat("fire.phoenix") < 1.0:
 		return false
 	# Down to a duel (one other snake left): rising would only keep the winner waiting
 	var others = get_tree().get_nodes_in_group("alivePlayers").filter(func(p): return p != player)

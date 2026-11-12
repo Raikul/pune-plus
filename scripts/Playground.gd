@@ -37,7 +37,11 @@ func _ready():
 	groupColliders()
 	$Events.set_space(topLimit,bottomLimit)
 	setup_music()
-	var active_ids = [1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active"))
+	var active_ids = Global.active_ids()
+	# Random teams (offline): a fresh deal every match
+	Global.match_teams = {}
+	if not Global.isMultiplayerActive and Global.teams and Global.random_teams:
+		Global.match_teams = Global.deal_teams(active_ids)
 	# Teams only make sense with players on both sides
 	var active_teams = {}
 	for id in active_ids:
@@ -108,7 +112,7 @@ func exit_menu_input() -> void:
 # "+1" over a snake whenever its score goes up (online too: it watches the synced scores)
 var shown_scores = {}
 func _pop_scores():
-	for id in [1, 2, 3, 4]:
+	for id in Global.element_ids():
 		var score = Global.get("player%dScore" % id)
 		var before = shown_scores.get(id, score)
 		shown_scores[id] = score
@@ -130,6 +134,7 @@ func _count_dead_time(delta):
 		if not player.is_in_group("alivePlayers") or player.reviving:
 			Global.add_stat(player.playerId, "dead_time", delta)
 		else:
+			Global.add_stat(player.playerId, "alive_time", delta)
 			life_time[player.playerId] = life_time.get(player.playerId, 0.0) + delta
 			Global.max_stat(player.playerId, "best_life", life_time[player.playerId])
 
@@ -164,6 +169,9 @@ func groupColliders():
 	$Colliders/LimitTop.add_to_group("limits")
 	$Colliders/LimitLeft.add_to_group("limits")
 	$Colliders/LimitRight.add_to_group("limits")
+	# The arena's edge (not a level's walls): fireballs go through it (projectile.gd)
+	for edge in [$Colliders/Control/LimitBottom, $Colliders/LimitTop, $Colliders/LimitLeft, $Colliders/LimitRight]:
+		edge.add_to_group("arena_border")
 	_draw_arena_border()
 
 # One thin line on the inner edge of the four wall colliders (where a head dies), instead
@@ -202,8 +210,8 @@ func _draw_arena_border():
 # spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
 func setupPlayers(spawns = {}):
 	if spawns.is_empty() and not net_session:
-		spawns = roll_spawns([1, 2, 3, 4].filter(func(id): return Global.get("player" + str(id) + "Active")))
-	for player_id in [1, 2, 3, 4]:
+		spawns = roll_spawns(Global.active_ids())
+	for player_id in Global.element_ids():
 		if spawns.has(player_id):
 			spawn_player(player_id, spawns[player_id])
 	for player in get_tree().get_nodes_in_group("activePlayers"):
@@ -224,6 +232,8 @@ func setupPlayers(spawns = {}):
 		await _start_countdown(countdown, _countdown_text(first))
 		if not is_inside_tree():
 			return
+	elif is_instance_valid(round_quote):
+		round_quote.vanish()
 	time_flowing = true
 
 var counted_down = false
@@ -248,6 +258,12 @@ func _quest_text() -> String:
 # The snakes wait in place through "3, 2, 1, GO!" (from seconds down); quest: a line under it
 func _start_countdown(seconds, quest = ""):
 	var steps = range(seconds, 0, -1).map(func(n): return str(n)) + [tr("COUNTDOWN_GO")]
+	# The break's quote waits under the countdown and goes with the GO
+	if is_instance_valid(round_quote):
+		round_quote.to_countdown()
+		get_tree().create_timer(seconds, false).timeout.connect(func():
+			if is_instance_valid(round_quote):
+				round_quote.vanish())
 	var snakes = get_tree().get_nodes_in_group("activePlayers")
 	for snake in snakes:
 		snake.set_frozen(true)
@@ -410,7 +426,8 @@ func roll_spawns(ids):
 		# level wall gets a random spot instead
 		to_roll = []
 		for id in ids:
-			var spot = level.spawn_for(id) if level else []
+			# Void starts where the element that sits out would (Global.seat_of)
+			var spot = level.spawn_for(Global.seat_of(id)) if level else []
 			if spot.is_empty():
 				# Around its corner, away from the walls and from the snakes placed so far
 				for attempt in 20:
@@ -457,13 +474,14 @@ func _arena_rect() -> Rect2:
 
 # Random spawn point and heading for a snake: [x, y, rotation]
 func roll_spawn(player_id):
-	var spawn_x = spawn_locations[player_id][0]
-	var spawn_y = spawn_locations[player_id][1]
+	var seat = Global.seat_of(player_id)
+	var spawn_x = spawn_locations[seat][0]
+	var spawn_y = spawn_locations[seat][1]
 	var spawn_range = 150
 	return [
 		spawn_x + randf_range(-spawn_range,spawn_range),
 		spawn_y + randf_range(-spawn_range,spawn_range),
-		(3/2 * PI) - (player_id * PI/2) - (randf_range(0,PI/2)) + PI/2,
+		(3/2 * PI) - (seat * PI/2) - (randf_range(0,PI/2)) + PI/2,
 	]
 
 func spawn_player(player_id, spawn):
@@ -476,7 +494,7 @@ func spawn_player(player_id, spawn):
 		newPlayer.net_remote = not net_session.is_local(player_id)
 		newPlayer.input_id = net_session.input_id_for(player_id)
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
-	newPlayer.get_node("ElementHeadSprite").set_texture(air_earth_texture)
+	newPlayer.get_node("ElementHeadSprite").set_texture(Global.element_symbol(5) if player_id == Global.VOID_ID else air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
 	newPlayer.connect("score", _on_player_score.bind(player_id))
 	newPlayer.name = "Player" + str(player_id)
@@ -548,7 +566,7 @@ func round_is_over():
 # Teams keep the same score on both members, so the scoreboard shows it on each
 func add_team_point(team):
 	var score = 0
-	var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+	var members = Global.active_ids().filter(func(id): return Global.team_of(id) == team)
 	for id in members:
 		score = max(score, Global.get("player%dScore" % id))
 	score += 1
@@ -583,6 +601,8 @@ func finishGame(playerId):
 		net_session.host_game_over(playerId)
 	stopTime()
 	gameEnded = true
+	if is_instance_valid(round_quote):
+		round_quote.vanish()
 	if net_session:
 		net_session.send_stats()
 	# Let the final moment (last crash, last point on the scoreboard) sink in first
@@ -611,7 +631,7 @@ var stats_screen: MatchStatsScreen
 var replay_recorder: ReplayRecorder
 
 func _active_ids():
-	return [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id))
+	return Global.active_ids()
 
 # The winning snake, or the whole winning team
 func _winners(player_id):
@@ -731,7 +751,11 @@ func stopTime():
 	hud.set_process(false)
 	pass
 
-func restart(delay = 2):
+## Seconds the arena stays on screen after a round is won (the winner is shown, the quote
+## pops up), before the upgrade screen or the next round
+const ROUND_END_LINGER = 3.0
+
+func restart(delay = ROUND_END_LINGER):
 	stopTime()
 	var alive_players = get_tree().get_nodes_in_group("alivePlayers")
 	last_round_winner = 0
@@ -739,11 +763,16 @@ func restart(delay = 2):
 		var id = alive_players[0].playerId
 		last_round_winner = id
 		for survivor in alive_players:
-			Global.note_highlight(survivor.playerId, "round", 1.0)
-			# End-screen stats (online the host counts them)
+			# End-screen stats and the play of the game (online the host counts them)
 			if not net_session or multiplayer.is_server():
 				Global.add_stat(survivor.playerId, "round_wins")
-		animation_player.play("player_"+str(id)+"_win")
+				Global.note_highlight(survivor.playerId, "round", 2.5)
+		# Its scoreboard card flashes (Void's card is the seat it took)
+		animation_player.play("player_%d_win" % Global.seat_of(id))
+		_signal_round_winner(alive_players)
+	# The quote of the break between rounds (RoundQuote)
+	if Global.show_quotes:
+		_pop_round_quote()
 	
 	# Online clients wait for the host's next round instead (NetSession.start_round)
 	if net_session and not multiplayer.is_server():
@@ -761,6 +790,50 @@ func restart(delay = 2):
 	else:
 		use_level(Global.pick_level(level_path))
 		call_deferred("setupPlayers")
+
+# The round's winner: rings bursting out of its head and its name over it
+func _signal_round_winner(survivors):
+	for snake in survivors:
+		var color = Color(Global.playerColors[snake.playerId])
+		PowerFx.explosion(self, snake.global_position, color, 70.0)
+		for i in 3:
+			get_tree().create_timer(0.25 * i).timeout.connect(func():
+				if is_instance_valid(snake):
+					PowerFx.pulse(self, snake, color))
+	var winner = survivors[0]
+	var name = Global.team_name(Global.team_of(winner.playerId)) if teams_mode else Global.player_name(winner.playerId)
+	var layer = CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	var label = Label.new()
+	label.text = tr("ROUND_WINNER") % name
+	label.add_theme_font_override("font", preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf"))
+	label.add_theme_font_size_override("font_size", 40)
+	label.add_theme_color_override("font_color", Color(Global.playerColors[winner.playerId]).lightened(0.3))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	label.add_theme_constant_override("outline_size", 12)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.size = Vector2(900, 60)
+	var screen = get_viewport_rect().size
+	label.position = (winner.global_position - Vector2(450, 110)).clamp(Vector2(20, 140), screen - Vector2(920, 80))
+	label.modulate.a = 0.0
+	layer.add_child(label)
+	var tween = label.create_tween()
+	tween.tween_property(label, "modulate:a", 1.0, 0.25)
+	tween.tween_interval(1.6)
+	tween.tween_property(label, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(layer.queue_free)
+
+# The quote pops up over the arena a moment after the round ends; it then follows the
+# break (open_upgrade_screen, _start_countdown) until the next round starts
+var round_quote: RoundQuote
+func _pop_round_quote():
+	if is_instance_valid(round_quote):
+		round_quote.queue_free()
+	round_quote = RoundQuote.create(self, last_round_winner)
+	get_tree().create_timer(0.9).timeout.connect(func():
+		if is_instance_valid(round_quote) and not gameEnded:
+			round_quote.pop(_arena_rect().get_center()))
 
 func clear_round():
 	animation_player.stop()
@@ -799,9 +872,22 @@ func open_upgrade_screen(time_limit, preset = {}):
 		layer.queue_free())
 	upgrade_screen = screen
 	screen.start([], time_limit, preset)
-	if Global.show_quotes:
+	if is_instance_valid(round_quote):
+		# The round's quote flies into the screen's quote spot (kept empty for it)
+		screen.show_quote(round_quote.quote, round_quote.winner_id, true)
+		_quote_to_upgrade_screen(screen)
+	elif Global.show_quotes:
 		screen.show_wisdom(last_round_winner)
 	return screen
+
+func _quote_to_upgrade_screen(screen):
+	# Once the screen has laid itself out
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_instance_valid(round_quote) and is_instance_valid(screen):
+		var spot = screen.quote_box.get_global_rect()
+		var label_size = float(screen.quote_label.get_theme_font_size("font_size"))
+		round_quote.move_to(spot.get_center(), label_size / RoundQuote.FONT_SIZE)
 
 func _on_upgrade_selected(player_id, upgrade_id):
 	_apply_upgrade(player_id, upgrade_id)
@@ -843,6 +929,10 @@ func _on_player_score(player_id):
 		2: _on_player_2_score()
 		3: _on_player_3_score()
 		4: _on_player_4_score()
+		5:
+			Global.player5Score += 1
+			if Global.player5Score >= Global.scoreToReach:
+				finishGame(5)
 	
 func _on_player_1_score():
 	Global.player1Score += 1

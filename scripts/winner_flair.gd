@@ -36,8 +36,9 @@ func _draw():
 	_laurel_corner(Vector2(size.x - edge - r, size.y - edge - r), -1, -1)
 	# Dragons facing each other across the header
 	var mid_y = header_top + header_height * 0.55
-	_dragon(Vector2(size.x * 0.29, mid_y), 1, 0.0)
-	_dragon(Vector2(size.x * 0.71, mid_y), -1, PI)
+	# Far enough apart that their heads stay clear of the element symbol in the middle
+	_dragon(Vector2(size.x * 0.2, mid_y), 1, 0.0)
+	_dragon(Vector2(size.x * 0.8, mid_y), -1, PI)
 
 # --- Laurels ---
 
@@ -182,20 +183,21 @@ func _dragon_head(at: Vector2, facing: int):
 	var eye = at + Vector2(f * 4.0, -4.0)
 	draw_circle(eye, 3.6, Color.WHITE)
 	draw_circle(eye + Vector2(f * 0.8, 0), 2.0, accent.darkened(0.2))
-	# Whiskers
+	# Whiskers, drooping down and back under the jaw (pointing forward they reached the
+	# element symbol between the dragons)
 	for k in 2:
-		var root = at + Vector2(f * 22.0, 0.0 + k * 3.0)
+		var root = at + Vector2(f * 20.0, 2.0 + k * 3.0)
 		var points = PackedVector2Array()
 		for i in 8:
 			var t = i / 7.0
-			points.append(root + Vector2(f * 26.0 * t, 10.0 * t * t + sin(t * 5.0 + time * 4.0 + k) * 3.0 * t))
+			points.append(root + Vector2(f * (6.0 * t - 16.0 * t * t), 18.0 * t + sin(t * 5.0 + time * 4.0 + k) * 2.0 * t))
 		draw_polyline(points, GOLD_DARK, 1.4, true)
-	# Fire breath
+	# Fire breath: short and rising, so it never covers the element symbol between them
 	if breath > 0.05:
 		var mouth = at + Vector2(f * 24.0, 6.0)
 		for k in 5:
 			var t = fmod(time * 2.5 + k * 0.2, 1.0)
-			var puff = mouth + Vector2(f * (8.0 + 34.0 * t), sin(k * 2.3 + time * 6.0) * 4.0 * t)
+			var puff = mouth + Vector2(f * (6.0 + 14.0 * t), -22.0 * t + sin(k * 2.3 + time * 6.0) * 3.0 * t)
 			var flame = Color(1.0, 0.55 + 0.4 * (1.0 - t), 0.15, breath * (1.0 - t))
 			draw_circle(puff, (3.0 + 6.0 * t) * breath, flame)
 		draw_circle(mouth + Vector2(f * 6.0, 0), 4.0 * breath, Color(accent.lightened(0.3), 0.8 * breath))

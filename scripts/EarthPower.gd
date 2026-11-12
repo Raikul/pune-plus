@@ -17,8 +17,8 @@ func activate() -> void:
 	player.set_head_visible(false)
 
 	var dur: float = duration
-	if player.stats != null:
-		dur = player.stats.get_stat("earth.duration")
+	if _stats() != null:
+		dur = stat("earth.duration")
 
 	# 2. Rocky path: its width grows with earth.scale (Tectonic Bulk); it lasts as long
 	# as the invincibility
@@ -34,6 +34,16 @@ func activate() -> void:
 	
 	timer.start(dur)
 	activated.emit()
+
+# Void with Earth and Water held: a twin gets the stone armor and lays its own rocky path
+# (the rocks belong to the snake, like the twin's trail)
+func armor_twin(twin) -> void:
+	var dur: float = duration
+	if _stats() != null:
+		dur = stat("earth.duration")
+	twin.armor_time = max(twin.armor_time, dur)
+	if fissure_scene:
+		player.start_fissure(1, fissure_scene, [], twin)
 
 func _on_timer_timeout() -> void:
 	# Vuelve al tamaño normal y quita invencibilidad

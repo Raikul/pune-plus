@@ -191,8 +191,7 @@ func _build_header():
 
 	var element = UpgradeCatalog.element_for_player(player_id)
 	var symbol = TextureRect.new()
-	symbol.texture = UpgradeIcon.FIRE_WATER_SYMBOL if element in ["fire", "water"] else UpgradeIcon.AIR_EARTH_SYMBOL
-	symbol.flip_v = element in ["water", "earth"]
+	symbol.texture = Global.element_symbol(player_id)
 	symbol.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	symbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	symbol.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS

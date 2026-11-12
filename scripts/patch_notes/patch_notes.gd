@@ -13,6 +13,38 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.7.0",
+		"name": "The Void",
+		"date": "2026-11-05",
+		"sections": [
+			["Void (EXPERIMENTAL)", [
+				"A fifth snake, Void, purple, with its own symbol: a snake shaped like an hourglass. Only four snakes play at once, so picking Void means one element sits out; Void takes its seat on the scoreboard and its corner. Online too: the lobby has a fifth slot. Default keys: F / H / T.",
+				"Its Punchi opens a wiggling void around its head for 3 seconds. A rival's fireball, rock or twin head it touches gives it that power, and so does Air's lightning: a jump bolt or Storm Fence crossing the void, or a shock (which then does nothing). A snake that crashes into Void's trail meanwhile gives up its power for the whole round.",
+				"Its Punchi takes 10 seconds to recharge, but absorbing recharges it. An absorbed power stays until the next press, which casts it, together with everything else it holds (and the void opens again); powers kept for the round are cast on every press. What it holds colors the newest stretch of its trail, one band per power in the order it got them, with its purple still running down the middle. Its borrowed rocks, fireballs and lightning are purple too, and its twins light purple. Holding Water, its twins copy the rest: they shoot fireballs, wear stone armor with a rocky path and jump.",
+				"Upgrades: Lingering Void (+1 s, common), Wide Void (30% wider, uncommon), Long Memory (absorbs stay for two presses, uncommon), Perfect Mimic (absorbs come with their owner's upgrades, epic) and Event Horizon (every absorb lasts the whole round, legendary).",
+			]],
+			["Fire", [
+				"The fireball no longer crashes on the arena's edge: it flies on out of the map, so it can be used close to the edge without fizzling.",
+				"New uncommon upgrade, Hearth: a circle of fire burns where you start each round, for the whole round. It kills other snakes, never you. With Phoenix, rising lights another one.",
+				"New epic upgrade, Pyre (needs Hearth): your fireball's kills leave a circle of fire where they fell.",
+				"Phoenix rises right where it died; its moment of immunity is what gets it clear.",
+			]],
+			["Water", [
+				"The twins are a lighter shade of Water's own color instead of aqua, so they're never mistaken for Air.",
+			]],
+			["Matches", [
+				"Between rounds the arena stays on screen for a moment: the winner bursts with light and its name shows, and the wisdom quote pops up big over the arena. The quote then glides into the upgrade screen, then under the next countdown, and fades out at GO.",
+				"New match setting for 2v2, Random teams: every match deals the snakes into two teams at random. Online the host deals them.",
+				"Play of the game: close calls, clutch uses of a power (one that gets you out alive), Earth's armor going through trails, electrocutions and round wins all count now, on top of kills, saves and blocks. Online every player sees the same play.",
+				"The replay's \"press Punchi to skip\" moved to the top band, so it no longer covers the arena.",
+				"Match stats: Time alive replaces Trail length.",
+				"The winner's dragons breathe their fire upwards, clear of the element symbol.",
+				"Online the game can't be paused (Space did it before); Esc still opens the menu.",
+				"Options > Audio: choose the output device (speakers, headphones...).",
+			]],
+		],
+	},
+	{
 		"version": "0.6.2",
 		"name": "Languages",
 		"date": "2026-11-04",

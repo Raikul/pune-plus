@@ -7,6 +7,10 @@ func _ready():
 	
 
 func _process(_delta):
+	# Online the match can't stop for everyone: no pausing (Escape still opens the menu,
+	# which never stops the game online)
+	if Global.isMultiplayerActive:
+		return
 	if Input.is_action_just_pressed("Pause"):
 		if visible and get_tree().paused:
 			hide()

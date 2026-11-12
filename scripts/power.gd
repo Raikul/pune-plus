@@ -4,7 +4,18 @@ signal activated
 signal finished
 
 var player: Node2D   # Referencia al Player
-var element: int     # 1: Fuego, 2: Tierra, 3: Aire, 4: Agua
+var element: int     # 1: Fuego, 2: Tierra, 3: Aire, 4: Agua, 5: Vacío
+## Whose upgrades this power uses: its snake's (null), or, for a power Void absorbed with
+## its Epic upgrade, the snake it came from
+var stats_source: PlayerStats = null
+
+func _stats() -> PlayerStats:
+	return stats_source if stats_source != null else player.stats
+
+# A stat of the upgrades this power uses (see _stats)
+func stat(key: String) -> float:
+	var s = _stats()
+	return s.get_stat(key) if s != null else 0.0
 
 func setup(p: Node2D) -> void:
 	player = p

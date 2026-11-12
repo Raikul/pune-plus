@@ -10,6 +10,8 @@ var age = 0.0
 var expiring = false
 ## Wildfire (set by FirePower): flames left along the flight, burning other snakes
 var fire_trail = false
+## Its fire's color: white keeps the art's orange; Void's fireballs are purple (FirePower)
+var tint = Color.WHITE
 const FLAME_SPACING = 16.0
 var last_flame = null
 
@@ -35,18 +37,30 @@ func _process(delta):
 		expire()
 	var	velocity = Vector2.UP.rotated(rotation) * speed
 	position += velocity * delta
-	position.x = clamp(position.x, 0, screen_size.x)
-#	position.y = clamp(position.y, colorRect.position.y * colorRect.scale.y, screen_size.y)
-	position.y = clamp(position.y, 0, screen_size.y)
-	if fire_trail and not expiring and (last_flame == null or global_position.distance_to(last_flame) >= FLAME_SPACING):
+	_leave_map()
+	if fire_trail and not expiring and not outside and (last_flame == null or global_position.distance_to(last_flame) >= FLAME_SPACING):
 		_drop_flame()
+
+# The arena's edge doesn't stop it: it flies on out of the map and is gone for good once
+# it's off the screen (so a shot fired close to the edge doesn't fizzle on it)
+const OFF_SCREEN_MARGIN = 80.0
+var outside = false # Past the arena's border: no more Wildfire flames
+
+func _leave_map():
+	var shooter = get_parent()
+	var playground = shooter.get_parent() if shooter != null else null
+	if playground != null and playground.has_method("_arena_rect"):
+		outside = not playground._arena_rect().has_point(global_position)
+	if not Rect2(Vector2.ZERO, screen_size).grow(OFF_SCREEN_MARGIN).has_point(global_position):
+		queue_free()
 
 func _drop_flame():
 	last_flame = global_position
 	var shooter = get_parent()
 	var flame = FireTrail.new()
 	flame.owner_id = shooter.playerId if "playerId" in shooter else 0
-	flame.color = Color(Global.playerColors[flame.owner_id]) if flame.owner_id in [1, 2, 3, 4] else Color(1, 0.5, 0.1)
+	flame.color = Color(Global.playerColors[flame.owner_id]) if flame.owner_id in [1, 2, 3, 4, 5] else Color(1, 0.5, 0.1)
+	flame.modulate = tint
 	flame.radius = FireTrail.RADIUS * scale.x
 	flame.global_position = global_position
 	# On the playground, so the flames outlive the fireball (and the snake)
@@ -61,13 +75,15 @@ func expire(crashed = false):
 	if expiring:
 		return
 	expiring = true
+	# Harmless from now on: it only fades (a void that swallowed it isn't hit by it)
 	set_deferred("monitoring", false)
+	set_deferred("monitorable", false)
 	var tween = create_tween()
 	if crashed:
 		var shooter = get_parent()
 		var playground = shooter.get_parent() if shooter else null
 		if playground:
-			PowerFx.explosion(playground, global_position, Color(1.0, 0.55, 0.15), 34.0 * scale.x)
+			PowerFx.explosion(playground, global_position, tint if tint != Color.WHITE else Color(1.0, 0.55, 0.15), 34.0 * scale.x)
 	if $AnimationPlayer.has_animation("expire"):
 		$AnimationPlayer.play("expire")
 		tween.tween_interval(EXPIRE_TIME)
@@ -85,8 +101,9 @@ func expire(crashed = false):
 	tween.tween_callback(queue_free)
 
 func _on_area_entered(area):
-	# Flames and Storm Fence lightning don't stop it
-	if area == get_parent() or expiring or area.is_in_group("hazards"):
+	# Flames, Storm Fence lightning and the arena's edge (it flies out of the map, _leave_map)
+	# don't stop it
+	if area == get_parent() or expiring or area.is_in_group("hazards") or area.is_in_group("arena_border"):
 		return
 	# Walls, snakes (and Water's twin heads) and Earth's stone stop it: it crashes and fades
 	# away. Freeing a twin head would also free its whole trail (the segments are its children);

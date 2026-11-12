@@ -21,6 +21,17 @@ var team_tags = {}
 var upgrade_badges = {}
 const ODIN_FONT = preload("res://assets/jorge-resources/Game Selection/Odin Rounded - Bold.otf")
 
+# The bar has four seats (cards). The classic four sit in their own; Void (player 5) takes
+# the seat of the element that sits out (Global.seat_of). Everything here is kept by seat;
+# the functions called with a player id turn it into its seat.
+func _seat(player_id) -> int:
+	return Global.seat_of(player_id)
+
+func _player_in(seat) -> int:
+	if Global.player5Active and Global.seat_of(Global.VOID_ID) == seat:
+		return Global.VOID_ID
+	return seat
+
 func _ready():
 	label1 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Player1ScoreLabel
 	label2 = $PanelContainer/MarginContainer/HBoxContainer/PanelContainer2/HBoxContainer/Player2ScoreLabel
@@ -74,7 +85,7 @@ func _restyle():
 	margin.add_theme_constant_override("margin_bottom", 22)
 	for id in [1, 2, 3, 4]:
 		var label = [null, label1, label2, label3, label4][id]
-		var color = Color(Global.playerColors[id])
+		var color = Color(Global.playerColors[_player_in(id)])
 		label.self_modulate = Color.WHITE
 		label.add_theme_font_override("font", ODIN_FONT)
 		label.add_theme_font_size_override("font_size", 56)
@@ -102,6 +113,9 @@ func _restyle():
 		# The symbol fills in the element's color (the scene's tints are the default colors)
 		_cooldown_bar(id).tint_under = color
 		_cooldown_bar(id).tint_progress = color.darkened(0.7)
+		if _player_in(id) == Global.VOID_ID:
+			_cooldown_bar(id).texture_under = Global.element_symbol(Global.VOID_ID)
+			_cooldown_bar(id).texture_progress = Global.element_symbol(Global.VOID_ID)
 	# "FIRST TO 10" under the middle of the bar
 	target_label = Label.new()
 	target_label.add_theme_font_override("font", ODIN_FONT)
@@ -130,7 +144,7 @@ func _notification(what):
 # total: the cooldown's full length (upgrades can shorten it), so the bar starts full
 func set_cooldown(player_id, time_left, total = 0.0):
 	var cooldown
-	match player_id:
+	match _seat(player_id):
 		1:
 			cooldown = player1cooldown
 		2:
@@ -146,7 +160,7 @@ func set_cooldown(player_id, time_left, total = 0.0):
 # 2v2: shows which team each snake is on ("A" / "B")
 func setup_teams(enabled):
 	for id in team_tags:
-		var team = Global.team_of(id)
+		var team = Global.team_of(_player_in(id))
 		team_tags[id].visible = enabled
 		team_tags[id].text = ["A", "B"][team]
 		team_tags[id].add_theme_color_override("font_color", Global.TEAM_COLORS[team])
@@ -159,7 +173,7 @@ func _group_by_team():
 	var cards_row = $PanelContainer/MarginContainer/HBoxContainer
 	var position_in_bar = 0
 	for team in [0, 1]:
-		var members = [1, 2, 3, 4].filter(func(id): return Global.get("player%dActive" % id) and Global.team_of(id) == team)
+		var members = Global.active_ids().filter(func(id): return Global.team_of(id) == team).map(_seat)
 		if members.is_empty():
 			continue
 		var lead = members[0]
@@ -180,7 +194,7 @@ func _group_by_team():
 			_card(mate).hide()
 	# Inactive snakes have no team card
 	for id in [1, 2, 3, 4]:
-		if not Global.get("player%dActive" % id):
+		if not Global.get("player%dActive" % _player_in(id)):
 			_card(id).hide()
 
 func _score_label(player_id):
@@ -193,13 +207,14 @@ func _card(player_id):
 # can_see(player_id) -> bool: false shows only how many upgrades a rival has
 func refresh_upgrades(can_see: Callable):
 	for id in upgrade_badges:
-		if Global.get("player%dActive" % id):
-			upgrade_badges[id].refresh(id, not can_see.call(id))
+		var player = _player_in(id)
+		if Global.get("player%dActive" % player):
+			upgrade_badges[id].refresh(player, not can_see.call(player))
 		else:
-			upgrade_badges[id].refresh(id, true)
+			upgrade_badges[id].refresh(player, true)
 
 func set_player_dead(player_id: int):
-	dead_players[player_id] = true
+	dead_players[_seat(player_id)] = true
 
 func reset_labels():
 	label1.self_modulate = Color.WHITE
@@ -242,6 +257,7 @@ func _process(_delta):
 # _process is off from then on and the last point would never be shown
 func refresh():
 	for id in [1, 2, 3, 4]:
-		if Global.get("player%dActive" % id):
-			[null, label1, label2, label3, label4][id].text = str(Global.get("player%dScore" % id))
+		var player = _player_in(id)
+		if Global.get("player%dActive" % player):
+			[null, label1, label2, label3, label4][id].text = str(Global.get("player%dScore" % player))
 			_show_dead(id, dead_players[id])

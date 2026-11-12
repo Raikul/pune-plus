@@ -35,12 +35,13 @@ signal body_laid(body_position, body_rotation)
 
 @export var snakeBodyScene : PackedScene
 
-# Ghostly look, so the twin can't be mistaken for the water snake itself: its usual aqua
-# (light blue in the colorblind mode: Global.twin_color), but see-through and shimmering
+# Ghostly look, so the twin can't be mistaken for the snake itself: a lighter shade of its
+# snake's color (Global.twin_color), see-through and shimmering
 # (scripts/fx/twin_ghost.gdshader). (No particles behind the head: during a gap they
 # looked like real trail.)
-static func ghost_color() -> Color:
-	return Global.twin_color()
+func ghost_color() -> Color:
+	var snake = get_parent()
+	return Global.twin_color(snake.playerId if snake != null and "playerId" in snake else 4)
 static var ghost_material: ShaderMaterial
 static func get_ghost_material() -> ShaderMaterial:
 	if ghost_material == null:
@@ -69,9 +70,13 @@ func _add_ghost_fx():
 	$BodySprite.modulate = ghost_color()
 	$BodySprite.material = get_ghost_material()
 
+## Void with Earth held: seconds of stone armor (walks through trails, like Earth)
+var armor_time = 0.0
+
 func _process(delta):
 	if net_remote:
 		return
+	armor_time = max(armor_time - delta, 0.0)
 	# Forced split first, then the AI steers on its own
 	var direction = 0
 	if split_time_left > 0:
@@ -217,14 +222,19 @@ func absorb():
 # Its water snake can make a new twin now (WaterPower pulses if its power is ready)
 func _tell_twin_lost():
 	var water = get_parent()
-	if water and "main_power" in water and water.main_power is WaterPower:
-		water.main_power.twin_lost()
+	if water and water.has_method("water_power") and water.water_power() != null:
+		water.water_power().twin_lost()
 
 func _on_area_entered(area):
 	if net_remote:
 		return
 	# Air's Storm Fence shocks snakes (no power to lock on a twin): harmless here
 	if area.is_in_group("storm_arcs"):
+		return
+	# Its own snake's fire never burns it; stone armor (Void) goes through all but walls
+	if area.is_in_group("hazards") and area.owner_id == get_parent().playerId:
+		return
+	if armor_time > 0 and not area.is_in_group("limits"):
 		return
 	if area is Shroom:
 		get_parent().emit_signal("score")
