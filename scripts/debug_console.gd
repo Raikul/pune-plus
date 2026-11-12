@@ -394,7 +394,7 @@ func actualizar_textos() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_QUOTELEFT or event.keycode == KEY_ASCIITILDE or event.unicode == 96:
+		if event.keycode == KEY_QUOTELEFT or event.keycode == KEY_ASCIITILDE or event.unicode == 96 or event.keycode == KEY_INSERT:
 			# Corregido: en online cada máquina tendría reglas distintas, así que no se abre
 			if Global.isMultiplayerActive:
 				return
