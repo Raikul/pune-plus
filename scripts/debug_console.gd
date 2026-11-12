@@ -11,6 +11,17 @@ var label_gap: Label
 var btn_air_double: Button
 var btn_water_triple: Button
 var btn_air_warp: Button
+# Rows/toggles taken from the gus_powers_refact console, mapped to main's stats
+var label_water_max: Label
+var label_void_dur: Label
+var label_void_rad: Label
+var label_void_uses: Label
+var current_water_max: float = 1.0
+var current_void_dur: float = 3.0
+var current_void_rad: float = 80.0
+var current_void_uses: float = 1.0
+# stat key -> {button, text, color}: ON/OFF buttons that set a stat to 1 or 0
+var toggles: Dictionary = {}
 
 var current_speed: float = 150.0
 var current_cooldown: float = 6.0
@@ -39,7 +50,7 @@ func _ready():
 
 func crear_interfaz_botones() -> void:
 	panel = Panel.new()
-	panel.custom_minimum_size = Vector2(390, 580)
+	panel.custom_minimum_size = Vector2(430, 640)
 	panel.position = Vector2(25, 25)
 	add_child(panel)
 
@@ -51,9 +62,15 @@ func crear_interfaz_botones() -> void:
 	margin.add_theme_constant_override("margin_bottom", 12)
 	panel.add_child(margin)
 
+	# Scrollable: with every power's cards the panel no longer fits the screen
+	var scroll = ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_child(scroll)
+
 	var vbox = VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 6)
-	margin.add_child(vbox)
+	scroll.add_child(vbox)
 
 	var title = Label.new()
 	title.text = "⚡ PANEL DE CONTROL [ ` ] ⚡"
@@ -136,6 +153,55 @@ func crear_interfaz_botones() -> void:
 		func(): cambiar_stat("fire.duration", 0.5)
 	)
 
+	# --- Extra cards (from gus_powers_refact) ---
+	crear_titulo(vbox, "AIRE", Color(0.5, 0.8, 1.0))
+	crear_toggle(vbox, "air.shock", "⚡ Descarga Estática", Color(0.3, 0.9, 1.0))
+	crear_toggle(vbox, "air.scramble", "🔀 Revoltijo (invierte controles)", Color(0.9, 0.4, 1.0))
+	crear_toggle(vbox, "air.storm", "🌩️ Cerca de Tormenta", Color(0.5, 0.7, 1.0))
+
+	crear_titulo(vbox, "AGUA", Color(0.2, 0.8, 1.0))
+	label_water_max = crear_fila(vbox, "Agua Máx Gemelos: 1",
+		func(): cambiar_stat("water.max_twins", -1.0),
+		func(): cambiar_stat("water.max_twins", 1.0)
+	)
+	crear_toggle(vbox, "water.lasting_twin", "💧 Gemelo Duradero", Color(0.4, 0.9, 1.0))
+
+	crear_titulo(vbox, "FUEGO", Color(1.0, 0.5, 0.1))
+	crear_toggle(vbox, "fire.trail", "🔥 Incendio (rastro)", Color(1.0, 0.5, 0.1))
+	crear_toggle(vbox, "fire.phoenix", "🦅 Fénix (renacer)", Color(1.0, 0.85, 0.2))
+
+	crear_titulo(vbox, "TIERRA", Color(0.85, 0.65, 0.3))
+	crear_toggle(vbox, "earth.border_pass", "⛏️ Excavador (atraviesa muros)", Color(0.85, 0.55, 0.2))
+	crear_toggle(vbox, "earth.stone_walk", "🪨 Caminante de Piedra", Color(0.9, 0.8, 0.4))
+
+	crear_titulo(vbox, "VACÍO (VOID)", Color(0.8, 0.4, 1.0))
+	label_void_dur = crear_fila(vbox, "Vacío Duración: 3.0s",
+		func(): cambiar_stat("void.duration", -0.5),
+		func(): cambiar_stat("void.duration", 0.5)
+	)
+	label_void_rad = crear_fila(vbox, "Vacío Radio: 80px",
+		func(): cambiar_stat("void.radius", -15.0),
+		func(): cambiar_stat("void.radius", 15.0)
+	)
+	label_void_uses = crear_fila(vbox, "Usos de poder absorbido: 1",
+		func(): cambiar_stat("void.absorb_uses", -1.0),
+		func(): cambiar_stat("void.absorb_uses", 1.0)
+	)
+	crear_toggle(vbox, "void.keep_upgrades", "🔮 Roba con mejoras (Épica)", Color(0.8, 0.4, 1.0))
+	crear_toggle(vbox, "void.round_absorbs", "👑 Poderes permanentes en ronda", Color(1.0, 0.85, 0.2))
+
+	var btn_void_all = Button.new()
+	btn_void_all.text = "✨ Vacío: ABSORBER TODOS LOS PODERES ✨"
+	btn_void_all.modulate = Color(0.9, 0.5, 1.0)
+	btn_void_all.pressed.connect(func():
+		for player in get_tree().get_nodes_in_group("activePlayers"):
+			if player.main_power != null and player.main_power.has_method("absorb"):
+				for element in Global.element_ids():
+					if element != 5:
+						player.main_power.absorb(element, player.playerId)
+	)
+	vbox.add_child(btn_void_all)
+
 	# ACCIONES RÁPIDAS
 	var hbox_acciones = HBoxContainer.new()
 	hbox_acciones.add_theme_constant_override("separation", 8)
@@ -177,7 +243,18 @@ func crear_interfaz_botones() -> void:
 		aplicar_stat_directo("fire.radius", 1.0)
 		aplicar_stat_directo("fire.duration", 2.5)
 		aplicar_stat_directo("gap.time", current_gap)
+		current_water_max = 1.0
+		current_void_dur = 3.0
+		current_void_rad = 80.0
+		current_void_uses = 1.0
+		aplicar_stat_directo("water.max_twins", 1.0)
+		aplicar_stat_directo("void.duration", current_void_dur)
+		aplicar_stat_directo("void.radius", current_void_rad)
+		aplicar_stat_directo("void.absorb_uses", current_void_uses)
+		for key in toggles:
+			aplicar_stat_directo(key, 0.0)
 		overrides.clear()
+		actualizar_toggles()
 		actualizar_boton_aire()
 		actualizar_boton_agua()
 		actualizar_textos()
@@ -208,6 +285,39 @@ func crear_fila(parent: Control, texto_inicial: String, on_minus: Callable, on_p
 	hbox.add_child(btn_plus)
 
 	return lbl
+
+func crear_titulo(parent: Control, texto: String, color: Color) -> void:
+	var lbl = Label.new()
+	lbl.text = "— %s —" % texto
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.modulate = color
+	parent.add_child(lbl)
+
+# ON/OFF button for a 0/1 stat. Its state is read back from the stats (see actualizar_toggles)
+func crear_toggle(parent: Control, stat_key: String, texto: String, color: Color) -> void:
+	var btn = Button.new()
+	btn.custom_minimum_size = Vector2(0, 28)
+	btn.pressed.connect(func():
+		aplicar_stat_directo(stat_key, 0.0 if _toggle_on(stat_key) else 1.0)
+		if stat_key == "fire.phoenix":
+			for player in get_tree().get_nodes_in_group("activePlayers"):
+				if player.main_power != null and "phoenix_used" in player.main_power:
+					player.main_power.phoenix_used = false
+		actualizar_toggles()
+	)
+	parent.add_child(btn)
+	toggles[stat_key] = {"button": btn, "text": texto, "color": color}
+	actualizar_toggles()
+
+func _toggle_on(stat_key: String) -> bool:
+	return overrides.get(stat_key, 0.0) >= 1.0
+
+func actualizar_toggles() -> void:
+	for key in toggles:
+		var t = toggles[key]
+		var on = _toggle_on(key)
+		t.button.text = t.text + (": ACTIVADO" if on else ": DESACTIVADO")
+		t.button.modulate = t.color if on else Color.WHITE
 
 func actualizar_boton_warp() -> void:
 	if btn_air_warp:
@@ -255,6 +365,18 @@ func cambiar_stat(tipo: String, delta: float) -> void:
 		"gap.time":
 			current_gap = clamp(current_gap + delta, 0.1, 2.0)
 			aplicar_stat_directo("gap.time", current_gap)
+		"water.max_twins":
+			current_water_max = clamp(current_water_max + delta, 1.0, 5.0)
+			aplicar_stat_directo("water.max_twins", current_water_max)
+		"void.duration":
+			current_void_dur = clamp(current_void_dur + delta, 0.5, 10.0)
+			aplicar_stat_directo("void.duration", current_void_dur)
+		"void.radius":
+			current_void_rad = clamp(current_void_rad + delta, 20.0, 300.0)
+			aplicar_stat_directo("void.radius", current_void_rad)
+		"void.absorb_uses":
+			current_void_uses = clamp(current_void_uses + delta, 1.0, 10.0)
+			aplicar_stat_directo("void.absorb_uses", current_void_uses)
 	actualizar_textos()
 
 func actualizar_textos() -> void:
@@ -265,6 +387,10 @@ func actualizar_textos() -> void:
 	if label_fire_radius: label_fire_radius.text = "Fuego Radio: %.2fx" % current_fire_radius
 	if label_fire_dur: label_fire_dur.text = "Fuego Vuelo: sin límite" if current_fire_dur <= 0 else "Fuego Vuelo: %.1fs" % current_fire_dur
 	if label_gap: label_gap.text = "Hueco Estela: %.2fs" % current_gap
+	if label_water_max: label_water_max.text = "Agua Máx Gemelos: %d" % int(current_water_max)
+	if label_void_dur: label_void_dur.text = "Vacío Duración: %.1fs" % current_void_dur
+	if label_void_rad: label_void_rad.text = "Vacío Radio: %dpx" % int(current_void_rad)
+	if label_void_uses: label_void_uses.text = "Usos de poder absorbido: %d" % int(current_void_uses)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -282,7 +408,7 @@ func _reaplicar_cambios() -> void:
 
 func aplicar_stat_directo(stat_key: String, valor: float) -> void:
 	overrides[stat_key] = valor
-	for id in [1, 2, 3, 4]:
+	for id in Global.element_ids():
 		if Global.player_stats.get(id) == null:
 			Global.player_stats[id] = PlayerStats.new()
 		Global.player_stats[id].set_stat(stat_key, valor)
