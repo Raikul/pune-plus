@@ -165,46 +165,46 @@ RARITY_UNCOMMON,Uncommon,Poco común,优秀
 RARITY_RARE,Rare,Rara,稀有
 RARITY_EPIC,Epic,Épica,史诗
 RARITY_LEGENDARY,Legendary,Legendaria,传说
-UPG_GAP_TIGHTER,Tighter Trail,Estela Cerrada,紧密尾迹
-UPG_GAP_TIGHTER_DESC,The holes in your trail close 25% sooner.,Los huecos de tu estela se cierran un 25% antes.,你尾迹中的缺口提前 25% 闭合。
-UPG_SPEED_UP,Swift Snake,Serpiente Veloz,迅捷之蛇
-UPG_SPEED_UP_DESC,Your snake moves 10% faster.,Tu serpiente se mueve un 10% más rápido.,你的蛇移动速度提升 10%。
-UPG_COOLDOWN_DOWN,Quick Recharge,Recarga Rápida,快速充能
-UPG_COOLDOWN_DOWN_DESC,Your power recharges 15% faster.,Tu poder se recarga un 15% más rápido.,你的能力充能速度提升 15%。
-UPG_FIRE_PIERCING,Piercing Flame,Llama Perforante,穿透烈焰
-UPG_FIRE_PIERCING_DESC,"Your fireball flies 1.5 s longer, burning through more of the trail.","Tu bola de fuego vuela 1,5 s más y quema más estela.",你的火球多飞行 1.5 秒，烧穿更多尾迹。
-UPG_FIRE_RADIUS,Big Fireball,Gran Bola de Fuego,巨型火球
-UPG_FIRE_RADIUS_DESC,Your fireball is 30% bigger.,Tu bola de fuego es un 30% más grande.,你的火球体积增大 30%。
-UPG_FIRE_WILDFIRE,Wildfire,Incendio,野火
-UPG_FIRE_WILDFIRE_DESC,"Your fireball leaves a trail of flames that burns for 2 s. It kills other snakes, never you.","Tu bola de fuego deja un rastro de llamas que arde 2 s. Mata a las demás serpientes, nunca a ti.",你的火球留下燃烧 2 秒的火焰轨迹。它会烧死其他蛇，但不会伤到你。
+UPG_GAP_TIGHTER,Mind the gap,Más estrecho,紧密尾迹
+UPG_GAP_TIGHTER_DESC,Gap is 25% tighter.,El espacio de tu estela es un 25 % más estrecho.,你尾迹中的缺口提前 25% 闭合。
+UPG_SPEED_UP,Swift Pottato,Bombacha veloz,迅捷之蛇
+UPG_SPEED_UP_DESC,Move 10% faster,Te mueves un 10 % más rápido.,你的蛇移动速度提升 10%。
+UPG_COOLDOWN_DOWN,Quick Recharge,Recarga ligera,快速充能
+UPG_COOLDOWN_DOWN_DESC,Power recharges 15% faster.,Tu poder se recarga un 15 % más rápido.,你的能力充能速度提升 15%。
+UPG_FIRE_PIERCING,Lasting Flame,Llama duradera,穿透烈焰
+UPG_FIRE_PIERCING_DESC,Fireball travels 60% more,La bola de fuego recorre un 60 % más de distancia.,你的火球多飞行 1.5 秒，烧穿更多尾迹。
+UPG_FIRE_RADIUS,Big Fireball,Llama gigante,巨型火球
+UPG_FIRE_RADIUS_DESC,30% bigger fireball,La bola de fuego es un 30 % más grande.,你的火球体积增大 30%。
+UPG_FIRE_WILDFIRE,Wildfire,Fuego salvaje,野火
+UPG_FIRE_WILDFIRE_DESC,Fireball leaves a trail that burns other players for 2 s.,La bola de fuego deja una estela de llamas que quema a los demás jugadores durante 2 s.,你的火球留下燃烧 2 秒的火焰轨迹。它会烧死其他蛇，但不会伤到你。
 UPG_FIRE_PHOENIX,Phoenix,Fénix,凤凰
-UPG_FIRE_PHOENIX_DESC,"Once per round, rise from your ashes 10 s after dying, in a burst that clears the trails around you. Aim with Left/Right. Doesn't trigger in a duel: with a single rival left, the round just ends.","Una vez por ronda, renaces de tus cenizas 10 s después de morir, con un estallido que borra las estelas a tu alrededor. Apunta con Izquierda/Derecha. No se activa en un duelo: si solo queda un rival, la ronda termina.",每回合一次，死亡 10 秒后浴火重生，并清除周围的尾迹。用左/右瞄准。只剩一个对手的决斗中不触发。
-UPG_AIR_WALL_WARP,Wall Warp,Salto de Muro,穿墙传送
-UPG_AIR_WALL_WARP_DESC,Your teleport passes through the arena walls and comes out on the other side.,Tu teletransporte atraviesa los muros de la arena y sale por el otro lado.,你的瞬移可以穿过竞技场边界，从另一侧出现。
-UPG_AIR_SECOND_WIND,Second Wind,Segundo Aliento,再度起风
-UPG_AIR_SECOND_WIND_DESC,"After teleporting, teleport once more for free within 1 second.","Tras teletransportarte, puedes volver a hacerlo gratis durante 1 segundo.",瞬移后 1 秒内可以免费再瞬移一次。
-UPG_AIR_SHOCK,Static Shock,Descarga Estática,静电冲击
-UPG_AIR_SHOCK_DESC,Snakes whose heads you teleport through are electrocuted: no power for 5 s.,Las serpientes cuya cabeza atraviesas al teletransportarte quedan electrocutadas: sin poder durante 5 s.,被你瞬移穿过头部的蛇会触电：5 秒内无法使用能力。
-UPG_AIR_SCRAMBLE,Scrambler,Revoltijo,错乱
-UPG_AIR_SCRAMBLE_DESC,Your shock also swaps their left and right for 3 s.,Tu descarga además les intercambia izquierda y derecha durante 3 s.,你的电击还会让对方的左右方向颠倒 3 秒。
-UPG_AIR_STORM_FENCE,Storm Fence,Cerca de Tormenta,风暴栅栏
-UPG_AIR_STORM_FENCE_DESC,"When you teleport, lightning crackles across every gap in your trail for 1 s. Snakes caught in a gap are electrocuted: no power for 5 s (and with Scrambler, left and right swapped for 3 s).","Al teletransportarte, los rayos chisporrotean en cada hueco de tu estela durante 1 s. Las serpientes atrapadas en un hueco quedan electrocutadas: sin poder durante 5 s (y con Revoltijo, izquierda y derecha intercambiadas durante 3 s).",瞬移时，尾迹的每个缺口中电光闪烁 1 秒。困在缺口中的蛇会触电：5 秒无法使用能力（有错乱时左右颠倒 3 秒）。
-UPG_EARTH_WIDE_BODY,Tectonic Bulk,Masa Tectónica,板块巨躯
-UPG_EARTH_WIDE_BODY_DESC,"Your rocky path is 30% wider: more ground for you, more wall for them.","Tu camino de roca es un 30% más ancho: más suelo para ti, más muro para ellos.",你的岩石之路加宽 30%：你的地盘更大，对手的墙更多。
-UPG_EARTH_STONE_WALK,Stone Walker,Caminante de Piedra,踏石者
-UPG_EARTH_STONE_WALK_DESC,You walk through your own stone walls. They still stop everyone else.,Atraviesas tus propios muros de piedra. A los demás los siguen deteniendo.,你可以穿过自己的石墙，其他人仍会被挡住。
+UPG_FIRE_PHOENIX_DESC,Once per turn and only if 2+ players are in play. Rebirth,"Renaces una vez por turno, siempre que haya al menos 2 jugadores en juego.",每回合一次，死亡 10 秒后浴火重生，并清除周围的尾迹。用左/右瞄准。只剩一个对手的决斗中不触发。
+UPG_AIR_WALL_WARP,Wall Warp,Salto Espacial,穿墙传送
+UPG_AIR_WALL_WARP_DESC,Your power passes through walls,Tu poder atraviesa los muros.,你的瞬移可以穿过竞技场边界，从另一侧出现。
+UPG_AIR_SECOND_WIND,Second Wind,Segundo impulso,再度起风
+UPG_AIR_SECOND_WIND_DESC,"After teleporting, use your power once more for free within 1 second.","Después de teletransportarte, puedes usar tu poder una vez más gratis durante el segundo siguiente.",瞬移后 1 秒内可以免费再瞬移一次。
+UPG_AIR_SHOCK,Static Shock,Descarga estática,静电冲击
+UPG_AIR_SHOCK_DESC,Characters whose heads you teleport through have no power for 5 s.,Los personajes cuyas cabezas atraviesas al teletransportarte no pueden usar su poder durante 5 s.,被你瞬移穿过头部的蛇会触电：5 秒内无法使用能力。
+UPG_AIR_SCRAMBLE,Misdirection,Desorientación,错乱
+UPG_AIR_SCRAMBLE_DESC,Your Static Shock also swaps opponent controls for 3 s,Tu Descarga estática también invierte los controles del rival durante 3 s.,你的电击还会让对方的左右方向颠倒 3 秒。
+UPG_AIR_STORM_FENCE,Storm Fence,Alambrado eléctrico,风暴栅栏
+UPG_AIR_STORM_FENCE_DESC,When your power is active lightning crackles across every gap for 1 s. Applying Shock effects.,"Mientras tu poder está activo, cada hueco se electrifica durante 1 s y aplica los efectos de Descarga estática.",瞬移时，尾迹的每个缺口中电光闪烁 1 秒。困在缺口中的蛇会触电：5 秒无法使用能力（有错乱时左右颠倒 3 秒）。
+UPG_EARTH_WIDE_BODY,Boulder Frame,Porte Ominoso,板块巨躯
+UPG_EARTH_WIDE_BODY_DESC,Power is 30% wider,Tu poder es un 30 % más ancho.,你的岩石之路加宽 30%：你的地盘更大，对手的墙更多。
+UPG_EARTH_STONE_WALK,Sand Slide,Deslizamiento de arena,踏石者
+UPG_EARTH_STONE_WALK_DESC,You can go through your own power wall,Puedes atravesar el muro creado por tu propio poder.,你可以穿过自己的石墙，其他人仍会被挡住。
 UPG_EARTH_BURROWER,Burrower,Excavador,掘地者
-UPG_EARTH_BURROWER_DESC,"While your armor lasts you dig through walls: the arena's obstacles and its edges. Be out in the open when it wears off, or you're crushed.",Mientras dura tu armadura atraviesas muros cavando: los obstáculos de la arena y sus bordes. Sal a campo abierto antes de que se acabe o quedarás aplastado.,护甲期间可掘穿障碍物与边界。护甲结束前须回到空地，否则会被压碎。
-UPG_EARTH_BEDROCK,Bedrock,Lecho de Roca,基岩
-UPG_EARTH_BEDROCK_DESC,Your armor and rocky path last 0.25 s longer.,"Tu armadura y tu camino de roca duran 0,25 s más.",你的护甲和岩石之路多持续 0.25 秒。
-UPG_WATER_EXTRA_COPY,Extra Twin,Gemelo Extra,额外分身
-UPG_WATER_EXTRA_COPY_DESC,Keep up to 2 twins alive. Cast again while your twin lives to summon another.,Mantén hasta 2 gemelos vivos. Vuelve a lanzar el poder mientras tu gemelo vive para invocar otro.,最多同时保留 2 个分身。分身存活时再次施放可召唤另一个。
-UPG_WATER_TWIN_BURST,Twin Burst,Ráfaga Gemela,分身爆发
-UPG_WATER_TWIN_BURST_DESC,"Your power summons twins two at a time, up to your maximum.","Tu poder invoca gemelos de dos en dos, hasta tu máximo.",你的能力一次召唤两个分身，直至上限。
+UPG_EARTH_BURROWER_DESC,While your power lasts you dig through any walls,"Mientras dura tu poder, podés atravesar cualquier muro.",护甲期间可掘穿障碍物与边界。护甲结束前须回到空地，否则会被压碎。
+UPG_EARTH_BEDROCK,Stallion,Semental,基岩
+UPG_EARTH_BEDROCK_DESC,Power lasts 20% longer,Tu poder dura un 20 % más.,你的护甲和岩石之路多持续 0.25 秒。
+UPG_WATER_EXTRA_COPY,Extra Twin,Clon adicional,额外分身
+UPG_WATER_EXTRA_COPY_DESC,Keep up to 2 clones at the same time.,Puedes mantener hasta 2 clones al mismo tiempo.,最多同时保留 2 个分身。分身存活时再次施放可召唤另一个。
+UPG_WATER_TWIN_BURST,Twin Burst,Ráfaga de clones,分身爆发
+UPG_WATER_TWIN_BURST_DESC,Summons two clones at a time.,Invocas dos clones a la vez.,你的能力一次召唤两个分身，直至上限。
 UPG_WATER_THIRD_TWIN,Triplets,Trillizos,三胞胎
-UPG_WATER_THIRD_TWIN_DESC,Keep up to 3 twins alive.,Mantén hasta 3 gemelos vivos.,最多同时保留 3 个分身。
-UPG_WATER_LASTING_TWIN,Lasting Twin,Gemelo Duradero,持久分身
-UPG_WATER_LASTING_TWIN_DESC,Your twin's trail never sheds: it keeps its ghost color and never blocks you.,La estela de tu gemelo nunca se suelta: conserva su color fantasma y nunca te bloquea.,分身的尾迹永不脱落：始终保持幽灵般的颜色，永远不会挡住你。
+UPG_WATER_THIRD_TWIN_DESC,Keep up to 3 clones alive.,Puedes mantener hasta 3 clones vivos.,最多同时保留 3 个分身。
+UPG_WATER_LASTING_TWIN,Lasting Twin,Clon Perfecto,持久分身
+UPG_WATER_LASTING_TWIN_DESC,Clone's trail stays aqua and never blocks you.,La estela del clon permanece de color aguamarina y nunca te bloquea.,分身的尾迹永不脱落：始终保持幽灵般的颜色，永远不会挡住你。
 UPG_SKIP,Skip,Saltar,跳过
 UPG_SKIP_DESC,Take nothing this time and keep the rest for later.,No elijas nada esta vez y guarda el resto para más adelante.,这次什么都不拿，把剩下的留到以后。
 UPGRADES_TITLE,CHOOSE YOUR UPGRADE,ELIGE TU MEJORA,选择你的强化
@@ -411,20 +411,20 @@ AI_ECLIPSE,Eclipse,Eclipse,日蚀
 STAT_VOID_ABSORBS,Powers absorbed,Poderes absorbidos,吞噬的能力
 STAT_VOID_ROUND_ABSORBS,Powers kept for a round,Poderes guardados una ronda,保留整回合的能力
 REPLAY_ABSORB,DEVOURED,DEVORADO,吞噬
-UPG_FIRE_HEARTH,Hearth,Hogar,炉火
-UPG_FIRE_HEARTH_DESC,"A circle of fire burns where you start each round, for the whole round. It kills other snakes, never you. With Phoenix, rising lights another one.","Un círculo de fuego arde donde empiezas cada ronda, durante toda la ronda. Mata a las demás serpientes, nunca a ti. Con Fénix, al renacer enciendes otro.",每回合在你出生的地方燃起一圈火焰，持续整回合。它会烧死其他蛇，但不会伤到你。若有凤凰，重生时会再点燃一圈。
+UPG_FIRE_HEARTH,Hearth,Fogón,炉火
+UPG_FIRE_HEARTH_DESC,Summon a Circle of Fire where you start each round.,Invocas un círculo de fuego en el lugar donde comienzas cada ronda.,每回合在你出生的地方燃起一圈火焰，持续整回合。它会烧死其他蛇，但不会伤到你。若有凤凰，重生时会再点燃一圈。
 UPG_FIRE_PYRE,Pyre,Pira,火葬堆
-UPG_FIRE_PYRE_DESC,"When your fireball kills a snake, a circle of fire is left burning where it fell.","Cuando tu bola de fuego mata a una serpiente, queda un círculo de fuego ardiendo donde cayó.",你的火球击杀一条蛇时，会在它倒下处留下一圈燃烧的火焰。
-UPG_VOID_DURATION,Lingering Void,Vacío Persistente,持久虚空
-UPG_VOID_DURATION_DESC,Your void stays open 1 s longer.,Tu vacío permanece abierto 1 s más.,你的虚空多开启 1 秒。
-UPG_VOID_RADIUS,Wide Void,Vacío Amplio,广域虚空
-UPG_VOID_RADIUS_DESC,Your void is 30% wider.,Tu vacío es un 30% más amplio.,你的虚空范围扩大 30%。
-UPG_VOID_MEMORY,Long Memory,Memoria Larga,长久记忆
-UPG_VOID_MEMORY_DESC,Absorbed powers stay for two presses instead of one.,Los poderes absorbidos duran dos toques en lugar de uno.,吞噬的能力可施放两次，而不是一次。
-UPG_VOID_MIMIC,Perfect Mimic,Imitación Perfecta,完美拟态
-UPG_VOID_MIMIC_DESC,You absorb powers with their owner's upgrades.,Absorbes los poderes con las mejoras de su dueño.,吞噬的能力会带上其原主的强化。
-UPG_VOID_HOARD,Event Horizon,Horizonte de Sucesos,事件视界
-UPG_VOID_HOARD_DESC,"Everything you absorb stays for the whole round, and is cast on every press.",Todo lo que absorbes se queda toda la ronda y se lanza en cada toque.,你吞噬的一切都会保留整回合，每次按键都会施放。
+UPG_FIRE_PYRE_DESC,Summon a Circle of Fire where you hit a head with your power,Invocas un círculo de fuego donde tu poder impacta contra la cabeza de otra serpiente.,你的火球击杀一条蛇时，会在它倒下处留下一圈燃烧的火焰。
+UPG_VOID_DURATION,Abbyss,Abismo,持久虚空
+UPG_VOID_DURATION_DESC,Void stays open 33% longer,El Vacío permanece abierto un 33 % más de tiempo.,你的虚空多开启 1 秒。
+UPG_VOID_RADIUS,Super Nova,Supernova,广域虚空
+UPG_VOID_RADIUS_DESC,Void is 30% wider.,El Vacío es un 30 % más ancho.,你的虚空范围扩大 30%。
+UPG_VOID_MEMORY,Lingering Stair,Mirada Persistente,长久记忆
+UPG_VOID_MEMORY_DESC,Absorbed powers have 2 charges,Los poderes absorbidos tienen 2 cargas.,吞噬的能力可施放两次，而不是一次。
+UPG_VOID_MIMIC,Perfect Mimic,Mimetismo perfecto,完美拟态
+UPG_VOID_MIMIC_DESC,Absorb upgraded powers,Puedes absorber poderes mejorados.,吞噬的能力会带上其原主的强化。
+UPG_VOID_HOARD,Event Horizon,Horizonte final,事件视界
+UPG_VOID_HOARD_DESC,Keep absorbed powers for the round. Cast on every power use.,Conservas los poderes absorbidos durante toda la ronda y los lanzas cada vez que usas un poder.,你吞噬的一切都会保留整回合，每次按键都会施放。
 WISDOM_SRC_HEART_SUTRA,Heart Sutra,Sutra del Corazón,《心经》
 WISDOM_SRC_NIETZSCHE,after Friedrich Nietzsche,según Friedrich Nietzsche,化用自尼采
 WISDOM_VOID_1,Form is emptiness; emptiness is form.,La forma es vacío; el vacío es forma.,色即是空，空即是色。
