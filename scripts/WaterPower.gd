@@ -20,6 +20,40 @@ func alive_twins() -> int:
 func can_activate() -> bool:
 	return alive_twins() < max_twins()
 
+# --- Ice: hold Punchi to freeze in place; letting go (or ICE_MAX seconds) sends the twins out ---
+const ICE_MAX = 2.0
+var ice_fx: HoldFx
+
+func hold_mode() -> bool:
+	return _stats() != null and stat("water.ice") >= 1.0
+
+func hold_max() -> float:
+	return ICE_MAX
+
+func hold_begin() -> void:
+	player.ice_frozen = true
+	player.ice_turns = stat("water.ice_turn") >= 1.0
+	ice_fx = HoldFx.spawn(player, "ice", Color(Global.playerColors[player.playerId]))
+
+func hold_update(seconds: float, _delta: float) -> void:
+	if is_instance_valid(ice_fx):
+		ice_fx.progress = minf(seconds / ICE_MAX, 1.0)
+
+func hold_cancel() -> void:
+	player.ice_frozen = false
+	player.ice_turns = false
+	if is_instance_valid(ice_fx):
+		ice_fx.queue_free()
+
+# Thawed: the snake moves again and the twins come out (if it can still make them)
+func activate_held(_seconds: float) -> void:
+	hold_cancel()
+	activate()
+
+# The AI freezes only in the open, where nothing is close ahead
+func ai_hold_time() -> float:
+	return 1.0
+
 func activate() -> void:
 	if twin_head_scene == null or not can_activate():
 		return
@@ -97,4 +131,8 @@ func try_prevent_death() -> bool:
 	return true
 
 func ai_should_activate(_direction: int) -> bool:
+	if hold_mode():
+		var raycaster = player.get_node_or_null("Raycaster")
+		if raycaster != null and raycaster.collision_distance("Up") < 180.0:
+			return false
 	return can_activate()

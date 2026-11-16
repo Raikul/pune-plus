@@ -24,6 +24,17 @@ var base: Dictionary = {
 	"water.lasting_twin": 0.0,  # 1 = la estela del gemelo nunca cambia de color
 	"fire.hearth": 0.0,         # 1 = un círculo de fuego donde aparece (y donde renace)
 	"fire.pyre": 0.0,           # 1 = también donde su bola de fuego mata
+	"air.breath": 0.0,          # 1 = salto corto; manteniendo Punchi se estira
+	"air.blizzard": 0.0,        # 1 = con el salto estirado al máximo, empuja en un cono
+	"earth.absorbent": 0.0,     # 1 = si Agua muere contra una estela común, se vuelve roca
+	"fire.fanned": 0.0,         # 1 = la bola crece y acelera al pasar por la estela de Aire
+	"fire.bounce": 0.0,         # 1 = la bola rebota en las rocas de Tierra
+	"fire.dual": 0.0,           # 1 = mantener Punchi abre dos bolas pequeñas
+	"fire.flamethrower": 0.0,   # 1 = mantener Punchi lanza llamas en un cono
+	"water.steam": 0.0,         # 1 = un gemelo quemado por una bola deja vapor mortal
+	"water.borer": 0.0,         # 1 = el gemelo atraviesa rocas de Tierra y las vuelve estela
+	"water.ice": 0.0,           # 1 = mantener Punchi te congela; al soltar salen los gemelos
+	"water.ice_turn": 0.0,      # 1 = congelado puede girar
 	"void.duration": 3.0,       # Segundos con el vacío abierto
 	"void.radius": 80.0,        # Radio del vacío
 	"void.absorb_uses": 1.0,    # Toques de Punchi que dura un poder absorbido

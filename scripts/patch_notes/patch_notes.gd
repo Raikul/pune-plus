@@ -13,6 +13,39 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.8.0",
+		"name": "Hold and React",
+		"date": "2026-11-16",
+		"sections": [
+			["Hold your Punchi", [
+				"Some new upgrades turn the power into one you hold: Punchi starts it, letting go casts it. Without them everything works as before. Powers Void absorbs still fire on the press.",
+			]],
+			["Fire", [
+				"Fanned Flames (uncommon): your fireball grows a little and speeds up each time it burns through Air's trail.",
+				"Ricochet (rare): your fireball bounces off Earth's rocks at the angle it came in, a few times, instead of stopping.",
+				"Dual Ball (epic): hold Punchi and two arrows open up in front of you; let go to throw a small fireball down each (with a new look). The longer you hold, the wider they spread.",
+				"Flamethrower (epic, can't be taken with Dual Ball): hold Punchi to spit a cone of fire for up to 1.5 seconds. It kills what it touches and burns the trails it sweeps over. A quick tap still throws the fireball. Kills with the flamethrower also leave a Pyre circle.",
+				"A snake's own fireballs no longer destroy each other.",
+			]],
+			["Air", [
+				"Breath Control (uncommon): your jump is shorter, but holding Punchi stretches it, up to a bit farther than the normal one.",
+				"Blizzard (epic, needs Breath Control): hold the jump to its longest and let go, and you don't jump: a gust shoves everything in a cone in front of you, snakes, twins, trails, fireballs and flames. Earth's rocks and the walls hold; steam is blown away.",
+			]],
+			["Water", [
+				"Steam (epic): when a fireball burns one of your twins, the water boils into a cloud of steam that lasts 10 seconds and kills everything that touches it, except you and your twins.",
+				"Rock Borer (rare): your twins go through Earth's rocks, and every rock they touch turns into common trail.",
+				"Ice (rare): hold Punchi to freeze in place, for up to 2 seconds; let go and you move again and your twins come out. You can still be hit while frozen.",
+				"Ice Skater (uncommon, needs Ice): you can turn while frozen.",
+			]],
+			["Earth", [
+				"Absorbent (rare): when Water, or one of its twins, dies on your common trail, that bit of trail turns into hard rock.",
+			]],
+			["Online", [
+				"Hold powers work online too: the others see them play out when you let go. The effects that come from collisions (steam, Absorbent, Rock Borer) are only decided on the machine that sees them, so they may differ a little between players for now.",
+			]],
+		],
+	},
+	{
 		"version": "0.7.1",
 		"name": "Words of the Winner",
 		"date": "2026-11-12",

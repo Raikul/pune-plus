@@ -580,6 +580,7 @@ func mark_player_dead(player):
 	player.powerAvailable = false
 	player.update_power_indicator()
 	player.hide_teleport_marker()
+	player.cancel_hold()
 	player.set_process(false)
 	$HUD.set_player_dead(player.playerId)
 	if player.is_in_group("alivePlayers"):
@@ -743,6 +744,7 @@ func stopTime():
 	for item in timers:
 		if is_instance_valid(item): item.stop()
 	for player in get_tree().get_nodes_in_group("activePlayers"):
+		player.cancel_hold()
 		player.set_process(false)
 	for twinHead in get_tree().get_nodes_in_group("twinHeads"):
 		twinHead.set_process(false)

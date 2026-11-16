@@ -171,10 +171,10 @@ func _send_twin_state(serial):
 		if entry.final_sends >= SEGMENT_REDUNDANCY:
 			local_twins.erase(serial)
 
-func _on_local_power_used(recast, player_id):
+func _on_local_power_used(recast, hold, player_id):
 	if not _online():
 		return
-	power_event.rpc(round_id, player_id, recast)
+	power_event.rpc(round_id, player_id, recast, hold)
 
 # A play-of-the-game moment noted here (Global.note_highlight): the others note it too
 func share_highlight(player_id, kind, weight, victim_id):
@@ -386,7 +386,7 @@ func _stop_twin(key):
 		snake.bridge.clear_points()
 
 @rpc("any_peer", "call_remote", "reliable")
-func power_event(event_round, player_id, recast = false):
+func power_event(event_round, player_id, recast = false, hold = 0.0):
 	if not _online():
 		return
 	var sender = multiplayer.get_remote_sender_id()
@@ -399,7 +399,7 @@ func power_event(event_round, player_id, recast = false):
 		return
 	# The water twin arrives through twin_state instead
 	if player_id != 4:
-		player.use_power()
+		player.use_power(hold)
 	# Air's second jump is free: it must not restart the cooldown
 	if not recast:
 		player.powerCooldown()
