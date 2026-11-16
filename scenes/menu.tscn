@@ -42,8 +42,6 @@ Button/fonts/font = ExtResource("ari_button")
 Label/font_sizes/font_size = 66
 Label/fonts/font = ExtResource("6_plbqb")
 
-[sub_resource type="SystemFont" id="SystemFont_xpgnv"]
-
 [node name="MainMenu" type="Control" unique_id=855265616]
 layout_mode = 3
 anchors_preset = 15
@@ -314,6 +312,12 @@ theme_override_constants/h_separation = 15
 theme_override_font_sizes/font_size = 66
 text = "MENU_INSTRUCTIONS"
 
+[node name="Credits" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=655808313]
+layout_mode = 2
+text = "Credits
+
+"
+
 [node name="Quit" type="Button" parent="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1123454094]
 layout_mode = 2
 theme_override_font_sizes/font_size = 66
@@ -350,6 +354,41 @@ offset_top = 169.0
 offset_right = -6.0
 offset_bottom = -221.0
 
+[node name="CreditsPanel" type="PanelContainer" parent="." unique_id=751785376]
+visible = false
+custom_minimum_size = Vector2(700, 450)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CreditsPanel" unique_id=855744860]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="CreditsPanel/VBoxContainer" unique_id=67590594]
+layout_mode = 2
+text = "CREDITS
+"
+horizontal_alignment = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CreditsPanel/VBoxContainer" unique_id=1527858972]
+layout_mode = 2
+text = "DISEÑO Y PROGRAMACIÓN
+Nico - Gustavo - Porlon
+
+HECHO EN GODOT ENGINE 4"
+fit_content = true
+horizontal_alignment = 1
+
+[node name="BackCreditsButton" type="Button" parent="CreditsPanel/VBoxContainer" unique_id=1327601343]
+layout_mode = 2
+text = "Back
+"
+
 [connection signal="toggled" from="CanvasLayer/Modifiers/PanelContainer/ShroomsContainer/ShroomsButton" to="." method="_on_shrooms_button_toggled"]
 [connection signal="toggled" from="CanvasLayer/Modifiers/UpgradesPanel/UpgradesContainer/UpgradesButton" to="." method="_on_upgrades_button_toggled"]
 [connection signal="back" from="CanvasLayer/Options" to="." method="_on_options_back_button_pressed"]
@@ -358,7 +397,8 @@ offset_bottom = -221.0
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Multiplayer" to="." method="_on_multiplayer_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Instructions" to="." method="_on_instructions_pressed"]
+[connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Credits" to="." method="_on_credits_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/TopMenu/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="back" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_back"]
 [connection signal="go" from="CanvasLayer/PlayerSetup/PanelContainer/PlayerSetup" to="." method="_on_player_setup_go"]
-
+[connection signal="pressed" from="CreditsPanel/VBoxContainer/BackCreditsButton" to="." method="_on_back_credits_button_pressed"]
