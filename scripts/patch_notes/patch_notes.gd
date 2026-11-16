@@ -13,6 +13,17 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.7.1",
+		"name": "Words of the Winner",
+		"date": "2026-11-12",
+		"sections": [
+			["Matches", [
+				"The winner screen now shows a quote picked from a list for the winning element: Fire, Earth, Air, Water and Void each have their own. Teams get the quote of the winning snake. For now the quotes are in Spanish only.",
+				"The quote has more room: it sits in a wider block on the winner screen, so long ones wrap instead of running off.",
+			]],
+		],
+	},
+	{
 		"version": "0.7.0",
 		"name": "The Void",
 		"date": "2026-11-05",
