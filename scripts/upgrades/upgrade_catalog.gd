@@ -10,6 +10,7 @@ class_name UpgradeCatalog
 # "enabled": false keeps an upgrade out of the rolls until it does something.
 # "rarity" (RARITIES) sets how often it is offered and its color on the card.
 # "requires": the id of an upgrade the snake must already have.
+# "excludes": the id of an upgrade that can't go with this one (it isn't offered once taken).
 # "name" and "description" (and the rarities' names) are translation keys: UPG_<ID> and
 # UPG_<ID>_DESC in translations/strings.csv. Show them with tr().
 
@@ -262,6 +263,121 @@ const UPGRADES = [
 		"max_stacks": 1,
 		"requires": &"fire_hearth",
 	},
+	# Hold powers and interactions between elements
+	{
+		"id": &"fire_fanned",
+		"rarity": "uncommon",
+		"name": "UPG_FIRE_FANNED",
+		"description": "UPG_FIRE_FANNED_DESC",
+		"element": "fire",
+		"icon": "fanned",
+		"stat_mods": {"fire.fanned": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"fire_bounce",
+		"rarity": "rare",
+		"name": "UPG_FIRE_BOUNCE",
+		"description": "UPG_FIRE_BOUNCE_DESC",
+		"element": "fire",
+		"icon": "bounce",
+		"stat_mods": {"fire.bounce": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"fire_dual",
+		"rarity": "epic",
+		"name": "UPG_FIRE_DUAL",
+		"description": "UPG_FIRE_DUAL_DESC",
+		"element": "fire",
+		"icon": "dual_ball",
+		"stat_mods": {"fire.dual": {"add": 1.0}},
+		"max_stacks": 1,
+		"excludes": &"fire_flamethrower",
+	},
+	{
+		"id": &"fire_flamethrower",
+		"rarity": "epic",
+		"name": "UPG_FIRE_FLAMETHROWER",
+		"description": "UPG_FIRE_FLAMETHROWER_DESC",
+		"element": "fire",
+		"icon": "flamethrower",
+		"stat_mods": {"fire.flamethrower": {"add": 1.0}},
+		"max_stacks": 1,
+		"excludes": &"fire_dual",
+	},
+	{
+		"id": &"air_breath",
+		"rarity": "uncommon",
+		"name": "UPG_AIR_BREATH",
+		"description": "UPG_AIR_BREATH_DESC",
+		"element": "air",
+		"icon": "breath",
+		"stat_mods": {"air.breath": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"air_blizzard",
+		"rarity": "epic",
+		"name": "UPG_AIR_BLIZZARD",
+		"description": "UPG_AIR_BLIZZARD_DESC",
+		"element": "air",
+		"icon": "blizzard",
+		"stat_mods": {"air.blizzard": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"air_breath",
+	},
+	{
+		"id": &"water_steam",
+		"rarity": "epic",
+		"name": "UPG_WATER_STEAM",
+		"description": "UPG_WATER_STEAM_DESC",
+		"element": "water",
+		"icon": "steam",
+		"stat_mods": {"water.steam": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"water_borer",
+		"rarity": "rare",
+		"name": "UPG_WATER_BORER",
+		"description": "UPG_WATER_BORER_DESC",
+		"element": "water",
+		"icon": "borer",
+		"stat_mods": {"water.borer": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"water_ice",
+		"rarity": "rare",
+		"name": "UPG_WATER_ICE",
+		"description": "UPG_WATER_ICE_DESC",
+		"element": "water",
+		"icon": "ice",
+		"stat_mods": {"water.ice": {"add": 1.0}},
+		"max_stacks": 1,
+	},
+	{
+		"id": &"water_ice_turn",
+		"rarity": "uncommon",
+		"name": "UPG_WATER_ICE_TURN",
+		"description": "UPG_WATER_ICE_TURN_DESC",
+		"element": "water",
+		"icon": "ice_turn",
+		"stat_mods": {"water.ice_turn": {"add": 1.0}},
+		"max_stacks": 1,
+		"requires": &"water_ice",
+	},
+	{
+		"id": &"earth_absorbent",
+		"rarity": "rare",
+		"name": "UPG_EARTH_ABSORBENT",
+		"description": "UPG_EARTH_ABSORBENT_DESC",
+		"element": "earth",
+		"icon": "absorbent",
+		"stat_mods": {"earth.absorbent": {"add": 1.0}},
+		"max_stacks": 1,
+	},
 	# Void (EXPERIMENTAL)
 	{
 		"id": &"void_duration",
@@ -341,7 +457,8 @@ static func pool_for_player(player_id) -> Array:
 		return (upgrade.element == "generic" or upgrade.element == element) \
 			and upgrade.get("enabled", true) \
 			and stacks_for(player_id, upgrade.id) < upgrade.get("max_stacks", 1) \
-			and (not upgrade.has("requires") or stacks_for(player_id, upgrade.requires) > 0))
+			and (not upgrade.has("requires") or stacks_for(player_id, upgrade.requires) > 0) \
+			and (not upgrade.has("excludes") or stacks_for(player_id, upgrade.excludes) == 0))
 
 static func stacks_for(player_id, upgrade_id) -> int:
 	var stats = Global.player_stats.get(player_id)

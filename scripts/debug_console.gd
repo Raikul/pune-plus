@@ -158,6 +158,8 @@ func crear_interfaz_botones() -> void:
 	crear_toggle(vbox, "air.shock", "⚡ Descarga Estática", Color(0.3, 0.9, 1.0))
 	crear_toggle(vbox, "air.scramble", "🔀 Revoltijo (invierte controles)", Color(0.9, 0.4, 1.0))
 	crear_toggle(vbox, "air.storm", "🌩️ Cerca de Tormenta", Color(0.5, 0.7, 1.0))
+	crear_toggle(vbox, "air.breath", "🌬️ Control de la Respiración (mantener)", Color(0.7, 0.9, 1.0))
+	crear_toggle(vbox, "air.blizzard", "❄️ Ventisca (respiración al máximo)", Color(0.8, 0.95, 1.0))
 
 	crear_titulo(vbox, "AGUA", Color(0.2, 0.8, 1.0))
 	label_water_max = crear_fila(vbox, "Agua Máx Gemelos: 1",
@@ -165,14 +167,23 @@ func crear_interfaz_botones() -> void:
 		func(): cambiar_stat("water.max_twins", 1.0)
 	)
 	crear_toggle(vbox, "water.lasting_twin", "💧 Gemelo Duradero", Color(0.4, 0.9, 1.0))
+	crear_toggle(vbox, "water.steam", "♨️ Vapor (gemelo quemado)", Color(0.8, 0.95, 1.0))
+	crear_toggle(vbox, "water.borer", "🪨 Horadapiedra (gemelo)", Color(0.6, 0.8, 0.9))
+	crear_toggle(vbox, "water.ice", "🧊 Hielo (mantener)", Color(0.6, 0.9, 1.0))
+	crear_toggle(vbox, "water.ice_turn", "⛸️ Patinador (gira congelado)", Color(0.7, 0.9, 1.0))
 
 	crear_titulo(vbox, "FUEGO", Color(1.0, 0.5, 0.1))
 	crear_toggle(vbox, "fire.trail", "🔥 Incendio (rastro)", Color(1.0, 0.5, 0.1))
 	crear_toggle(vbox, "fire.phoenix", "🦅 Fénix (renacer)", Color(1.0, 0.85, 0.2))
+	crear_toggle(vbox, "fire.fanned", "🌬️ Llamas Avivadas", Color(1.0, 0.7, 0.3))
+	crear_toggle(vbox, "fire.bounce", "↩️ Rebote", Color(1.0, 0.6, 0.2))
+	crear_toggle(vbox, "fire.dual", "🔥 Bola Doble (mantener)", Color(1.0, 0.5, 0.1))
+	crear_toggle(vbox, "fire.flamethrower", "🔥 Lanzallamas (mantener)", Color(1.0, 0.4, 0.1))
 
 	crear_titulo(vbox, "TIERRA", Color(0.85, 0.65, 0.3))
 	crear_toggle(vbox, "earth.border_pass", "⛏️ Excavador (atraviesa muros)", Color(0.85, 0.55, 0.2))
 	crear_toggle(vbox, "earth.stone_walk", "🪨 Caminante de Piedra", Color(0.9, 0.8, 0.4))
+	crear_toggle(vbox, "earth.absorbent", "🧲 Absorbente (Agua muere → roca)", Color(0.85, 0.65, 0.3))
 
 	crear_titulo(vbox, "VACÍO (VOID)", Color(0.8, 0.4, 1.0))
 	label_void_dur = crear_fila(vbox, "Vacío Duración: 3.0s",

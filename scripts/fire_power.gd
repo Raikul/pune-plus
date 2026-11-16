@@ -13,11 +13,88 @@ var aim = 0.0
 func activate() -> void:
 	_fire(null)
 
+# --- Dual Ball and Flamethrower: held powers ---
+# Dual Ball: two arrows open up while held; letting go throws a small fireball down each
+# Flamethrower: a cone of fire once it is held past a tap (a quick tap still throws the fireball)
+const DUAL_MIN_SPREAD = 0.06
+const DUAL_MAX_SPREAD = 0.7
+const DUAL_TIME = 1.0
+const DUAL_SIZE = 0.65
+const FLAME_MAX = 1.5
+## Held less than this, Flamethrower throws a fireball; past it the jet starts
+const FLAME_DELAY = 0.2
+var dual_fx: HoldFx
+var jet: FlameJet
+
+func has_dual() -> bool:
+	return _stats() != null and stat("fire.dual") >= 1.0
+
+func has_flamethrower() -> bool:
+	return _stats() != null and stat("fire.flamethrower") >= 1.0
+
+func hold_mode() -> bool:
+	return has_dual() or has_flamethrower()
+
+func hold_max() -> float:
+	return FLAME_MAX if has_flamethrower() else 0.0
+
+func hold_begin() -> void:
+	if has_flamethrower():
+		pass # The jet starts in hold_update once it is clear it isn't a tap
+	else:
+		dual_fx = HoldFx.spawn(player, "dual", Color(Global.playerColors[player.playerId]))
+		dual_fx.spread = DUAL_MIN_SPREAD
+
+func hold_update(seconds: float, _delta: float) -> void:
+	if has_flamethrower() and not is_instance_valid(jet) and seconds >= FLAME_DELAY:
+		jet = FlameJet.spawn(player)
+		if has_node("Shoot"):
+			$Shoot.play()
+	if is_instance_valid(dual_fx):
+		dual_fx.progress = minf(seconds / DUAL_TIME, 1.0)
+		dual_fx.spread = _dual_spread(seconds)
+
+func hold_cancel() -> void:
+	if is_instance_valid(dual_fx):
+		dual_fx.queue_free()
+	if is_instance_valid(jet):
+		jet.put_out()
+	jet = null
+
+func activate_held(seconds: float) -> void:
+	if has_flamethrower():
+		if seconds < FLAME_DELAY:
+			_fire(null) # A tap: the plain fireball
+			jet = null
+			return
+		if is_instance_valid(jet):
+			jet.stop() # Held here: it has been burning all along
+		else:
+			# Another machine's snake: its jet plays out now, as long as it was held
+			var remote_jet = FlameJet.spawn(player)
+			remote_jet.run_for(seconds - FLAME_DELAY)
+		jet = null
+		activated.emit()
+	elif has_dual():
+		if is_instance_valid(dual_fx):
+			dual_fx.queue_free()
+		var spread = _dual_spread(seconds)
+		_fire(null, spread, DUAL_SIZE)
+		_fire(null, -spread, DUAL_SIZE)
+	else:
+		_fire(null)
+
+func _dual_spread(seconds: float) -> float:
+	return lerpf(DUAL_MIN_SPREAD, DUAL_MAX_SPREAD, clampf(seconds / DUAL_TIME, 0.0, 1.0))
+
+func ai_hold_time() -> float:
+	return 1.0 if has_flamethrower() else 0.5
+
 # Void with Fire and Water held: its twins shoot too (from where they are, where they head)
 func shoot_from(origin: Node2D) -> void:
 	_fire(origin)
 
-func _fire(origin) -> void:
+func _fire(origin, turn = 0.0, size = 1.0) -> void:
 	if projectile_scene == null:
 		return
 
@@ -30,7 +107,10 @@ func _fire(origin) -> void:
 	var radius_mult: float = 1.0
 	if _stats() != null:
 		radius_mult = stat("fire.radius")
-	proj.scale = Vector2(radius_mult, radius_mult)
+	proj.rotation += turn
+	if size < 1.0:
+		proj.use_pixelfx() # Dual Ball's small fireballs have their own look
+	proj.scale = Vector2(radius_mult, radius_mult) * size
 
 	# 2. Aplicar Duración en el aire
 	# The projectile flies this long, then fades out (projectile.gd); 0 = until it hits something
@@ -39,6 +119,8 @@ func _fire(origin) -> void:
 		duration = stat("fire.duration")
 	proj.lifetime = duration
 	proj.fire_trail = _stats() != null and stat("fire.trail") >= 1.0
+	proj.fanned = _stats() != null and stat("fire.fanned") >= 1.0
+	proj.bounce = _stats() != null and stat("fire.bounce") >= 1.0
 	# Void's borrowed fireball burns purple (its flames and its burst too)
 	if player.main_power is VoidPower:
 		proj.tint = Global.void_tint()

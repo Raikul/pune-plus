@@ -26,7 +26,7 @@ func _ready():
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# The pixel-art fireball stays crisp, the big symbol art is smoothed when scaled down
-	if kind.begins_with("fireball") or kind == "wildfire":
+	if kind.begins_with("fireball") or kind in ["wildfire", "fanned", "bounce", "dual_ball"]:
 		texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	else:
 		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -90,6 +90,28 @@ func _draw():
 			_draw_hearth(center, true)
 		"void_time", "void_wide", "void_memory", "void_mimic", "void_hoard":
 			_draw_void(center, kind)
+		"fanned":
+			_draw_fanned(center)
+		"bounce":
+			_draw_bounce(center)
+		"dual_ball":
+			_draw_dual_ball(center)
+		"flamethrower":
+			_draw_flamethrower(center)
+		"breath":
+			_draw_breath(center)
+		"blizzard":
+			_draw_blizzard(center)
+		"steam":
+			_draw_steam(center)
+		"borer":
+			_draw_borer(center)
+		"ice":
+			_draw_ice(center, false)
+		"ice_turn":
+			_draw_ice(center, true)
+		"absorbent":
+			_draw_absorbent(center)
 
 # Water symbols splitting from the middle one, with a caption
 func _draw_twins(center, caption):
@@ -375,6 +397,141 @@ func _draw_hearth(center, pyre):
 		_draw_text("+", size.y * 0.95, 30)
 	else:
 		_draw_symbol(FIRE_WATER_SYMBOL, ring_center, size.x * 0.26, false)
+
+
+# --- Hold powers and interactions (Fanned Flames, Ricochet, Dual Ball, Flamethrower, Breath
+# Control, Blizzard, Steam, Rock Borer, Ice, Ice Skater, Absorbent) ---
+
+# A rock piece lying across the icon, `alpha` see-through
+func _draw_stone(at, length, thickness, angle, alpha = 1.0):
+	var width = thickness * STONE_TEXTURE.get_height() / float(STONE_TEXTURE.get_width())
+	draw_set_transform(at, angle, Vector2.ONE)
+	draw_texture_rect(STONE_TEXTURE, Rect2(-length / 2, -thickness / 2, length, thickness), false, Color(1, 1, 1, alpha))
+	draw_set_transform(Vector2.ZERO)
+
+# A fireball crosses a trail of Air and comes out bigger
+func _draw_fanned(center):
+	var t = fmod(time, 2.0) / 2.0
+	var x = lerp(-6.0, size.x - 22.0, t)
+	var grown = smoothstep(0.38, 0.55, t)
+	_stroke(PackedVector2Array([Vector2(center.x, size.y * 0.12), Vector2(center.x + 5, center.y), Vector2(center.x - 3, size.y * 0.88)]), Color(color, 0.85), 4.0)
+	_draw_fireball(Vector2(x, center.y), 0.45 + 0.5 * grown)
+
+# A fireball off a rock, at the angle it came in
+func _draw_bounce(center):
+	var floor_y = size.y * 0.84
+	_draw_stone(Vector2(center.x, floor_y + 4), size.x * 0.7, 16.0, 0.0)
+	var hit = Vector2(center.x, floor_y - 6)
+	var start = Vector2(size.x * 0.08, size.y * 0.12)
+	var leave = Vector2(size.x * 0.92, size.y * 0.12)
+	draw_dashed_line(start, hit, Color(1, 0.6, 0.15, 0.35), 2.0, 5.0)
+	draw_dashed_line(hit, leave, Color(1, 0.6, 0.15, 0.35), 2.0, 5.0)
+	var t = fmod(time, 2.0) / 2.0
+	var ball = start.lerp(hit, t * 2.0) if t < 0.5 else hit.lerp(leave, (t - 0.5) * 2.0)
+	_dot(ball, 9.0, Color(1, 0.55, 0.1, 0.3))
+	_dot(ball, 5.5, Color(1, 0.85, 0.4))
+
+# Two small fireballs flying apart from one spot
+func _draw_dual_ball(center):
+	var t = fmod(time, 2.0) / 2.0
+	var spread = lerp(0.08, 0.55, smoothstep(0.0, 0.7, t))
+	var origin = Vector2(size.x * 0.18, center.y)
+	for side in [-1, 1]:
+		var dir = Vector2.RIGHT.rotated(spread * side)
+		draw_dashed_line(origin + dir * 14, origin + dir * size.x * 0.62, Color(1, 0.6, 0.15, 0.45), 2.0, 5.0)
+		var along = origin + dir * lerp(size.x * 0.25, size.x * 0.7, smoothstep(0.55, 1.0, t))
+		_dot(along, 8.0, Color(1, 0.55, 0.1, 0.3))
+		_dot(along, 5.0, Color(1, 0.85, 0.4))
+	_draw_symbol(FIRE_WATER_SYMBOL, origin, size.x * 0.2, false)
+
+# A cone of flame puffs
+func _draw_flamethrower(center):
+	var origin = Vector2(size.x * 0.2, center.y)
+	_draw_symbol(FIRE_WATER_SYMBOL, origin - Vector2(8, 0), size.x * 0.2, false)
+	for i in 30:
+		var t = fposmod(time * 1.2 + i * 0.137, 1.0)
+		var angle = (fposmod(i * 0.618, 1.0) - 0.5) * 0.8
+		var at = origin + Vector2.RIGHT.rotated(angle) * (14.0 + t * size.x * 0.6)
+		var heat = Color(1.0, 0.95, 0.5).lerp(Color(1.0, 0.4, 0.08), clamp(t * 1.5, 0.0, 1.0))
+		_dot(at, lerp(3.0, 12.0, t), Color(heat, 0.7 * (1.0 - t)))
+
+# The jump: short, then stretched longer by holding
+func _draw_breath(center):
+	var hold = 0.5 + 0.5 * sin(time * 2.2)
+	var start = Vector2(size.x * 0.2, center.y)
+	var reach = lerp(size.x * 0.25, size.x * 0.62, hold)
+	_draw_symbol(AIR_EARTH_SYMBOL, start, size.x * 0.22, false)
+	var tip = start + Vector2(reach, 0)
+	_stroke(PackedVector2Array([start + Vector2(16, 0), tip]), Color(color, 0.5), 3.0)
+	_dot(tip, 5.0 + 3.0 * hold, Color(color, 0.9))
+	draw_arc(start, size.x * 0.17, -PI / 2, -PI / 2 + TAU * hold, 28, Color.WHITE, 3.0, true)
+
+# A cone of wind with streaks blowing out of it
+func _draw_blizzard(center):
+	var origin = Vector2(size.x * 0.18, center.y)
+	var half = 0.5
+	var far = size.x * 0.78
+	_shape(PackedVector2Array([origin, origin + Vector2.RIGHT.rotated(-half) * far, origin + Vector2.RIGHT.rotated(half) * far]), Color(color, 0.14))
+	_draw_symbol(AIR_EARTH_SYMBOL, origin, size.x * 0.2, false)
+	for i in 9:
+		var lane = lerp(-0.85, 0.85, i / 8.0)
+		var start = fposmod(time * 0.9 + i * 0.21, 1.0)
+		var near = origin + Vector2.RIGHT.rotated(half * lane) * (20.0 + start * far * 0.85)
+		var tail = origin + Vector2.RIGHT.rotated(half * lane) * (20.0 + start * far * 0.85 + 22.0)
+		_stroke(PackedVector2Array([near, tail]), Color(1, 1, 1, 0.8 * (1.0 - start)), 2.5)
+
+# A cloud of steam around the Water symbol
+func _draw_steam(center):
+	_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.2, true, 0.8)
+	for i in 8:
+		var angle = TAU * i / 8.0 + time * 0.5
+		var out = Vector2.RIGHT.rotated(angle) * size.y * (0.2 + 0.05 * sin(time * 2.0 + i))
+		_dot(center + out, size.y * 0.17, Color(1, 1, 1, 0.22))
+	draw_arc(center, size.y * 0.36, 0, TAU, 40, Color(0.85, 0.95, 1.0, 0.65), 2.0, true)
+
+# A Water twin goes through a rock, which turns into common trail behind it
+func _draw_borer(center):
+	var x = fposmod(time * 60.0, size.x + 30.0) - 15.0
+	var stone_x = center.x + size.x * 0.06
+	var crossing = clamp(1.0 - abs(x - stone_x) / 26.0, 0.0, 1.0)
+	_draw_stone(Vector2(stone_x, center.y), size.y * 0.8, 24.0, PI / 2, 1.0 - 0.7 * crossing)
+	if x > stone_x:
+		_stroke(PackedVector2Array([Vector2(stone_x + 6, center.y), Vector2(x - 12, center.y)]), Color(color, 0.8), 4.0)
+	_draw_symbol(FIRE_WATER_SYMBOL, Vector2(x, center.y), size.x * 0.22, true, 0.55)
+
+# A snowflake around the Water symbol, with the time it can be held running down
+func _draw_snowflake(center, radius, spin):
+	for i in 6:
+		var dir = Vector2.RIGHT.rotated(TAU * i / 6.0 + spin)
+		_stroke(PackedVector2Array([center + dir * radius * 0.25, center + dir * radius]), Color(0.9, 0.98, 1.0, 0.95), 2.4)
+		var fork = center + dir * radius * 0.68
+		_stroke(PackedVector2Array([fork, fork + dir.rotated(0.65) * radius * 0.3]), Color(0.9, 0.98, 1.0, 0.85), 2.0)
+		_stroke(PackedVector2Array([fork, fork + dir.rotated(-0.65) * radius * 0.3]), Color(0.9, 0.98, 1.0, 0.85), 2.0)
+
+func _draw_ice(center, skater):
+	_dot(center, size.y * 0.34, Color(0.65, 0.9, 1.0, 0.16))
+	_draw_snowflake(center, size.y * 0.36, time * 0.4)
+	_draw_symbol(FIRE_WATER_SYMBOL, center, size.x * 0.18, true)
+	if skater:
+		# A turning arrow: it spins on the spot
+		var spin = time * 2.2
+		var r = size.y * 0.44
+		draw_arc(center, r, spin, spin + PI * 1.2, 24, Color(1, 1, 1, 0.85), 3.0, true)
+		var tip = center + Vector2.RIGHT.rotated(spin + PI * 1.2) * r
+		var dir = Vector2.RIGHT.rotated(spin + PI * 1.2 + PI / 2)
+		_shape(PackedVector2Array([tip + dir * 7, tip + dir.rotated(2.5) * 8, tip + dir.rotated(-2.5) * 8]), Color(1, 1, 1, 0.85))
+
+# Common trail on its way to turn into hard rock
+func _draw_absorbent(center):
+	var t = fmod(time, 2.4) / 2.4
+	var turned = smoothstep(0.35, 0.6, t)
+	var left = size.x * 0.1
+	var right = size.x * 0.9
+	_stroke(PackedVector2Array([Vector2(left, center.y), Vector2(center.x, center.y + 6), Vector2(right, center.y)]), Color(color, 0.9 * (1.0 - turned)), 5.0)
+	for i in 3:
+		var at = Vector2(lerp(left + 24.0, right - 24.0, i / 2.0), center.y + (6.0 if i == 1 else 0.0))
+		_draw_stone(at, size.x * 0.3, 22.0, 0.0, turned)
+	_draw_symbol(FIRE_WATER_SYMBOL, Vector2(size.x * 0.5, size.y * 0.2), size.x * 0.14, true, 1.0 - 0.7 * turned)
 
 # Void: its symbol, with what each upgrade does to the void around it
 func _draw_void(center, which):
