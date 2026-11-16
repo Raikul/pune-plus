@@ -49,5 +49,36 @@ func should_ignore_collision(_area: Area2D) -> bool:
 func should_pulse_ready() -> bool:
 	return true
 
+# --- Powers that are held (Dual Ball, Flamethrower, Breath Control, Ice) ---
+# With the upgrade, Punchi starts the power (hold_begin) and letting go casts it
+# (activate_held). Without it the power fires on the press, as always. Void's absorbed
+# powers always fire on the press (activate).
+
+# The upgrades make this power a hold power
+func hold_mode() -> bool:
+	return false
+
+# Seconds after which the hold lets go by itself (0 = holds as long as the key does)
+func hold_max() -> float:
+	return 0.0
+
+func hold_begin() -> void:
+	pass
+
+func hold_update(_seconds: float, _delta: float) -> void:
+	pass
+
+# Held but never cast (the snake died or was electrocuted)
+func hold_cancel() -> void:
+	pass
+
+# The cast, after holding for this long. Also what other machines replay.
+func activate_held(_seconds: float) -> void:
+	activate()
+
+# AI: how long it holds before letting go
+func ai_hold_time() -> float:
+	return 0.3
+
 func cleanup() -> void:
 	pass

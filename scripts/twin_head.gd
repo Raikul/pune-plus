@@ -243,11 +243,21 @@ func _on_area_entered(area):
 #	if area.playerId == null or area.playerId != 4:
 		if listOfNodes.find(area) == -1 and bufferListOfNodes.find(area) == -1:
 	#		if area.is_in_group("activePlayers"):
+			var snake = get_parent()
+			# Rock Borer: the rock gives way to common trail and the twin goes on
+			if area.is_in_group("Fissures") and snake.stat_value("water.borer") >= 1.0 and RockSwap.rock_to_trail(area):
+				return
 			# End-screen stats: crashed on Earth's rock
 			if area.is_in_group("Fissures"):
 				var earth = Fissure.owner_of(area)
 				if earth != null:
 					Global.add_stat(earth.playerId, "earth_blocked")
+			# Steam: a twin burnt by a fireball boils into a deadly cloud
+			if area.is_in_group("fireballs") and snake.stat_value("water.steam") >= 1.0:
+				SteamCloud.spawn.call_deferred(snake, global_position)
+			# Earth's Absorbent: the trail it died on turns to rock
+			if area is TrailSegment:
+				RockSwap.trail_to_rock(area, global_position)
 			$CollisionShape2D.set_deferred("disabled", true)
 			remove_from_group("twinHeads")
 			alive = false

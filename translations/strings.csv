@@ -442,3 +442,25 @@ Haz clic para seguir, Esc para reiniciar la ronda","已暂停
 REPLAY_CLOSE_CALL,CLOSE CALL,POR LOS PELOS,千钧一发
 REPLAY_CLUTCH,CLUTCH,JUGADA SALVADORA,关键救场
 REPLAY_PHASE,STONE WALKER,PASO DE PIEDRA,穿石而过
+UPG_FIRE_FANNED,Fanned Flames,Llamas Avivadas,风助火势
+UPG_FIRE_FANNED_DESC,Your fireball grows and speeds up crossing Air's trail.,Tu bola de fuego crece y acelera al cruzar la estela de Aire.,火球穿过风之蛇的尾迹时会变大、变快。
+UPG_FIRE_BOUNCE,Ricochet,Rebote,弹跳火球
+UPG_FIRE_BOUNCE_DESC,Your fireball bounces off Earth's rocks.,Tu bola de fuego rebota en las rocas de Tierra.,火球会从土之蛇的岩石上弹开。
+UPG_FIRE_DUAL,Dual Ball,Bola Doble,双生火球
+UPG_FIRE_DUAL_DESC,"Hold Punchi to aim two small fireballs apart, let go to throw them.","Mantén Punchi para separar dos bolas pequeñas, suéltalo para lanzarlas.",按住 Punchi 让两个小火球分开瞄准，松开后发射。
+UPG_FIRE_FLAMETHROWER,Flamethrower,Lanzallamas,火焰喷射器
+UPG_FIRE_FLAMETHROWER_DESC,Hold Punchi to spit a cone of fire. Replaces the fireball.,Mantén Punchi para escupir un cono de fuego. Reemplaza la bola de fuego.,按住 Punchi 喷出锥形火焰，取代火球。
+UPG_AIR_BREATH,Breath Control,Control de la Respiración,控息
+UPG_AIR_BREATH_DESC,"Your jump is shorter, but holding Punchi stretches it.","Tu salto es más corto, pero mantener Punchi lo estira.",跳跃变短，但按住 Punchi 可以拉长。
+UPG_AIR_BLIZZARD,Blizzard,Ventisca,暴风雪
+UPG_AIR_BLIZZARD_DESC,"Hold the jump to its longest and let go: no jump, a gust pushes everything in a cone.","Si mantienes el salto al máximo y sueltas, no saltas: una ráfaga empuja todo en un cono.",把跳跃蓄到最长再松开：不跳，而是刮起一阵风，把锥形范围内的一切吹走。
+UPG_WATER_STEAM,Steam,Vapor,蒸汽
+UPG_WATER_STEAM_DESC,A twin burnt by a fireball boils into a cloud of steam that kills everyone but you.,Un gemelo quemado por una bola de fuego se vuelve una nube de vapor que mata a todos menos a ti.,分身被火球烧毁时会变成一团蒸汽，除你之外的所有蛇碰到即死。
+UPG_WATER_BORER,Rock Borer,Horadapiedra,穿岩
+UPG_WATER_BORER_DESC,Your twins bore through Earth's rocks and turn them into common trail.,Tus gemelos horadan las rocas de Tierra y las vuelven una estela común.,分身能穿透土之蛇的岩石，并把它们变成普通尾迹。
+UPG_WATER_ICE,Ice,Hielo,寒冰
+UPG_WATER_ICE_DESC,"Hold Punchi to freeze in place, let go to move again and send out your twins.","Mantén Punchi para congelarte, suéltalo para moverte de nuevo y soltar tus gemelos.",按住 Punchi 原地冻结，松开后继续前进并放出分身。
+UPG_WATER_ICE_TURN,Ice Skater,Patinador,滑冰者
+UPG_WATER_ICE_TURN_DESC,You can turn while frozen.,Puedes girar mientras estás congelado.,冻结时也能转向。
+UPG_EARTH_ABSORBENT,Absorbent,Absorbente,吸收
+UPG_EARTH_ABSORBENT_DESC,"When Water dies on your common trail, that trail turns to hard rock.","Cuando Agua muere contra tu estela común, esa estela se vuelve roca dura.",水之蛇撞上你的普通尾迹死亡时，那段尾迹会变成坚硬的岩石。

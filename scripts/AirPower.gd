@@ -21,6 +21,49 @@ func execute_recast() -> void:
 	recast_active = false
 	realizar_salto()
 
+# --- Breath Control / Blizzard: a short jump that stretches while Punchi is held ---
+## Seconds of holding to stretch the jump to its longest (and, with Blizzard, to blow instead)
+const BREATH_TIME = 1.0
+var hold_fx: HoldFx
+
+func hold_mode() -> bool:
+	return _stats() != null and stat("air.breath") >= 1.0
+
+func has_blizzard() -> bool:
+	return _stats() != null and stat("air.blizzard") >= 1.0
+
+func hold_begin() -> void:
+	player.breath_hold = 0.0
+	hold_fx = HoldFx.spawn(player, "breath", Color(Global.playerColors[player.playerId]))
+
+func hold_update(seconds: float, _delta: float) -> void:
+	player.breath_hold = seconds
+	if is_instance_valid(hold_fx):
+		hold_fx.progress = minf(seconds / BREATH_TIME, 1.0)
+		hold_fx.full = has_blizzard() and seconds >= BREATH_TIME
+
+func hold_cancel() -> void:
+	player.breath_hold = 0.0
+	if is_instance_valid(hold_fx):
+		hold_fx.queue_free()
+
+func activate_held(seconds: float) -> void:
+	hold_cancel()
+	# Held to the limit with Blizzard: no jump, a gust instead
+	if has_blizzard() and seconds >= BREATH_TIME:
+		AirBlizzard.spawn(player)
+		if dash_sound:
+			dash_sound.play()
+		activated.emit()
+		finished.emit()
+		return
+	player.breath_hold = seconds
+	activate()
+	player.breath_hold = 0.0
+
+func ai_hold_time() -> float:
+	return 0.35
+
 func activate() -> void:
 	realizar_salto()
 

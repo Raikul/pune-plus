@@ -14,7 +14,7 @@ signal score()
 ## Online: a trail segment was laid by this (local) snake
 signal body_laid(body_position, body_rotation)
 ## Online: this (local) snake used its power. recast: Air's free second jump (no cooldown)
-signal power_used(recast)
+signal power_used(recast, hold)
 ## Online: this (local) water snake split off a twin
 signal twin_spawned(twin)
 ## Online: this (local) fire snake turned to ash (rising = false) or rose again (Phoenix)
@@ -37,6 +37,10 @@ var teleport_target_unwrapped = Vector2.ZERO
 var teleport_wrapped = false
 var teleport_clamped = false
 const TELEPORT_WALL_MARGIN = 40.0
+# Breath Control: the jump is this short, and grows to its longest the longer Punchi is held
+const BREATH_MIN = 105.0
+const BREATH_MAX = 250.0
+var breath_hold = 0.0
 
 # Air's Static Shock: seconds left without power, and with left/right swapped (Scrambler)
 var shocked_time = 0.0
@@ -157,7 +161,8 @@ func _process(delta):
 					direction = 0
 
 	_watch_close_calls(delta)
-	if ai_enabled and powerAvailable: ai_punchi(direction)
+	_update_hold(delta)
+	if ai_enabled and powerAvailable and not holding: ai_punchi(direction)
 	elif ai_enabled and main_power and main_power.ai_should_recast(direction): try_use_power()
 	_update_shock(delta)
 	teleport_grace = max(teleport_grace - delta, 0.0)
@@ -202,7 +207,15 @@ func _danger_ahead() -> float:
 	var raycaster = get_node_or_null("Raycaster")
 	return raycaster.collision_distance("Up") if raycaster else INF
 
+# Water's Ice: frozen in place while Punchi is held (it turns on the spot only with Ice Skater)
+var ice_frozen = false
+var ice_turns = false
+
 func _move(direction, delta):
+	if ice_frozen:
+		if ice_turns:
+			rotation += angular_speed * direction * delta
+		return
 	rotation += angular_speed * direction * delta
 	position += Vector2.UP.rotated(rotation) * speed * delta
 
@@ -297,6 +310,9 @@ func actualizarPuntoDeTransporte():
 
 	# Tomamos la posición base adelante de la serpiente
 	var target_pos : Vector2 = $FixedTeleportNode.global_position
+	if has_breath():
+		var reach = lerpf(BREATH_MIN, BREATH_MAX, clampf(breath_hold / AirPower.BREATH_TIME, 0.0, 1.0))
+		target_pos = global_position + Vector2.UP.rotated(rotation) * reach
 	teleport_target_unwrapped = target_pos
 	teleport_wrapped = false
 	teleport_clamped = false
@@ -475,6 +491,10 @@ func _on_area_entered(area):
 			_crash(area)
 
 func _crash(cause):
+	cancel_hold()
+	# Earth's Absorbent: the trail Water died on turns to rock
+	if playerId == 4 and cause is TrailSegment:
+		RockSwap.trail_to_rock(cause, global_position)
 	_credit_death(cause)
 	_feed_void(cause)
 	$CollisionShape2D.set_deferred("disabled", true)
@@ -514,9 +534,11 @@ func _credit_death(cause):
 	var killer = killer_of(cause)
 	if cause.is_in_group("fire_trail") and killer != 0:
 		Global.add_stat(killer, "fire_kills")
-	if cause.is_in_group("fireballs") and killer != 0:
-		Global.add_stat(killer, "fire_kills")
-		# Pyre (Fire): the fire stays where its fireball killed
+	var jet_kill = cause is FlameJet and killer != 0
+	if (cause.is_in_group("fireballs") or jet_kill) and killer != 0:
+		if not jet_kill: # (the jet already counted as fire_trail above)
+			Global.add_stat(killer, "fire_kills")
+		# Pyre (Fire): the fire stays where its fireball (or flamethrower) killed
 		var shooter = cause.get_parent()
 		if shooter != null and shooter.has_method("has_pyre") and shooter.has_pyre():
 			FireRing.spawn.call_deferred(shooter, global_position)
@@ -588,6 +610,21 @@ func spawn_remote_twin():
 	twin.bufferListOfNodes = listOfNodes
 	twin.bufferListOfNodes.append(self)
 	return twin
+
+# A trail piece not laid by moving: a rock turning back into trail (RockSwap). It isn't in
+# the snake's list of recent pieces, so it kills any snake, its own too.
+func lay_loose_trail(at, heading, previous = null):
+	var body = snakeBodyScene.instantiate()
+	body.set_as_top_level(true)
+	body.global_position = at
+	body.modulate = head_modulate
+	body.apply_scale(get_scale())
+	body.rotation = heading
+	if main_power is EarthPower:
+		body.z_index = FISSURE_Z_INDEX + 1
+	add_child(body)
+	body.link_to(previous)
+	return body
 
 func createBody(scene):
 	var sceneInstance = scene.instantiate()
@@ -712,6 +749,51 @@ func _input(event):
 	if playerId != null and input_id != 0 and event.is_action_pressed("Player" + str(input_id) + "Up"):
 		try_use_power()
 
+# --- Holding Punchi (powers with a hold upgrade, see Power.hold_mode) ---
+var holding = false
+var hold_time = 0.0
+var hold_target = 0.0 # AI: how long it holds
+
+func _begin_hold() -> void:
+	holding = true
+	hold_time = 0.0
+	hold_target = main_power.ai_hold_time() * randf_range(0.7, 1.3)
+	main_power.hold_begin()
+	set_face("effort", 0.5)
+
+# Every frame while Punchi is held. The key is polled, so a release is never missed.
+func _update_hold(delta) -> void:
+	if not holding:
+		return
+	hold_time += delta
+	main_power.hold_update(hold_time, delta)
+	var let_go = false
+	if ai_enabled:
+		let_go = hold_time >= hold_target
+	else:
+		let_go = input_id == 0 or not Input.is_action_pressed("Player%dUp" % input_id)
+	var limit = main_power.hold_max()
+	if limit > 0.0 and hold_time >= limit:
+		let_go = true
+	if let_go:
+		_end_hold()
+
+func _end_hold() -> void:
+	if not holding:
+		return
+	holding = false
+	_cast_power(hold_time)
+	hold_time = 0.0
+
+# It never got to cast (dead, electrocuted, round over)
+func cancel_hold() -> void:
+	if not holding:
+		return
+	holding = false
+	hold_time = 0.0
+	if main_power != null:
+		main_power.hold_cancel()
+
 func try_use_power() -> void:
 	# Stopped (dead, an ember, or the round/game is over): no power and no sound
 	if not is_processing():
@@ -723,7 +805,7 @@ func try_use_power() -> void:
 	if main_power != null and main_power.has_method("is_recast_ready") and main_power.is_recast_ready():
 		main_power.execute_recast()
 		set_face("effort", 0.5)
-		power_used.emit(true)
+		power_used.emit(true, 0.0)
 		Global.add_stat(playerId, "powers")
 		return
 
@@ -734,6 +816,17 @@ func try_use_power() -> void:
 	if main_power != null and not main_power.can_activate():
 		return
 	
+	# A hold power (Dual Ball, Flamethrower, Breath Control, Ice): Punchi only starts it,
+	# letting go casts it (_end_hold)
+	if main_power != null and main_power.hold_mode():
+		if not holding:
+			_begin_hold()
+		return
+	_cast_power(0.0)
+
+# The cast itself: cooldown, the power, and everything that counts it. hold: seconds
+# Punchi was held first (hold powers).
+func _cast_power(hold: float) -> void:
 	powerCooldown()
 	
 	# About to crash: if the power gets it out alive, that's a clutch play
@@ -741,9 +834,9 @@ func try_use_power() -> void:
 		clutch_left = CLUTCH_SURVIVE
 		close_call_left = -1.0
 	if main_power != null:
-		main_power.activate()
+		main_power.activate_held(hold)
 	set_face("effort", 0.5)
-	power_used.emit(false)
+	power_used.emit(false, hold)
 	Global.add_stat(playerId, "powers")
 
 	if stats != null:
@@ -752,9 +845,9 @@ func try_use_power() -> void:
 				entry.behavior.on_power_activated(self, entry.stacks)
 
 # Online: replays another machine's power use on our copy of its snake (no cooldown checks)
-func use_power():
+func use_power(hold = 0.0):
 	if main_power != null:
-		main_power.activate()
+		main_power.activate_held(hold)
 	set_face("effort", 0.5)
 # 2v2: the snake's teammate (a snake of the same team, not itself)
 func is_ally(other) -> bool:
@@ -835,6 +928,7 @@ func shock(duration, scramble = 0.0, by = 0):
 	if main_power is VoidPower and main_power.field_active():
 		main_power.absorb(3, by if by != 0 else 3)
 		return
+	cancel_hold()
 	var parent = get_parent()
 	if shocked_time <= 0 and parent:
 		# Void's borrowed lightning is purple
@@ -867,6 +961,7 @@ const PHOENIX_WALL_MARGIN = 90.0
 
 # Dies for a while: stays where it fell as an ember (FirePower rises it again)
 func phoenix_ash():
+	cancel_hold()
 	reviving = true
 	set_process(false)
 	$CollisionShape2D.set_deferred("disabled", true)
@@ -992,6 +1087,9 @@ func has_border_pass() -> bool:
 
 func has_stone_walk() -> bool:
 	return stat_value("earth.stone_walk") >= 1.0
+
+func has_breath() -> bool:
+	return main_power is AirPower and stat_value("air.breath") >= 1.0
 
 func has_wall_warp() -> bool:
 	return stat_value("air.wall_warp") >= 1.0
