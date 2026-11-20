@@ -298,7 +298,7 @@ GALLERY_BASE,BASE,BASE,基础
 GALLERY_ALWAYS_ON,Always on,Siempre activo,始终生效
 GALLERY_EVERY_SNAKE,"Every snake: turn with Left/Right, power on Up","Todas las serpientes: giran con Izquierda/Derecha, poder con Arriba",所有蛇：左/右转向，上键使用能力
 GALLERY_BASE_FIRE,Shoots a fireball that burns through the trails it hits.,Dispara una bola de fuego que quema las estelas que toca.,发射火球，烧穿所击中的尾迹。
-GALLERY_BASE_EARTH,"Rock armor: passes through trails for a moment, leaving a path of stone behind.",Armadura de roca: atraviesa estelas un momento y deja un camino de piedra detrás.,岩石护甲：短时间内穿过尾迹，并在身后留下石路。
+GALLERY_BASE_EARTH,"Rock armor: breaks through trails for a moment, leaving a path of stone behind.",Armadura de roca: rompe las estelas que atraviesa por un momento y deja un camino de piedra detrás.,岩石护甲：短时间内冲破所经过的尾迹，并在身后留下石路。
 GALLERY_BASE_AIR,Jumps to the marker ahead of it.,Salta a la marca que tiene delante.,跳跃到前方的标记点。
 GALLERY_BASE_WATER,"Splits off a mirrored twin. If the head dies while the twin lives, you take over the twin.","Se separa un gemelo reflejado. Si la cabeza muere mientras el gemelo vive, pasas a controlarlo.",分裂出一个镜像分身。若本体死亡而分身存活，你将接管分身。
 GALLERY_PERCENT_ROLLS,%d%% of rolls,%d%% de las tiradas,出现率 %d%%

@@ -442,6 +442,10 @@ func _on_area_entered(area):
 		if area.owner_id != playerId:
 			_storm_shock(area)
 		return
+	# Earth's stone armor breaks the common trail it goes through (not its rocks, not the
+	# pieces it just laid). On every machine, like a fireball: the remote copies move too.
+	if invincible and area is TrailSegment and listOfNodes.find(area) == -1 and not area.is_queued_for_deletion():
+		_break_trail(area)
 	# A remote snake's owner decides its deaths and pickups
 	if net_remote:
 		return
@@ -489,6 +493,16 @@ func _on_area_entered(area):
 
 			# Muerte normal
 			_crash(area)
+
+const BREAK_FX_GAP_MS = 120
+var last_break_fx = -BREAK_FX_GAP_MS
+func _break_trail(segment):
+	# The stats and the play of the game still see the crossing (below), then it crumbles
+	(func(): if is_instance_valid(segment): segment.queue_free()).call_deferred()
+	var now = Time.get_ticks_msec()
+	if now - last_break_fx >= BREAK_FX_GAP_MS:
+		last_break_fx = now
+		PowerFx.burst(get_parent(), segment.global_position, Color(Global.playerColors[playerId]))
 
 func _crash(cause):
 	cancel_hold()
@@ -609,6 +623,9 @@ func spawn_remote_twin():
 	PowerFx.splash(get_parent(), global_position, Color(Global.playerColors[playerId]), 0.35, 0.55)
 	twin.bufferListOfNodes = listOfNodes
 	twin.bufferListOfNodes.append(self)
+	# Void cast Water with other powers: what the new twin copies arrives with it
+	if main_power is VoidPower:
+		main_power.remote_twin_arrived(twin)
 	return twin
 
 # A trail piece not laid by moving: a rock turning back into trail (RockSwap). It isn't in

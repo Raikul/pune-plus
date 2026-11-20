@@ -175,6 +175,8 @@ func crear_interfaz_botones() -> void:
 	crear_titulo(vbox, "FUEGO", Color(1.0, 0.5, 0.1))
 	crear_toggle(vbox, "fire.trail", "🔥 Incendio (rastro)", Color(1.0, 0.5, 0.1))
 	crear_toggle(vbox, "fire.phoenix", "🦅 Fénix (renacer)", Color(1.0, 0.85, 0.2))
+	crear_toggle(vbox, "fire.hearth", "🔥 Hogar (círculo al empezar)", Color(1.0, 0.55, 0.2))
+	crear_toggle(vbox, "fire.pyre", "🔥 Pira (círculo donde mata)", Color(1.0, 0.45, 0.15))
 	crear_toggle(vbox, "fire.fanned", "🌬️ Llamas Avivadas", Color(1.0, 0.7, 0.3))
 	crear_toggle(vbox, "fire.bounce", "↩️ Rebote", Color(1.0, 0.6, 0.2))
 	crear_toggle(vbox, "fire.dual", "🔥 Bola Doble (mantener)", Color(1.0, 0.5, 0.1))

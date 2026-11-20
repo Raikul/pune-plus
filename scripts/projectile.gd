@@ -147,6 +147,9 @@ func _on_area_entered(area):
 	# Fireballs of the same snake pass through each other (Dual Ball throws two at once)
 	if area.is_in_group("fireballs") and area.get_parent() == get_parent():
 		return
+	# Its own snake's rocks (Void casting Fire and Earth at once): it flies out over them
+	if area.is_in_group("Fissures") and Fissure.owner_of(area) == get_parent():
+		return
 	# Walls, snakes (and Water's twin heads) and Earth's stone stop it: it crashes and fades
 	# away. Freeing a twin head would also free its whole trail (the segments are its children);
 	# the twin may already have died of this same hit, so the check is "twins", not "twinHeads".
