@@ -8,7 +8,8 @@ var bottomLimit
 @onready var rng = RandomNumberGenerator.new()
 
 func _ready():
-	if Global.shrooms_enabled():
+	# Online (a campaign) only the host spawns them, and shows them everywhere
+	if Global.shrooms_enabled() and (not Global.isMultiplayerActive or multiplayer.is_server()):
 		$ShroomTimer.start()
 
 
@@ -19,6 +20,11 @@ const SHROOM_SPOT_TAKEN = 40.0
 func _on_shroom_timer_timeout():
 	var point = _shroom_point()
 	if point == null:
+		return
+	# The campaign places them (same name on every machine online)
+	var rules = get_parent().get("campaign_rules")
+	if rules != null:
+		rules.place_shroom(point, false)
 		return
 	var shroom = shroomScene.instantiate() as Node2D
 	shroom.set_as_top_level(true)

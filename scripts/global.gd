@@ -288,6 +288,8 @@ var round_countdown = true
 var online_round_countdown = true
 
 func round_countdown_enabled() -> bool:
+	if Campaign.playing:
+		return true
 	return online_round_countdown if isMultiplayerActive else round_countdown
 
 # Arena: a level scene with walls (res://levels, see docs/levels.md); "" = the empty classic arena
@@ -312,6 +314,9 @@ var online_level_rotation = [""]
 func level_rotation_setting() -> Array:
 	if test_level != "":
 		return [test_level]
+	# The roguelike campaign: the scenario's arena (Campaign)
+	if Campaign.playing:
+		return [Campaign.level_path()]
 	var rotation = online_level_rotation if isMultiplayerActive else level_rotation
 	rotation = rotation.filter(func(path): return path == "" or ResourceLoader.exists(path))
 	return rotation if not rotation.is_empty() else [""]
@@ -408,17 +413,27 @@ func in_match() -> bool:
 	return scene != null and scene.scene_file_path == "res://scenes/Playground.tscn"
 
 func random_spawns_enabled() -> bool:
+	if Campaign.playing:
+		return false
 	return online_random_spawns if isMultiplayerActive else random_spawns
 
 func teams_enabled() -> bool:
+	# The roguelike campaign: the players against the AI rivals
+	if Campaign.playing:
+		return Campaign.teams()
 	return online_teams if isMultiplayerActive else teams
 
 func team_of(player_id) -> int:
+	if Campaign.playing:
+		return Campaign.team_of(player_id)
 	if not isMultiplayerActive and not match_teams.is_empty():
 		return match_teams.get(player_id, 0)
 	return (online_player_team if isMultiplayerActive else player_team).get(player_id, 0)
 
 func points_to_win_setting() -> int:
+	# The campaign's scenarios end on their objective (CampaignRules), never on points
+	if Campaign.playing:
+		return 9999
 	return online_points_to_win if isMultiplayerActive else points_to_win
 
 func points_to_win_text(points) -> String:
@@ -436,9 +451,14 @@ func match_options() -> Dictionary:
 		"levels": level_rotation.duplicate()}
 
 func shrooms_enabled() -> bool:
+	if Campaign.playing:
+		return Campaign.shrooms()
 	return shrooms and not isMultiplayerActive
 
 func upgrades_enabled() -> bool:
+	# The campaign hands out upgrades between scenarios, not between rounds
+	if Campaign.playing:
+		return false
 	return online_upgrades if isMultiplayerActive else upgrades
 
 # --- Short names for bound keys and gamepad buttons (setup screen, lobby, upgrade screen) ---
@@ -474,6 +494,8 @@ func action_key_name(action) -> String:
 const SETTINGS_PATH = "user://settings.cfg"
 
 func _ready():
+	# Every run leaves a log in user://logs (the last 30, project.godot): the version first
+	print("[Pune] %s, %s" % [ProjectSettings.get_setting("application/config/version"), Time.get_datetime_string_from_system()])
 	load_settings()
 	apply_language()
 	apply_colors()

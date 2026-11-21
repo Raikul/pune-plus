@@ -152,6 +152,7 @@ func _process(delta):
 		elif (ai_enabled and $Raycaster.return_steering() == "Right"): direction = 1
 		if ai_enabled and not _human_steering():
 			direction = _ai_keep_from_ally(direction)
+			direction = _ai_seek_shroom(direction)
 			direction = _ai_dodge_moving_walls(direction)
 			if invincible and has_border_pass():
 				# Burrower: back towards the middle from off the map; straight through a wall
@@ -227,6 +228,46 @@ func _ai_steer_home() -> int:
 	if abs(turn) < 0.1:
 		return 0
 	return 1 if turn > 0 else -1
+
+# --- AI and shrooms ---
+# Where the shrooms are what wins (the campaign's shroom scenarios), the AI heads for the
+# nearest one while nothing is close ahead; the raycasts take over again near danger.
+## Nothing deadly this close ahead (or ahead to the sides) before it goes for a shroom
+const AI_SHROOM_SAFE = 110.0
+
+func _ai_seek_shroom(direction) -> int:
+	var pg = get_parent()
+	if pg == null or pg.get("campaign_rules") == null or not pg.campaign_rules.ai_seeks_shrooms():
+		return direction
+	var raycaster = get_node_or_null("Raycaster")
+	if raycaster == null:
+		return direction
+	for ray in ["Up", "UpLeft", "UpRight"]:
+		if raycaster.collision_distance(ray) < AI_SHROOM_SAFE:
+			return direction
+	var target = null
+	var nearest = INF
+	for shroom in get_tree().get_nodes_in_group("Shrooms"):
+		if shroom.is_queued_for_deletion():
+			continue
+		var distance = global_position.distance_squared_to(shroom.global_position)
+		if distance < nearest:
+			nearest = distance
+			target = shroom
+	if target == null:
+		return direction
+	var forward = Vector2.UP.rotated(rotation)
+	var to_shroom = target.global_position - global_position
+	var turn = forward.angle_to(to_shroom)
+	if abs(turn) < 0.08:
+		return 0
+	var side = 1 if turn > 0 else -1
+	# Inside its turning circle it can't get there turning: straight on first, for room
+	var radius = speed / angular_speed
+	var center = global_position + forward.rotated(side * PI / 2) * radius
+	if center.distance_to(target.global_position) < radius:
+		return 0
+	return side
 
 func _human_steering() -> bool:
 	return input_id != 0 and (Input.is_action_pressed("Player%dLeft" % input_id) or Input.is_action_pressed("Player%dRight" % input_id))
@@ -450,8 +491,10 @@ func _on_area_entered(area):
 	if net_remote:
 		return
 	if area is Shroom:
+		if area.is_queued_for_deletion():
+			return
 		$ShroomEaten.play()
-		emit_signal("score")
+		_eat_shroom(area)
 		area.queue_free()
 		return
 
@@ -503,6 +546,16 @@ func _break_trail(segment):
 	if now - last_break_fx >= BREAK_FX_GAP_MS:
 		last_break_fx = now
 		PowerFx.burst(get_parent(), segment.global_position, Color(Global.playerColors[playerId]))
+
+# The campaign counts the shrooms its players eat, and a power shroom gives its effect
+# (scripts/campaign/); otherwise it's a point. A twin eats them for its snake.
+func _eat_shroom(shroom):
+	if shroom.is_in_group("power_shrooms"):
+		PowerShroom.apply(self)
+	else:
+		emit_signal("score")
+	if get_parent() != null and get_parent().has_method("shroom_eaten"):
+		get_parent().shroom_eaten(playerId, shroom.name)
 
 func _crash(cause):
 	cancel_hold()
@@ -845,6 +898,8 @@ func try_use_power() -> void:
 # Punchi was held first (hold powers).
 func _cast_power(hold: float) -> void:
 	powerCooldown()
+	# A trail in the log (user://logs) of what happened before a crash
+	print("[Power] %d%s hold %.2f" % [playerId, " (AI)" if ai_enabled else "", hold])
 	
 	# About to crash: if the power gets it out alive, that's a clutch play
 	if _danger_ahead() < CLUTCH_DANGER:
