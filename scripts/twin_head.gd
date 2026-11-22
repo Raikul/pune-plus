@@ -237,7 +237,9 @@ func _on_area_entered(area):
 	if armor_time > 0 and not area.is_in_group("limits"):
 		return
 	if area is Shroom:
-		get_parent().emit_signal("score")
+		if area.is_queued_for_deletion():
+			return
+		get_parent()._eat_shroom(area)
 		area.queue_free()
 	else:
 #	if area.playerId == null or area.playerId != 4:

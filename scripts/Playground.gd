@@ -14,6 +14,10 @@ var time_flowing = false
 var upgrade_selection_scene = preload("res://scenes/upgrade_selection.tscn")
 # Online play only: syncs snakes and lets the host drive rounds
 var net_session
+# Roguelike campaign only (scripts/campaign/campaign_rules.gd)
+var campaign_rules: CampaignRules
+# The round's time limit: the arena closes in after a minute (scripts/arena_shrink.gd)
+var arena_shrink: ArenaShrink
 # 2v2: teams share their score and earn one point per enemy snake that dies (Global.team_of)
 var teams_mode = false
 
@@ -55,6 +59,18 @@ func _ready():
 		Global.scoreToReach = max((active_ids.size() - 1) * 10, 10)
 	$HUD.setup_teams(teams_mode)
 	add_child(CursorFade.new())
+	# The roguelike campaign: the scenario's rules (objective, rounds, boss, upgrades)
+	if Campaign.playing:
+		campaign_rules = CampaignRules.new()
+		campaign_rules.name = "CampaignRules"
+		add_child(campaign_rules)
+		campaign_rules.setup(self)
+	# Not against the Medusa: that fight lasts until her snakes run out
+	if not (campaign_rules and campaign_rules.objective == "boss"):
+		arena_shrink = ArenaShrink.new()
+		arena_shrink.name = "ArenaShrink"
+		arena_shrink.playground = self
+		add_child(arena_shrink)
 	if teams_mode:
 		var takeover = AiTakeover.new()
 		takeover.name = "AiTakeover"
@@ -209,8 +225,13 @@ func _draw_arena_border():
 
 # spawns: optional {player_id: [x, y, rotation]} decided by the host when playing online
 func setupPlayers(spawns = {}):
+	print("[Round] start: snakes %s, level %s" % [Global.active_ids(), level_path if level_path != "" else "-"])
 	if spawns.is_empty() and not net_session:
 		spawns = roll_spawns(Global.active_ids())
+	if campaign_rules:
+		campaign_rules.round_starting()
+	if arena_shrink:
+		arena_shrink.reset()
 	for player_id in Global.element_ids():
 		if spawns.has(player_id):
 			spawn_player(player_id, spawns[player_id])
@@ -252,6 +273,8 @@ func _countdown_text(first) -> String:
 
 # The match's goal, shown under the first countdown
 func _quest_text() -> String:
+	if campaign_rules:
+		return campaign_rules.quest_text()
 	var mode = tr("COUNTDOWN_TEAMS") if teams_mode else tr("COUNTDOWN_FFA")
 	return tr("COUNTDOWN_QUEST") % [mode, Global.scoreToReach]
 
@@ -493,6 +516,9 @@ func spawn_player(player_id, spawn):
 	if net_session:
 		newPlayer.net_remote = not net_session.is_local(player_id)
 		newPlayer.input_id = net_session.input_id_for(player_id)
+	elif campaign_rules:
+		# A player's own keys (also in a swap scenario); the rivals are AI only
+		newPlayer.input_id = Campaign.input_for(player_id)
 	newPlayer.get_node("HeadSprite").modulate = Global.playerColors[player_id]
 	newPlayer.get_node("ElementHeadSprite").set_texture(Global.element_symbol(5) if player_id == Global.VOID_ID else air_earth_texture)
 	newPlayer.connect("dead", _on_player_dead.bind(newPlayer))
@@ -546,6 +572,8 @@ func playerDead(player):
 		else:
 			for alivePlayer in get_tree().get_nodes_in_group("alivePlayers"):
 				alivePlayer.emit_signal("score")
+		if campaign_rules:
+			campaign_rules.on_snake_dead(player)
 	# The match may have ended on the first survivor's point: show everyone's
 	$HUD.refresh()
 	if round_is_over() and gameEnded == false and time_flowing:
@@ -555,6 +583,8 @@ func playerDead(player):
 
 # Free for all: one snake left. Teams: only one team left.
 func round_is_over():
+	if campaign_rules:
+		return campaign_rules.round_is_over()
 	var alive = get_tree().get_nodes_in_group("alivePlayers")
 	if not teams_mode:
 		return alive.size() <= 1
@@ -775,6 +805,10 @@ func restart(delay = ROUND_END_LINGER):
 	# The quote of the break between rounds (RoundQuote)
 	if Global.show_quotes:
 		_pop_round_quote()
+	# The campaign decides: another round, or the scenario is won or lost
+	if campaign_rules:
+		campaign_rules.round_ended(delay)
+		return
 	
 	# Online clients wait for the host's next round instead (NetSession.start_round)
 	if net_session and not multiplayer.is_server():
@@ -920,6 +954,11 @@ func can_see_upgrades(player_id) -> bool:
 				return true
 	return false
 #
+
+# A snake ate a shroom (Player._eat_shroom)
+func shroom_eaten(player_id, shroom_name = ""):
+	if campaign_rules:
+		campaign_rules.shroom_eaten(player_id, shroom_name)
 
 func _on_player_score(player_id):
 	# Shrooms: with teams the point goes to the team

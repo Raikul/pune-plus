@@ -15,11 +15,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Pune"
-config/version="0.8.0"
+config/version="0.8.1"
 run/main_scene="res://scenes/menu.tscn"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 run/transparent_background=false
+run/flush_stdout_on_print=true
 
 [autoload]
 
@@ -27,6 +28,7 @@ Global="*res://scripts/global.gd"
 LessonList="*res://scripts/lessonList.gd"
 DebugConsole="*uid://ig5lna8yp7d2"
 SteamNet="*res://scripts/net/steam_net.gd"
+Campaign="*res://scripts/campaign/campaign.gd"
 
 [display]
 
@@ -38,6 +40,11 @@ window/size/borderless=true
 window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="res://assets/images/ui/cursor.png"
 mouse_cursor/custom_image_hotspot=Vector2(4, 3)
+
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/max_log_files=30
 
 [dotnet]
 

@@ -67,6 +67,15 @@ func add_buff(b: Buff) -> void:
 		}
 	stats_changed.emit()
 
+# Takes one stack of a buff away (a temporary upgrade running out)
+func remove_buff(buff_id: StringName) -> void:
+	if not active_buffs.has(buff_id):
+		return
+	active_buffs[buff_id].stacks -= 1
+	if active_buffs[buff_id].stacks <= 0:
+		active_buffs.erase(buff_id)
+	stats_changed.emit()
+
 func get_stack_count(buff_id: StringName) -> int:
 	if active_buffs.has(buff_id):
 		return active_buffs[buff_id].stacks

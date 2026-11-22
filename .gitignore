@@ -16,3 +16,4 @@ mono_crash.*.json
 
 #Export Ignores
 bin/
+*.tscn*.tmp

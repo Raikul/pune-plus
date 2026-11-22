@@ -35,13 +35,20 @@ func setup(p: Node2D) -> void:
 	player.add_child.call_deferred(field)
 
 func activate() -> void:
+	# Online, another machine's Void: a twin this press makes arrives later (twin_state),
+	# so what it copies (fireball, stone armor) waits for it (remote_twin_arrived)
+	twin_copies = []
+	var makes_twins = held.has(4) and player.net_remote
 	for element in ORDER:
 		if held.has(element):
 			_cast(element)
+			if makes_twins and element in [1, 2]:
+				twin_copies.append(element)
 			if held.has(element) and held[element].uses != INF:
 				held[element].uses -= 1
 				if held[element].uses <= 0:
 					held.erase(element)
+	twin_copies_until = Time.get_ticks_msec() + TWIN_COPY_WAIT_MS
 	field_left = stat("void.duration")
 	activated.emit()
 
@@ -159,6 +166,23 @@ func _cast(element):
 				power.armor_twin(twin)
 			3:
 				_twin_jump(twin)
+
+## How long after the press a remote twin still counts as made by it
+const TWIN_COPY_WAIT_MS = 1500
+var twin_copies = []
+var twin_copies_until = 0
+
+# Online: a twin of this (remote) Void just showed up; if the press that made it also cast
+# Fire or Earth, it copies them like the owner's twin did
+func remote_twin_arrived(twin):
+	if twin_copies.is_empty() or Time.get_ticks_msec() > twin_copies_until:
+		return
+	for element in twin_copies:
+		match element:
+			1:
+				_instance(1).shoot_from(twin)
+			2:
+				_instance(2).armor_twin(twin)
 
 # Its living twins (here, or the copies of another machine's twins online)
 func _twins() -> Array:

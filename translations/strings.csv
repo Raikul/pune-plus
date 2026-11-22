@@ -298,7 +298,7 @@ GALLERY_BASE,BASE,BASE,基础
 GALLERY_ALWAYS_ON,Always on,Siempre activo,始终生效
 GALLERY_EVERY_SNAKE,"Every snake: turn with Left/Right, power on Up","Todas las serpientes: giran con Izquierda/Derecha, poder con Arriba",所有蛇：左/右转向，上键使用能力
 GALLERY_BASE_FIRE,Shoots a fireball that burns through the trails it hits.,Dispara una bola de fuego que quema las estelas que toca.,发射火球，烧穿所击中的尾迹。
-GALLERY_BASE_EARTH,"Rock armor: passes through trails for a moment, leaving a path of stone behind.",Armadura de roca: atraviesa estelas un momento y deja un camino de piedra detrás.,岩石护甲：短时间内穿过尾迹，并在身后留下石路。
+GALLERY_BASE_EARTH,"Rock armor: breaks through trails for a moment, leaving a path of stone behind.",Armadura de roca: rompe las estelas que atraviesa por un momento y deja un camino de piedra detrás.,岩石护甲：短时间内冲破所经过的尾迹，并在身后留下石路。
 GALLERY_BASE_AIR,Jumps to the marker ahead of it.,Salta a la marca que tiene delante.,跳跃到前方的标记点。
 GALLERY_BASE_WATER,"Splits off a mirrored twin. If the head dies while the twin lives, you take over the twin.","Se separa un gemelo reflejado. Si la cabeza muere mientras el gemelo vive, pasas a controlarlo.",分裂出一个镜像分身。若本体死亡而分身存活，你将接管分身。
 GALLERY_PERCENT_ROLLS,%d%% of rolls,%d%% de las tiradas,出现率 %d%%
@@ -464,3 +464,81 @@ UPG_WATER_ICE_TURN,Ice Skater,Patinador,滑冰者
 UPG_WATER_ICE_TURN_DESC,You can turn while frozen.,Puedes girar mientras estás congelado.,冻结时也能转向。
 UPG_EARTH_ABSORBENT,Absorbent,Absorbente,吸收
 UPG_EARTH_ABSORBENT_DESC,"When Water dies on your common trail, that trail turns to hard rock.","Cuando Agua muere contra tu estela común, esa estela se vuelve roca dura.",水之蛇撞上你的普通尾迹死亡时，那段尾迹会变成坚硬的岩石。
+MENU_ONLINE,Online,Online,在线
+MENU_HOTSEAT,Hotseat,Hotseat,同屏对战
+MENU_ROGUELIKE,Roguelike,Roguelike,肉鸽模式
+CAMPAIGN_TITLE,ROGUELIKE,ROGUELIKE,肉鸽模式
+CAMPAIGN_ACT_SUBTITLE,"Act I: a run of scenarios, the Medusa at the end. Play alone or together.","Acto I: una serie de escenarios, con la Medusa al final. Solo o en equipo.",第一幕：一连串关卡，最后是美杜莎。可单人或合作。
+CAMPAIGN_SLOT_EMPTY,Slot %d: empty,Ranura %d: vacía,存档 %d：空
+CAMPAIGN_SLOT_SUMMARY,Slot %d: %s · step %d/%d · %d lives,Ranura %d: %s · paso %d/%d · %d vidas,存档 %d：%s · 第 %d/%d 步 · %d 条命
+CAMPAIGN_NEW,New,Nueva,新游戏
+CAMPAIGN_CONTINUE,Continue,Continuar,继续
+CAMPAIGN_DELETE,Delete,Borrar,删除
+CAMPAIGN_DELETE_SURE,Sure?,¿Seguro?,确定？
+CAMPAIGN_PICK_TITLE,Who plays?,¿Quiénes juegan?,谁来玩？
+CAMPAIGN_PICK_HELP,Pick an element for each player (up to %d). It stays for the whole campaign; each player steers with their element's keys.,Elegí un elemento por jugador (hasta %d). Se mantiene toda la campaña; cada jugador usa las teclas de su elemento.,为每位玩家选择一个元素（最多 %d 位）。整个战役中保持不变；每位玩家使用其元素的按键。
+CAMPAIGN_SEAT_LINE,Player %d: %s (%s),Jugador %d: %s (%s),玩家 %d：%s（%s）
+CAMPAIGN_PICK_NONE,Nobody yet,Nadie todavía,还没有人
+CAMPAIGN_START,Start,Empezar,开始
+CAMPAIGN_LIFE_LOST,Scenario lost: one life less (%d left). Try again!,Escenario perdido: una vida menos (quedan %d). ¡Otra vez!,关卡失败：失去一条命（剩 %d 条）。再试一次！
+CAMPAIGN_VICTORY,ACT COMPLETE!,¡ACTO COMPLETADO!,本幕完成！
+CAMPAIGN_VICTORY_TEXT,The Medusa ran out of snakes. Well played!,La Medusa se quedó sin serpientes. ¡Bien jugado!,美杜莎的蛇用完了。打得好！
+CAMPAIGN_GAME_OVER,GAME OVER,FIN DE LA CAMPAÑA,游戏结束
+CAMPAIGN_GAME_OVER_TEXT,No lives left. The save is gone; a new run awaits.,No quedan vidas. El save se borró; te espera una campaña nueva.,没有剩余的命了。存档已删除，新的冒险在等着你。
+CAMPAIGN_TO_SLOTS,To the saves,A las ranuras,返回存档
+CAMPAIGN_ACT_TITLE,ACT I,ACTO I,第一幕
+CAMPAIGN_STEP,Step %d of %d,Paso %d de %d,第 %d / %d 步
+CAMPAIGN_NO_UPGRADES,no upgrades yet,sin mejoras todavía,暂无强化
+CAMPAIGN_SAVE_QUIT,Save and quit,Guardar y salir,保存并退出
+CAMPAIGN_KIND_HARD,(hard),(difícil),（困难）
+CAMPAIGN_KIND_SPECIAL,(special),(especial),（特殊）
+CAMPAIGN_KIND_BOSS,(boss),(jefe),（首领）
+CAMPAIGN_DETAIL_RIVALS,%d rivals (%d upgrades each),%d rivales (%d mejoras cada uno),%d 名对手（各有 %d 个强化）
+CAMPAIGN_DETAIL_ARENA,Arena: %s,Arena: %s,竞技场：%s
+CAMPAIGN_DETAIL_SHROOMS,Shrooms,Honguitos,蘑菇
+CAMPAIGN_DETAIL_POWER_SHROOMS,Power shrooms,Honguitos de poder,能量蘑菇
+CAMPAIGN_DETAIL_SWAP,"You play another element, with random upgrades","Jugás con otro elemento, con mejoras al azar",你将使用另一个元素，并获得随机强化
+CAMPAIGN_DETAIL_HARD,Rarer upgrade cards,Cartas de mejora más raras,更稀有的强化卡
+CAMPAIGN_GOAL_ROUNDS,Win %d of %d rounds,Ganá %d de %d rondas,赢下 %d / %d 回合
+CAMPAIGN_GOAL_SURVIVE,"Survive %d s, in %d of %d rounds","Sobreviví %d s, en %d de %d rondas",存活 %d 秒，需在 %d / %d 回合内做到
+CAMPAIGN_GOAL_SHROOMS,Eat %d shrooms within %d rounds,Comé %d honguitos en %d rondas,吃掉 %d 个蘑菇（%d 个回合内）
+CAMPAIGN_GOAL_KILLS,Take down %d rivals within %d rounds,Eliminá %d rivales en %d rondas,击倒 %d 名对手（%d 个回合内）
+CAMPAIGN_GOAL_BOSS,Outlast the Medusa: survive until her snakes run out. Don't look her in the eye.,Resistí a la Medusa: sobreviví hasta que se le acaben las serpientes. No la mires a los ojos.,撑过美杜莎：活到她的蛇用完为止。别直视她的眼睛。
+CAMPAIGN_HUD_WINS,Rounds won %d/%d,Rondas ganadas %d/%d,已赢回合 %d/%d
+CAMPAIGN_HUD_SURVIVE,Hold on: %d s,Aguantá: %d s,坚持：%d 秒
+CAMPAIGN_HUD_SHROOMS,Shrooms %d/%d,Honguitos %d/%d,蘑菇 %d/%d
+CAMPAIGN_HUD_KILLS,Rivals down %d/%d,Rivales caídos %d/%d,击倒对手 %d/%d
+CAMPAIGN_HUD_HAIR,Medusa's snakes left: %d,Serpientes de la Medusa: %d,美杜莎剩余的蛇：%d
+CAMPAIGN_HUD_ROUND,Round %d/%d,Ronda %d/%d,回合 %d/%d
+CAMPAIGN_HUD_LIVES,Lives %d,Vidas %d,生命 %d
+CAMPAIGN_SCENARIO_WON,SCENARIO CLEARED!,¡ESCENARIO SUPERADO!,关卡通过！
+CAMPAIGN_SCENARIO_LOST,SCENARIO LOST,ESCENARIO PERDIDO,关卡失败
+CAMPAIGN_FX_BORROW,Next Punchi: +%s,Próximo Punchi: +%s,下次 Punchi：+%s
+CAMPAIGN_FX_HASTE,Haste!,¡Velocidad!,加速！
+CAMPAIGN_FX_SHIELD,Shield!,¡Escudo!,护盾！
+CAMPAIGN_FX_RECHARGE,Punchi ready!,¡Punchi listo!,Punchi 就绪！
+CAMPAIGN_SC_SKIRMISH,Skirmish,Escaramuza,小规模冲突
+CAMPAIGN_SC_PILLARS,Pillar Hunt,Cacería entre pilares,柱间狩猎
+CAMPAIGN_SC_HARVEST,Harvest,Cosecha,丰收
+CAMPAIGN_SC_SIEGE,Siege,Asedio,围城
+CAMPAIGN_SC_FUNGAL,Fungal Frenzy,Fiebre de hongos,蘑菇狂热
+CAMPAIGN_SC_MAZE,Zigzag Maze,Laberinto zigzag,之字迷宫
+CAMPAIGN_SC_SERPENT,Serpent's Den,Nido de serpientes,蛇穴
+CAMPAIGN_SC_CHEVRONS,Arrowfall,Lluvia de flechas,箭雨
+CAMPAIGN_SC_PARALLELS,Parallel Feast,Banquete paralelo,平行盛宴
+CAMPAIGN_SC_GAUNTLET,The Gauntlet,El desafío,夹道考验
+CAMPAIGN_SC_ARENA,Twin Arena,Arena gemela,双子竞技场
+CAMPAIGN_SC_MIRROR,Mirror Match,Espejo,镜像对决
+CAMPAIGN_SC_STRANGER,Strange Skin,Piel ajena,异样之躯
+CAMPAIGN_SC_MEDUSA,The Medusa,La Medusa,美杜莎
+CAMPAIGN_WAIT_HOST,Waiting for the host...,Esperando al host...,等待房主...
+CAMPAIGN_TO_LOBBY,Save and back to the lobby,Guardar y volver al lobby,保存并返回大厅
+CAMPAIGN_LEAVE,Leave,Salir,离开
+CAMPAIGN_ONLINE_NO_AI,Roguelike: remove the AI snakes (the rivals come with each scenario).,Roguelike: sacá las IA (los rivales vienen con cada escenario).,肉鸽模式：请移除 AI 蛇（对手会随关卡出现）。
+CAMPAIGN_ONLINE_PLAYERS,Roguelike: 1 to 3 players.,Roguelike: de 1 a 3 jugadores.,肉鸽模式：1 到 3 名玩家。
+CAMPAIGN_ONLINE_SEATS,Roguelike: this save needs the same elements it started with.,Roguelike: este save necesita los mismos elementos con los que empezó.,肉鸽模式：此存档需要与开始时相同的元素。
+LOBBY_CAMPAIGN_OFF,Roguelike: off,Roguelike: no,肉鸽模式：关
+LOBBY_CAMPAIGN_NEW,Roguelike: slot %d (new),Roguelike: ranura %d (nueva),肉鸽模式：存档 %d（新）
+LOBBY_CAMPAIGN_SAVE,"Roguelike: slot %d (%s, step %d)","Roguelike: ranura %d (%s, paso %d)",肉鸽模式：存档 %d（%s，第 %d 步）
+ARENA_CLOSING,The arena closes in!,¡La arena se cierra!,竞技场正在缩小！
+CAMPAIGN_KEYS_HINT,"%s / %s: move · %s: pick","%s / %s: mover · %s: elegir","%s / %s：移动 · %s：选择"

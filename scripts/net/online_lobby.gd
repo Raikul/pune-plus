@@ -39,8 +39,14 @@ var privacy_button
 var code_label
 var copy_code_button
 var code_input
+# Roguelike: the save slot the host plays online (-1 = a normal match)
+var campaign_slot = -1
+var campaign_button
+var campaign_note
 
 func _ready():
+	# Out of an online campaign, if we were in one (also when a session ended mid-way)
+	Campaign.end_online()
 	# Steam only runs on this screen and in online matches (SteamNet.stop_steam)
 	SteamNet.start_steam()
 	_build_layout()
@@ -113,6 +119,7 @@ func _refresh_roster():
 	add_player_button.disabled = not SteamNet.is_online() or full
 	add_ai_button.disabled = not SteamNet.is_online() or full
 	start_button.disabled = not SteamNet.is_host() or SteamNet.roster.size() < 2
+	_refresh_campaign()
 	# The host's toggle decides the match (Global.online_upgrades)
 	# Match options: the host's (Global) on the host, the synced copy everywhere else
 	var options = Global.match_options() if SteamNet.is_host() or not SteamNet.is_online() else SteamNet.match_options
@@ -272,6 +279,36 @@ func _match_options_edited():
 	SteamNet.push_match_options()
 	_refresh_roster()
 
+# Roguelike online: off, or one of the save slots (a new campaign if it's empty)
+func _cycle_campaign():
+	campaign_slot += 1
+	if campaign_slot >= Campaign.SLOTS:
+		campaign_slot = -1
+	_refresh_roster()
+
+func _refresh_campaign():
+	var host = SteamNet.is_host()
+	campaign_button.disabled = not host
+	campaign_note.text = ""
+	if campaign_slot < 0 or not host:
+		campaign_button.text = tr("LOBBY_CAMPAIGN_OFF")
+		return
+	var save = Campaign.read_slot(campaign_slot)
+	if save.is_empty():
+		campaign_button.text = tr("LOBBY_CAMPAIGN_NEW") % (campaign_slot + 1)
+	else:
+		var names = save.seats.map(func(seat): return tr(ELEMENT_NAMES[int(seat.element)]))
+		campaign_button.text = tr("LOBBY_CAMPAIGN_SAVE") % [campaign_slot + 1, ", ".join(names), int(save.step) + 1]
+	var problem = Campaign.online_problem(campaign_slot)
+	campaign_note.text = tr(problem) if problem != "" else ""
+	start_button.disabled = not SteamNet.is_online() or problem != ""
+
+func _on_start_pressed():
+	if campaign_slot >= 0:
+		Campaign.host_online(campaign_slot)
+	else:
+		SteamNet.start_match()
+
 func _on_back_pressed():
 	SteamNet.leave()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
@@ -366,7 +403,13 @@ func _build_layout():
 	settings_box.add_child(spawns_button)
 	countdown_button = _button(tr("MATCH_COUNTDOWN") % tr("VALUE_ON"), _toggle_round_countdown)
 	settings_box.add_child(countdown_button)
-	start_button = _button(tr("LOBBY_START"), SteamNet.start_match)
+	campaign_button = _button(tr("LOBBY_CAMPAIGN_OFF"), _cycle_campaign)
+	actions.add_child(campaign_button)
+	campaign_note = _label("", 18, Color(1, 0.7, 0.4))
+	campaign_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	campaign_note.custom_minimum_size.x = 300
+	actions.add_child(campaign_note)
+	start_button = _button(tr("LOBBY_START"), _on_start_pressed)
 	actions.add_child(start_button)
 	actions.add_child(_button(tr("UI_BACK"), _on_back_pressed))
 	# Many buttons: a bit smaller than the rest so the column fits on screen

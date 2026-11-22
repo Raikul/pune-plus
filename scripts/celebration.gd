@@ -9,6 +9,7 @@ class_name Celebration
 # - Earth: rocky mode all the time
 # - Air: zaps ahead every 1.5 s
 # - Water: three twins every 3 s, up to nine
+# - Void: the four in a random order, one every 1.6 s, in its purple (Earth's rocks for 2 s)
 # Placed inside the win screen's backdrop (a Control): its size is the play area.
 
 const FIRE_INTERVAL = 2.0
@@ -16,6 +17,8 @@ const AIR_INTERVAL = 1.5
 const WATER_INTERVAL = 3.0
 const WATER_PER_CAST = 3
 const WATER_MAX = 9
+const VOID_INTERVAL = 1.6
+const VOID_ROCK_TIME = 2.0
 const AIR_JUMP = 200.0
 const FIREBALL_LIFETIME = 1.3
 const ROCK_SPACING = 22.0
@@ -42,6 +45,8 @@ func setup(winners: Array):
 		snake.heading = randf_range(-PI, PI)
 		# Earth's rocks are all you'd see of its trail in rocky mode
 		snake.draw_trail = snake.player_id != 2
+		if snake.player_id == Global.VOID_ID:
+			snake.symbol = Global.element_symbol(Global.VOID_ID)
 		snake.moved.connect(_on_snake_moved.bind(snake))
 		add_child(snake)
 		snakes.append(snake)
@@ -70,8 +75,45 @@ func _process(delta):
 				4:
 					_split(snake)
 					timers[snake] = WATER_INTERVAL
+				Global.VOID_ID:
+					_void_cast(snake)
+					timers[snake] = VOID_INTERVAL
 				_:
 					timers[snake] = INF
+
+# Void's rocks are purple, like in the arena (scripts/fx/void_rock.gdshader)
+var void_rock_material: ShaderMaterial
+func _void_rock_material() -> ShaderMaterial:
+	if void_rock_material == null:
+		void_rock_material = ShaderMaterial.new()
+		void_rock_material.shader = preload("res://scripts/fx/void_rock.gdshader")
+		void_rock_material.set_shader_parameter("tint", Color(Global.playerColors[Global.VOID_ID]))
+	return void_rock_material
+
+# Void: the others' powers, all four shuffled, then shuffled again (never one twice in a row)
+var void_bag = {}
+var void_last = {}
+var void_rock_left = {}
+func _void_cast(snake):
+	if void_bag.get(snake, []).is_empty():
+		var bag = [1, 2, 3, 4]
+		bag.shuffle()
+		if bag[0] == void_last.get(snake, 0):
+			bag.reverse()
+		void_bag[snake] = bag
+	var element = void_bag[snake].pop_front()
+	void_last[snake] = element
+	match element:
+		1:
+			_fire(snake)
+		2:
+			void_rock_left[snake] = VOID_ROCK_TIME
+			PowerFx.burst(self, to_global(snake.position), snake.color)
+			_lift_last_fx()
+		3:
+			_zap(snake)
+		4:
+			_split(snake)
 
 func _fire(snake):
 	for i in 4:
@@ -82,6 +124,9 @@ func _fire(snake):
 		fireball.position = snake.position
 		fireball.rotation = snake.heading + i * PI / 2
 		fireball.lifetime = FIREBALL_LIFETIME
+		if snake.player_id == Global.VOID_ID:
+			fireball.tint = Global.void_tint()
+			fireball.modulate = fireball.tint
 		add_child(fireball)
 
 func _zap(snake):
@@ -126,7 +171,10 @@ func _lift_last_fx():
 # Earth: a rock every few steps, crumbling away after a while
 var rock_distance = {}
 func _on_snake_moved(distance, snake):
-	if snake.player_id != 2:
+	if snake.player_id == Global.VOID_ID and void_rock_left.get(snake, 0.0) > 0.0:
+		# Void's borrowed rocky mode: a while, in its color
+		void_rock_left[snake] -= distance / Snake.SPEED
+	elif snake.player_id != 2:
 		return
 	rock_distance[snake] = rock_distance.get(snake, ROCK_SPACING) + distance
 	if rock_distance[snake] < ROCK_SPACING:
@@ -138,6 +186,8 @@ func _on_snake_moved(distance, snake):
 	rock.flip_h = randf() < 0.5
 	rock.position = snake.position
 	rock.rotation = snake.heading
+	if snake.player_id == Global.VOID_ID:
+		rock.material = _void_rock_material()
 	rocks.add_child(rock)
 	var tween = rock.create_tween()
 	tween.tween_interval(ROCK_LIFE)
@@ -163,6 +213,7 @@ class Snake extends Node2D:
 	var player_id = 1
 	var input_id = 0
 	var color = Color.WHITE
+	var symbol: Texture2D = SYMBOL_TEXTURE
 	var heading = 0.0
 	var area = Vector2(1920, 1000)
 	var ghost = false
@@ -239,7 +290,7 @@ class Snake extends Node2D:
 		if not ghost:
 			# Where the game puts it (player.tscn's ElementHeadSprite, under the snake's 0.1 scale)
 			draw_set_transform(Vector2(0, -2.6).rotated(heading), heading, Vector2.ONE * SYMBOL_SCALE)
-			draw_texture(SYMBOL_TEXTURE, -SYMBOL_TEXTURE.get_size() / 2)
+			draw_texture(symbol, -symbol.get_size() / 2)
 		draw_set_transform(Vector2.ZERO)
 
 	func _draw_run(run, colors):
