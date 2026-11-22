@@ -13,6 +13,42 @@ const STAGE = "Alpha"
 
 const RELEASES = [
 	{
+		"version": "0.8.1",
+		"name": "The Medusa's Path",
+		"date": "2026-11-22",
+		"sections": [
+			["Menu", [
+				"Play now opens Online, Hotseat and Roguelike.",
+				"New Credits screen in the main menu.",
+			]],
+			["Roguelike (PROTOTYPE)", [
+				"A co-op campaign for 1 to 3 players on one keyboard against AI rivals. Three save slots; each save keeps its players and their elements, and the team shares 3 lives.",
+				"An act is a map of 8 steps with two scenarios each, then the boss. Scenarios ask you to win rounds, survive, eat shrooms or get kills, in themed arenas. Hard ones have tougher rivals and better rewards; special ones swap your elements for others.",
+				"After each win every player picks 1 of 3 upgrades, kept for the whole campaign.",
+				"Power shrooms give a short boost: a borrowed power, a temporary upgrade, speed, a shield or a recharge.",
+				"The boss, the Medusa: a slow sphere that sends out snakes with short trails. Survive until her hair runs out. Her gaze sweeps a cone: caught in it you slow down, and facing her you turn to stone for a moment.",
+				"The map runs bottom to top and the first player moves through it with their own keys (left/right to move, Punchi to pick).",
+				"In shroom scenarios the AI goes for the shrooms, and score shrooms only show up where they count.",
+				"Online: the host picks a save with the lobby's Roguelike button and everyone plays it together.",
+			]],
+			["Matches", [
+				"After 1 minute of a round the arena starts closing in from the edges, down to nothing in 25 seconds, like a battle royale: every round has a time limit now. Not in the Medusa fight.",
+			]],
+			["Earth", [
+				"While its stone armor is on, Earth breaks the common trails it goes through.",
+			]],
+			["Void", [
+				"A fireball cast together with Earth's rocks flies over its own rocks.",
+				"Online: casting Water and Earth together no longer makes the twin look rocky only on Void's screen.",
+				"On the winner screen Void shows off all four powers at random.",
+			]],
+			["Other", [
+				"Each run keeps a log (the last 30) to help track down crashes.",
+				"Debug console: the new powers and upgrades are in it.",
+			]],
+		],
+	},
+	{
 		"version": "0.8.0",
 		"name": "Hold and React",
 		"date": "2026-11-16",
